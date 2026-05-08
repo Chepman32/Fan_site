@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Newspaper, Loader, AlertCircle, MessageSquare, ArrowUpRight, Clock } from 'lucide-react'
+import { Newspaper, Loader, MessageSquare, ArrowUpRight, Clock } from 'lucide-react'
 import './NewsSection.css'
 
 // Fallback news data in case API fails
@@ -86,8 +86,6 @@ function formatNumber(num) {
 function NewsSection() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-  const [usingFallback, setUsingFallback] = useState(false)
 
   useEffect(() => {
     const fetchReddit = async () => {
@@ -108,11 +106,9 @@ function NewsSection() {
         const data = await response.json()
         const redditPosts = data.data.children.map(child => child.data)
         setPosts(redditPosts)
-        setUsingFallback(false)
       } catch (err) {
         console.log('Reddit fetch failed, using fallback:', err)
         setPosts(FALLBACK_NEWS)
-        setUsingFallback(true)
       } finally {
         setLoading(false)
       }
@@ -133,13 +129,6 @@ function NewsSection() {
             LATEST <span className="gradient-text">UPDATES</span>
           </h2>
         </div>
-
-        {usingFallback && (
-          <div className="fallback-notice">
-            <AlertCircle size={14} />
-            <span>Showing curated news (Reddit API unavailable in this environment)</span>
-          </div>
-        )}
 
         {loading && (
           <div className="loading-state">
