@@ -1,0 +1,9 @@
+{
+  "/page": "app/page.js",
+  "/[slug]/page": "app/[slug]/page.js",
+  "/gta-vi/characters/page": "app/gta-vi/characters/page.js",
+  "/gta-vi/release-date/page": "app/gta-vi/release-date/page.js",
+  "/gta-vi/locations/page": "app/gta-vi/locations/page.js",
+  "/gta-vi/timeline/page": "app/gta-vi/timeline/page.js",
+  "/gta-vi/trailers/page": "app/gta-vi/trailers/page.js"
+}
