@@ -10,7 +10,7 @@ const videos = [
     description: 'The first official trailer revealing Vice City and Leonida.',
   },
   {
-    id: 'n5iXKNbP4hE',
+    id: 'VQRLujxTm3c',
     title: 'GTA VI - Trailer 2',
     duration: '2:16',
     description: 'Second trailer showcasing gameplay, characters, and more of Leonida.',
