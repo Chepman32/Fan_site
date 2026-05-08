@@ -91,13 +91,7 @@ function NewsSection() {
     const fetchReddit = async () => {
       try {
         setLoading(true)
-        // Try to fetch from Reddit's JSON API
-        // Note: This may fail due to CORS or rate limiting in some environments
-        const response = await fetch('https://www.reddit.com/r/GTA6/hot.json?limit=6', {
-          headers: {
-            'User-Agent': 'GTA-VI-Fan-Site/1.0',
-          },
-        })
+        const response = await fetch('/api/reddit/hot')
 
         if (!response.ok) {
           throw new Error('Reddit API unavailable')
