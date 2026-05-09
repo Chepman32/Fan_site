@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Lock, Mail, User, X } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import './AuthModal.css'
 
 function AuthModal({ onClose }) {
-  const { login, signup, authError } = useSocial()
+  const { login, signup, authError, isSignedIn } = useSocial()
   const [mode, setMode] = useState('signup')
   const [form, setForm] = useState({
     username: '',
@@ -12,20 +12,33 @@ function AuthModal({ onClose }) {
     password: '',
   })
   const [busy, setBusy] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   const updateForm = (field, value) => {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
   }
 
+  useEffect(() => {
+    if (isSignedIn) onClose()
+  }, [isSignedIn, onClose])
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     setBusy(true)
+    setSubmitError('')
 
-    const success = mode === 'signup'
-      ? await signup(form)
-      : await login({ email: form.email, password: form.password })
+    let success = false
 
-    setBusy(false)
+    try {
+      success = mode === 'signup'
+        ? await signup(form)
+        : await login({ email: form.email, password: form.password })
+    } catch (error) {
+      setSubmitError(error?.message || 'Sign-in request failed.')
+    } finally {
+      setBusy(false)
+    }
+
     if (success) onClose()
   }
 
@@ -106,7 +119,7 @@ function AuthModal({ onClose }) {
             </div>
           </label>
 
-          {authError && <p className="auth-error">{authError}</p>}
+          {(authError || submitError) && <p className="auth-error">{authError || submitError}</p>}
 
           <button className="auth-submit" type="submit" disabled={busy}>
             {busy ? 'Checking...' : mode === 'signup' ? 'Create account' : 'Login'}

@@ -9,6 +9,18 @@ import {
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
+const FIREBASE_REQUEST_TIMEOUT_MS = 20000
+
+function withFirebaseTimeout(promise) {
+  let timeoutId
+  const timeout = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error('Firebase took too long to respond. Check your project config and network connection.'))
+    }, FIREBASE_REQUEST_TIMEOUT_MS)
+  })
+
+  return Promise.race([promise, timeout]).finally(() => window.clearTimeout(timeoutId))
+}
 
 function mergeById(seedItems, firestoreItems) {
   const items = new Map(seedItems.map((item) => [item.id, item]))
@@ -202,18 +214,21 @@ function firebaseErrorMessage(error) {
 
 async function ensureUserDocument(services, authUser) {
   const userRef = services.doc(services.db, 'users', authUser.uid)
-  const existing = await services.getDoc(userRef)
-  if (existing.exists()) return
 
-  const username = authUser.displayName || authUser.email?.split('@')[0] || 'Player'
-  await services.setDoc(userRef, publicUserDocument({
-    username,
-    usernameLower: username.toLowerCase(),
-    avatarColor: '#00d9ff',
-    joinedAt: new Date().toISOString(),
-    followedTopics: [],
-    badges: [],
-  }, services.serverTimestamp()))
+  await services.runTransaction(services.db, async (transaction) => {
+    const existing = await transaction.get(userRef)
+    if (existing.exists()) return
+
+    const username = authUser.displayName || authUser.email?.split('@')[0] || 'Player'
+    transaction.set(userRef, publicUserDocument({
+      username,
+      usernameLower: username.toLowerCase(),
+      avatarColor: '#00d9ff',
+      joinedAt: new Date().toISOString(),
+      followedTopics: [],
+      badges: [],
+    }, services.serverTimestamp()))
+  })
 }
 
 async function updateReactionTransaction(services, postId, userId, reactionId) {
@@ -317,7 +332,7 @@ export function SocialProvider({ children }) {
       setAuthLoading(false)
 
       if (nextAuthUser) {
-        ensureUserDocument(services, nextAuthUser).catch((error) => {
+        withFirebaseTimeout(ensureUserDocument(services, nextAuthUser)).catch((error) => {
           setBackendError(firebaseErrorMessage(error))
         })
       } else {
@@ -449,18 +464,39 @@ export function SocialProvider({ children }) {
     }
 
     try {
-      const result = await services.createUserWithEmailAndPassword(services.auth, cleanEmail, password)
-      await services.updateProfile(result.user, { displayName: cleanUsername })
-
       const colors = ['#ff2d95', '#00d9ff', '#ffb000', '#3ddc97', '#9d4edd']
-      await services.setDoc(services.doc(services.db, 'users', result.user.uid), publicUserDocument({
+      const result = await withFirebaseTimeout(
+        services.createUserWithEmailAndPassword(services.auth, cleanEmail, password),
+      )
+      const profile = {
+        id: result.user.uid,
         username: cleanUsername,
         usernameLower: cleanUsername.toLowerCase(),
         avatarColor: colors[state.users.length % colors.length],
         joinedAt: new Date().toISOString(),
         followedTopics: [],
         badges: [],
-      }, services.serverTimestamp()))
+      }
+
+      setState((currentState) => ({
+        ...currentState,
+        users: mergeById(currentState.users, [profile]),
+      }))
+
+      void Promise.allSettled([
+        withFirebaseTimeout(services.updateProfile(result.user, { displayName: cleanUsername })),
+        withFirebaseTimeout(
+          services.setDoc(
+            services.doc(services.db, 'users', result.user.uid),
+            publicUserDocument(profile, services.serverTimestamp()),
+          ),
+        ),
+      ]).then((results) => {
+        const failure = results.find((syncResult) => syncResult.status === 'rejected')
+        if (failure) {
+          setBackendError(`Account created, but profile sync failed: ${firebaseErrorMessage(failure.reason)}`)
+        }
+      })
 
       return true
     } catch (error) {
@@ -478,7 +514,7 @@ export function SocialProvider({ children }) {
     }
 
     try {
-      await services.signInWithEmailAndPassword(services.auth, normalizeEmail(email), password)
+      await withFirebaseTimeout(services.signInWithEmailAndPassword(services.auth, normalizeEmail(email), password))
       return true
     } catch (error) {
       setAuthError(firebaseErrorMessage(error))
