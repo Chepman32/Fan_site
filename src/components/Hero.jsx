@@ -39,6 +39,7 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
           <a href="#game-info">About</a>
           <a href="#characters">Characters</a>
           <a href="#media">Media</a>
+          <a href="#leonida">Leonida</a>
           <a href="#news">News</a>
           <a href="#social">Social</a>
         </div>

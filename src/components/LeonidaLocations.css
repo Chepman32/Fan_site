@@ -1,0 +1,251 @@
+.leonida-section {
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+}
+
+.leonida-content {
+  display: grid;
+  gap: 24px;
+}
+
+.leonida-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.7fr);
+  gap: 28px;
+  padding: 28px;
+  background:
+    linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(255, 107, 53, 0.06)),
+    var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.leonida-kicker {
+  display: inline-flex;
+  margin-bottom: 14px;
+  color: var(--accent-cyan);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.leonida-copy {
+  display: grid;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.leonida-note {
+  margin-top: 16px;
+  color: var(--accent-orange);
+  font-size: 13px;
+}
+
+.leonida-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.leonida-stat {
+  display: flex;
+  min-height: 104px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(10, 10, 15, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.leonida-stat strong {
+  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 42px;
+  line-height: 1;
+}
+
+.leonida-stat span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.leonida-images {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.leonida-image-card {
+  position: relative;
+  min-height: 230px;
+  overflow: hidden;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.leonida-image-card:first-child {
+  grid-column: span 2;
+}
+
+.leonida-image-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 230px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.leonida-image-card:hover img {
+  transform: scale(1.04);
+}
+
+.leonida-image-card figcaption {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: calc(100% - 28px);
+  padding: 8px 10px;
+  background: rgba(10, 10, 15, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.major-locations-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.major-location-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 14px;
+  min-height: 130px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.major-location-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 217, 255, 0.5);
+  background: #1d1d2a;
+}
+
+.location-marker {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  grid-row: span 2;
+  background: rgba(0, 217, 255, 0.12);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+  border-radius: 8px;
+  color: var(--accent-cyan);
+}
+
+.major-location-card strong {
+  align-self: end;
+  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.major-location-card > span:last-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.leonida-lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.leonida-list-panel {
+  padding: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.leonida-list-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: var(--text-primary);
+  font-size: 26px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tag-list span {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+@media (max-width: 968px) {
+  .leonida-overview,
+  .leonida-lists {
+    grid-template-columns: 1fr;
+  }
+
+  .major-locations-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .leonida-images,
+  .major-locations-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .leonida-image-card:first-child {
+    grid-column: auto;
+  }
+
+  .leonida-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .leonida-overview,
+  .leonida-list-panel {
+    padding: 20px;
+  }
+}

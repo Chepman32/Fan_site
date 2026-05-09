@@ -4,12 +4,9 @@ import './NewsSection.css'
 
 const IGN_GAME_URL = 'https://www.ign.com/games/grand-theft-auto-vi'
 const IGN_ORIGIN = 'https://www.ign.com'
-const MAX_ARTICLES = 12
+const MAX_ARTICLES = 80
+const INITIAL_ARTICLE_COUNT = 6
 const FETCH_TIMEOUT_MS = 10000
-const IGN_FETCH_URLS = [
-  IGN_GAME_URL,
-  `https://api.allorigins.win/raw?url=${encodeURIComponent(IGN_GAME_URL)}`,
-]
 
 const FALLBACK_NEWS = [
   {
@@ -34,6 +31,12 @@ function cleanTitle(value = '') {
     .replace(/\s+\d+[mhdw]\s+ago\s+-\s+.*$/i, '')
     .replace(/\s+\d+[mhdw]\s+ago\s+(?:GTA\s?6|GTA Online|Grand Theft Auto VI).*$/i, '')
     .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function cleanSummary(value = '') {
+  return stripText(value)
+    .replace(/^(?:\d+[mhdw]\s+ago|just now)\s*(?:-\s*)?/i, '')
     .trim()
 }
 
@@ -98,7 +101,7 @@ function addArticle(articles, article) {
     author: stripText(article.author || 'IGN'),
     source: 'IGN',
     publishedAt: normalizeDate(article.publishedAt || article.datePublished || article.date),
-    summary: stripText(article.summary || article.description || ''),
+    summary: cleanSummary(article.summary || article.description || ''),
     type: stripText(article.type || 'Article'),
   }
 
@@ -120,7 +123,7 @@ function readJsonLdArticles(document, articles) {
         const graph = Array.isArray(node['@graph']) ? node['@graph'] : [node]
         graph.forEach((entry) => {
           const entryType = Array.isArray(entry['@type']) ? entry['@type'] : [entry['@type']]
-          if (!entryType.some((type) => ['Article', 'NewsArticle', 'VideoObject', 'Game'].includes(type))) return
+          if (!entryType.some((type) => ['Article', 'NewsArticle', 'VideoObject'].includes(type))) return
 
           addArticle(articles, {
             title: entry.headline || entry.name,
@@ -128,7 +131,7 @@ function readJsonLdArticles(document, articles) {
             author: Array.isArray(entry.author) ? entry.author.map((author) => author.name).join(', ') : entry.author?.name,
             publishedAt: entry.datePublished || entry.uploadDate,
             summary: entry.description,
-            type: entryType.includes('VideoObject') ? 'Video' : entryType.includes('Game') ? 'Game' : 'Article',
+            type: entryType.includes('VideoObject') ? 'Video' : 'Article',
           })
         })
       })
@@ -171,10 +174,35 @@ function readNextDataArticles(document, articles) {
   }
 }
 
+function readContentItemArticles(document, articles) {
+  document.querySelectorAll('[data-cy="content-item"]').forEach((item) => {
+    const anchor = item.querySelector('a[data-cy="item-body"][href]')
+    const url = absoluteIgnUrl(anchor?.getAttribute('href'))
+
+    if (!url.includes('/articles/') && !url.includes('/videos/')) return
+
+    const title = stripText(item.querySelector('[data-cy="item-title"]')?.textContent || anchor?.getAttribute('aria-label'))
+    const summary = stripText(item.querySelector('[data-cy="item-subtitle"]')?.textContent)
+    const relativeDate = stripText(item.querySelector('.item-publish-date')?.textContent || summary)
+    const author = stripText(item.querySelector('a[href^="/person/"]')?.textContent || 'IGN')
+    const isVideo = url.includes('/videos/') || Boolean(item.querySelector('.video-duration'))
+
+    addArticle(articles, {
+      title,
+      url,
+      author,
+      publishedAt: relativeDateFromText(relativeDate),
+      summary,
+      type: isVideo ? 'Video' : 'Article',
+    })
+  })
+}
+
 function readAnchorArticles(document, articles) {
   document.querySelectorAll('a[href]').forEach((anchor) => {
     const url = absoluteIgnUrl(anchor.getAttribute('href'))
-    const title = stripText(anchor.textContent)
+    const title = stripText(anchor.querySelector('[data-cy="item-title"]')?.textContent || anchor.getAttribute('aria-label') || anchor.textContent)
+    const summary = stripText(anchor.querySelector('[data-cy="item-subtitle"]')?.textContent)
 
     if (!url.includes('/articles/') && !url.includes('/videos/')) return
     if (!title || title.length < 18 || title.length > 180) return
@@ -182,7 +210,8 @@ function readAnchorArticles(document, articles) {
     addArticle(articles, {
       title,
       url,
-      publishedAt: anchor.querySelector('time')?.dateTime || relativeDateFromText(title),
+      publishedAt: anchor.querySelector('time')?.dateTime || relativeDateFromText(stripText(anchor.querySelector('.item-publish-date')?.textContent || anchor.textContent)),
+      summary,
       type: url.includes('/videos/') ? 'Video' : 'Article',
     })
   })
@@ -200,6 +229,7 @@ function parseIgnNews(html) {
   const document = new DOMParser().parseFromString(html, 'text/html')
   const articles = []
 
+  readContentItemArticles(document, articles)
   readJsonLdArticles(document, articles)
   readNextDataArticles(document, articles)
   readAnchorArticles(document, articles)
@@ -228,19 +258,10 @@ async function fetchTextWithTimeout(url) {
 }
 
 async function fetchIgnArticles() {
-  let lastError
-
-  for (const url of IGN_FETCH_URLS) {
-    try {
-      const html = await fetchTextWithTimeout(url)
-      const articles = parseIgnNews(html)
-      if (articles.length) return articles
-    } catch (error) {
-      lastError = error
-    }
-  }
-
-  throw lastError || new Error('IGN news unavailable')
+  const html = await fetchTextWithTimeout(IGN_GAME_URL)
+  const articles = parseIgnNews(html)
+  if (articles.length) return articles
+  throw new Error('IGN news unavailable')
 }
 
 function formatTimeAgo(value) {
@@ -272,6 +293,10 @@ function formatTimeAgo(value) {
 function NewsSection() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
+
+  const visibleArticles = showAll ? articles : articles.slice(0, INITIAL_ARTICLE_COUNT)
+  const hasMoreArticles = articles.length > INITIAL_ARTICLE_COUNT
 
   useEffect(() => {
     let canceled = false
@@ -317,42 +342,55 @@ function NewsSection() {
         )}
 
         {!loading && (
-          <div className="news-grid">
-            {articles.map((article, index) => (
-              <a
-                key={article.id || article.url}
-                href={article.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="news-card"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="news-header">
-                  <span className="news-source">{article.source || 'IGN'}</span>
-                  <span className="news-time">
-                    <Clock size={12} />
-                    {formatTimeAgo(article.publishedAt)}
-                  </span>
-                </div>
-
-                <h3 className="news-title">{article.title}</h3>
-                {article.summary && <p className="news-summary">{article.summary}</p>}
-
-                <div className="news-footer">
-                  <div className="news-stats">
-                    <span className="news-stat">
-                      <ArrowUpRight size={14} />
-                      {article.type || 'Article'}
+          <>
+            <div className="news-grid">
+              {visibleArticles.map((article, index) => (
+                <a
+                  key={article.id || article.url}
+                  href={article.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="news-card"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="news-header">
+                    <span className="news-source">{article.source || 'IGN'}</span>
+                    <span className="news-time">
+                      <Clock size={12} />
+                      {formatTimeAgo(article.publishedAt)}
                     </span>
                   </div>
-                  <span className="news-author">
-                    <UserRound size={13} />
-                    {article.author || 'IGN'}
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
+
+                  <h3 className="news-title">{article.title}</h3>
+                  {article.summary && <p className="news-summary">{article.summary}</p>}
+
+                  <div className="news-footer">
+                    <div className="news-stats">
+                      <span className="news-stat">
+                        <ArrowUpRight size={14} />
+                        {article.type || 'Article'}
+                      </span>
+                    </div>
+                    <span className="news-author">
+                      <UserRound size={13} />
+                      {article.author || 'IGN'}
+                    </span>
+                  </div>
+                </a>
+              ))}
+            </div>
+
+            {hasMoreArticles && (
+              <div className="news-actions">
+                <span className="news-count">
+                  Showing {visibleArticles.length} of {articles.length}
+                </span>
+                <button type="button" className="show-more-button" onClick={() => setShowAll((current) => !current)}>
+                  {showAll ? 'Show less' : 'Show more'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

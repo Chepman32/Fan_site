@@ -3,6 +3,7 @@ import Hero from './components/Hero'
 import GameInfo from './components/GameInfo'
 import Characters from './components/Characters'
 import MediaGallery from './components/MediaGallery'
+import LeonidaLocations from './components/LeonidaLocations'
 import NewsSection from './components/NewsSection'
 import SocialHub from './components/SocialHub'
 import AuthModal from './components/AuthModal'
@@ -24,6 +25,7 @@ function AppContent() {
       <GameInfo />
       <Characters />
       <MediaGallery />
+      <LeonidaLocations />
       <NewsSection />
       <SocialHub onOpenAuth={() => setAuthOpen(true)} />
       <Footer />
