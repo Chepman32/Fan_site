@@ -86,8 +86,11 @@
   letter-spacing: 2px;
 }
 
-.nav-icon {
-  color: var(--accent-pink);
+.nav-favicon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 45, 149, 0.45));
 }
 
 .nav-brand .highlight {

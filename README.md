@@ -5,6 +5,7 @@ This template provides a minimal setup to get React working in Vite with HMR and
 ## Firebase social features
 
 The community/social section uses Firebase Auth and Cloud Firestore.
+The news section parses live GTA VI coverage from IGN in the frontend at runtime.
 
 For local development, either run through Firebase Hosting's reserved config endpoint or set the Vite variables from `.env.example`. The Vite dev server proxies `/__/firebase/init.json` to the configured Firebase Hosting project.
 

@@ -39,12 +39,9 @@ function Footer() {
               </a>
             </div>
             <div className="footer-column">
-              <h4>Community</h4>
-              <a href="https://www.reddit.com/r/GTA6/" target="_blank" rel="noopener noreferrer">
-                r/GTA6 <ExternalLink size={12} />
-              </a>
-              <a href="https://www.reddit.com/r/GrandTheftAutoVI/" target="_blank" rel="noopener noreferrer">
-                r/GrandTheftAutoVI <ExternalLink size={12} />
+              <h4>Coverage</h4>
+              <a href="https://www.ign.com/games/grand-theft-auto-vi" target="_blank" rel="noopener noreferrer">
+                IGN GTA VI <ExternalLink size={12} />
               </a>
             </div>
           </div>

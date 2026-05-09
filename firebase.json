@@ -1,17 +1,4 @@
 {
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ]
-    }
-  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
@@ -24,13 +11,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      {
-        "source": "/api/reddit/hot",
-        "function": {
-          "functionId": "redditHot",
-          "region": "us-central1"
-        }
-      },
       {
         "source": "**",
         "destination": "/index.html"

@@ -6,7 +6,6 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'https://gta-vi-fan-site.web.app',
       '/__/firebase': 'https://gta-vi-fan-site.web.app',
     },
   },

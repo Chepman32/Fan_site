@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Calendar, ChevronDown, Gamepad2, LogOut, MapPin, User } from 'lucide-react'
 import Countdown from './Countdown'
+import favIcon from '../assets/fav.png'
 import './Hero.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
@@ -31,7 +32,7 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
 
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="nav-brand">
-          <Gamepad2 size={28} className="nav-icon" />
+          <img className="nav-favicon" src={favIcon} alt="" aria-hidden="true" />
           <span>GTA VI <span className="highlight">HUB</span></span>
         </div>
         <div className="nav-links">

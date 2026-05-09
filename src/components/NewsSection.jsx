@@ -1,63 +1,255 @@
 import { useEffect, useState } from 'react'
-import { Newspaper, Loader, MessageSquare, ArrowUpRight, Clock } from 'lucide-react'
+import { Newspaper, Loader, ArrowUpRight, Clock, UserRound } from 'lucide-react'
 import './NewsSection.css'
 
-// Fallback news data in case API fails
+const IGN_GAME_URL = 'https://www.ign.com/games/grand-theft-auto-vi'
+const IGN_ORIGIN = 'https://www.ign.com'
+const MAX_ARTICLES = 12
+const FETCH_TIMEOUT_MS = 10000
+const IGN_FETCH_URLS = [
+  IGN_GAME_URL,
+  `https://api.allorigins.win/raw?url=${encodeURIComponent(IGN_GAME_URL)}`,
+]
+
 const FALLBACK_NEWS = [
   {
-    title: 'GTA VI Release Date Set for November 19, 2026',
-    author: 'Rockstar Games',
-    subreddit: 'GTA6',
-    score: 45200,
-    num_comments: 3890,
-    created_utc: Date.now() / 1000 - 86400 * 2,
-    permalink: '/r/GTA6/comments/1gta6_release/',
-    url: 'https://www.rockstargames.com/VI',
-  },
-  {
-    title: 'New GTA VI Screenshots Show Stunning Vice City Detail',
-    author: 'gaming_news',
-    subreddit: 'GTA6',
-    score: 28500,
-    num_comments: 2140,
-    created_utc: Date.now() / 1000 - 86400 * 5,
-    permalink: '/r/GTA6/comments/1gta6_screenshots/',
-    url: 'https://www.reddit.com/r/GTA6',
-  },
-  {
-    title: 'Analysis: GTA VI Map Size Compared to Previous Games',
-    author: 'map_master',
-    subreddit: 'GTA6',
-    score: 18900,
-    num_comments: 1650,
-    created_utc: Date.now() / 1000 - 86400 * 7,
-    permalink: '/r/GTA6/comments/1gta6_map/',
-    url: 'https://www.reddit.com/r/GTA6',
-  },
-  {
-    title: 'Jason and Lucia Relationship Dynamic Explained by Leakers',
-    author: 'vice_city_insider',
-    subreddit: 'GTA6',
-    score: 22100,
-    num_comments: 1980,
-    created_utc: Date.now() / 1000 - 86400 * 10,
-    permalink: '/r/GTA6/comments/1gta6_characters/',
-    url: 'https://www.reddit.com/r/GTA6',
-  },
-  {
-    title: 'GTA VI Pre-Orders Expected to Break Records',
-    author: 'industry_analyst',
-    subreddit: 'GTA6',
-    score: 15600,
-    num_comments: 1200,
-    created_utc: Date.now() / 1000 - 86400 * 12,
-    permalink: '/r/GTA6/comments/1gta6_preorders/',
-    url: 'https://www.reddit.com/r/GTA6',
+    id: 'ign-gta-vi-page',
+    title: 'Grand Theft Auto VI',
+    author: 'IGN',
+    source: 'IGN',
+    type: 'Game page',
+    publishedAt: '',
+    summary: 'Open IGN coverage for the latest Grand Theft Auto VI news, videos, previews, and updates.',
+    url: IGN_GAME_URL,
   },
 ]
 
-function formatTimeAgo(timestamp) {
-  const seconds = Math.floor((Date.now() / 1000) - timestamp)
+function stripText(value = '') {
+  return String(value ?? '').replace(/\s+/g, ' ').trim()
+}
+
+function cleanTitle(value = '') {
+  return stripText(value)
+    .replace(/^(?:\d{1,2}:\d{2}\s+)?\d+[mhdw]\s+ago\s+/i, '')
+    .replace(/\s+\d+[mhdw]\s+ago\s+-\s+.*$/i, '')
+    .replace(/\s+\d+[mhdw]\s+ago\s+(?:GTA\s?6|GTA Online|Grand Theft Auto VI).*$/i, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function absoluteIgnUrl(url) {
+  if (!url) return ''
+
+  try {
+    return new URL(url, IGN_ORIGIN).toString()
+  } catch {
+    return ''
+  }
+}
+
+function normalizeDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
+}
+
+function relativeDateFromText(value = '') {
+  const match = stripText(value).match(/(\d+)([mhdw])\s+ago/i)
+  if (!match) return ''
+
+  const amount = Number(match[1])
+  const unitMs = {
+    m: 60 * 1000,
+    h: 60 * 60 * 1000,
+    d: 24 * 60 * 60 * 1000,
+    w: 7 * 24 * 60 * 60 * 1000,
+  }[match[2].toLowerCase()]
+
+  return unitMs ? new Date(Date.now() - amount * unitMs).toISOString() : ''
+}
+
+function articleId(url, title) {
+  return `${url || title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
+function isGtaArticle(article) {
+  const haystack = `${article.title} ${article.url}`.toLowerCase()
+  return (
+    haystack.includes('gta-6') ||
+    haystack.includes('gta-vi') ||
+    haystack.includes('grand-theft-auto-6') ||
+    haystack.includes('grand-theft-auto-vi') ||
+    haystack.includes('grand theft auto 6') ||
+    haystack.includes('grand theft auto vi')
+  )
+}
+
+function addArticle(articles, article) {
+  const url = absoluteIgnUrl(article.url)
+  const title = cleanTitle(article.title)
+
+  if (!url || !title || title.length < 8) return
+  if (!url.startsWith(`${IGN_ORIGIN}/`)) return
+
+  const normalizedArticle = {
+    id: articleId(url, title),
+    title,
+    url,
+    author: stripText(article.author || 'IGN'),
+    source: 'IGN',
+    publishedAt: normalizeDate(article.publishedAt || article.datePublished || article.date),
+    summary: stripText(article.summary || article.description || ''),
+    type: stripText(article.type || 'Article'),
+  }
+
+  if (!isGtaArticle(normalizedArticle)) return
+
+  const duplicate = articles.some((item) => item.url === normalizedArticle.url || item.title === normalizedArticle.title)
+  if (!duplicate) articles.push(normalizedArticle)
+}
+
+function readJsonLdArticles(document, articles) {
+  const scripts = document.querySelectorAll('script[type="application/ld+json"]')
+
+  scripts.forEach((script) => {
+    try {
+      const parsed = JSON.parse(script.textContent.trim())
+      const nodes = Array.isArray(parsed) ? parsed : [parsed]
+
+      nodes.forEach((node) => {
+        const graph = Array.isArray(node['@graph']) ? node['@graph'] : [node]
+        graph.forEach((entry) => {
+          const entryType = Array.isArray(entry['@type']) ? entry['@type'] : [entry['@type']]
+          if (!entryType.some((type) => ['Article', 'NewsArticle', 'VideoObject', 'Game'].includes(type))) return
+
+          addArticle(articles, {
+            title: entry.headline || entry.name,
+            url: entry.url || entry.mainEntityOfPage?.['@id'] || entry.mainEntityOfPage,
+            author: Array.isArray(entry.author) ? entry.author.map((author) => author.name).join(', ') : entry.author?.name,
+            publishedAt: entry.datePublished || entry.uploadDate,
+            summary: entry.description,
+            type: entryType.includes('VideoObject') ? 'Video' : entryType.includes('Game') ? 'Game' : 'Article',
+          })
+        })
+      })
+    } catch {
+      // IGN can embed unrelated JSON-LD; skip malformed blocks.
+    }
+  })
+}
+
+function walkJson(value, visit, seen = new Set()) {
+  if (!value || typeof value !== 'object' || seen.has(value)) return
+  seen.add(value)
+  visit(value)
+
+  Object.values(value).forEach((child) => walkJson(child, visit, seen))
+}
+
+function readNextDataArticles(document, articles) {
+  const script = document.querySelector('#__NEXT_DATA__')
+  if (!script?.textContent) return
+
+  try {
+    const nextData = JSON.parse(script.textContent.trim())
+    walkJson(nextData, (node) => {
+      const title = node.title || node.headline || node.name
+      const url = node.url || node.href || node.canonicalUrl || node.slug
+      if (!title || !url) return
+
+      addArticle(articles, {
+        title,
+        url,
+        author: node.author?.name || node.author || node.byline || node.authorName,
+        publishedAt: node.publishedAt || node.publishDate || node.datePublished || node.createdAt,
+        summary: node.description || node.summary || node.subtitle,
+        type: node.type || node.contentType,
+      })
+    })
+  } catch {
+    // The page still has anchor cards if Next data changes.
+  }
+}
+
+function readAnchorArticles(document, articles) {
+  document.querySelectorAll('a[href]').forEach((anchor) => {
+    const url = absoluteIgnUrl(anchor.getAttribute('href'))
+    const title = stripText(anchor.textContent)
+
+    if (!url.includes('/articles/') && !url.includes('/videos/')) return
+    if (!title || title.length < 18 || title.length > 180) return
+
+    addArticle(articles, {
+      title,
+      url,
+      publishedAt: anchor.querySelector('time')?.dateTime || relativeDateFromText(title),
+      type: url.includes('/videos/') ? 'Video' : 'Article',
+    })
+  })
+}
+
+function sortArticles(articles) {
+  return [...articles].sort((a, b) => {
+    const aTime = a.publishedAt ? new Date(a.publishedAt).getTime() : 0
+    const bTime = b.publishedAt ? new Date(b.publishedAt).getTime() : 0
+    return bTime - aTime
+  })
+}
+
+function parseIgnNews(html) {
+  const document = new DOMParser().parseFromString(html, 'text/html')
+  const articles = []
+
+  readJsonLdArticles(document, articles)
+  readNextDataArticles(document, articles)
+  readAnchorArticles(document, articles)
+
+  return sortArticles(articles).slice(0, MAX_ARTICLES)
+}
+
+async function fetchTextWithTimeout(url) {
+  const controller = new AbortController()
+  const timeoutId = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      cache: 'no-store',
+    })
+
+    if (!response.ok) {
+      throw new Error(`News source failed with ${response.status}`)
+    }
+
+    return response.text()
+  } finally {
+    window.clearTimeout(timeoutId)
+  }
+}
+
+async function fetchIgnArticles() {
+  let lastError
+
+  for (const url of IGN_FETCH_URLS) {
+    try {
+      const html = await fetchTextWithTimeout(url)
+      const articles = parseIgnNews(html)
+      if (articles.length) return articles
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError || new Error('IGN news unavailable')
+}
+
+function formatTimeAgo(value) {
+  if (!value) return 'IGN'
+
+  const timestamp = new Date(value).getTime()
+  if (Number.isNaN(timestamp)) return 'IGN'
+
+  const seconds = Math.floor((Date.now() - timestamp) / 1000)
   const intervals = [
     { label: 'year', seconds: 31536000 },
     { label: 'month', seconds: 2592000 },
@@ -73,42 +265,35 @@ function formatTimeAgo(timestamp) {
       return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`
     }
   }
+
   return 'Just now'
 }
 
-function formatNumber(num) {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k'
-  }
-  return num.toString()
-}
-
 function NewsSection() {
-  const [posts, setPosts] = useState([])
+  const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchReddit = async () => {
+    let canceled = false
+
+    const fetchIgnNews = async () => {
       try {
         setLoading(true)
-        const response = await fetch('/api/reddit/hot')
-
-        if (!response.ok) {
-          throw new Error('Reddit API unavailable')
-        }
-
-        const data = await response.json()
-        const redditPosts = data.data.children.map(child => child.data)
-        setPosts(redditPosts)
-      } catch (err) {
-        console.log('Reddit fetch failed, using fallback:', err)
-        setPosts(FALLBACK_NEWS)
+        const nextArticles = await fetchIgnArticles()
+        if (!canceled) setArticles(nextArticles)
+      } catch (error) {
+        console.log('IGN news fetch failed, using fallback:', error)
+        if (!canceled) setArticles(FALLBACK_NEWS)
       } finally {
-        setLoading(false)
+        if (!canceled) setLoading(false)
       }
     }
 
-    fetchReddit()
+    fetchIgnNews()
+
+    return () => {
+      canceled = true
+    }
   }, [])
 
   return (
@@ -117,7 +302,7 @@ function NewsSection() {
         <div className="section-header">
           <div className="section-badge">
             <Newspaper size={14} />
-            <span>COMMUNITY</span>
+            <span>IGN COVERAGE</span>
           </div>
           <h2 className="section-title">
             LATEST <span className="gradient-text">UPDATES</span>
@@ -133,35 +318,37 @@ function NewsSection() {
 
         {!loading && (
           <div className="news-grid">
-            {posts.map((post, index) => (
+            {articles.map((article, index) => (
               <a
-                key={index}
-                href={`https://www.reddit.com${post.permalink}`}
+                key={article.id || article.url}
+                href={article.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="news-card"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="news-header">
-                  <span className="news-subreddit">r/{post.subreddit}</span>
+                  <span className="news-source">{article.source || 'IGN'}</span>
                   <span className="news-time">
                     <Clock size={12} />
-                    {formatTimeAgo(post.created_utc)}
+                    {formatTimeAgo(article.publishedAt)}
                   </span>
                 </div>
-                <h3 className="news-title">{post.title}</h3>
+
+                <h3 className="news-title">{article.title}</h3>
+                {article.summary && <p className="news-summary">{article.summary}</p>}
+
                 <div className="news-footer">
                   <div className="news-stats">
                     <span className="news-stat">
                       <ArrowUpRight size={14} />
-                      {formatNumber(post.score)}
-                    </span>
-                    <span className="news-stat">
-                      <MessageSquare size={14} />
-                      {formatNumber(post.num_comments)}
+                      {article.type || 'Article'}
                     </span>
                   </div>
-                  <span className="news-author">u/{post.author}</span>
+                  <span className="news-author">
+                    <UserRound size={13} />
+                    {article.author || 'IGN'}
+                  </span>
                 </div>
               </a>
             ))}
