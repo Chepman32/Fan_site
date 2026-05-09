@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { ChevronDown, Calendar, Gamepad2, MapPin } from 'lucide-react'
+import { Calendar, ChevronDown, Gamepad2, LogOut, MapPin, User } from 'lucide-react'
 import Countdown from './Countdown'
 import './Hero.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
 
-function Hero() {
+function Hero({ currentUser, onOpenAuth, onLogout }) {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
@@ -39,6 +39,27 @@ function Hero() {
           <a href="#characters">Characters</a>
           <a href="#media">Media</a>
           <a href="#news">News</a>
+          <a href="#social">Social</a>
+        </div>
+        <div className="nav-auth">
+          {currentUser ? (
+            <>
+              <a className="nav-profile" href="#social" aria-label="Open profile">
+                <span style={{ backgroundColor: `${currentUser.avatarColor}22`, color: currentUser.avatarColor }}>
+                  {currentUser.initials}
+                </span>
+                <strong>{currentUser.username}</strong>
+              </a>
+              <button type="button" onClick={onLogout} aria-label="Log out">
+                <LogOut size={16} />
+              </button>
+            </>
+          ) : (
+            <button type="button" onClick={onOpenAuth}>
+              <User size={16} />
+              <span>Sign in</span>
+            </button>
+          )}
         </div>
       </nav>
 

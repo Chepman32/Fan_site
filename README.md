@@ -2,6 +2,22 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Firebase social features
+
+The community/social section uses Firebase Auth and Cloud Firestore.
+
+For local development, either run through Firebase Hosting's reserved config endpoint or set the Vite variables from `.env.example`. The Vite dev server proxies `/__/firebase/init.json` to the configured Firebase Hosting project.
+
+Before sign-up, posting, voting, source submissions, comments, and messages can work against the live project:
+
+- Enable Firebase Authentication with the Email/Password provider.
+- Create/enable Cloud Firestore for the project.
+- Deploy Firestore rules and indexes:
+
+```sh
+npx firebase-tools deploy --only firestore:rules,firestore:indexes
+```
+
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)

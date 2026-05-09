@@ -2,41 +2,39 @@ import { useEffect, useState } from 'react'
 import { Clock } from 'lucide-react'
 import './Countdown.css'
 
+function calculateCountdown(targetDate) {
+  const difference = targetDate - new Date()
+
+  if (difference <= 0) {
+    return {
+      isReleased: true,
+      timeLeft: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+    }
+  }
+
+  return {
+    isReleased: false,
+    timeLeft: {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    },
+  }
+}
+
 function Countdown({ targetDate }) {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0,
-  })
-  const [isReleased, setIsReleased] = useState(false)
+  const [countdown, setCountdown] = useState(() => calculateCountdown(targetDate))
 
   useEffect(() => {
-    const calculateTimeLeft = () => {
-      const difference = targetDate - new Date()
-      
-      if (difference <= 0) {
-        setIsReleased(true)
-        return { days: 0, hours: 0, minutes: 0, seconds: 0 }
-      }
-
-      return {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      }
-    }
-
-    setTimeLeft(calculateTimeLeft())
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft())
+      setCountdown(calculateCountdown(targetDate))
     }, 1000)
 
     return () => clearInterval(timer)
   }, [targetDate])
 
-  if (isReleased) {
+  if (countdown.isReleased) {
     return (
       <div className="countdown released">
         <Clock size={20} />
@@ -46,10 +44,10 @@ function Countdown({ targetDate }) {
   }
 
   const timeUnits = [
-    { value: timeLeft.days, label: 'DAYS' },
-    { value: timeLeft.hours, label: 'HOURS' },
-    { value: timeLeft.minutes, label: 'MINUTES' },
-    { value: timeLeft.seconds, label: 'SECONDS' },
+    { value: countdown.timeLeft.days, label: 'DAYS' },
+    { value: countdown.timeLeft.hours, label: 'HOURS' },
+    { value: countdown.timeLeft.minutes, label: 'MINUTES' },
+    { value: countdown.timeLeft.seconds, label: 'SECONDS' },
   ]
 
   return (
