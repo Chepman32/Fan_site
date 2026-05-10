@@ -90,10 +90,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   border: 1px solid currentColor;
   border-radius: 50%;
   font-family: 'Bebas Neue', sans-serif;
   letter-spacing: 1px;
+}
+
+.social-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .social-avatar.sm {
@@ -315,7 +322,7 @@
 
 .social-tabs {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 20px;
 }
@@ -474,11 +481,41 @@
 }
 
 .post-header {
+  justify-content: space-between;
   margin-bottom: 14px;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .post-header h3 {
   font-size: 15px;
+}
+
+.post-bookmark-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.post-bookmark-button.active,
+.post-bookmark-button:hover {
+  color: var(--accent-cyan);
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(0, 217, 255, 0.35);
 }
 
 .post-header span,

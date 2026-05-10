@@ -12,7 +12,7 @@ const en = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'News',
-    social: 'Social',
+    social: 'Community',
     signIn: 'Sign in',
     logOut: 'Log out',
   },

@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
-  BadgeCheck,
   Bell,
+  Bookmark,
+  BookmarkCheck,
   CheckCircle2,
   Clock,
   Eye,
-  FileText,
   Hash,
   HelpCircle,
   Link,
@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   ThumbsUp,
   Trophy,
-  User,
   Users,
   Vote,
   XCircle,
@@ -30,12 +29,11 @@ import {
   RUMOR_VOTE_OPTIONS,
   SOCIAL_TOPICS,
   SOURCE_CATEGORIES,
-  TRAILER_ANALYSIS_THREADS,
 } from '../social/socialData'
 import './SocialHub.css'
 
-const TAB_IDS = ['feed', 'rumors', 'sources', 'polls', 'messages', 'profile']
-const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote, messages: Mail, profile: User }
+const TAB_IDS = ['feed', 'rumors', 'sources', 'polls', 'messages']
+const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote, messages: Mail }
 
 const REACTION_ICONS = {
   useful: ThumbsUp,
@@ -82,6 +80,7 @@ function userFallback(userId) {
     id: userId,
     username: 'Unknown user',
     avatarColor: '#6b6b7b',
+    photoDataUrl: '',
     followedTopics: [],
     joinedAt: new Date().toISOString(),
   }
@@ -96,7 +95,7 @@ function Avatar({ user, size = 'md' }) {
       style={{ backgroundColor: `${user?.avatarColor ?? '#6b6b7b'}22`, color: user?.avatarColor }}
       aria-hidden="true"
     >
-      {initials}
+      {user?.photoDataUrl ? <img src={user.photoDataUrl} alt="" /> : initials}
     </div>
   )
 }
@@ -262,7 +261,7 @@ function PostComposer({ onOpenAuth }) {
 }
 
 function FeedTab({ onOpenAuth }) {
-  const { state, usersById, currentUser, isSignedIn, reactToPost } = useSocial()
+  const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark } = useSocial()
 
   return (
     <div className="social-stack">
@@ -275,15 +274,31 @@ function FeedTab({ onOpenAuth }) {
         const currentReaction = REACTION_OPTIONS.find((option) =>
           post.reactions[option.id]?.includes(currentUser?.id),
         )
+        const bookmarked = currentProfile?.bookmarkedPostIds.includes(post.id)
+        const canBookmark = post.authorId !== currentUser?.id
 
         return (
           <article key={post.id} className="community-post">
             <header className="post-header">
-              <Avatar user={author} />
-              <div>
-                <h3>{author.username}</h3>
-                <span>{formatRelative(post.createdAt)}</span>
+              <div className="post-author">
+                <Avatar user={author} />
+                <div>
+                  <h3>{author.username}</h3>
+                  <span>{formatRelative(post.createdAt)}</span>
+                </div>
               </div>
+              {canBookmark && (
+                <button
+                  className={bookmarked ? 'post-bookmark-button active' : 'post-bookmark-button'}
+                  type="button"
+                  onClick={() => (isSignedIn ? toggleBookmark(post.id) : onOpenAuth())}
+                  aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                  aria-pressed={Boolean(bookmarked)}
+                  title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                >
+                  {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
+                </button>
+              )}
             </header>
 
             <p className="post-body">{post.body}</p>
@@ -595,24 +610,6 @@ function PollsTab({ onOpenAuth }) {
   )
 }
 
-function TrailerAnalysisTab({ onOpenAuth }) {
-  return (
-    <div className="social-stack">
-      {TRAILER_ANALYSIS_THREADS.map((thread) => (
-        <article key={thread.id} className="trailer-thread">
-          <div className="rumor-topline">
-            <span>{thread.topic}</span>
-            <small>Analysis thread</small>
-          </div>
-          <h3>{thread.title}</h3>
-          <p>{thread.summary}</p>
-          <CommentsPanel targetType="trailer" targetId={thread.id} onOpenAuth={onOpenAuth} />
-        </article>
-      ))}
-    </div>
-  )
-}
-
 function MessagesTab({ onOpenAuth }) {
   const { state, publicUsers, currentUser, isSignedIn, usersById, sendMessage } = useSocial()
   const { t } = useTranslation()
@@ -695,85 +692,8 @@ function MessagesTab({ onOpenAuth }) {
   )
 }
 
-function ProfileTab({ onOpenAuth }) {
-  const { currentProfile, publicUsers, state, isSignedIn } = useSocial()
-  const leaderboard = [...publicUsers].sort((a, b) => b.reputation.score - a.reputation.score)
-
-  if (!isSignedIn) {
-    return <AuthPrompt onOpenAuth={onOpenAuth} />
-  }
-
-  const mySources = state.sources.filter((source) => source.authorId === currentProfile.id)
-
-  return (
-    <div className="profile-grid">
-      <article className="profile-detail">
-        <div className="profile-hero">
-          <Avatar user={currentProfile} size="xl" />
-          <div>
-            <span>Level {currentProfile.reputation.level}: {currentProfile.reputation.name}</span>
-            <h3>{currentProfile.username}</h3>
-            <p>Joined {formatDate(currentProfile.joinedAt)}</p>
-          </div>
-        </div>
-
-        <div className="profile-metrics">
-          <span><strong>{currentProfile.submittedSources}</strong>Submitted sources</span>
-          <span><strong>{currentProfile.acceptedSources}</strong>Accepted sources</span>
-          <span><strong>{currentProfile.followedTopicsCount}</strong>Followed topics</span>
-        </div>
-
-        <div className="profile-badge-wrap">
-          {currentProfile.badges.map((badge) => (
-            <span key={badge} className="badge earned">
-              <BadgeCheck size={13} />
-              {badge}
-            </span>
-          ))}
-        </div>
-      </article>
-
-      <article className="profile-detail">
-        <div className="panel-heading">
-          <FileText size={16} />
-          <h3>Your source log</h3>
-        </div>
-        {mySources.length === 0 ? (
-          <p className="empty-state">No source submissions yet.</p>
-        ) : (
-          <div className="mini-source-list">
-            {mySources.map((source) => (
-              <div key={source.id}>
-                <strong>{source.category}</strong>
-                <span>{source.status} · {formatRelative(source.createdAt)}</span>
-                <p>{source.claim}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </article>
-
-      <article className="profile-detail leaderboard">
-        <div className="panel-heading">
-          <Trophy size={16} />
-          <h3>Spotter board</h3>
-        </div>
-        {leaderboard.map((user, index) => (
-          <div key={user.id} className="leader-row">
-            <span>{index + 1}</span>
-            <Avatar user={user} size="sm" />
-            <strong>{user.username}</strong>
-            <em>Lvl {user.reputation.level}</em>
-          </div>
-        ))}
-      </article>
-    </div>
-  )
-}
-
 function SocialHub({ onOpenAuth }) {
   const [activeTab, setActiveTab] = useState('feed')
-  const [showTrailerThreads, setShowTrailerThreads] = useState(false)
   const { backendError, isSignedIn } = useSocial()
   const { t } = useTranslation()
 
@@ -783,13 +703,12 @@ function SocialHub({ onOpenAuth }) {
     sources: t.social.tabs.sources,
     polls: t.social.tabs.polls,
     messages: t.social.tabs.messages,
-    profile: t.social.tabs.profile,
   }
   const TABS = TAB_IDS.map((id) => ({ id, label: TAB_LABELS[id], icon: TAB_ICONS[id] }))
   const activeTitle = TAB_LABELS[activeTab] ?? t.social.tabs.posts
 
   return (
-    <section id="social" className="section-padding social-hub">
+    <section id="community" className="section-padding social-hub">
       <div className="container">
         <div className="section-header social-header">
           <div className="section-badge">
@@ -836,14 +755,11 @@ function SocialHub({ onOpenAuth }) {
               </div>
             )}
 
-            {showTrailerThreads && <TrailerAnalysisTab onOpenAuth={onOpenAuth} />}
-
-            {!showTrailerThreads && activeTab === 'feed' && <FeedTab onOpenAuth={onOpenAuth} />}
-            {!showTrailerThreads && activeTab === 'rumors' && <RumorsTab onOpenAuth={onOpenAuth} />}
-            {!showTrailerThreads && activeTab === 'sources' && <SourcesTab onOpenAuth={onOpenAuth} />}
-            {!showTrailerThreads && activeTab === 'polls' && <PollsTab onOpenAuth={onOpenAuth} />}
-            {!showTrailerThreads && activeTab === 'messages' && <MessagesTab onOpenAuth={onOpenAuth} />}
-            {!showTrailerThreads && activeTab === 'profile' && <ProfileTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'feed' && <FeedTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'rumors' && <RumorsTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'sources' && <SourcesTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'polls' && <PollsTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'messages' && <MessagesTab onOpenAuth={onOpenAuth} />}
           </div>
         </div>
       </div>

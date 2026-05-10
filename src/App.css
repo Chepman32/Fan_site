@@ -2,3 +2,7 @@
   min-height: 100vh;
   background-color: var(--bg-primary);
 }
+
+.page-main {
+  padding-top: 70px;
+}

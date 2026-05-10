@@ -63,6 +63,10 @@ function normalizeUsername(username) {
   return username.trim().replace(/\s+/g, '')
 }
 
+function normalizeDisplayName(username) {
+  return username.trim().replace(/\s+/g, ' ')
+}
+
 function getInitials(username) {
   return username.slice(0, 2).toUpperCase()
 }
@@ -146,8 +150,11 @@ export function getUserProfile(user, state) {
 
   const safeUser = {
     ...user,
+    bio: user.bio ?? '',
+    photoDataUrl: user.photoDataUrl ?? '',
     followedTopics: user.followedTopics ?? [],
     badges: user.badges ?? [],
+    bookmarkedPostIds: user.bookmarkedPostIds ?? [],
   }
   const submittedSources = state.sources.filter((source) => source.authorId === safeUser.id)
   const acceptedSources = submittedSources.filter((source) => source.status === 'accepted')
@@ -172,22 +179,28 @@ function authUserFallback(authUser) {
     username: authUser.displayName || authUser.email?.split('@')[0] || 'Player',
     usernameLower: (authUser.displayName || authUser.email?.split('@')[0] || 'player').toLowerCase(),
     avatarColor: '#00d9ff',
+    bio: '',
+    photoDataUrl: '',
     joinedAt: authUser.metadata?.creationTime
       ? new Date(authUser.metadata.creationTime).toISOString()
       : new Date().toISOString(),
     followedTopics: [],
     badges: [],
+    bookmarkedPostIds: [],
   }
 }
 
 function publicUserDocument(user, updatedAt) {
   return {
     username: user.username,
-    usernameLower: user.usernameLower,
+    usernameLower: user.usernameLower ?? user.username.toLowerCase(),
     avatarColor: user.avatarColor,
+    bio: user.bio ?? '',
+    photoDataUrl: user.photoDataUrl ?? '',
     joinedAt: user.joinedAt,
-    followedTopics: user.followedTopics,
-    badges: user.badges,
+    followedTopics: user.followedTopics ?? [],
+    badges: user.badges ?? [],
+    bookmarkedPostIds: user.bookmarkedPostIds ?? [],
     updatedAt,
   }
 }
@@ -224,9 +237,12 @@ async function ensureUserDocument(services, authUser) {
       username,
       usernameLower: username.toLowerCase(),
       avatarColor: '#00d9ff',
+      bio: '',
+      photoDataUrl: '',
       joinedAt: new Date().toISOString(),
       followedTopics: [],
       badges: [],
+      bookmarkedPostIds: [],
     }, services.serverTimestamp()))
   })
 }
@@ -473,9 +489,12 @@ export function SocialProvider({ children }) {
         username: cleanUsername,
         usernameLower: cleanUsername.toLowerCase(),
         avatarColor: colors[state.users.length % colors.length],
+        bio: '',
+        photoDataUrl: '',
         joinedAt: new Date().toISOString(),
         followedTopics: [],
         badges: [],
+        bookmarkedPostIds: [],
       }
 
       setState((currentState) => ({
@@ -597,6 +616,70 @@ export function SocialProvider({ children }) {
     }
   }
 
+  const updateUserProfile = async ({ username, bio, photoDataUrl }) => {
+    if (!requireUser()) return false
+
+    setBackendError('')
+    const cleanUsername = normalizeDisplayName(username)
+    const cleanBio = bio.trim().slice(0, 220)
+    const cleanPhotoDataUrl = photoDataUrl || ''
+
+    if (cleanUsername.length < 3) {
+      setBackendError('Choose a name with at least 3 characters.')
+      return false
+    }
+
+    const usernameTaken = state.users.some((user) => {
+      return user.id !== authUser.uid && user.username.toLowerCase() === cleanUsername.toLowerCase()
+    })
+
+    if (usernameTaken) {
+      setBackendError('That name is already registered.')
+      return false
+    }
+
+    const userRef = services.doc(services.db, 'users', authUser.uid)
+
+    try {
+      await withFirebaseTimeout(
+        services.updateDoc(userRef, {
+          username: cleanUsername,
+          usernameLower: cleanUsername.toLowerCase(),
+          bio: cleanBio,
+          photoDataUrl: cleanPhotoDataUrl,
+          updatedAt: services.serverTimestamp(),
+        }),
+      )
+
+      await withFirebaseTimeout(services.updateProfile(authUser, { displayName: cleanUsername }))
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
+  const toggleBookmark = async (postId) => {
+    if (!requireUser()) return false
+
+    const postExists = state.posts.some((post) => post.id === postId)
+    if (!postExists) return false
+
+    const userRef = services.doc(services.db, 'users', authUser.uid)
+    const alreadyBookmarked = currentProfile?.bookmarkedPostIds.includes(postId)
+
+    try {
+      await services.updateDoc(userRef, {
+        bookmarkedPostIds: alreadyBookmarked ? services.arrayRemove(postId) : services.arrayUnion(postId),
+        updatedAt: services.serverTimestamp(),
+      })
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
   const submitSource = async ({ url, claim, category, reason }) => {
     if (!requireUser()) return false
 
@@ -699,6 +782,8 @@ export function SocialProvider({ children }) {
     reactToPost,
     voteRumor,
     followTopic,
+    updateUserProfile,
+    toggleBookmark,
     submitSource,
     votePoll,
     addComment,

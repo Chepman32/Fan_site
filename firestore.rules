@@ -51,26 +51,38 @@ service cloud.firestore {
           'username',
           'usernameLower',
           'avatarColor',
+          'bio',
+          'photoDataUrl',
           'joinedAt',
           'followedTopics',
           'badges',
+          'bookmarkedPostIds',
           'updatedAt'
         ])
         && request.resource.data.username is string
         && request.resource.data.usernameLower is string
         && request.resource.data.followedTopics is list
-        && request.resource.data.badges is list;
+        && request.resource.data.badges is list
+        && (!('bio' in request.resource.data) || request.resource.data.bio is string)
+        && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
+        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list);
       allow update: if owns(userId)
         && changedOnly([
           'username',
           'usernameLower',
           'avatarColor',
+          'bio',
+          'photoDataUrl',
           'followedTopics',
           'badges',
+          'bookmarkedPostIds',
           'updatedAt'
         ])
         && request.resource.data.followedTopics is list
-        && request.resource.data.badges is list;
+        && request.resource.data.badges is list
+        && (!('bio' in request.resource.data) || request.resource.data.bio is string)
+        && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
+        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list);
       allow delete: if false;
     }
 
