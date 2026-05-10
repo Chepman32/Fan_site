@@ -5,6 +5,7 @@ import './Footer.css'
 function Footer() {
   const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
+  const copyrightName = t.footer.copyrightName || 'Anton Chepur'
 
   return (
     <footer className="footer">
@@ -51,7 +52,7 @@ function Footer() {
 
         <div className="footer-bottom">
           <p>
-            {t.footer.madeByFans} <Heart size={14} className="heart-icon" /> {t.footer.byFans} • {currentYear}
+            {t.footer.madeByFans} <Heart size={14} className="heart-icon" /> {t.footer.byFans} • © {copyrightName} {currentYear}
           </p>
           <p className="footer-disclaimer">{t.footer.disclaimer}</p>
         </div>

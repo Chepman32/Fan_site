@@ -204,6 +204,7 @@ const en = {
     media: 'Media',
     madeByFans: 'Made with',
     byFans: 'by fans',
+    copyrightName: 'Anton Chepur',
     disclaimer: 'This is a fan-made project. Not affiliated with Rockstar Games or Take-Two Interactive.',
   },
 }
@@ -528,6 +529,7 @@ const ru = {
     media: 'Медиа',
     madeByFans: 'Сделано с',
     byFans: 'фанатами',
+    copyrightName: 'Антон Чепур',
     disclaimer: 'Фан-проект. Не связан с Rockstar Games или Take-Two Interactive.',
   },
 }
