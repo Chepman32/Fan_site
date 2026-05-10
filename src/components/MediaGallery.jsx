@@ -1,35 +1,21 @@
 import { useState } from 'react'
 import { Play, Film, ExternalLink } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './MediaGallery.css'
 
-const videos = [
-  {
-    id: 'QdBZY2fkU-0',
-    title: 'GTA VI - Trailer 1',
-    duration: '1:31',
-    description: 'The first official trailer revealing Vice City and Leonida.',
-  },
-  {
-    id: 'VQRLujxTm3c',
-    title: 'GTA VI - Trailer 2',
-    duration: '2:16',
-    description: 'Second trailer showcasing gameplay, characters, and more of Leonida.',
-  },
-]
-
-const screenshots = [
-  {
-    url: 'https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png',
-    caption: 'Official Box Art',
-  },
-  {
-    url: 'https://upload.wikimedia.org/wikipedia/en/c/c5/Grand_Theft_Auto_VI_screenshot.png',
-    caption: 'In-Game Screenshot',
-  },
-]
-
 function MediaGallery() {
-  const [activeVideo, setActiveVideo] = useState(videos[0].id)
+  const { t } = useTranslation()
+  const [activeVideo, setActiveVideo] = useState('QdBZY2fkU-0')
+
+  const videos = [
+    { id: 'QdBZY2fkU-0', title: t.media.videos.trailer1.title, duration: '1:31', description: t.media.videos.trailer1.description },
+    { id: 'VQRLujxTm3c', title: t.media.videos.trailer2.title, duration: '2:16', description: t.media.videos.trailer2.description },
+  ]
+
+  const screenshots = [
+    { url: 'https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png', caption: t.media.screenshots.boxArt },
+    { url: 'https://upload.wikimedia.org/wikipedia/en/c/c5/Grand_Theft_Auto_VI_screenshot.png', caption: t.media.screenshots.inGame },
+  ]
 
   return (
     <section id="media" className="section-padding media-gallery">
@@ -37,10 +23,10 @@ function MediaGallery() {
         <div className="section-header">
           <div className="section-badge">
             <Film size={14} />
-            <span>MEDIA</span>
+            <span>{t.media.badge}</span>
           </div>
           <h2 className="section-title">
-            TRAILERS & <span className="gradient-text">SCREENSHOTS</span>
+            {t.media.title} <span className="gradient-text">{t.media.titleHighlight}</span>
           </h2>
         </div>
 
@@ -87,7 +73,7 @@ function MediaGallery() {
         <div className="screenshots-section">
           <h3 className="screenshots-title">
             <ExternalLink size={16} />
-            Official Screenshots
+            {t.media.officialScreenshots}
           </h3>
           <div className="screenshots-grid">
             {screenshots.map((shot, index) => (

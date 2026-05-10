@@ -1,34 +1,26 @@
 import { useEffect, useState } from 'react'
 import { Lock, Mail, User, X } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './AuthModal.css'
 
 function AuthModal({ onClose }) {
   const { login, signup, authError, isSignedIn } = useSocial()
+  const { t } = useTranslation()
   const [mode, setMode] = useState('signup')
-  const [form, setForm] = useState({
-    username: '',
-    email: '',
-    password: '',
-  })
+  const [form, setForm] = useState({ username: '', email: '', password: '' })
   const [busy, setBusy] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
-  const updateForm = (field, value) => {
-    setForm((currentForm) => ({ ...currentForm, [field]: value }))
-  }
+  const updateForm = (field, value) => setForm((f) => ({ ...f, [field]: value }))
 
-  useEffect(() => {
-    if (isSignedIn) onClose()
-  }, [isSignedIn, onClose])
+  useEffect(() => { if (isSignedIn) onClose() }, [isSignedIn, onClose])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     setBusy(true)
     setSubmitError('')
-
     let success = false
-
     try {
       success = mode === 'signup'
         ? await signup(form)
@@ -38,91 +30,62 @@ function AuthModal({ onClose }) {
     } finally {
       setBusy(false)
     }
-
     if (success) onClose()
   }
 
   return (
     <div className="auth-backdrop" role="presentation">
       <div className="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-title">
-        <button className="auth-close" type="button" onClick={onClose} aria-label="Close sign in">
+        <button className="auth-close" type="button" onClick={onClose} aria-label={t.auth.closeSignIn}>
           <X size={18} />
         </button>
 
         <div className="auth-copy">
-          <span className="auth-kicker">Community access</span>
-          <h2 id="auth-title">{mode === 'signup' ? 'Create your hub profile' : 'Welcome back'}</h2>
-          <p>
-            Signed-in fans can post, vote, follow topics, submit sources, and message other members.
-          </p>
+          <span className="auth-kicker">{t.auth.communityAccess}</span>
+          <h2 id="auth-title">{mode === 'signup' ? t.auth.createProfile : t.auth.welcomeBack}</h2>
+          <p>{t.auth.description}</p>
         </div>
 
         <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
-          <button
-            className={mode === 'signup' ? 'active' : ''}
-            type="button"
-            onClick={() => setMode('signup')}
-          >
-            Sign up
+          <button className={mode === 'signup' ? 'active' : ''} type="button" onClick={() => setMode('signup')}>
+            {t.auth.signUp}
           </button>
-          <button
-            className={mode === 'login' ? 'active' : ''}
-            type="button"
-            onClick={() => setMode('login')}
-          >
-            Login
+          <button className={mode === 'login' ? 'active' : ''} type="button" onClick={() => setMode('login')}>
+            {t.auth.login}
           </button>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           {mode === 'signup' && (
             <label>
-              <span>Username</span>
+              <span>{t.auth.username}</span>
               <div className="auth-field">
                 <User size={16} />
-                <input
-                  value={form.username}
-                  onChange={(event) => updateForm('username', event.target.value)}
-                  placeholder="ViceCityFan"
-                  autoComplete="username"
-                />
+                <input value={form.username} onChange={(e) => updateForm('username', e.target.value)} placeholder={t.auth.usernamePlaceholder} autoComplete="username" />
               </div>
             </label>
           )}
 
           <label>
-            <span>Email</span>
+            <span>{t.auth.email}</span>
             <div className="auth-field">
               <Mail size={16} />
-              <input
-                type="text"
-                inputMode="email"
-                value={form.email}
-                onChange={(event) => updateForm('email', event.target.value)}
-                placeholder="you@example.com"
-                autoComplete="email"
-              />
+              <input type="text" inputMode="email" value={form.email} onChange={(e) => updateForm('email', e.target.value)} placeholder={t.auth.emailPlaceholder} autoComplete="email" />
             </div>
           </label>
 
           <label>
-            <span>Password</span>
+            <span>{t.auth.password}</span>
             <div className="auth-field">
               <Lock size={16} />
-              <input
-                type="password"
-                value={form.password}
-                onChange={(event) => updateForm('password', event.target.value)}
-                placeholder="6+ characters"
-                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-              />
+              <input type="password" value={form.password} onChange={(e) => updateForm('password', e.target.value)} placeholder={t.auth.passwordPlaceholder} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
             </div>
           </label>
 
           {(authError || submitError) && <p className="auth-error">{authError || submitError}</p>}
 
           <button className="auth-submit" type="submit" disabled={busy}>
-            {busy ? 'Checking...' : mode === 'signup' ? 'Create account' : 'Login'}
+            {busy ? t.auth.checking : mode === 'signup' ? t.auth.createAccount : t.auth.login}
           </button>
         </form>
       </div>

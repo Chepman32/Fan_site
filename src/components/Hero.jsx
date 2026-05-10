@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react'
-import { Calendar, ChevronDown, Gamepad2, LogOut, MapPin, User } from 'lucide-react'
+import { Calendar, ChevronDown, Gamepad2, Globe, LogOut, MapPin, User } from 'lucide-react'
 import Countdown from './Countdown'
 import favIcon from '../assets/fav.png'
+import { useTranslation } from '../i18n/useTranslation.jsx'
+import { LANGUAGE_NAMES } from '../i18n/translations'
 import './Hero.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
 
 function Hero({ currentUser, onOpenAuth, onLogout }) {
+  const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50)
-    }
+    const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  useEffect(() => {
+    if (!langOpen) return
+    const close = () => setLangOpen(false)
+    window.addEventListener('click', close)
+    return () => window.removeEventListener('click', close)
+  }, [langOpen])
 
   const scrollToInfo = () => {
     document.getElementById('game-info')?.scrollIntoView({ behavior: 'smooth' })
@@ -36,14 +45,45 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
           <span>GTA VI <span className="highlight">HUB</span></span>
         </div>
         <div className="nav-links">
-          <a href="#game-info">About</a>
-          <a href="#characters">Characters</a>
-          <a href="#media">Media</a>
-          <a href="#leonida">Leonida</a>
-          <a href="#news">News</a>
-          <a href="#social">Social</a>
+          <a href="#game-info">{t.nav.about}</a>
+          <a href="#characters">{t.nav.characters}</a>
+          <a href="#media">{t.nav.media}</a>
+          <a href="#leonida">{t.nav.leonida}</a>
+          <a href="#news">{t.nav.news}</a>
+          <a href="#social">{t.nav.social}</a>
         </div>
         <div className="nav-auth">
+          {/* Language switcher */}
+          <div className="lang-switcher" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="lang-toggle"
+              onClick={() => setLangOpen((o) => !o)}
+              aria-label="Change language"
+              aria-expanded={langOpen}
+            >
+              <Globe size={15} />
+              <span>{LANGUAGE_NAMES[lang]}</span>
+            </button>
+            {langOpen && (
+              <ul className="lang-dropdown" role="listbox">
+                {Object.entries(LANGUAGE_NAMES).map(([code, name]) => (
+                  <li key={code}>
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={lang === code}
+                      className={lang === code ? 'active' : ''}
+                      onClick={() => { setLang(code); setLangOpen(false) }}
+                    >
+                      {name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
           {currentUser ? (
             <>
               <a className="nav-profile" href="#social" aria-label="Open profile">
@@ -52,14 +92,14 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
                 </span>
                 <strong>{currentUser.username}</strong>
               </a>
-              <button type="button" onClick={onLogout} aria-label="Log out">
+              <button type="button" onClick={onLogout} aria-label={t.nav.logOut}>
                 <LogOut size={16} />
               </button>
             </>
           ) : (
             <button type="button" onClick={onOpenAuth}>
               <User size={16} />
-              <span>Sign in</span>
+              <span>{t.nav.signIn}</span>
             </button>
           )}
         </div>
@@ -68,7 +108,7 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
       <div className="hero-content">
         <div className="hero-badge animate-fade-in-up">
           <MapPin size={14} />
-          <span>LEONIDA / VICE CITY</span>
+          <span>{t.hero.badge}</span>
         </div>
 
         <h1 className="hero-title animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -77,19 +117,18 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
         </h1>
 
         <p className="hero-subtitle animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          The most anticipated game of the decade. 
-          Return to Vice City in a story of love, crime, and betrayal.
+          {t.hero.subtitle}
         </p>
 
         <div className="hero-meta animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
           <div className="meta-item">
             <Calendar size={16} />
-            <span>November 19, 2026</span>
+            <span>{t.hero.releaseDate}</span>
           </div>
           <div className="meta-divider"></div>
           <div className="meta-item">
             <Gamepad2 size={16} />
-            <span>PS5 / Xbox Series X|S</span>
+            <span>{t.hero.platforms}</span>
           </div>
         </div>
 
@@ -99,15 +138,15 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
 
         <div className="hero-actions animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
           <button className="btn-primary" onClick={scrollToInfo}>
-            Explore Game
+            {t.hero.exploreGame}
           </button>
-          <a 
-            href="https://www.rockstargames.com/VI" 
-            target="_blank" 
+          <a
+            href="https://www.rockstargames.com/VI"
+            target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary"
           >
-            Official Site
+            {t.hero.officialSite}
           </a>
         </div>
       </div>

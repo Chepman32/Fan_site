@@ -9,6 +9,7 @@ import SocialHub from './components/SocialHub'
 import AuthModal from './components/AuthModal'
 import Footer from './components/Footer'
 import { SocialProvider, useSocial } from './social/SocialContext'
+import { LanguageProvider } from './i18n/useTranslation.jsx'
 import './App.css'
 
 function AppContent() {
@@ -36,9 +37,11 @@ function AppContent() {
 
 function App() {
   return (
-    <SocialProvider>
-      <AppContent />
-    </SocialProvider>
+    <LanguageProvider>
+      <SocialProvider>
+        <AppContent />
+      </SocialProvider>
+    </LanguageProvider>
   )
 }
 

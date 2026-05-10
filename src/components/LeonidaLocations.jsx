@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Building2, ExternalLink, Image as ImageIcon, Loader, Map, MapPin } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaLocations.css'
 
 const IGN_ORIGIN = 'https://www.ign.com'
@@ -217,6 +218,7 @@ function formatUpdatedAt(value) {
 }
 
 function LeonidaLocations() {
+  const { t } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
@@ -253,11 +255,11 @@ function LeonidaLocations() {
 
   const locationStats = useMemo(
     () => [
-      { label: 'Major regions', value: data.majorLocations.length },
-      { label: 'Spotted places', value: data.otherLocations.length },
-      { label: 'Businesses', value: data.businesses.length },
+      { label: t.leonida.stats.majorRegions, value: data.majorLocations.length },
+      { label: t.leonida.stats.spottedPlaces, value: data.otherLocations.length },
+      { label: t.leonida.stats.businesses, value: data.businesses.length },
     ],
-    [data],
+    [data, t],
   )
 
   return (
@@ -266,17 +268,17 @@ function LeonidaLocations() {
         <div className="section-header">
           <div className="section-badge">
             <Map size={14} />
-            <span>IGN WIKI GUIDE</span>
+            <span>{t.leonida.badge}</span>
           </div>
           <h2 className="section-title">
-            LEONIDA <span className="gradient-text">LOCATIONS</span>
+            {t.leonida.title} <span className="gradient-text">{t.leonida.titleHighlight}</span>
           </h2>
         </div>
 
         {loading && (
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Loading Leonida guide...</p>
+            <p>{t.leonida.loading}</p>
           </div>
         )}
 
@@ -284,13 +286,13 @@ function LeonidaLocations() {
           <div className="leonida-content">
             <div className="leonida-overview">
               <div>
-                <span className="leonida-kicker">Updated {formatUpdatedAt(data.updatedAt)}</span>
+                <span className="leonida-kicker">{t.leonida.updatedOn} {formatUpdatedAt(data.updatedAt)}</span>
                 <div className="leonida-copy">
                   {data.intro.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {usingFallback && <p className="leonida-note">Live IGN parsing failed, showing the latest saved IGN wiki data.</p>}
+                {usingFallback && <p className="leonida-note">{t.leonida.fallbackNote}</p>}
               </div>
 
               <div className="leonida-stats">
@@ -329,7 +331,7 @@ function LeonidaLocations() {
                   </span>
                   <strong>{location.name}</strong>
                   <span>
-                    IGN guide
+                    {t.leonida.ignGuide}
                     <ExternalLink size={13} />
                   </span>
                 </a>
@@ -340,7 +342,7 @@ function LeonidaLocations() {
               <article className="leonida-list-panel">
                 <h3>
                   <MapPin size={18} />
-                  Other spotted locations
+                  {t.leonida.otherLocations}
                 </h3>
                 <div className="tag-list">
                   {data.otherLocations.map((location) => (
@@ -352,7 +354,7 @@ function LeonidaLocations() {
               <article className="leonida-list-panel">
                 <h3>
                   <Building2 size={18} />
-                  Shops and businesses
+                  {t.leonida.shopsAndBusinesses}
                 </h3>
                 <div className="tag-list">
                   {data.businesses.map((business) => (

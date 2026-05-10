@@ -1,7 +1,9 @@
 import { Gamepad2, Heart, ExternalLink } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './Footer.css'
 
 function Footer() {
+  const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
 
   return (
@@ -13,21 +15,18 @@ function Footer() {
               <Gamepad2 size={24} className="footer-icon" />
               <span>GTA VI <span className="highlight">HUB</span></span>
             </div>
-            <p className="footer-description">
-              An unofficial fan site dedicated to Grand Theft Auto VI. 
-              All game content and trademarks are property of Rockstar Games.
-            </p>
+            <p className="footer-description">{t.footer.description}</p>
           </div>
 
           <div className="footer-links">
             <div className="footer-column">
-              <h4>Game</h4>
-              <a href="#game-info">About</a>
-              <a href="#characters">Characters</a>
-              <a href="#media">Media</a>
+              <h4>{t.footer.game}</h4>
+              <a href="#game-info">{t.footer.about}</a>
+              <a href="#characters">{t.footer.characters}</a>
+              <a href="#media">{t.footer.media}</a>
             </div>
             <div className="footer-column">
-              <h4>Official</h4>
+              <h4>{t.footer.official}</h4>
               <a href="https://www.rockstargames.com/VI" target="_blank" rel="noopener noreferrer">
                 Rockstar Games <ExternalLink size={12} />
               </a>
@@ -39,7 +38,7 @@ function Footer() {
               </a>
             </div>
             <div className="footer-column">
-              <h4>Coverage</h4>
+              <h4>{t.footer.coverage}</h4>
               <a href="https://www.ign.com/games/grand-theft-auto-vi" target="_blank" rel="noopener noreferrer">
                 IGN GTA VI <ExternalLink size={12} />
               </a>
@@ -49,11 +48,9 @@ function Footer() {
 
         <div className="footer-bottom">
           <p>
-            Made with <Heart size={14} className="heart-icon" /> by fans • {currentYear}
+            {t.footer.madeByFans} <Heart size={14} className="heart-icon" /> {t.footer.byFans} • {currentYear}
           </p>
-          <p className="footer-disclaimer">
-            This is a fan-made project. Not affiliated with Rockstar Games or Take-Two Interactive.
-          </p>
+          <p className="footer-disclaimer">{t.footer.disclaimer}</p>
         </div>
       </div>
     </footer>

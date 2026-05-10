@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ExternalLink, Image as ImageIcon, Loader, UserRound, Users } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './Characters.css'
 
 const IGN_ORIGIN = 'https://www.ign.com'
@@ -264,6 +265,7 @@ function formatUpdatedAt(value) {
 }
 
 function CharacterCard({ character, featured = false, index = 0 }) {
+  const { t } = useTranslation()
   return (
     <a
       className={featured ? 'ign-character-card featured-character' : 'ign-character-card'}
@@ -284,12 +286,12 @@ function CharacterCard({ character, featured = false, index = 0 }) {
       <div className="ign-character-body">
         <span className="character-source">
           <UserRound size={13} />
-          {character.actor && character.actor !== 'Unknown' ? character.actor : 'Actor unknown'}
+          {character.actor && character.actor !== 'Unknown' ? character.actor : t.characters.actorUnknown}
         </span>
         <h3>{character.name}</h3>
         <p>{character.bio}</p>
         <span className="character-link">
-          IGN guide
+          {t.characters.ignGuide}
           <ExternalLink size={13} />
         </span>
       </div>
@@ -298,6 +300,7 @@ function CharacterCard({ character, featured = false, index = 0 }) {
 }
 
 function Characters() {
+  const { t } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
@@ -334,11 +337,11 @@ function Characters() {
 
   const stats = useMemo(
     () => [
-      { label: 'Characters', value: data.characters.length },
-      { label: 'Profile images', value: data.characters.filter((character) => character.imageUrl).length },
-      { label: 'Lead duo', value: data.characters.slice(0, 2).length },
+      { label: t.characters.stats.characters, value: data.characters.length },
+      { label: t.characters.stats.profileImages, value: data.characters.filter((character) => character.imageUrl).length },
+      { label: t.characters.stats.leadDuo, value: data.characters.slice(0, 2).length },
     ],
-    [data.characters],
+    [data.characters, t],
   )
 
   const featuredCharacters = data.characters.slice(0, 2)
@@ -350,17 +353,17 @@ function Characters() {
         <div className="section-header">
           <div className="section-badge">
             <Users size={14} />
-            <span>IGN WIKI GUIDE</span>
+            <span>{t.characters.badge}</span>
           </div>
           <h2 className="section-title">
-            GTA 6 <span className="gradient-text">CHARACTERS</span>
+            {t.characters.title} <span className="gradient-text">{t.characters.titleHighlight}</span>
           </h2>
         </div>
 
         {loading && (
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Loading character guide...</p>
+            <p>{t.characters.loading}</p>
           </div>
         )}
 
@@ -368,13 +371,13 @@ function Characters() {
           <div className="ign-characters-content">
             <div className="characters-overview">
               <div>
-                <span className="characters-kicker">Updated {formatUpdatedAt(data.updatedAt)}</span>
+                <span className="characters-kicker">{t.characters.updatedOn} {formatUpdatedAt(data.updatedAt)}</span>
                 <div className="characters-copy">
                   {data.intro.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {usingFallback && <p className="characters-note">Live IGN parsing failed, showing the latest saved IGN wiki data.</p>}
+                {usingFallback && <p className="characters-note">{t.characters.fallbackNote}</p>}
               </div>
 
               <div className="characters-stats">

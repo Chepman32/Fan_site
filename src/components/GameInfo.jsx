@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Info, Loader, AlertCircle, Monitor, Users, Globe, Sparkles } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './GameInfo.css'
 
 function GameInfo() {
+  const { t } = useTranslation()
   const [wikiData, setWikiData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -46,23 +48,23 @@ function GameInfo() {
   const features = [
     {
       icon: <Globe size={24} />,
-      title: 'Open World',
-      description: 'Explore the fictional state of Leonida, featuring Vice City, the Everglades-inspired Grassrivers, and the Leonida Keys.',
+      title: t.gameInfo.features.openWorld.title,
+      description: t.gameInfo.features.openWorld.description,
     },
     {
       icon: <Users size={24} />,
-      title: 'Dual Protagonists',
-      description: 'Play as Jason Duval and Lucia Caminos, a romantic criminal duo inspired by Bonnie and Clyde.',
+      title: t.gameInfo.features.dualProtagonists.title,
+      description: t.gameInfo.features.dualProtagonists.description,
     },
     {
       icon: <Monitor size={24} />,
-      title: 'Next-Gen Only',
-      description: 'Built exclusively for PlayStation 5 and Xbox Series X|S, leveraging the full power of modern hardware.',
+      title: t.gameInfo.features.nextGen.title,
+      description: t.gameInfo.features.nextGen.description,
     },
     {
       icon: <Sparkles size={24} />,
-      title: 'RAGE Engine',
-      description: 'Powered by an enhanced version of the Rockstar Advanced Game Engine with stunning visuals and physics.',
+      title: t.gameInfo.features.rage.title,
+      description: t.gameInfo.features.rage.description,
     },
   ]
 
@@ -81,15 +83,15 @@ function GameInfo() {
         <div className="section-header">
           <div className="section-badge">
             <Info size={14} />
-            <span>ABOUT THE GAME</span>
+            <span>{t.gameInfo.badge}</span>
           </div>
-          <h2 className="section-title">WELCOME TO <span className="gradient-text">LEONIDA</span></h2>
+          <h2 className="section-title">{t.gameInfo.title} <span className="gradient-text">{t.gameInfo.titleHighlight}</span></h2>
         </div>
 
         {loading && (
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Loading game information...</p>
+            <p>{t.gameInfo.loading}</p>
           </div>
         )}
 
@@ -131,7 +133,7 @@ function GameInfo() {
                   rel="noopener noreferrer"
                   className="wiki-link"
                 >
-                  Read more on Wikipedia →
+                  {t.gameInfo.readMore}
                 </a>
               </div>
             </div>

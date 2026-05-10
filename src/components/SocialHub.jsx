@@ -24,6 +24,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import {
   REACTION_OPTIONS,
   RUMOR_VOTE_OPTIONS,
@@ -33,14 +34,8 @@ import {
 } from '../social/socialData'
 import './SocialHub.css'
 
-const TABS = [
-  { id: 'feed', label: 'Posts', icon: MessageSquare },
-  { id: 'rumors', label: 'Rumors', icon: Radio },
-  { id: 'sources', label: 'Sources', icon: Link },
-  { id: 'polls', label: 'Polls', icon: Vote },
-  { id: 'messages', label: 'Messages', icon: Mail },
-  { id: 'profile', label: 'Profile', icon: User },
-]
+const TAB_IDS = ['feed', 'rumors', 'sources', 'polls', 'messages', 'profile']
+const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote, messages: Mail, profile: User }
 
 const REACTION_ICONS = {
   useful: ThumbsUp,
@@ -48,10 +43,10 @@ const REACTION_ICONS = {
   doubtful: HelpCircle,
 }
 
-const SOURCE_STATUS = {
-  accepted: { label: 'Accepted', icon: CheckCircle2 },
-  review: { label: 'In review', icon: Clock },
-  rejected: { label: 'Rejected', icon: XCircle },
+const SOURCE_STATUS_ICONS = {
+  accepted: CheckCircle2,
+  review: Clock,
+  rejected: XCircle,
 }
 
 function formatDate(date) {
@@ -107,17 +102,19 @@ function Avatar({ user, size = 'md' }) {
 }
 
 function AuthPrompt({ onOpenAuth, compact = false }) {
+  const { t } = useTranslation()
   return (
     <div className={compact ? 'social-auth-prompt compact' : 'social-auth-prompt'}>
       <LogIn size={compact ? 16 : 20} />
-      <span>Sign in to use community features.</span>
-      <button type="button" onClick={onOpenAuth}>Sign in</button>
+      <span>{t.social.signInPrompt}</span>
+      <button type="button" onClick={onOpenAuth}>{t.social.signIn}</button>
     </div>
   )
 }
 
 function Sidebar({ onOpenAuth }) {
   const { currentProfile, isSignedIn, followTopic, state } = useSocial()
+  const { t } = useTranslation()
   const topicCounts = SOCIAL_TOPICS.map((topic) => ({
     topic,
     count: state.users.filter((user) => user.followedTopics.includes(topic)).length,
@@ -130,28 +127,28 @@ function Sidebar({ onOpenAuth }) {
           <div className="profile-summary-top">
             <Avatar user={currentProfile} size="lg" />
             <div>
-              <span className="profile-eyebrow">Signed in as</span>
+              <span className="profile-eyebrow">{t.social.signedInAs}</span>
               <h3>{currentProfile.username}</h3>
               <p>{currentProfile.reputation.name}</p>
             </div>
           </div>
 
-          <div className="reputation-meter" aria-label={`Level ${currentProfile.reputation.level}`}>
+          <div className="reputation-meter" aria-label={`${t.social.level} ${currentProfile.reputation.level}`}>
             <span style={{ width: `${Math.min(currentProfile.reputation.level * 25, 100)}%` }} />
           </div>
 
           <div className="profile-stats">
             <span>
               <strong>{currentProfile.submittedSources}</strong>
-              Sources
+              {t.social.sources}
             </span>
             <span>
               <strong>{currentProfile.acceptedSources}</strong>
-              Accepted
+              {t.social.accepted}
             </span>
             <span>
               <strong>{currentProfile.followedTopicsCount}</strong>
-              Topics
+              {t.social.topics}
             </span>
           </div>
         </div>
@@ -162,13 +159,13 @@ function Sidebar({ onOpenAuth }) {
               <Users size={24} />
             </div>
             <div>
-              <span className="profile-eyebrow">Guest mode</span>
-              <h3>Read-only access</h3>
-              <p>Posts, sources, and results stay visible.</p>
+              <span className="profile-eyebrow">{t.social.guestMode}</span>
+              <h3>{t.social.readOnly}</h3>
+              <p>{t.social.postsVisible}</p>
             </div>
           </div>
           <button className="sidebar-auth-button" type="button" onClick={onOpenAuth}>
-            Unlock social tools
+            {t.social.unlockSocial}
           </button>
         </div>
       )}
@@ -176,7 +173,7 @@ function Sidebar({ onOpenAuth }) {
       <div className="topics-panel">
         <div className="panel-heading">
           <Hash size={16} />
-          <h3>Tracked topics</h3>
+          <h3>{t.social.trackedTopics}</h3>
         </div>
 
         <div className="topic-list">
@@ -190,7 +187,7 @@ function Sidebar({ onOpenAuth }) {
                 onClick={() => (isSignedIn ? followTopic(topic) : onOpenAuth())}
               >
                 <span>{topic}</span>
-                <small>{following ? 'Following' : `${count} watching`}</small>
+                <small>{following ? t.social.following : `${count} ${t.social.watching}`}</small>
               </button>
             )
           })}
@@ -200,14 +197,11 @@ function Sidebar({ onOpenAuth }) {
       <div className="badges-panel">
         <div className="panel-heading">
           <Trophy size={16} />
-          <h3>Badges</h3>
+          <h3>{t.social.badges}</h3>
         </div>
         <div className="badge-list">
           {['Early Follower', 'Trailer Watcher', 'Source Hunter', 'Fact Checker', 'Vice City Local'].map((badge) => (
-            <span
-              key={badge}
-              className={currentProfile?.badges.includes(badge) ? 'badge earned' : 'badge'}
-            >
+            <span key={badge} className={currentProfile?.badges.includes(badge) ? 'badge earned' : 'badge'}>
               {badge}
             </span>
           ))}
@@ -219,6 +213,7 @@ function Sidebar({ onOpenAuth }) {
 
 function PostComposer({ onOpenAuth }) {
   const { createPost, isSignedIn } = useSocial()
+  const { t } = useTranslation()
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState(['Trailers'])
 
@@ -231,16 +226,9 @@ function PostComposer({ onOpenAuth }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    if (!isSignedIn) {
-      onOpenAuth()
-      return
-    }
-
+    if (!isSignedIn) { onOpenAuth(); return }
     const didCreate = await createPost({ body, tags: selectedTags })
-    if (didCreate) {
-      setBody('')
-      setSelectedTags(['Trailers'])
-    }
+    if (didCreate) { setBody(''); setSelectedTags(['Trailers']) }
   }
 
   return (
@@ -248,7 +236,7 @@ function PostComposer({ onOpenAuth }) {
       <textarea
         value={body}
         onChange={(event) => setBody(event.target.value)}
-        placeholder={isSignedIn ? 'Share a GTA VI find, theory, or update...' : 'Sign in to create community posts.'}
+        placeholder={isSignedIn ? t.social.postPlaceholder : t.social.postPlaceholderGuest}
         rows={4}
       />
       <div className="composer-bottom">
@@ -266,7 +254,7 @@ function PostComposer({ onOpenAuth }) {
         </div>
         <button className="compose-button" type="submit">
           <Plus size={16} />
-          Post
+          {t.social.post}
         </button>
       </div>
     </form>
@@ -439,6 +427,7 @@ function RumorsTab({ onOpenAuth }) {
 
 function SourceForm({ onOpenAuth }) {
   const { isSignedIn, submitSource } = useSocial()
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     url: '',
     claim: '',
@@ -508,7 +497,7 @@ function SourceForm({ onOpenAuth }) {
       </label>
       <button className="compose-button" type="submit">
         <ShieldCheck size={16} />
-        Submit source
+        {t.social.submitSource}
       </button>
     </form>
   )
@@ -516,6 +505,7 @@ function SourceForm({ onOpenAuth }) {
 
 function SourcesTab({ onOpenAuth }) {
   const { state, usersById } = useSocial()
+  const { t } = useTranslation()
 
   return (
     <div className="social-stack">
@@ -524,8 +514,8 @@ function SourcesTab({ onOpenAuth }) {
       <div className="source-list">
         {state.sources.map((source) => {
           const author = usersById[source.authorId] ?? userFallback(source.authorId)
-          const status = SOURCE_STATUS[source.status] ?? SOURCE_STATUS.review
-          const StatusIcon = status.icon
+          const StatusIcon = SOURCE_STATUS_ICONS[source.status] ?? SOURCE_STATUS_ICONS.review
+          const statusLabel = t.social.sourceStatus[source.status] ?? t.social.sourceStatus.review
 
           return (
             <article key={source.id} className="source-card">
@@ -533,7 +523,7 @@ function SourcesTab({ onOpenAuth }) {
                 <div>
                   <span className={`source-status ${source.status}`}>
                     <StatusIcon size={14} />
-                    {status.label}
+                    {statusLabel}
                   </span>
                   <h3>{source.claim}</h3>
                 </div>
@@ -625,6 +615,7 @@ function TrailerAnalysisTab({ onOpenAuth }) {
 
 function MessagesTab({ onOpenAuth }) {
   const { state, publicUsers, currentUser, isSignedIn, usersById, sendMessage } = useSocial()
+  const { t } = useTranslation()
   const recipients = publicUsers.filter((user) => user.id !== currentUser?.id)
   const [selectedUserId, setSelectedUserId] = useState(recipients[0]?.id ?? '')
   const [body, setBody] = useState('')
@@ -676,7 +667,7 @@ function MessagesTab({ onOpenAuth }) {
         </header>
 
         <div className="message-list">
-          {thread.length === 0 && <p className="empty-state">No messages in this thread yet.</p>}
+          {thread.length === 0 && <p className="empty-state">{t.social.noMessages}</p>}
           {thread.map((message) => {
             const mine = message.fromId === currentUser.id
             const author = usersById[message.fromId] ?? userFallback(message.fromId)
@@ -784,8 +775,18 @@ function SocialHub({ onOpenAuth }) {
   const [activeTab, setActiveTab] = useState('feed')
   const [showTrailerThreads, setShowTrailerThreads] = useState(false)
   const { backendError, isSignedIn } = useSocial()
+  const { t } = useTranslation()
 
-  const activeTitle = useMemo(() => TABS.find((tab) => tab.id === activeTab)?.label ?? 'Posts', [activeTab])
+  const TAB_LABELS = {
+    feed: t.social.tabs.posts,
+    rumors: t.social.tabs.rumors,
+    sources: t.social.tabs.sources,
+    polls: t.social.tabs.polls,
+    messages: t.social.tabs.messages,
+    profile: t.social.tabs.profile,
+  }
+  const TABS = TAB_IDS.map((id) => ({ id, label: TAB_LABELS[id], icon: TAB_ICONS[id] }))
+  const activeTitle = TAB_LABELS[activeTab] ?? t.social.tabs.posts
 
   return (
     <section id="social" className="section-padding social-hub">
@@ -793,14 +794,11 @@ function SocialHub({ onOpenAuth }) {
         <div className="section-header social-header">
           <div className="section-badge">
             <Bell size={14} />
-            <span>SOCIAL TRACKER</span>
+            <span>{t.social.badge}</span>
           </div>
           <h2 className="section-title">
-            FAN SIGNAL <span className="gradient-text">CENTER</span>
+            {t.social.title} <span className="gradient-text">{t.social.titleHighlight}</span>
           </h2>
-          <p>
-            Follow topics, compare rumors, share sources, and keep community discussion attached to the pages where it matters.
-          </p>
         </div>
 
         <div className="social-shell">
@@ -809,17 +807,9 @@ function SocialHub({ onOpenAuth }) {
           <div className="social-main">
             <div className="social-main-top">
               <div>
-                <span>{isSignedIn ? 'Interactive mode' : 'Guest mode'}</span>
+                <span>{isSignedIn ? t.social.signedInAs : t.social.guestMode}</span>
                 <h3>{activeTitle}</h3>
               </div>
-              <button
-                className={showTrailerThreads ? 'analysis-toggle active' : 'analysis-toggle'}
-                type="button"
-                onClick={() => setShowTrailerThreads((visible) => !visible)}
-              >
-                <FileText size={15} />
-                Trailer analysis
-              </button>
             </div>
 
             <div className="social-tabs" role="tablist" aria-label="Social sections">

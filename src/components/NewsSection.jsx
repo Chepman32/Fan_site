@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Newspaper, Loader, ArrowUpRight, Clock, UserRound } from 'lucide-react'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 
 const IGN_GAME_URL = 'https://www.ign.com/games/grand-theft-auto-vi'
@@ -264,7 +265,7 @@ async function fetchIgnArticles() {
   throw new Error('IGN news unavailable')
 }
 
-function formatTimeAgo(value) {
+function formatTimeAgo(value, t) {
   if (!value) return 'IGN'
 
   const timestamp = new Date(value).getTime()
@@ -272,25 +273,27 @@ function formatTimeAgo(value) {
 
   const seconds = Math.floor((Date.now() - timestamp) / 1000)
   const intervals = [
-    { label: 'year', seconds: 31536000 },
-    { label: 'month', seconds: 2592000 },
-    { label: 'week', seconds: 604800 },
-    { label: 'day', seconds: 86400 },
-    { label: 'hour', seconds: 3600 },
-    { label: 'minute', seconds: 60 },
+    { key: 'year', seconds: 31536000 },
+    { key: 'month', seconds: 2592000 },
+    { key: 'week', seconds: 604800 },
+    { key: 'day', seconds: 86400 },
+    { key: 'hour', seconds: 3600 },
+    { key: 'minute', seconds: 60 },
   ]
 
   for (const interval of intervals) {
     const count = Math.floor(seconds / interval.seconds)
     if (count >= 1) {
-      return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`
+      const label = t.news.timeAgo[interval.key]
+      return `${count} ${label}${count > 1 && !['zh','ru','pl','hi','ms','id'].includes('') ? 's' : ''} ago`
     }
   }
 
-  return 'Just now'
+  return t.news.justNow
 }
 
 function NewsSection() {
+  const { t } = useTranslation()
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
@@ -316,9 +319,7 @@ function NewsSection() {
 
     fetchIgnNews()
 
-    return () => {
-      canceled = true
-    }
+    return () => { canceled = true }
   }, [])
 
   return (
@@ -327,17 +328,17 @@ function NewsSection() {
         <div className="section-header">
           <div className="section-badge">
             <Newspaper size={14} />
-            <span>IGN COVERAGE</span>
+            <span>{t.news.badge}</span>
           </div>
           <h2 className="section-title">
-            LATEST <span className="gradient-text">UPDATES</span>
+            {t.news.title} <span className="gradient-text">{t.news.titleHighlight}</span>
           </h2>
         </div>
 
         {loading && (
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Loading latest news...</p>
+            <p>{t.news.loading}</p>
           </div>
         )}
 
@@ -357,7 +358,7 @@ function NewsSection() {
                     <span className="news-source">{article.source || 'IGN'}</span>
                     <span className="news-time">
                       <Clock size={12} />
-                      {formatTimeAgo(article.publishedAt)}
+                      {formatTimeAgo(article.publishedAt, t)}
                     </span>
                   </div>
 
@@ -383,10 +384,10 @@ function NewsSection() {
             {hasMoreArticles && (
               <div className="news-actions">
                 <span className="news-count">
-                  Showing {visibleArticles.length} of {articles.length}
+                  {t.news.showing} {visibleArticles.length} {t.news.of} {articles.length}
                 </span>
-                <button type="button" className="show-more-button" onClick={() => setShowAll((current) => !current)}>
-                  {showAll ? 'Show less' : 'Show more'}
+                <button type="button" className="show-more-button" onClick={() => setShowAll((c) => !c)}>
+                  {showAll ? t.news.showLess : t.news.showMore}
                 </button>
               </div>
             )}
