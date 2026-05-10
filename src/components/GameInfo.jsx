@@ -3,47 +3,61 @@ import { Info, Loader, AlertCircle, Monitor, Users, Globe, Sparkles } from 'luci
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './GameInfo.css'
 
+// Languages where the Wikipedia article exists under the standard title.
+// 'hi' is intentionally absent — falls back to English automatically.
+const WIKI_LANGS = { en: 'en', zh: 'zh', ru: 'ru', it: 'it', id: 'id', pl: 'pl', ms: 'ms' }
+const WIKI_TITLE = 'Grand_Theft_Auto_VI'
+
 function GameInfo() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [wikiData, setWikiData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    setLoading(true)
+    setError(null)
+    setWikiData(null)
+
+    const wikiLang = WIKI_LANGS[lang] ?? 'en'
+
     const fetchWikiData = async () => {
-      try {
-        // Fetch summary
-        const summaryRes = await fetch(
-          'https://en.wikipedia.org/api/rest_v1/page/summary/Grand_Theft_Auto_VI'
-        )
-        const summary = await summaryRes.json()
+      const langs = wikiLang !== 'en' ? [wikiLang, 'en'] : ['en']
 
-        // Fetch full extract
-        const extractRes = await fetch(
-          'https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext&titles=Grand_Theft_Auto_VI&format=json&origin=*'
-        )
-        const extractData = await extractRes.json()
-        const pages = extractData.query.pages
-        const page = Object.values(pages)[0]
-        const fullExtract = page.extract || summary.extract
+      for (const l of langs) {
+        try {
+          const summaryRes = await fetch(
+            `https://${l}.wikipedia.org/api/rest_v1/page/summary/${WIKI_TITLE}`
+          )
+          if (!summaryRes.ok) continue
+          const summary = await summaryRes.json()
+          if (summary.type !== 'standard') continue
 
-        setWikiData({
-          title: summary.title,
-          description: summary.description,
-          extract: fullExtract,
-          thumbnail: summary.thumbnail?.source,
-          wikiUrl: summary.content_urls?.desktop?.page,
-        })
-      } catch (err) {
-        setError('Failed to load game information')
-        console.error(err)
-      } finally {
-        setLoading(false)
+          const extractRes = await fetch(
+            `https://${l}.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext&titles=${WIKI_TITLE}&format=json&origin=*`
+          )
+          const extractData = await extractRes.json()
+          const page = Object.values(extractData.query.pages)[0]
+          const fullExtract = page.extract || summary.extract
+
+          setWikiData({
+            title: summary.title,
+            description: summary.description,
+            extract: fullExtract,
+            thumbnail: summary.thumbnail?.source,
+            wikiUrl: summary.content_urls?.desktop?.page,
+          })
+          return
+        } catch {
+          // try next language
+        }
       }
+      setError(t.gameInfo.error)
     }
 
-    fetchWikiData()
-  }, [])
+    fetchWikiData().finally(() => setLoading(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
 
   const features = [
     {
