@@ -8,18 +8,64 @@ import './GameInfo.css'
 const WIKI_LANGS = { en: 'en', zh: 'zh', ru: 'ru', it: 'it', id: 'id', pl: 'pl', ms: 'ms' }
 const WIKI_TITLE = 'Grand_Theft_Auto_VI'
 
+function normalizeWikiText(value = '') {
+  return String(value ?? '')
+    .replace(/\r\n?/g, '\n')
+    .replace(/\u00a0/g, ' ')
+    .replace(/(^|\n)(={2,}\s*[^=\n]+?\s*={2,})[ \t]*(?=\S)/g, '$1$2\n')
+}
+
+function cleanWikiText(value = '') {
+  return String(value ?? '').replace(/\s+/g, ' ').trim()
+}
+
+function formatExtract(text) {
+  if (!text) return []
+
+  const sections = []
+  let current = { title: null, lines: [] }
+
+  normalizeWikiText(text).split('\n').forEach((line) => {
+    const heading = line.match(/^={2,}\s*(.*?)\s*={2,}$/)
+
+    if (heading) {
+      if (current.title || current.lines.length) {
+        sections.push(current)
+      }
+      current = { title: cleanWikiText(heading[1]), lines: [] }
+      return
+    }
+
+    const cleaned = cleanWikiText(line)
+    if (cleaned) {
+      current.lines.push(cleaned)
+    }
+  })
+
+  if (current.title || current.lines.length) {
+    sections.push(current)
+  }
+
+  return sections
+    .map((section) => ({
+      title: section.title,
+      content: cleanWikiText(section.lines.join(' ')),
+    }))
+    .filter((section) => section.title || section.content)
+}
+
 function GameInfo() {
   const { t, lang } = useTranslation()
   const [wikiData, setWikiData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [wikiError, setWikiError] = useState(null)
+
+  const activeWikiData = wikiData?.requestLang === lang ? wikiData : null
+  const activeError = wikiError?.requestLang === lang ? wikiError.message : null
+  const loading = !activeWikiData && !activeError
 
   useEffect(() => {
-    setLoading(true)
-    setError(null)
-    setWikiData(null)
-
     const wikiLang = WIKI_LANGS[lang] ?? 'en'
+    let cancelled = false
 
     const fetchWikiData = async () => {
       const langs = wikiLang !== 'en' ? [wikiLang, 'en'] : ['en']
@@ -40,22 +86,30 @@ function GameInfo() {
           const page = Object.values(extractData.query.pages)[0]
           const fullExtract = page.extract || summary.extract
 
+          if (cancelled) return
           setWikiData({
+            requestLang: lang,
             title: summary.title,
             description: summary.description,
             extract: fullExtract,
             thumbnail: summary.thumbnail?.source,
             wikiUrl: summary.content_urls?.desktop?.page,
           })
+          setWikiError(null)
           return
         } catch {
           // try next language
         }
       }
-      setError(t.gameInfo.error)
+      if (!cancelled) {
+        setWikiError({ requestLang: lang, message: t.gameInfo.error })
+      }
     }
 
-    fetchWikiData().finally(() => setLoading(false))
+    fetchWikiData()
+    return () => {
+      cancelled = true
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 
@@ -82,14 +136,7 @@ function GameInfo() {
     },
   ]
 
-  const formatExtract = (text) => {
-    if (!text) return []
-    // Split by section headers (== Section ==)
-    const sections = text.split(/\n== /).map(s => s.replace(/ ==\n?/g, '').trim()).filter(Boolean)
-    return sections
-  }
-
-  const sections = wikiData ? formatExtract(wikiData.extract) : []
+  const sections = activeWikiData ? formatExtract(activeWikiData.extract) : []
 
   return (
     <section id="game-info" className="section-padding game-info">
@@ -109,40 +156,37 @@ function GameInfo() {
           </div>
         )}
 
-        {error && (
+        {activeError && (
           <div className="error-state">
             <AlertCircle size={24} />
-            <p>{error}</p>
+            <p>{activeError}</p>
           </div>
         )}
 
-        {!loading && !error && wikiData && (
+        {!loading && !activeError && activeWikiData && (
           <div className="game-info-content">
             <div className="info-main">
-              {wikiData.thumbnail && (
+              {activeWikiData.thumbnail && (
                 <div className="info-image">
-                  <img src={wikiData.thumbnail} alt="GTA VI Cover" />
+                  <img src={activeWikiData.thumbnail} alt="GTA VI Cover" />
                   <div className="image-glow"></div>
                 </div>
               )}
 
               <div className="info-text">
-                <p className="info-description">{wikiData.description}</p>
+                <p className="info-description">{activeWikiData.description}</p>
                 <div className="info-extract">
                   {sections.slice(0, 4).map((section, index) => {
-                    const lines = section.split('\n').filter(l => l.trim())
-                    const title = lines[0]
-                    const content = lines.slice(1).join(' ')
                     return (
                       <div key={index} className="extract-section">
-                        <h4>{title}</h4>
-                        <p>{content}</p>
+                        {section.title && <h4>{section.title}</h4>}
+                        {section.content && <p>{section.content}</p>}
                       </div>
                     )
                   })}
                 </div>
                 <a 
-                  href={wikiData.wikiUrl} 
+                  href={activeWikiData.wikiUrl} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="wiki-link"
