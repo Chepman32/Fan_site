@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Calendar, ChevronDown, Gamepad2, Globe, LogOut, MapPin, User } from 'lucide-react'
+import { Calendar, ChevronDown, Ellipsis, Gamepad2, Globe, LogOut, MapPin, User } from 'lucide-react'
 import Countdown from './Countdown'
 import favIcon from '../assets/fav.png'
 import { useTranslation } from '../i18n/useTranslation.jsx'
@@ -47,6 +47,16 @@ function Hero({ currentUser, onOpenAuth, onLogout }) {
         <div className="nav-links">
           <a href="#game-info">{t.nav.about}</a>
           <a href="#characters">{t.nav.characters}</a>
+          <div className="nav-more">
+            <button type="button" className="nav-more-toggle" aria-label="Show more guide links" aria-haspopup="true">
+              <Ellipsis size={20} />
+            </button>
+            <div className="nav-more-menu" role="menu">
+              <a href="#weapons" role="menuitem">{t.nav.weapons || 'Weapons'}</a>
+              <a href="#vehicles" role="menuitem">{t.nav.vehicles || 'Vehicles'}</a>
+              <a href="#social-media-guide" role="menuitem">{t.nav.socialMedia || 'Social Media'}</a>
+            </div>
+          </div>
           <a href="#media">{t.nav.media}</a>
           <a href="#leonida">{t.nav.leonida}</a>
           <a href="#news">{t.nav.news}</a>

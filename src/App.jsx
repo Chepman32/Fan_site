@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Hero from './components/Hero'
 import GameInfo from './components/GameInfo'
 import Characters from './components/Characters'
+import IgnGuideSections from './components/IgnGuide'
 import MediaGallery from './components/MediaGallery'
 import LeonidaLocations from './components/LeonidaLocations'
 import NewsSection from './components/NewsSection'
@@ -25,6 +26,7 @@ function AppContent() {
       />
       <GameInfo />
       <Characters />
+      <IgnGuideSections />
       <MediaGallery />
       <LeonidaLocations />
       <NewsSection />

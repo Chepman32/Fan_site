@@ -6,6 +6,9 @@ const en = {
   nav: {
     about: 'About',
     characters: 'Characters',
+    weapons: 'Weapons',
+    vehicles: 'Vehicles',
+    socialMedia: 'Social Media',
     media: 'Media',
     leonida: 'Leonida',
     news: 'News',
