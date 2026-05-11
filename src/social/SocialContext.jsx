@@ -41,9 +41,9 @@ function docData(snapshot) {
   return {
     id: snapshot.id,
     ...data,
-    createdAt: data.createdAt ? dateValue(data.createdAt) : undefined,
-    joinedAt: data.joinedAt ? dateValue(data.joinedAt) : undefined,
-    updatedAt: data.updatedAt ? dateValue(data.updatedAt) : undefined,
+    createdAt: dateValue(data.createdAt),
+    joinedAt: dateValue(data.joinedAt),
+    updatedAt: dateValue(data.updatedAt),
   }
 }
 
