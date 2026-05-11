@@ -96,7 +96,7 @@ service cloud.firestore {
       allow update: if signedIn()
         && changedOnly(['reactions'])
         && validReactionMap();
-      allow delete: if isAdmin();
+      allow delete: if signedIn() && resource.data.authorId == request.auth.uid;
     }
 
     match /rumors/{rumorId} {

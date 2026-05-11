@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Bell,
   Bookmark,
@@ -12,11 +12,14 @@ import {
   LogIn,
   Mail,
   MessageSquare,
+  MoreVertical,
   Plus,
   Radio,
   Send,
+  Share2,
   ShieldCheck,
   ThumbsUp,
+  Trash2,
   Trophy,
   Users,
   Vote,
@@ -260,8 +263,72 @@ function PostComposer({ onOpenAuth }) {
   )
 }
 
+function PostMenu({ postId, onDelete }) {
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    const handleClick = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [open])
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/community`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Community Post', url })
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(url)
+      }
+    } catch {
+      // share cancelled or failed
+    }
+    setOpen(false)
+  }
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to remove this post?')) {
+      await onDelete(postId)
+    }
+    setOpen(false)
+  }
+
+  return (
+    <div ref={menuRef} className="post-menu">
+      <button
+        className="post-menu-button"
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Post options"
+      >
+        <MoreVertical size={17} />
+      </button>
+      {open && (
+        <div className="post-menu-dropdown" role="menu">
+          <button type="button" role="menuitem" onClick={handleShare}>
+            <Share2 size={14} />
+            Share
+          </button>
+          <button type="button" role="menuitem" onClick={handleDelete}>
+            <Trash2 size={14} />
+            Remove
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function FeedTab({ onOpenAuth }) {
-  const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark } = useSocial()
+  const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark, deletePost } = useSocial()
 
   return (
     <div className="social-stack">
@@ -287,18 +354,23 @@ function FeedTab({ onOpenAuth }) {
                   <span>{formatRelative(post.createdAt)}</span>
                 </div>
               </div>
-              {canBookmark && (
-                <button
-                  className={bookmarked ? 'post-bookmark-button active' : 'post-bookmark-button'}
-                  type="button"
-                  onClick={() => (isSignedIn ? toggleBookmark(post.id) : onOpenAuth())}
-                  aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                  aria-pressed={Boolean(bookmarked)}
-                  title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                >
-                  {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
-                </button>
-              )}
+              <div className="post-header-actions">
+                {canBookmark && (
+                  <button
+                    className={bookmarked ? 'post-bookmark-button active' : 'post-bookmark-button'}
+                    type="button"
+                    onClick={() => (isSignedIn ? toggleBookmark(post.id) : onOpenAuth())}
+                    aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                    aria-pressed={Boolean(bookmarked)}
+                    title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                  >
+                    {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
+                  </button>
+                )}
+                {post.authorId === currentUser?.id && (
+                  <PostMenu postId={post.id} onDelete={deletePost} />
+                )}
+              </div>
             </header>
 
             <p className="post-body">{post.body}</p>

@@ -567,6 +567,18 @@ export function SocialProvider({ children }) {
     }
   }
 
+  const deletePost = async (postId) => {
+    if (!requireUser()) return false
+
+    try {
+      await services.deleteDoc(services.doc(services.db, 'posts', postId))
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
   const reactToPost = async (postId, reactionId) => {
     if (!requireUser()) return false
 
@@ -779,6 +791,7 @@ export function SocialProvider({ children }) {
     login,
     logout,
     createPost,
+    deletePost,
     reactToPost,
     voteRumor,
     followTopic,
