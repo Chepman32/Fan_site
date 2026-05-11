@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ExternalLink, Image as ImageIcon, Loader, UserRound, Users } from 'lucide-react'
+import { Image as ImageIcon, Loader, UserRound, Users } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import ImageZoomModal from './ImageZoomModal'
 import './Characters.css'
 
 const IGN_ORIGIN = 'https://www.ign.com'
@@ -264,15 +265,14 @@ function formatUpdatedAt(value) {
   }).format(timestamp)
 }
 
-function CharacterCard({ character, featured = false, index = 0 }) {
+function CharacterCard({ character, featured = false, index = 0, onZoom }) {
   const { t } = useTranslation()
   return (
-    <a
+    <button
+      type="button"
       className={featured ? 'ign-character-card featured-character' : 'ign-character-card'}
-      href={character.url || CHARACTERS_URL}
-      target="_blank"
-      rel="noopener noreferrer"
       style={{ animationDelay: `${index * 0.08}s` }}
+      onClick={() => onZoom(character)}
     >
       <div className="ign-character-image">
         {character.imageUrl ? (
@@ -290,12 +290,8 @@ function CharacterCard({ character, featured = false, index = 0 }) {
         </span>
         <h3>{character.name}</h3>
         <p>{character.bio}</p>
-        <span className="character-link">
-          {t.characters.ignGuide}
-          <ExternalLink size={13} />
-        </span>
       </div>
-    </a>
+    </button>
   )
 }
 
@@ -304,6 +300,7 @@ function Characters() {
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
     let canceled = false
@@ -392,18 +389,26 @@ function Characters() {
 
             <div className="featured-characters-grid">
               {featuredCharacters.map((character, index) => (
-                <CharacterCard key={character.id} character={character} featured index={index} />
+                <CharacterCard key={character.id} character={character} featured index={index} onZoom={setZoomed} />
               ))}
             </div>
 
             <div className="characters-grid">
               {supportingCharacters.map((character, index) => (
-                <CharacterCard key={character.id} character={character} index={index + featuredCharacters.length} />
+                <CharacterCard key={character.id} character={character} index={index + featuredCharacters.length} onZoom={setZoomed} />
               ))}
             </div>
           </div>
         )}
       </div>
+      {zoomed && (
+        <ImageZoomModal
+          src={zoomed.imageUrl}
+          alt={zoomed.imageTitle || zoomed.name}
+          ignUrl={zoomed.url}
+          onClose={() => setZoomed(null)}
+        />
+      )}
     </section>
   )
 }

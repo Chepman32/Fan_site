@@ -12,6 +12,7 @@ import {
   Tag,
 } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import ImageZoomModal from './ImageZoomModal'
 import './IgnGuide.css'
 
 const IGN_ORIGIN = 'https://www.ign.com'
@@ -917,14 +918,13 @@ function GuideImage({ image }) {
   )
 }
 
-function GuideCard({ item, sourceLabel, sourceUrl, index = 0 }) {
+function GuideCard({ item, sourceLabel, index = 0, onZoom }) {
   return (
-    <a
+    <button
+      type="button"
       className="ign-guide-card"
-      href={item.url || sourceUrl}
-      target="_blank"
-      rel="noopener noreferrer"
       style={{ animationDelay: `${index * 0.05}s` }}
+      onClick={() => onZoom(item)}
     >
       <div className="ign-guide-card-image">
         {item.imageUrl ? (
@@ -942,12 +942,8 @@ function GuideCard({ item, sourceLabel, sourceUrl, index = 0 }) {
         </span>
         <h3>{item.name}</h3>
         <p>{item.description}</p>
-        <span className="ign-guide-link">
-          IGN guide
-          <ExternalLink size={13} />
-        </span>
       </div>
-    </a>
+    </button>
   )
 }
 
@@ -993,6 +989,7 @@ function SimpleGuideSection({ config }) {
   const [data, setData] = useState(config.fallback)
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
     let canceled = false
@@ -1070,8 +1067,8 @@ function SimpleGuideSection({ config }) {
                       key={item.id}
                       item={item}
                       sourceLabel={copy.sourceLabel}
-                      sourceUrl={config.url}
                       index={index}
+                      onZoom={setZoomed}
                     />
                   ))}
                 </div>
@@ -1080,6 +1077,14 @@ function SimpleGuideSection({ config }) {
           </div>
         )}
       </div>
+      {zoomed && (
+        <ImageZoomModal
+          src={zoomed.imageUrl}
+          alt={zoomed.imageTitle || zoomed.name}
+          ignUrl={zoomed.url}
+          onClose={() => setZoomed(null)}
+        />
+      )}
     </section>
   )
 }
@@ -1091,6 +1096,7 @@ function VehiclesGuide() {
   const [activeCategoryId, setActiveCategoryId] = useState('cars')
   const [loading, setLoading] = useState(true)
   const [usingFallback, setUsingFallback] = useState(false)
+  const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
     let canceled = false
@@ -1257,8 +1263,8 @@ function VehiclesGuide() {
                         key={item.id}
                         item={item}
                         sourceLabel={copy.sourceLabel}
-                        sourceUrl={activeConfig.url}
                         index={index}
+                        onZoom={setZoomed}
                       />
                     ))}
                   </div>
@@ -1268,6 +1274,14 @@ function VehiclesGuide() {
           </div>
         )}
       </div>
+      {zoomed && (
+        <ImageZoomModal
+          src={zoomed.imageUrl}
+          alt={zoomed.imageTitle || zoomed.name}
+          ignUrl={zoomed.url}
+          onClose={() => setZoomed(null)}
+        />
+      )}
     </section>
   )
 }
