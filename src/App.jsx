@@ -9,6 +9,7 @@ import NewsSection from './components/NewsSection'
 import SocialHub from './components/SocialHub'
 import Header from './components/Header'
 import ProfilePage from './components/ProfilePage'
+import UserProfilePage from './components/UserProfilePage'
 import AuthModal from './components/AuthModal'
 import Footer from './components/Footer'
 import { SocialProvider, useSocial } from './social/SocialContext'
@@ -18,7 +19,10 @@ import './App.css'
 const APP_ROUTES = new Set(['/community', '/profile'])
 
 function currentRoute() {
-  return APP_ROUTES.has(window.location.pathname) ? window.location.pathname : '/'
+  const { pathname } = window.location
+  if (APP_ROUTES.has(pathname)) return pathname
+  if (pathname.startsWith('/profile/')) return pathname
+  return '/'
 }
 
 function AppContent() {
@@ -45,7 +49,8 @@ function AppContent() {
 
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
-    const nextRoute = APP_ROUTES.has(nextUrl.pathname) ? nextUrl.pathname : '/'
+    const isKnown = APP_ROUTES.has(nextUrl.pathname) || nextUrl.pathname.startsWith('/profile/')
+    const nextRoute = isKnown ? nextUrl.pathname : '/'
 
     window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.hash}`)
     setRoute(nextRoute)
@@ -64,7 +69,21 @@ function AppContent() {
       <div className="app">
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <SocialHub onOpenAuth={() => setAuthOpen(true)} />
+          <SocialHub onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+        </main>
+        <Footer />
+        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      </div>
+    )
+  }
+
+  if (route.startsWith('/profile/')) {
+    const userId = route.slice('/profile/'.length)
+    return (
+      <div className="app">
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <UserProfilePage userId={userId} onNavigate={navigateTo} />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}

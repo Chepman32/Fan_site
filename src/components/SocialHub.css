@@ -137,31 +137,6 @@
   transform: scale(1.08);
 }
 
-.user-profile-modal {
-  width: min(360px, 100%);
-}
-
-.user-profile-modal .badges-panel {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 0;
-  background: none;
-  border: none;
-}
-
-.badge-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  font-size: 0.75em;
-  opacity: 0.85;
-}
-
 .guest-mark {
   display: inline-flex;
   align-items: center;

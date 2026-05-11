@@ -25,9 +25,8 @@ import {
   Users,
   Vote,
   XCircle,
-  X,
 } from 'lucide-react'
-import { getUserProfile, useSocial } from '../social/SocialContext'
+import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import {
   REACTION_OPTIONS,
@@ -327,47 +326,6 @@ function PostMenu({ postId, onDelete }) {
           </button>
         </div>
       )}
-    </div>
-  )
-}
-
-function UserProfileModal({ user, onClose }) {
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose()
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  return (
-    <div className="auth-backdrop" onClick={onClose}>
-      <div className="auth-modal user-profile-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="auth-close" type="button" onClick={onClose} aria-label="Close">
-          <X size={18} />
-        </button>
-        <div className="profile-summary-top" style={{ marginBottom: 12 }}>
-          <Avatar user={user} size="lg" />
-          <div>
-            <h3 style={{ margin: 0 }}>{user.username}</h3>
-            <p style={{ margin: '2px 0 0', opacity: 0.6, fontSize: '0.85em' }}>{user.reputation.name}</p>
-          </div>
-        </div>
-        <div className="reputation-meter" aria-label={`Level ${user.reputation.level}`}>
-          <span style={{ width: `${Math.min(user.reputation.level * 25, 100)}%` }} />
-        </div>
-        <div className="profile-stats" style={{ marginTop: 12 }}>
-          <span><strong>{user.submittedSources}</strong> sources</span>
-          <span><strong>{user.acceptedSources}</strong> accepted</span>
-          <span><strong>{user.followedTopicsCount}</strong> topics</span>
-        </div>
-        {user.badges.length > 0 && (
-          <div className="badges-panel" style={{ marginTop: 12 }}>
-            {user.badges.map((badge) => (
-              <span key={badge} className="badge-chip"><Trophy size={11} /> {badge}</span>
-            ))}
-          </div>
-        )}
-        {user.bio && <p style={{ marginTop: 12, opacity: 0.7, fontSize: '0.9em' }}>{user.bio}</p>}
-      </div>
     </div>
   )
 }
@@ -818,17 +776,12 @@ function MessagesTab({ onOpenAuth }) {
   )
 }
 
-function SocialHub({ onOpenAuth }) {
+function SocialHub({ onOpenAuth, onNavigate }) {
   const [activeTab, setActiveTab] = useState('feed')
-  const [viewingUserId, setViewingUserId] = useState(null)
-  const { backendError, isSignedIn, state } = useSocial()
+  const { backendError, isSignedIn } = useSocial()
   const { t } = useTranslation()
 
-  const viewingUser = viewingUserId
-    ? getUserProfile(state.users.find((u) => u.id === viewingUserId), state)
-    : null
-
-  const onViewUser = (userId) => setViewingUserId(userId)
+  const onViewUser = (userId) => onNavigate(`/profile/${userId}`)
 
   const TAB_LABELS = {
     feed: t.social.tabs.posts,
@@ -896,7 +849,6 @@ function SocialHub({ onOpenAuth }) {
           </div>
         </div>
       </div>
-      {viewingUser && <UserProfileModal user={viewingUser} onClose={() => setViewingUserId(null)} />}
     </section>
   )
 }
