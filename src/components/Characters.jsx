@@ -405,7 +405,6 @@ function Characters() {
         <ImageZoomModal
           src={zoomed.imageUrl}
           alt={zoomed.imageTitle || zoomed.name}
-          ignUrl={zoomed.url}
           onClose={() => setZoomed(null)}
         />
       )}
