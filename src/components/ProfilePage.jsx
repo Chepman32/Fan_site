@@ -10,25 +10,26 @@ import {
   User,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './ProfilePage.css'
 
-function formatDate(date) {
-  return new Intl.DateTimeFormat('en', {
+function formatDate(date, lang = 'en') {
+  return new Intl.DateTimeFormat(lang, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(date))
 }
 
-function formatRelative(date) {
+function formatRelative(date, s) {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
-  if (minutes < 1) return 'now'
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 1) return s.relativeNow
+  if (minutes < 60) return `${minutes}${s.relativeMin}`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return `${hours}${s.relativeHour}`
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
+  if (days < 7) return `${days}${s.relativeDay}`
   return formatDate(date)
 }
 
@@ -64,18 +65,18 @@ function ProfileAvatar({ user, size = 'md' }) {
   )
 }
 
-function resizePhoto(file) {
+function resizePhoto(file, errors) {
   return new Promise((resolve, reject) => {
     if (!file.type.startsWith('image/')) {
-      reject(new Error('Choose an image file.'))
+      reject(new Error(errors.chooseImageError))
       return
     }
 
     const reader = new FileReader()
-    reader.onerror = () => reject(new Error('Could not read this image.'))
+    reader.onerror = () => reject(new Error(errors.readImageError))
     reader.onload = () => {
       const image = new Image()
-      image.onerror = () => reject(new Error('Could not prepare this image.'))
+      image.onerror = () => reject(new Error(errors.prepareImageError))
       image.onload = () => {
         const maxSize = 512
         const scale = Math.min(1, maxSize / Math.max(image.width, image.height))
@@ -105,6 +106,8 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
     updateUserProfile,
     usersById,
   } = useSocial()
+  const { t, lang } = useTranslation()
+  const s = t.social
   const [formDraft, setFormDraft] = useState(null)
   const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -142,7 +145,11 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
 
     try {
       setFormError('')
-      const photoDataUrl = await resizePhoto(file)
+      const photoDataUrl = await resizePhoto(file, {
+        chooseImageError: s.chooseImageError,
+        readImageError: s.readImageError,
+        prepareImageError: s.prepareImageError,
+      })
       updateField('photoDataUrl', photoDataUrl)
     } catch (error) {
       setFormError(error.message)
@@ -177,13 +184,13 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
       <section className="profile-page section-padding">
         <div className="container">
           <div className="profile-page-heading">
-            <span>Profile</span>
-            <h1>Sign in to edit your profile</h1>
-            <p>Your profile, uploaded photo, and saved community posts are available after sign in.</p>
+            <span>{t.social.tabs.profile}</span>
+            <h1>{s.signInToEdit}</h1>
+            <p>{s.signInToEditDesc}</p>
           </div>
           <button className="profile-primary-action" type="button" onClick={onOpenAuth}>
             <User size={17} />
-            Sign in
+            {t.social.signIn}
           </button>
         </div>
       </section>
@@ -194,9 +201,9 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
     <section className="profile-page section-padding">
       <div className="container profile-page-layout">
         <div className="profile-page-heading">
-          <span>Profile</span>
+          <span>{t.social.tabs.profile}</span>
           <h1>{currentProfile.username}</h1>
-          <p>Joined {formatDate(currentProfile.joinedAt)} · Level {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
+          <p>{s.joinedOn} {formatDate(currentProfile.joinedAt, lang)} · {s.level} {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
         </div>
 
         <div className="profile-page-grid">
@@ -204,10 +211,10 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
             <div className="profile-photo-panel">
               <ProfileAvatar user={{ ...currentProfile, photoDataUrl: form.photoDataUrl, username: form.username }} size="xl" />
               <div>
-                <span>Profile photo</span>
+                <span>{s.profilePhoto}</span>
                 <label className="profile-upload-button">
                   <Upload size={16} />
-                  Upload new
+                  {s.uploadNew}
                   <input type="file" accept="image/*" onChange={handlePhotoChange} />
                 </label>
                 {form.photoDataUrl && (
@@ -216,14 +223,14 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
                     type="button"
                     onClick={() => updateField('photoDataUrl', '')}
                   >
-                    Remove photo
+                    {s.removePhoto}
                   </button>
                 )}
               </div>
             </div>
 
             <label>
-              <span>Name</span>
+              <span>{s.nameLabel}</span>
               <input
                 value={form.username}
                 onChange={(event) => updateField('username', event.target.value)}
@@ -232,11 +239,11 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
             </label>
 
             <label>
-              <span>Bio</span>
+              <span>{s.bioLabel}</span>
               <textarea
                 value={form.bio}
                 onChange={(event) => updateField('bio', event.target.value)}
-                placeholder="Tell the community what you track: trailers, map clues, source checks..."
+                placeholder={s.bioPlaceholder}
                 rows={5}
                 maxLength={220}
               />
@@ -246,28 +253,28 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
               <small>{form.bio.length}/220</small>
               <button className="profile-primary-action" type="submit" disabled={saving}>
                 <Save size={16} />
-                {saving ? 'Saving...' : 'Save profile'}
+                {saving ? s.saving : s.saveProfile}
               </button>
             </div>
 
             {(formError || backendError || saved) && (
               <p className={saved ? 'profile-form-note success' : 'profile-form-note'}>
-                {saved ? 'Profile updated.' : formError || backendError}
+                {saved ? s.profileUpdated : formError || backendError}
               </p>
             )}
           </form>
 
           <aside className="profile-status-panel">
             <div className="profile-metrics-card">
-              <span><strong>{currentProfile.submittedSources}</strong>Sources</span>
-              <span><strong>{currentProfile.acceptedSources}</strong>Accepted</span>
-              <span><strong>{bookmarkedPosts.length}</strong>Bookmarks</span>
+              <span><strong>{currentProfile.submittedSources}</strong>{s.sources}</span>
+              <span><strong>{currentProfile.acceptedSources}</strong>{s.accepted}</span>
+              <span><strong>{bookmarkedPosts.length}</strong>{s.bookmarks}</span>
             </div>
 
             <div className="profile-badges-card">
               <div className="profile-panel-heading">
                 <BadgeCheck size={16} />
-                <h2>Badges</h2>
+                <h2>{s.badges}</h2>
               </div>
               <div className="profile-badge-list">
                 {currentProfile.badges.map((badge) => (
@@ -282,14 +289,14 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
           <section className="profile-bookmarks-panel">
             <div className="profile-panel-heading">
               <Bookmark size={16} />
-              <h2>Bookmarks</h2>
-              <button type="button" onClick={goToCommunity}>Browse posts</button>
+              <h2>{s.bookmarks}</h2>
+              <button type="button" onClick={goToCommunity}>{s.browsePosts}</button>
             </div>
 
             {bookmarkedPosts.length === 0 ? (
               <div className="profile-empty-state">
                 <Camera size={20} />
-                <p>No bookmarked posts yet.</p>
+                <p>{s.noBookmarks}</p>
               </div>
             ) : (
               <div className="profile-bookmark-list">
@@ -301,12 +308,12 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
                         <ProfileAvatar user={author} size="sm" />
                         <div>
                           <strong>{author.username}</strong>
-                          <span>{formatRelative(post.createdAt)}</span>
+                          <span>{formatRelative(post.createdAt, s)}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => toggleBookmark(post.id)}
-                          aria-label="Remove bookmark"
+                          aria-label={s.removeBookmark}
                         >
                           <Trash2 size={16} />
                         </button>
@@ -328,15 +335,15 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
             <section className="profile-source-log">
               <div className="profile-panel-heading">
                 <FileText size={16} />
-                <h2>Your source log</h2>
+                <h2>{s.yourSourceLog}</h2>
               </div>
               {mySources.length === 0 ? (
-                <p className="profile-muted">No source submissions yet.</p>
+                <p className="profile-muted">{s.noSources}</p>
               ) : (
                 mySources.map((source) => (
                   <div key={source.id} className="profile-mini-source">
                     <strong>{source.category}</strong>
-                    <span>{source.status} · {formatRelative(source.createdAt)}</span>
+                    <span>{source.status} · {formatRelative(source.createdAt, s)}</span>
                     <p>{source.claim}</p>
                   </div>
                 ))
@@ -346,14 +353,14 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
             <section className="profile-leaderboard">
               <div className="profile-panel-heading">
                 <BadgeCheck size={16} />
-                <h2>Spotter board</h2>
+                <h2>{s.spotterBoard}</h2>
               </div>
               {leaderboard.map((user, index) => (
                 <div key={user.id} className="profile-leader-row">
                   <span>{index + 1}</span>
                   <ProfileAvatar user={user} size="sm" />
                   <strong>{user.username}</strong>
-                  <em>Lvl {user.reputation.level}</em>
+                  <em>{s.lvl} {user.reputation.level}</em>
                 </div>
               ))}
             </section>
