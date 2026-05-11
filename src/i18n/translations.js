@@ -41,7 +41,6 @@ const en = {
     titleHighlight: 'LEONIDA',
     loading: 'Loading game information...',
     error: 'Failed to load game information',
-    readMore: 'Read more on Wikipedia →',
     features: {
       openWorld: { title: 'Open World', description: 'Explore the fictional state of Leonida, featuring Vice City, the Everglades-inspired Grassrivers, and the Leonida Keys.' },
       dualProtagonists: { title: 'Dual Protagonists', description: 'Play as Jason Duval and Lucia Caminos, a romantic criminal duo inspired by Bonnie and Clyde.' },
@@ -238,6 +237,9 @@ const zh = {
   nav: {
     about: '关于',
     characters: '角色',
+    weapons: '武器',
+    vehicles: '载具',
+    socialMedia: '社交媒体',
     media: '媒体',
     leonida: '莱昂尼达',
     news: '新闻',
@@ -267,7 +269,6 @@ const zh = {
     titleHighlight: '莱昂尼达',
     loading: '正在加载游戏信息……',
     error: '游戏信息加载失败',
-    readMore: '在维基百科上阅读更多 →',
     features: {
       openWorld: { title: '开放世界', description: '探索虚构的莱昂尼达州，包括罪恶都市、以大沼泽为灵感的草河地带以及莱昂尼达群岛。' },
       dualProtagonists: { title: '双主角', description: '扮演杰森·杜瓦尔和露西娅·卡米诺斯，一对以邦妮与克莱德为原型的浪漫犯罪搭档。' },
@@ -418,6 +419,7 @@ const zh = {
     media: '媒体',
     madeByFans: '由',
     byFans: '粉丝制作',
+    copyrightName: 'Anton Chepur',
     disclaimer: '本项目为粉丝自制，与 Rockstar Games 或 Take-Two Interactive 无关。',
   },
 }
@@ -426,6 +428,9 @@ const ru = {
   nav: {
     about: 'О игре',
     characters: 'Персонажи',
+    weapons: 'Оружие',
+    vehicles: 'Транспорт',
+    socialMedia: 'Соцсети',
     media: 'Медиа',
     leonida: 'Леонида',
     news: 'Новости',
@@ -455,7 +460,6 @@ const ru = {
     titleHighlight: 'ЛЕОНИДУ',
     loading: 'Загрузка информации об игре…',
     error: 'Не удалось загрузить информацию об игре',
-    readMore: 'Читать далее на Википедии →',
     features: {
       openWorld: { title: 'Открытый мир', description: 'Исследуйте вымышленный штат Леонида: Вайс-Сити, болота Грассриверс и острова Леонида-Кис.' },
       dualProtagonists: { title: 'Два протагониста', description: 'Играйте за Джейсона Дюваля и Люсию Каминос — криминальный дуэт, вдохновлённый Бонни и Клайдом.' },
@@ -615,6 +619,9 @@ const it = {
   nav: {
     about: 'Info',
     characters: 'Personaggi',
+    weapons: 'Armi',
+    vehicles: 'Veicoli',
+    socialMedia: 'Social Media',
     media: 'Media',
     leonida: 'Leonida',
     news: 'Notizie',
@@ -644,7 +651,6 @@ const it = {
     titleHighlight: 'LEONIDA',
     loading: 'Caricamento informazioni sul gioco…',
     error: 'Impossibile caricare le informazioni sul gioco',
-    readMore: 'Leggi di più su Wikipedia →',
     features: {
       openWorld: { title: 'Mondo aperto', description: 'Esplora lo stato immaginario di Leonida: Vice City, le Grassrivers ispirate alle Everglades e le Leonida Keys.' },
       dualProtagonists: { title: 'Due protagonisti', description: 'Gioca nei panni di Jason Duval e Lucia Caminos, una coppia criminale romantica ispirata a Bonnie e Clyde.' },
@@ -803,6 +809,9 @@ const id = {
   nav: {
     about: 'Tentang',
     characters: 'Karakter',
+    weapons: 'Senjata',
+    vehicles: 'Kendaraan',
+    socialMedia: 'Media Sosial',
     media: 'Media',
     leonida: 'Leonida',
     news: 'Berita',
@@ -832,7 +841,6 @@ const id = {
     titleHighlight: 'LEONIDA',
     loading: 'Memuat informasi game…',
     error: 'Gagal memuat informasi game',
-    readMore: 'Baca selengkapnya di Wikipedia →',
     features: {
       openWorld: { title: 'Dunia Terbuka', description: 'Jelajahi negara bagian fiktif Leonida, termasuk Vice City, Grassrivers yang terinspirasi Everglades, dan Leonida Keys.' },
       dualProtagonists: { title: 'Dua Protagonis', description: 'Mainkan sebagai Jason Duval dan Lucia Caminos, duo kriminal romantis yang terinspirasi dari Bonnie dan Clyde.' },
@@ -991,6 +999,9 @@ const pl = {
   nav: {
     about: 'O grze',
     characters: 'Postacie',
+    weapons: 'Broń',
+    vehicles: 'Pojazdy',
+    socialMedia: 'Social Media',
     media: 'Media',
     leonida: 'Leonida',
     news: 'Aktualności',
@@ -1020,7 +1031,6 @@ const pl = {
     titleHighlight: 'LEONIDZIE',
     loading: 'Ładowanie informacji o grze…',
     error: 'Nie udało się załadować informacji o grze',
-    readMore: 'Czytaj więcej na Wikipedii →',
     features: {
       openWorld: { title: 'Otwarty świat', description: 'Eksploruj fikcyjny stan Leonida z Vice City, bagnami Grassrivers i archipelagiem Leonida Keys.' },
       dualProtagonists: { title: 'Dwoje protagonistów', description: 'Graj jako Jason Duval i Lucia Caminos — romantyczny duet przestępczy inspirowany Bonnie i Clydem.' },
@@ -1179,6 +1189,9 @@ const hi = {
   nav: {
     about: 'परिचय',
     characters: 'किरदार',
+    weapons: 'हथियार',
+    vehicles: 'वाहन',
+    socialMedia: 'सोशल मीडिया',
     media: 'मीडिया',
     leonida: 'लियोनिडा',
     news: 'खबरें',
@@ -1208,7 +1221,6 @@ const hi = {
     titleHighlight: 'लियोनिडा में',
     loading: 'गेम की जानकारी लोड हो रही है…',
     error: 'गेम की जानकारी लोड नहीं हो सकी',
-    readMore: 'विकिपीडिया पर और पढ़ें →',
     features: {
       openWorld: { title: 'ओपन वर्ल्ड', description: 'काल्पनिक राज्य लियोनिडा को एक्सप्लोर करें — वाइस सिटी, एवरग्लेड्स से प्रेरित ग्रासरिवर्स और लियोनिडा कीज़।' },
       dualProtagonists: { title: 'दो नायक', description: 'जेसन डुवाल और लूसिया कैमिनोस के रूप में खेलें — बॉनी और क्लाइड से प्रेरित एक रोमांटिक क्रिमिनल जोड़ी।' },
@@ -1327,6 +1339,10 @@ const hi = {
     chooseImageError: 'कोई इमेज फाइल चुनें।',
     readImageError: 'यह इमेज नहीं पढ़ी जा सकी।',
     prepareImageError: 'यह इमेज तैयार नहीं हो सकी।',
+    relativeNow: 'अभी-अभी',
+    relativeMin: 'मि. पहले',
+    relativeHour: 'घं. पहले',
+    relativeDay: 'दिन पहले',
   },
   auth: {
     communityAccess: 'कम्युनिटी एक्सेस',
@@ -1363,6 +1379,9 @@ const ms = {
   nav: {
     about: 'Tentang',
     characters: 'Watak',
+    weapons: 'Senjata',
+    vehicles: 'Kenderaan',
+    socialMedia: 'Media Sosial',
     media: 'Media',
     leonida: 'Leonida',
     news: 'Berita',
@@ -1392,7 +1411,6 @@ const ms = {
     titleHighlight: 'LEONIDA',
     loading: 'Memuatkan maklumat permainan…',
     error: 'Gagal memuatkan maklumat permainan',
-    readMore: 'Baca lanjut di Wikipedia →',
     features: {
       openWorld: { title: 'Dunia Terbuka', description: 'Terokai negeri rekaan Leonida — Vice City, Grassrivers yang terinspirasi Everglades, dan Leonida Keys.' },
       dualProtagonists: { title: 'Dua Protagonis', description: 'Main sebagai Jason Duval dan Lucia Caminos, duet jenayah romantik yang terinspirasi Bonnie dan Clyde.' },
@@ -1511,6 +1529,10 @@ const ms = {
     chooseImageError: 'Pilih fail imej.',
     readImageError: 'Tidak dapat membaca imej ini.',
     prepareImageError: 'Tidak dapat menyediakan imej ini.',
+    relativeNow: 'baru sahaja',
+    relativeMin: 'min lalu',
+    relativeHour: 'j lalu',
+    relativeDay: 'h lalu',
   },
   auth: {
     communityAccess: 'Akses komuniti',

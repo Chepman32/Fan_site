@@ -185,14 +185,6 @@ function GameInfo() {
                     )
                   })}
                 </div>
-                <a 
-                  href={activeWikiData.wikiUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="wiki-link"
-                >
-                  {t.gameInfo.readMore}
-                </a>
               </div>
             </div>
 
