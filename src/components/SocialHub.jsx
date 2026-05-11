@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Bell,
   Bookmark,
@@ -293,10 +294,8 @@ function PostMenu({ postId, onDelete }) {
   }
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to remove this post?')) {
-      await onDelete(postId)
-    }
     setOpen(false)
+    await onDelete(postId)
   }
 
   return (
@@ -336,6 +335,7 @@ function FeedTab({ onOpenAuth }) {
 
       {!isSignedIn && <AuthPrompt onOpenAuth={onOpenAuth} compact />}
 
+      <AnimatePresence initial={false}>
       {state.posts.map((post) => {
         const author = usersById[post.authorId] ?? userFallback(post.authorId)
         const currentReaction = REACTION_OPTIONS.find((option) =>
@@ -345,7 +345,14 @@ function FeedTab({ onOpenAuth }) {
         const canBookmark = post.authorId !== currentUser?.id
 
         return (
-          <article key={post.id} className="community-post">
+          <motion.article
+            key={post.id}
+            className="community-post"
+            layout
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 30 } }}
+            exit={{ opacity: 0, scale: 0.94, height: 0, marginBottom: 0, transition: { type: 'spring', stiffness: 400, damping: 35, opacity: { duration: 0.15 } } }}
+          >
             <header className="post-header">
               <div className="post-author">
                 <Avatar user={author} />
@@ -400,9 +407,10 @@ function FeedTab({ onOpenAuth }) {
                 )
               })}
             </div>
-          </article>
+          </motion.article>
         )
       })}
+      </AnimatePresence>
     </div>
   )
 }
