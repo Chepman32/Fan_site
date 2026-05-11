@@ -306,7 +306,7 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
                     <article key={post.id} className="profile-bookmark-card">
                       <div className="profile-bookmark-top">
                         <ProfileAvatar user={author} size="sm" />
-                        <div>
+                        <div className="profile-bookmark-meta">
                           <strong>{author.username}</strong>
                           <span>{formatRelative(post.createdAt, s)}</span>
                         </div>

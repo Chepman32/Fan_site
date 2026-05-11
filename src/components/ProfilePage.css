@@ -333,7 +333,7 @@
   margin-bottom: 12px;
 }
 
-.profile-bookmark-top div {
+.profile-bookmark-meta {
   display: flex;
   flex: 1;
   min-width: 0;
