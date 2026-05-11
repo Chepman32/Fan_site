@@ -947,7 +947,7 @@ function GuideCard({ item, sourceLabel, index = 0, onZoom }) {
   )
 }
 
-function OverviewPanel({ copy, data, stats, usingFallback, images = [] }) {
+function OverviewPanel({ copy, data, stats, images = [] }) {
   return (
     <>
       <div className="ign-guide-overview">
@@ -958,7 +958,6 @@ function OverviewPanel({ copy, data, stats, usingFallback, images = [] }) {
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
-          {usingFallback && <p className="ign-guide-note">{copy.fallbackNote}</p>}
         </div>
 
         <div className="ign-guide-stats">
@@ -988,7 +987,6 @@ function SimpleGuideSection({ config }) {
   const Icon = config.icon
   const [data, setData] = useState(config.fallback)
   const [loading, setLoading] = useState(true)
-  const [usingFallback, setUsingFallback] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
@@ -1001,13 +999,11 @@ function SimpleGuideSection({ config }) {
         const parsedData = parseGuidePage(html, config.url, config.fallback)
         if (!canceled) {
           setData(parsedData)
-          setUsingFallback(false)
         }
       } catch (error) {
         console.log(`IGN ${config.key} fetch failed, using fallback:`, error)
         if (!canceled) {
           setData(config.fallback)
-          setUsingFallback(true)
         }
       } finally {
         if (!canceled) setLoading(false)
@@ -1035,10 +1031,6 @@ function SimpleGuideSection({ config }) {
     <section id={config.id} className="section-padding ign-guide-section">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Icon size={14} />
-            <span>{copy.badge}</span>
-          </div>
           <h2 className="section-title">
             {copy.title} <span className="gradient-text">{copy.titleHighlight}</span>
           </h2>
@@ -1053,7 +1045,7 @@ function SimpleGuideSection({ config }) {
 
         {!loading && (
           <div className="ign-guide-content">
-            <OverviewPanel copy={copy} data={data} stats={stats} usingFallback={usingFallback} images={data.extraImages} />
+            <OverviewPanel copy={copy} data={data} stats={stats} images={data.extraImages} />
 
             {data.collections.map((collection) => (
               <article key={collection.id} className="ign-guide-collection">
@@ -1094,15 +1086,12 @@ function VehiclesGuide() {
   const [data, setData] = useState(VEHICLES_FALLBACK)
   const [activeCategoryId, setActiveCategoryId] = useState('cars')
   const [loading, setLoading] = useState(true)
-  const [usingFallback, setUsingFallback] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
     let canceled = false
 
     const fetchVehicles = async () => {
-      let fallbackUsed = false
-
       try {
         setLoading(true)
         const overviewHtml = await fetchTextWithTimeout(GUIDE_URLS.vehicles)
@@ -1120,7 +1109,6 @@ function VehiclesGuide() {
               }
             } catch (error) {
               console.log(`IGN ${category.id} fetch failed, using fallback:`, error)
-              fallbackUsed = true
               return fallback
             }
           }),
@@ -1131,13 +1119,11 @@ function VehiclesGuide() {
             ...overview,
             categories,
           })
-          setUsingFallback(fallbackUsed)
         }
       } catch (error) {
         console.log('IGN vehicles fetch failed, using fallback:', error)
         if (!canceled) {
           setData(VEHICLES_FALLBACK)
-          setUsingFallback(true)
         }
       } finally {
         if (!canceled) setLoading(false)
@@ -1178,10 +1164,6 @@ function VehiclesGuide() {
     <section id="vehicles" className="section-padding ign-guide-section vehicles-guide-section">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Car size={14} />
-            <span>{copy.badge}</span>
-          </div>
           <h2 className="section-title">
             {copy.title} <span className="gradient-text">{copy.titleHighlight}</span>
           </h2>
@@ -1196,7 +1178,7 @@ function VehiclesGuide() {
 
         {!loading && activeCategory && (
           <div className="ign-guide-content">
-            <OverviewPanel copy={copy} data={data} stats={stats} usingFallback={usingFallback} images={data.images} />
+            <OverviewPanel copy={copy} data={data} stats={stats} images={data.images} />
 
             <div className="vehicle-tabs" role="tablist" aria-label="GTA 6 vehicle subpages">
               {data.categories.map((category) => {

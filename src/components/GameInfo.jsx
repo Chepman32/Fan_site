@@ -142,10 +142,6 @@ function GameInfo() {
     <section id="game-info" className="section-padding game-info">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Info size={14} />
-            <span>{t.gameInfo.badge}</span>
-          </div>
           <h2 className="section-title">{t.gameInfo.title} <span className="gradient-text">{t.gameInfo.titleHighlight}</span></h2>
         </div>
 

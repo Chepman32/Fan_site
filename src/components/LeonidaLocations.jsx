@@ -221,8 +221,6 @@ function LeonidaLocations() {
   const { t } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
-  const [usingFallback, setUsingFallback] = useState(false)
-
   useEffect(() => {
     let canceled = false
 
@@ -233,13 +231,11 @@ function LeonidaLocations() {
         const parsedData = parseLeonidaPage(html)
         if (!canceled) {
           setData(parsedData)
-          setUsingFallback(false)
         }
       } catch (error) {
         console.log('IGN Leonida fetch failed, using fallback:', error)
         if (!canceled) {
           setData(FALLBACK_DATA)
-          setUsingFallback(true)
         }
       } finally {
         if (!canceled) setLoading(false)
@@ -266,10 +262,6 @@ function LeonidaLocations() {
     <section id="leonida" className="section-padding leonida-section">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Map size={14} />
-            <span>{t.leonida.badge}</span>
-          </div>
           <h2 className="section-title">
             {t.leonida.title} <span className="gradient-text">{t.leonida.titleHighlight}</span>
           </h2>
@@ -292,7 +284,6 @@ function LeonidaLocations() {
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {usingFallback && <p className="leonida-note">{t.leonida.fallbackNote}</p>}
               </div>
 
               <div className="leonida-stats">

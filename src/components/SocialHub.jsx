@@ -797,10 +797,6 @@ function SocialHub({ onOpenAuth, onNavigate }) {
     <section id="community" className="section-padding social-hub">
       <div className="container">
         <div className="section-header social-header">
-          <div className="section-badge">
-            <Bell size={14} />
-            <span>{t.social.badge}</span>
-          </div>
           <h2 className="section-title">
             {t.social.title} <span className="gradient-text">{t.social.titleHighlight}</span>
           </h2>

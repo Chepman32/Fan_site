@@ -37,12 +37,6 @@
   line-height: 1.8;
 }
 
-.leonida-note {
-  margin-top: 16px;
-  color: var(--accent-orange);
-  font-size: 13px;
-}
-
 .leonida-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

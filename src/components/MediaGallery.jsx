@@ -21,10 +21,6 @@ function MediaGallery() {
     <section id="media" className="section-padding media-gallery">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Film size={14} />
-            <span>{t.media.badge}</span>
-          </div>
           <h2 className="section-title">
             {t.media.title} <span className="gradient-text">{t.media.titleHighlight}</span>
           </h2>

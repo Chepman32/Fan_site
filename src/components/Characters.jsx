@@ -299,7 +299,6 @@ function Characters() {
   const { t } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
-  const [usingFallback, setUsingFallback] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
@@ -312,13 +311,11 @@ function Characters() {
         const parsedData = parseCharactersPage(html)
         if (!canceled) {
           setData(parsedData)
-          setUsingFallback(false)
         }
       } catch (error) {
         console.log('IGN characters fetch failed, using fallback:', error)
         if (!canceled) {
           setData(FALLBACK_DATA)
-          setUsingFallback(true)
         }
       } finally {
         if (!canceled) setLoading(false)
@@ -348,10 +345,6 @@ function Characters() {
     <section id="characters" className="section-padding characters">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Users size={14} />
-            <span>{t.characters.badge}</span>
-          </div>
           <h2 className="section-title">
             {t.characters.title} <span className="gradient-text">{t.characters.titleHighlight}</span>
           </h2>
@@ -374,7 +367,6 @@ function Characters() {
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
-                {usingFallback && <p className="characters-note">{t.characters.fallbackNote}</p>}
               </div>
 
               <div className="characters-stats">

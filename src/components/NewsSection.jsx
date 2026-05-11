@@ -326,10 +326,6 @@ function NewsSection() {
     <section id="news" className="section-padding news-section">
       <div className="container">
         <div className="section-header">
-          <div className="section-badge">
-            <Newspaper size={14} />
-            <span>{t.news.badge}</span>
-          </div>
           <h2 className="section-title">
             {t.news.title} <span className="gradient-text">{t.news.titleHighlight}</span>
           </h2>
