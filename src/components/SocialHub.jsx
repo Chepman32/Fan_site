@@ -25,8 +25,9 @@ import {
   Users,
   Vote,
   XCircle,
+  X,
 } from 'lucide-react'
-import { useSocial } from '../social/SocialContext'
+import { getUserProfile, useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import {
   REACTION_OPTIONS,
@@ -90,14 +91,18 @@ function userFallback(userId) {
   }
 }
 
-function Avatar({ user, size = 'md' }) {
+function Avatar({ user, size = 'md', onClick }) {
   const initials = (user?.username ?? '?').slice(0, 2).toUpperCase()
 
   return (
     <div
-      className={`social-avatar ${size}`}
+      className={`social-avatar ${size}${onClick ? ' clickable' : ''}`}
       style={{ backgroundColor: `${user?.avatarColor ?? '#6b6b7b'}22`, color: user?.avatarColor }}
-      aria-hidden="true"
+      aria-hidden={!onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onClick={onClick}
+      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
     >
       {user?.photoDataUrl ? <img src={user.photoDataUrl} alt="" /> : initials}
     </div>
@@ -326,7 +331,48 @@ function PostMenu({ postId, onDelete }) {
   )
 }
 
-function FeedTab({ onOpenAuth }) {
+function UserProfileModal({ user, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  return (
+    <div className="auth-backdrop" onClick={onClose}>
+      <div className="auth-modal user-profile-modal" onClick={(e) => e.stopPropagation()}>
+        <button className="auth-close" type="button" onClick={onClose} aria-label="Close">
+          <X size={18} />
+        </button>
+        <div className="profile-summary-top" style={{ marginBottom: 12 }}>
+          <Avatar user={user} size="lg" />
+          <div>
+            <h3 style={{ margin: 0 }}>{user.username}</h3>
+            <p style={{ margin: '2px 0 0', opacity: 0.6, fontSize: '0.85em' }}>{user.reputation.name}</p>
+          </div>
+        </div>
+        <div className="reputation-meter" aria-label={`Level ${user.reputation.level}`}>
+          <span style={{ width: `${Math.min(user.reputation.level * 25, 100)}%` }} />
+        </div>
+        <div className="profile-stats" style={{ marginTop: 12 }}>
+          <span><strong>{user.submittedSources}</strong> sources</span>
+          <span><strong>{user.acceptedSources}</strong> accepted</span>
+          <span><strong>{user.followedTopicsCount}</strong> topics</span>
+        </div>
+        {user.badges.length > 0 && (
+          <div className="badges-panel" style={{ marginTop: 12 }}>
+            {user.badges.map((badge) => (
+              <span key={badge} className="badge-chip"><Trophy size={11} /> {badge}</span>
+            ))}
+          </div>
+        )}
+        {user.bio && <p style={{ marginTop: 12, opacity: 0.7, fontSize: '0.9em' }}>{user.bio}</p>}
+      </div>
+    </div>
+  )
+}
+
+function FeedTab({ onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark, deletePost } = useSocial()
 
   return (
@@ -355,7 +401,7 @@ function FeedTab({ onOpenAuth }) {
           >
             <header className="post-header">
               <div className="post-author">
-                <Avatar user={author} />
+                <Avatar user={author} onClick={() => onViewUser(post.authorId)} />
                 <div>
                   <h3>{author.username}</h3>
                   <span>{formatRelative(post.createdAt)}</span>
@@ -415,7 +461,7 @@ function FeedTab({ onOpenAuth }) {
   )
 }
 
-function CommentsPanel({ targetType, targetId, onOpenAuth }) {
+function CommentsPanel({ targetType, targetId, onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, isSignedIn, addComment } = useSocial()
   const [body, setBody] = useState('')
   const comments = state.comments.filter(
@@ -446,7 +492,7 @@ function CommentsPanel({ targetType, targetId, onOpenAuth }) {
             const author = usersById[comment.authorId] ?? userFallback(comment.authorId)
             return (
               <div key={comment.id} className="comment-item">
-                <Avatar user={author} size="sm" />
+                <Avatar user={author} size="sm" onClick={() => onViewUser?.(comment.authorId)} />
                 <div>
                   <strong>{author.username}</strong>
                   <span>{formatRelative(comment.createdAt)}</span>
@@ -472,7 +518,7 @@ function CommentsPanel({ targetType, targetId, onOpenAuth }) {
   )
 }
 
-function RumorsTab({ onOpenAuth }) {
+function RumorsTab({ onOpenAuth, onViewUser }) {
   const { state, currentUser, isSignedIn, voteRumor, totalVotes } = useSocial()
 
   return (
@@ -512,7 +558,7 @@ function RumorsTab({ onOpenAuth }) {
               })}
             </div>
 
-            <CommentsPanel targetType="rumor" targetId={rumor.id} onOpenAuth={onOpenAuth} />
+            <CommentsPanel targetType="rumor" targetId={rumor.id} onOpenAuth={onOpenAuth} onViewUser={onViewUser} />
           </article>
         )
       })}
@@ -598,7 +644,7 @@ function SourceForm({ onOpenAuth }) {
   )
 }
 
-function SourcesTab({ onOpenAuth }) {
+function SourcesTab({ onOpenAuth, onViewUser }) {
   const { state, usersById } = useSocial()
   const { t } = useTranslation()
 
@@ -636,11 +682,11 @@ function SourcesTab({ onOpenAuth }) {
               <p>{source.reason}</p>
 
               <div className="source-author">
-                <Avatar user={author} size="sm" />
+                <Avatar user={author} size="sm" onClick={() => onViewUser(source.authorId)} />
                 <span>Submitted by {author.username}</span>
               </div>
 
-              <CommentsPanel targetType="source" targetId={source.id} onOpenAuth={onOpenAuth} />
+              <CommentsPanel targetType="source" targetId={source.id} onOpenAuth={onOpenAuth} onViewUser={onViewUser} />
             </article>
           )
         })}
@@ -649,7 +695,7 @@ function SourcesTab({ onOpenAuth }) {
   )
 }
 
-function PollsTab({ onOpenAuth }) {
+function PollsTab({ onOpenAuth, onViewUser }) {
   const { state, currentUser, isSignedIn, votePoll, totalVotes } = useSocial()
 
   return (
@@ -682,7 +728,7 @@ function PollsTab({ onOpenAuth }) {
               })}
             </div>
             <span className="poll-total">{totalVotes(poll.votes)} votes</span>
-            <CommentsPanel targetType="poll" targetId={poll.id} onOpenAuth={onOpenAuth} />
+            <CommentsPanel targetType="poll" targetId={poll.id} onOpenAuth={onOpenAuth} onViewUser={onViewUser} />
           </article>
         )
       })}
@@ -774,8 +820,15 @@ function MessagesTab({ onOpenAuth }) {
 
 function SocialHub({ onOpenAuth }) {
   const [activeTab, setActiveTab] = useState('feed')
-  const { backendError, isSignedIn } = useSocial()
+  const [viewingUserId, setViewingUserId] = useState(null)
+  const { backendError, isSignedIn, state } = useSocial()
   const { t } = useTranslation()
+
+  const viewingUser = viewingUserId
+    ? getUserProfile(state.users.find((u) => u.id === viewingUserId), state)
+    : null
+
+  const onViewUser = (userId) => setViewingUserId(userId)
 
   const TAB_LABELS = {
     feed: t.social.tabs.posts,
@@ -835,14 +888,15 @@ function SocialHub({ onOpenAuth }) {
               </div>
             )}
 
-            {activeTab === 'feed' && <FeedTab onOpenAuth={onOpenAuth} />}
-            {activeTab === 'rumors' && <RumorsTab onOpenAuth={onOpenAuth} />}
-            {activeTab === 'sources' && <SourcesTab onOpenAuth={onOpenAuth} />}
-            {activeTab === 'polls' && <PollsTab onOpenAuth={onOpenAuth} />}
+            {activeTab === 'feed' && <FeedTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
+            {activeTab === 'rumors' && <RumorsTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
+            {activeTab === 'sources' && <SourcesTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
+            {activeTab === 'polls' && <PollsTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
             {activeTab === 'messages' && <MessagesTab onOpenAuth={onOpenAuth} />}
           </div>
         </div>
       </div>
+      {viewingUser && <UserProfileModal user={viewingUser} onClose={() => setViewingUserId(null)} />}
     </section>
   )
 }
