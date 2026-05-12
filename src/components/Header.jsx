@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Ellipsis, Globe, LogOut, User } from 'lucide-react'
+import { Ellipsis, Globe, LogOut, ShoppingCart, User } from 'lucide-react'
 import favIcon from '../assets/fav.png'
+import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { LANGUAGE_NAMES } from '../i18n/translations'
 import './Header.css'
@@ -9,7 +10,16 @@ function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
-function Header({ currentUser, onOpenAuth, onLogout, onNavigate, solid = false }) {
+function Header({
+  currentUser,
+  onOpenAuth,
+  onLogout,
+  onNavigate,
+  cartItems = [],
+  cartTotal = 0,
+  onRemoveCartItem,
+  solid = false,
+}) {
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
@@ -76,6 +86,23 @@ function Header({ currentUser, onOpenAuth, onLogout, onNavigate, solid = false }
       </div>
 
       <div className="nav-auth">
+        {cartItems.length > 0 && (
+          <div className="nav-cart">
+            <button type="button" className="nav-cart-toggle" aria-label={`${cartItems.length} cart items`}>
+              <ShoppingCart size={16} />
+              <span>{cartItems.length}</span>
+            </button>
+            <div className="nav-cart-popover">
+              <CryptoCheckoutPanel
+                cartItems={cartItems}
+                cartTotal={cartTotal}
+                onRemoveItem={onRemoveCartItem}
+                compact
+              />
+            </div>
+          </div>
+        )}
+
         <div className="lang-switcher" onClick={(event) => event.stopPropagation()}>
           <button
             type="button"

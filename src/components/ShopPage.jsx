@@ -1,78 +1,14 @@
 import { useEffect, useState } from 'react'
-import {
-  Check,
-  Copy,
-  MonitorPlay,
-  PackageCheck,
-  ShieldCheck,
-  ShoppingCart,
-  Sparkles,
-  Wallet,
-} from 'lucide-react'
+import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet } from 'lucide-react'
+import CryptoCheckoutPanel from './CryptoCheckoutPanel'
+import { STREAM_OVERLAY_PRODUCTS, categoryTabs } from '../shop/shopData'
 import './ShopPage.css'
 
-const PAYMENT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
-const PAYMENT_NETWORK = 'USDT TRC20'
-
-const overlayImageModules = import.meta.glob('../assets/shop/Stream overlays/*.png', {
-  eager: true,
-  import: 'default',
-})
-
-const overlayNames = [
-  'Vice Nights Broadcast Kit',
-  'Ocean Drive Stream Suite',
-  'Neon Storm Overlay Bundle',
-  'Leonida Heat Scene Pack',
-  'Downtown Chase Creator Pack',
-  'Keys Sunset Stream Kit',
-  'Port Gellhorn Night Set',
-  'Paradise Hotel Overlay Pack',
-]
-
-const overlayTags = [
-  ['Animated-ready', 'Facecam', 'Alerts'],
-  ['Starting soon', 'Social lower third', 'Donation panel'],
-  ['BRB scene', 'Subscriber panel', 'Purple neon'],
-  ['Gameplay frame', 'Chat panel', 'Cyan HUD'],
-  ['Racing theme', 'Goal bar', 'Creator badges'],
-  ['Beach scene', 'Follower alert', 'Turquoise trim'],
-  ['Night city', 'Motel frame', 'High contrast'],
-  ['Vice City', 'Pink trim', 'Full stream set'],
-]
-
-const categoryTabs = [
-  { id: 'stream-overlays', label: 'Stream overlays', count: Object.keys(overlayImageModules).length, active: true },
-  { id: 'profile-banners', label: 'Profile banners', count: 0 },
-  { id: 'emote-packs', label: 'Emote packs', count: 0 },
-  { id: 'logo-kits', label: 'Logo kits', count: 0 },
-]
-
-function buildOverlayProducts() {
-  return Object.entries(overlayImageModules)
-    .sort(([pathA], [pathB]) => pathA.localeCompare(pathB))
-    .map(([path, image], index) => ({
-      id: path.split('/').pop()?.replace('.png', '').toLowerCase() || `overlay-${index + 1}`,
-      title: overlayNames[index] || `Leonida Stream Overlay ${index + 1}`,
-      image,
-      price: 12 + (index % 4) * 3,
-      format: 'PNG pack',
-      resolution: '1672 x 941',
-      tags: overlayTags[index] || ['Stream overlay', 'Creator asset', 'Leonida style'],
-    }))
-}
-
-const STREAM_OVERLAY_PRODUCTS = buildOverlayProducts()
-
-function ShopPage() {
+function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onRemoveCartItem = () => {} }) {
   const products = STREAM_OVERLAY_PRODUCTS
-  const [cartItems, setCartItems] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
   const [featuredId, setFeaturedId] = useState(products[0]?.id || '')
   const [paymentOpen, setPaymentOpen] = useState(false)
-  const [copiedField, setCopiedField] = useState('')
-  const [txHash, setTxHash] = useState('')
-  const [paymentSubmitted, setPaymentSubmitted] = useState(false)
 
   useEffect(() => {
     const previousTitle = document.title
@@ -83,43 +19,17 @@ function ShopPage() {
     }
   }, [])
 
-  const cartTotal = cartItems.reduce((total, item) => total + item.price, 0)
-  const paymentAmount = cartTotal.toFixed(2)
   const featuredProduct = products.find((product) => product.id === featuredId) || products[0]
-
-  const addToCart = (product) => {
-    setPaymentSubmitted(false)
-    setCartItems((items) => {
-      if (items.some((item) => item.id === product.id)) return items
-      return [...items, product]
-    })
-  }
-
-  const removeFromCart = (productId) => {
-    setPaymentSubmitted(false)
-    const removingLastItem = cartItems.length <= 1 && cartItems.some((item) => item.id === productId)
-    if (removingLastItem) setPaymentOpen(false)
-    setCartItems((items) => items.filter((item) => item.id !== productId))
-  }
-
-  const copyPaymentValue = async (value, field) => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopiedField(field)
-      window.setTimeout(() => setCopiedField(''), 1400)
-    } catch (error) {
-      console.log('Could not copy payment value:', error)
-    }
-  }
 
   const openCheckout = () => {
     setPaymentOpen(true)
-    setPaymentSubmitted(false)
   }
 
-  const submitPaymentProof = () => {
-    if (!txHash.trim()) return
-    setPaymentSubmitted(true)
+  const removeCartItem = (productId) => {
+    if (cartItems.length <= 1 && cartItems.some((item) => item.id === productId)) {
+      setPaymentOpen(false)
+    }
+    onRemoveCartItem(productId)
   }
 
   return (
@@ -178,7 +88,7 @@ function ShopPage() {
                 <span>{featuredProduct.tags[0]}</span>
               </div>
               <div className="shop-featured-actions">
-                <button type="button" className="shop-buy-button" onClick={() => addToCart(featuredProduct)}>
+                <button type="button" className="shop-buy-button" onClick={() => onAddCartItem(featuredProduct)}>
                   <ShoppingCart size={16} />
                   Add ${featuredProduct.price}
                 </button>
@@ -226,7 +136,7 @@ function ShopPage() {
                   <button
                     type="button"
                     className={`shop-card-action ${inCart ? 'selected' : ''}`}
-                    onClick={() => (inCart ? removeFromCart(product.id) : addToCart(product))}
+                    onClick={() => (inCart ? removeCartItem(product.id) : onAddCartItem(product))}
                   >
                     {inCart ? <Check size={16} /> : <ShoppingCart size={16} />}
                     {inCart ? 'Added' : 'Add to cart'}
@@ -251,7 +161,7 @@ function ShopPage() {
                       <strong>{item.title}</strong>
                       <span>${item.price}</span>
                     </div>
-                    <button type="button" onClick={() => removeFromCart(item.id)}>
+                    <button type="button" onClick={() => removeCartItem(item.id)}>
                       Remove
                     </button>
                   </div>
@@ -271,66 +181,11 @@ function ShopPage() {
             </button>
 
             {paymentOpen && cartItems.length > 0 && (
-              <div className="shop-payment-panel">
-                <div className="shop-payment-heading">
-                  <ShieldCheck size={18} />
-                  <div>
-                    <h3>Crypto checkout</h3>
-                    <span>{PAYMENT_NETWORK} only</span>
-                  </div>
-                </div>
-
-                <div className="shop-payment-amount">
-                  <span>Send exactly</span>
-                  <strong>{paymentAmount} USDT</strong>
-                  <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
-                    <Copy size={14} />
-                    {copiedField === 'amount' ? 'Copied' : 'Copy amount'}
-                  </button>
-                </div>
-
-                <div className="shop-payment-address">
-                  <span>Receiving address</span>
-                  <code>{PAYMENT_ADDRESS}</code>
-                  <button type="button" onClick={() => copyPaymentValue(PAYMENT_ADDRESS, 'address')}>
-                    <Copy size={14} />
-                    {copiedField === 'address' ? 'Copied' : 'Copy address'}
-                  </button>
-                </div>
-
-                <p className="shop-payment-warning">
-                  Send USDT on the TRON/TRC20 network only. Transfers from other networks may be unrecoverable.
-                </p>
-
-                <label className="shop-tx-field">
-                  <span>Transaction hash</span>
-                  <input
-                    type="text"
-                    value={txHash}
-                    onChange={(event) => {
-                      setTxHash(event.target.value)
-                      setPaymentSubmitted(false)
-                    }}
-                    placeholder="Paste your TRC20 transaction hash"
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  className="shop-submit-payment"
-                  disabled={!txHash.trim()}
-                  onClick={submitPaymentProof}
-                >
-                  Submit payment proof
-                </button>
-
-                {paymentSubmitted && (
-                  <div className="shop-payment-success">
-                    <Check size={16} />
-                    Payment proof saved for manual confirmation.
-                  </div>
-                )}
-              </div>
+              <CryptoCheckoutPanel
+                cartItems={cartItems}
+                cartTotal={cartTotal}
+                onRemoveItem={removeCartItem}
+              />
             )}
           </aside>
         </div>

@@ -31,6 +31,7 @@ function currentRoute() {
 function AppContent() {
   const [authOpen, setAuthOpen] = useState(false)
   const [route, setRoute] = useState(currentRoute)
+  const [cartItems, setCartItems] = useState([])
   const { currentProfile, logout } = useSocial()
 
   useEffect(() => {
@@ -62,11 +63,27 @@ function AppContent() {
     scrollToHash(nextUrl.hash)
   }
 
+  const addCartItem = (product) => {
+    setCartItems((items) => {
+      if (items.some((item) => item.id === product.id)) return items
+      return [...items, product]
+    })
+  }
+
+  const removeCartItem = (productId) => {
+    setCartItems((items) => items.filter((item) => item.id !== productId))
+  }
+
+  const cartTotal = cartItems.reduce((total, item) => total + item.price, 0)
+
   const sharedHeaderProps = {
     currentUser: currentProfile,
     onOpenAuth: () => setAuthOpen(true),
     onLogout: logout,
     onNavigate: navigateTo,
+    cartItems,
+    cartTotal,
+    onRemoveCartItem: removeCartItem,
   }
 
   if (route === '/community') {
@@ -115,7 +132,12 @@ function AppContent() {
       <div className="app">
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <ShopPage />
+          <ShopPage
+            cartItems={cartItems}
+            cartTotal={cartTotal}
+            onAddCartItem={addCartItem}
+            onRemoveCartItem={removeCartItem}
+          />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
@@ -143,6 +165,9 @@ function AppContent() {
         onOpenAuth={() => setAuthOpen(true)}
         onLogout={logout}
         onNavigate={navigateTo}
+        cartItems={cartItems}
+        cartTotal={cartTotal}
+        onRemoveCartItem={removeCartItem}
       />
       <GameInfo />
       <Characters />

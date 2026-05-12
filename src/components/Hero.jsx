@@ -6,7 +6,7 @@ import './Hero.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
 
-function Hero({ currentUser, onOpenAuth, onLogout, onNavigate }) {
+function Hero({ currentUser, onOpenAuth, onLogout, onNavigate, cartItems, cartTotal, onRemoveCartItem }) {
   const { t } = useTranslation()
 
   const scrollToInfo = () => {
@@ -20,6 +20,9 @@ function Hero({ currentUser, onOpenAuth, onLogout, onNavigate }) {
         onOpenAuth={onOpenAuth}
         onLogout={onLogout}
         onNavigate={onNavigate}
+        cartItems={cartItems}
+        cartTotal={cartTotal}
+        onRemoveCartItem={onRemoveCartItem}
       />
 
       <div className="hero-bg">

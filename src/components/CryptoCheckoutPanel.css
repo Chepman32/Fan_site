@@ -1,0 +1,280 @@
+.crypto-checkout-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(0, 217, 255, 0.055);
+  border: 1px solid rgba(0, 217, 255, 0.2);
+  border-radius: 8px;
+}
+
+.crypto-checkout-panel.compact {
+  max-height: min(78vh, 760px);
+  overflow-y: auto;
+  background:
+    linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(255, 45, 149, 0.08)),
+    #171722;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
+}
+
+.crypto-checkout-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--accent-cyan);
+}
+
+.crypto-checkout-heading h3 {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.crypto-checkout-heading span,
+.crypto-payment-amount span,
+.crypto-payment-address span,
+.crypto-tx-field span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.crypto-checkout-items {
+  display: grid;
+  gap: 10px;
+}
+
+.crypto-checkout-item {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.crypto-checkout-item img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.crypto-checkout-item strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.crypto-checkout-item span {
+  color: var(--accent-cyan);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.crypto-checkout-item button {
+  grid-column: 2;
+  width: fit-content;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.crypto-checkout-item button:hover {
+  color: var(--accent-pink);
+}
+
+.crypto-checkout-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.crypto-checkout-total strong {
+  color: var(--text-primary);
+  font-size: 18px;
+}
+
+.crypto-qr-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: rgba(10, 10, 15, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.crypto-qr-box {
+  display: grid;
+  width: 164px;
+  aspect-ratio: 1;
+  place-items: center;
+  padding: 8px;
+  background: white;
+  border-radius: 8px;
+}
+
+.crypto-checkout-panel.compact .crypto-qr-box {
+  width: 128px;
+}
+
+.crypto-qr-box img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.crypto-qr-box span {
+  color: #0a0a0f;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.crypto-qr-row p {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.crypto-payment-amount,
+.crypto-payment-address {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(10, 10, 15, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+}
+
+.crypto-payment-amount strong {
+  color: var(--text-primary);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.crypto-payment-address code {
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.crypto-payment-amount button,
+.crypto-payment-address button,
+.crypto-submit-payment {
+  display: inline-flex;
+  min-height: 34px;
+  width: fit-content;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, color 0.22s ease;
+}
+
+.crypto-payment-amount button:hover,
+.crypto-payment-address button:hover,
+.crypto-submit-payment:hover:not(:disabled) {
+  color: var(--accent-cyan);
+  border-color: rgba(0, 217, 255, 0.38);
+  transform: translateY(-2px);
+}
+
+.crypto-payment-warning {
+  padding: 10px 12px;
+  background: rgba(255, 107, 53, 0.09);
+  border: 1px solid rgba(255, 107, 53, 0.22);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.crypto-tx-field {
+  display: grid;
+  gap: 8px;
+}
+
+.crypto-tx-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  background: rgba(10, 10, 15, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+}
+
+.crypto-tx-field input:focus {
+  outline: none;
+  border-color: rgba(0, 217, 255, 0.45);
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.08);
+}
+
+.crypto-submit-payment {
+  width: 100%;
+  min-height: 42px;
+  color: white;
+  background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple));
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.crypto-submit-payment:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.crypto-payment-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(0, 217, 255, 0.1);
+  border: 1px solid rgba(0, 217, 255, 0.28);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 560px) {
+  .crypto-qr-row {
+    grid-template-columns: 1fr;
+  }
+
+  .crypto-qr-box,
+  .crypto-checkout-panel.compact .crypto-qr-box {
+    width: 100%;
+    max-width: 180px;
+  }
+}
