@@ -1,6 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  MonitorPlay,
+  PackageCheck,
+  ShieldCheck,
+  ShoppingCart,
+  Sparkles,
+  Wallet,
+} from 'lucide-react'
 import './ShopPage.css'
+
+const PAYMENT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
+const PAYMENT_NETWORK = 'USDT TRC20'
 
 const overlayImageModules = import.meta.glob('../assets/shop/Stream overlays/*.png', {
   eager: true,
@@ -57,6 +69,10 @@ function ShopPage() {
   const [cartItems, setCartItems] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
   const [featuredId, setFeaturedId] = useState(products[0]?.id || '')
+  const [paymentOpen, setPaymentOpen] = useState(false)
+  const [copiedField, setCopiedField] = useState('')
+  const [txHash, setTxHash] = useState('')
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false)
 
   useEffect(() => {
     const previousTitle = document.title
@@ -68,9 +84,11 @@ function ShopPage() {
   }, [])
 
   const cartTotal = cartItems.reduce((total, item) => total + item.price, 0)
+  const paymentAmount = cartTotal.toFixed(2)
   const featuredProduct = products.find((product) => product.id === featuredId) || products[0]
 
   const addToCart = (product) => {
+    setPaymentSubmitted(false)
     setCartItems((items) => {
       if (items.some((item) => item.id === product.id)) return items
       return [...items, product]
@@ -78,7 +96,30 @@ function ShopPage() {
   }
 
   const removeFromCart = (productId) => {
+    setPaymentSubmitted(false)
+    const removingLastItem = cartItems.length <= 1 && cartItems.some((item) => item.id === productId)
+    if (removingLastItem) setPaymentOpen(false)
     setCartItems((items) => items.filter((item) => item.id !== productId))
+  }
+
+  const copyPaymentValue = async (value, field) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField(''), 1400)
+    } catch (error) {
+      console.log('Could not copy payment value:', error)
+    }
+  }
+
+  const openCheckout = () => {
+    setPaymentOpen(true)
+    setPaymentSubmitted(false)
+  }
+
+  const submitPaymentProof = () => {
+    if (!txHash.trim()) return
+    setPaymentSubmitted(true)
   }
 
   return (
@@ -224,9 +265,73 @@ function ShopPage() {
               <span>Total</span>
               <strong>${cartTotal}</strong>
             </div>
-            <button type="button" className="shop-checkout-button" disabled={!cartItems.length}>
-              Checkout
+            <button type="button" className="shop-checkout-button" disabled={!cartItems.length} onClick={openCheckout}>
+              <Wallet size={16} />
+              Pay with USDT
             </button>
+
+            {paymentOpen && cartItems.length > 0 && (
+              <div className="shop-payment-panel">
+                <div className="shop-payment-heading">
+                  <ShieldCheck size={18} />
+                  <div>
+                    <h3>Crypto checkout</h3>
+                    <span>{PAYMENT_NETWORK} only</span>
+                  </div>
+                </div>
+
+                <div className="shop-payment-amount">
+                  <span>Send exactly</span>
+                  <strong>{paymentAmount} USDT</strong>
+                  <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
+                    <Copy size={14} />
+                    {copiedField === 'amount' ? 'Copied' : 'Copy amount'}
+                  </button>
+                </div>
+
+                <div className="shop-payment-address">
+                  <span>Receiving address</span>
+                  <code>{PAYMENT_ADDRESS}</code>
+                  <button type="button" onClick={() => copyPaymentValue(PAYMENT_ADDRESS, 'address')}>
+                    <Copy size={14} />
+                    {copiedField === 'address' ? 'Copied' : 'Copy address'}
+                  </button>
+                </div>
+
+                <p className="shop-payment-warning">
+                  Send USDT on the TRON/TRC20 network only. Transfers from other networks may be unrecoverable.
+                </p>
+
+                <label className="shop-tx-field">
+                  <span>Transaction hash</span>
+                  <input
+                    type="text"
+                    value={txHash}
+                    onChange={(event) => {
+                      setTxHash(event.target.value)
+                      setPaymentSubmitted(false)
+                    }}
+                    placeholder="Paste your TRC20 transaction hash"
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  className="shop-submit-payment"
+                  disabled={!txHash.trim()}
+                  onClick={submitPaymentProof}
+                >
+                  Submit payment proof
+                </button>
+
+                {paymentSubmitted && (
+                  <div className="shop-payment-success">
+                    <Check size={16} />
+                    Payment proof saved for manual confirmation.
+                  </div>
+                )}
+              </div>
+            )}
           </aside>
         </div>
       </div>
