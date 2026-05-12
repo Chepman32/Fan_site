@@ -8,6 +8,7 @@ import LeonidaLocations from './components/LeonidaLocations'
 import LocationGuidePage from './components/LocationGuidePage'
 import NewsSection from './components/NewsSection'
 import SocialHub from './components/SocialHub'
+import ShopPage from './components/ShopPage'
 import Header from './components/Header'
 import ProfilePage from './components/ProfilePage'
 import UserProfilePage from './components/UserProfilePage'
@@ -17,7 +18,7 @@ import { SocialProvider, useSocial } from './social/SocialContext'
 import { LanguageProvider } from './i18n/useTranslation.jsx'
 import './App.css'
 
-const APP_ROUTES = new Set(['/community', '/profile'])
+const APP_ROUTES = new Set(['/community', '/profile', '/shop'])
 
 function currentRoute() {
   const { pathname } = window.location
@@ -102,6 +103,19 @@ function AppContent() {
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LocationGuidePage locationSlug={locationSlug} onNavigate={navigateTo} />
+        </main>
+        <Footer />
+        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      </div>
+    )
+  }
+
+  if (route === '/shop') {
+    return (
+      <div className="app">
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <ShopPage />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}

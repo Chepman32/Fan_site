@@ -67,6 +67,9 @@ function Header({ currentUser, onOpenAuth, onLogout, onNavigate, solid = false }
         <a href="/#media" onClick={(event) => navigate(event, '/#media')}>{t.nav.media}</a>
         <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
         <a href="/#news" onClick={(event) => navigate(event, '/#news')}>{t.nav.news}</a>
+        <a href="/shop" onClick={(event) => navigate(event, '/shop')}>
+          {t.nav.shop || 'Shop'}
+        </a>
         <a href="/community" onClick={(event) => navigate(event, '/community')}>
           {t.nav.community || t.nav.social || 'Community'}
         </a>
