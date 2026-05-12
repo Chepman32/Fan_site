@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet } from 'lucide-react'
 import CryptoCheckoutPanel from './CryptoCheckoutPanel'
+import ProductPreviewModal from './ProductPreviewModal'
 import { STREAM_OVERLAY_PRODUCTS, categoryTabs } from '../shop/shopData'
 import './ShopPage.css'
 
@@ -9,6 +10,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
   const [featuredId, setFeaturedId] = useState(products[0]?.id || '')
   const [paymentOpen, setPaymentOpen] = useState(false)
+  const [previewProduct, setPreviewProduct] = useState(null)
 
   useEffect(() => {
     const previousTitle = document.title
@@ -30,6 +32,11 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
       setPaymentOpen(false)
     }
     onRemoveCartItem(productId)
+  }
+
+  const openProductPreview = (product) => {
+    setFeaturedId(product.id)
+    setPreviewProduct(product)
   }
 
   return (
@@ -73,9 +80,14 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
 
         {featuredProduct && (
           <article className="shop-featured">
-            <div className="shop-featured-media">
+            <button
+              type="button"
+              className="shop-featured-media"
+              onClick={() => openProductPreview(featuredProduct)}
+              aria-label={`Open ${featuredProduct.title} fullscreen preview`}
+            >
               <img src={featuredProduct.image} alt={featuredProduct.title} />
-            </div>
+            </button>
             <div className="shop-featured-copy">
               <span className="shop-pack-label">
                 <MonitorPlay size={15} />
@@ -92,9 +104,9 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                   <ShoppingCart size={16} />
                   Add ${featuredProduct.price}
                 </button>
-                <a href={featuredProduct.image} target="_blank" rel="noopener noreferrer" className="shop-preview-link">
-                  Preview PNG
-                </a>
+                <button type="button" className="shop-preview-link" onClick={() => openProductPreview(featuredProduct)}>
+                  Preview fullscreen
+                </button>
               </div>
             </div>
           </article>
@@ -113,7 +125,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                   <button
                     type="button"
                     className="shop-product-preview"
-                    onClick={() => setFeaturedId(product.id)}
+                    onClick={() => openProductPreview(product)}
                     aria-label={`Preview ${product.title}`}
                   >
                     <img src={product.image} alt={product.title} loading="lazy" />
@@ -190,6 +202,13 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
           </aside>
         </div>
       </div>
+
+      <ProductPreviewModal
+        product={previewProduct}
+        inCart={Boolean(previewProduct && cartItems.some((item) => item.id === previewProduct.id))}
+        onAddToCart={onAddCartItem}
+        onClose={() => setPreviewProduct(null)}
+      />
     </section>
   )
 }

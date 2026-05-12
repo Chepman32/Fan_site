@@ -141,10 +141,13 @@
   background: #050509;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
+  cursor: pointer;
 }
 
 .shop-featured-media {
+  width: 100%;
   aspect-ratio: 1672 / 941;
+  padding: 0;
 }
 
 .shop-featured-media img,
@@ -154,6 +157,14 @@
   height: 100%;
   display: block;
   object-fit: cover;
+}
+
+.shop-featured-media img {
+  transition: transform 0.35s ease;
+}
+
+.shop-featured-media:hover img {
+  transform: scale(1.025);
 }
 
 .shop-featured-copy {
