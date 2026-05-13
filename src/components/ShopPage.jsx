@@ -11,6 +11,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
   const [featuredId, setFeaturedId] = useState(products[0]?.id || '')
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [previewProduct, setPreviewProduct] = useState(null)
+  const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
     const previousTitle = document.title
@@ -211,6 +212,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
 
             {paymentOpen && cartItems.length > 0 && (
               <CryptoCheckoutPanel
+                key={checkoutKey}
                 cartItems={cartItems}
                 cartTotal={cartTotal}
                 onRemoveItem={removeCartItem}

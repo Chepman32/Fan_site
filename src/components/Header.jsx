@@ -23,6 +23,7 @@ function Header({
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
+  const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
@@ -94,6 +95,7 @@ function Header({
             </button>
             <div className="nav-cart-popover">
               <CryptoCheckoutPanel
+                key={checkoutKey}
                 cartItems={cartItems}
                 cartTotal={cartTotal}
                 onRemoveItem={onRemoveCartItem}

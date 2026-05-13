@@ -1,5 +1,9 @@
 export const PAYMENT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
 export const PAYMENT_NETWORK = 'USDT TRC20'
+export const TRONGRID_FULL_HOST = 'https://api.trongrid.io'
+export const USDT_CONTRACT_ADDRESS = 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'
+export const USDT_DECIMALS = 6
+export const USDT_TRANSFER_FEE_LIMIT = 100_000_000
 
 const overlayImageModules = import.meta.glob('../assets/shop/Stream overlays/*.png', {
   eager: true,
