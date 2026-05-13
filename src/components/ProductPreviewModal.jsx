@@ -7,6 +7,10 @@ const backdropTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
 const sheetSpring = { type: 'spring', stiffness: 420, damping: 34, mass: 0.9 }
 
 function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
+  const preventPreviewContextMenu = (event) => {
+    event.preventDefault()
+  }
+
   useEffect(() => {
     if (!product) return undefined
 
@@ -58,6 +62,7 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
             onDragEnd={(_, info) => {
               if (info.offset.y > 140 || info.velocity.y > 720) onClose()
             }}
+            onContextMenu={preventPreviewContextMenu}
             initial={{ y: 90, scale: 0.94, opacity: 0, borderRadius: 34 }}
             animate={{ y: 0, scale: 1, opacity: 1, borderRadius: 22 }}
             exit={{ y: 140, scale: 0.96, opacity: 0 }}
@@ -79,6 +84,7 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
               <motion.img
                 src={product.image}
                 alt={product.title}
+                onContextMenu={preventPreviewContextMenu}
                 initial={{ scale: 1.05, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ ...sheetSpring, delay: 0.04 }}

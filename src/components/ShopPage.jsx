@@ -39,6 +39,10 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
     setPreviewProduct(product)
   }
 
+  const preventPreviewContextMenu = (event) => {
+    event.preventDefault()
+  }
+
   return (
     <section className="shop-page section-padding">
       <div className="container shop-container">
@@ -84,9 +88,15 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               type="button"
               className="shop-featured-media"
               onClick={() => openProductPreview(featuredProduct)}
+              onContextMenu={preventPreviewContextMenu}
               aria-label={`Open ${featuredProduct.title} fullscreen preview`}
             >
-              <img src={featuredProduct.image} alt={featuredProduct.title} />
+              <img
+                src={featuredProduct.image}
+                alt={featuredProduct.title}
+                draggable="false"
+                onContextMenu={preventPreviewContextMenu}
+              />
             </button>
             <div className="shop-featured-copy">
               <span className="shop-pack-label">
@@ -126,9 +136,16 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                     type="button"
                     className="shop-product-preview"
                     onClick={() => openProductPreview(product)}
+                    onContextMenu={preventPreviewContextMenu}
                     aria-label={`Preview ${product.title}`}
                   >
-                    <img src={product.image} alt={product.title} loading="lazy" />
+                    <img
+                      src={product.image}
+                      alt={product.title}
+                      loading="lazy"
+                      draggable="false"
+                      onContextMenu={preventPreviewContextMenu}
+                    />
                   </button>
 
                   <div className="shop-product-body">
