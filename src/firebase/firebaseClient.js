@@ -36,8 +36,7 @@ export async function getFirebaseServices() {
       import('firebase/app'),
       import('firebase/auth'),
       import('firebase/firestore'),
-      import('firebase/functions'),
-    ]).then(([config, appModule, authModule, firestoreModule, functionsModule]) => {
+    ]).then(([config, appModule, authModule, firestoreModule]) => {
       const { initializeApp } = appModule
       const {
         createUserWithEmailAndPassword,
@@ -64,16 +63,11 @@ export async function getFirebaseServices() {
         updateDoc,
         where,
       } = firestoreModule
-      const {
-        getFunctions,
-        httpsCallable,
-      } = functionsModule
       const app = initializeApp(config)
       return {
         app,
         auth: getAuth(app),
         db: getFirestore(app),
-        functions: getFunctions(app),
         addDoc,
         arrayRemove,
         arrayUnion,
@@ -82,7 +76,6 @@ export async function getFirebaseServices() {
         deleteDoc,
         doc,
         getDoc,
-        httpsCallable,
         onAuthStateChanged,
         onSnapshot,
         query,
