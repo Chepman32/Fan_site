@@ -25,7 +25,7 @@ function shortenAddress(value = '') {
   return `${value.slice(0, 6)}...${value.slice(-6)}`
 }
 
-function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = false }) {
+function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = false, wide = false }) {
   const [copiedField, setCopiedField] = useState('')
   const [txHash, setTxHash] = useState('')
   const [txIdToVerify, setTxIdToVerify] = useState('')
@@ -158,7 +158,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
   }
 
   return (
-    <div className={`crypto-checkout-panel ${compact ? 'compact' : ''}`}>
+    <div className={`crypto-checkout-panel ${compact ? 'compact' : ''} ${wide ? 'wide' : ''}`}>
       <div className="crypto-checkout-heading">
         <ShieldCheck size={18} />
         <div>
@@ -167,123 +167,127 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
         </div>
       </div>
 
-      {cartItems.length > 0 && (
-        <div className="crypto-checkout-items">
-          {cartItems.map((item) => (
-            <div key={item.id} className="crypto-checkout-item">
-              <img src={item.image} alt="" aria-hidden="true" />
-              <div>
-                <strong>{item.title}</strong>
-                <span>${item.price}</span>
+      <div className="crypto-checkout-summary">
+        {cartItems.length > 0 && (
+          <div className="crypto-checkout-items">
+            {cartItems.map((item) => (
+              <div key={item.id} className="crypto-checkout-item">
+                <img src={item.image} alt="" aria-hidden="true" />
+                <div>
+                  <strong>{item.title}</strong>
+                  <span>${item.price}</span>
+                </div>
+                {onRemoveItem && (
+                  <button type="button" onClick={() => onRemoveItem(item.id)}>
+                    Remove
+                  </button>
+                )}
               </div>
-              {onRemoveItem && (
-                <button type="button" onClick={() => onRemoveItem(item.id)}>
-                  Remove
-                </button>
-              )}
+            ))}
+          </div>
+        )}
+
+        <div className="crypto-checkout-total">
+          <span>Total</span>
+          <strong>${cartTotal}</strong>
+        </div>
+
+        <div className="crypto-qr-row">
+          <div className="crypto-qr-box">
+            {qrSrc ? <img src={qrSrc} alt={`${PAYMENT_NETWORK} address QR`} /> : <span>QR</span>}
+          </div>
+          <p>QR encodes the receiving address. Send the exact USDT amount shown.</p>
+        </div>
+      </div>
+
+      <div className="crypto-checkout-payment">
+        <div className="crypto-payment-amount">
+          <span>Send exactly</span>
+          <strong>{paymentAmount} USDT</strong>
+          <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
+            <Copy size={14} />
+            {copiedField === 'amount' ? 'Copied' : 'Copy amount'}
+          </button>
+        </div>
+
+        <div className="crypto-payment-address">
+          <span>Receiving address</span>
+          <code>{PAYMENT_ADDRESS}</code>
+          <button type="button" onClick={() => copyPaymentValue(PAYMENT_ADDRESS, 'address')}>
+            <Copy size={14} />
+            {copiedField === 'address' ? 'Copied' : 'Copy address'}
+          </button>
+        </div>
+
+        <div className="crypto-wallet-box">
+          <div className="crypto-wallet-heading">
+            <PlugZap size={16} />
+            <div>
+              <span>TronLink automation</span>
+              <strong>{walletAccount ? shortenAddress(walletAccount) : 'Wallet not connected'}</strong>
             </div>
-          ))}
-        </div>
-      )}
-
-      <div className="crypto-checkout-total">
-        <span>Total</span>
-        <strong>${cartTotal}</strong>
-      </div>
-
-      <div className="crypto-qr-row">
-        <div className="crypto-qr-box">
-          {qrSrc ? <img src={qrSrc} alt={`${PAYMENT_NETWORK} address QR`} /> : <span>QR</span>}
-        </div>
-        <p>QR encodes the receiving address. Send the exact USDT amount shown.</p>
-      </div>
-
-      <div className="crypto-payment-amount">
-        <span>Send exactly</span>
-        <strong>{paymentAmount} USDT</strong>
-        <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
-          <Copy size={14} />
-          {copiedField === 'amount' ? 'Copied' : 'Copy amount'}
-        </button>
-      </div>
-
-      <div className="crypto-payment-address">
-        <span>Receiving address</span>
-        <code>{PAYMENT_ADDRESS}</code>
-        <button type="button" onClick={() => copyPaymentValue(PAYMENT_ADDRESS, 'address')}>
-          <Copy size={14} />
-          {copiedField === 'address' ? 'Copied' : 'Copy address'}
-        </button>
-      </div>
-
-      <div className="crypto-wallet-box">
-        <div className="crypto-wallet-heading">
-          <PlugZap size={16} />
-          <div>
-            <span>TronLink automation</span>
-            <strong>{walletAccount ? shortenAddress(walletAccount) : 'Wallet not connected'}</strong>
           </div>
+          <div className="crypto-wallet-actions">
+            <button
+              type="button"
+              onClick={() => {
+                connectWallet().catch(() => {})
+              }}
+              disabled={walletStatus === 'connecting' || paymentInProgress}
+            >
+              {walletStatus === 'connecting' ? 'Connecting...' : walletAccount ? 'Reconnect' : 'Connect TronLink'}
+            </button>
+            <button
+              type="button"
+              className="primary"
+              onClick={sendPaymentWithTronLink}
+              disabled={!cartItems.length || paymentInProgress || paymentStatus === 'success'}
+            >
+              <Send size={14} />
+              {paymentStatus === 'waiting_wallet' ? 'Open TronLink' : 'Send USDT'}
+            </button>
+          </div>
+          {walletMessage && <p>{walletMessage}</p>}
         </div>
-        <div className="crypto-wallet-actions">
-          <button
-            type="button"
-            onClick={() => {
-              connectWallet().catch(() => {})
+
+        <p className="crypto-payment-warning">
+          Send USDT on the TRON/TRC20 network only. Transfers from other networks may be unrecoverable.
+        </p>
+
+        <label className="crypto-tx-field">
+          <span>Transaction hash</span>
+          <input
+            type="text"
+            value={txHash}
+            onChange={(event) => {
+              setTxHash(event.target.value)
+              setTxIdToVerify('')
+              setPaymentStatus('idle')
+              setPaymentMessage('')
             }}
-            disabled={walletStatus === 'connecting' || paymentInProgress}
-          >
-            {walletStatus === 'connecting' ? 'Connecting...' : walletAccount ? 'Reconnect' : 'Connect TronLink'}
-          </button>
-          <button
-            type="button"
-            className="primary"
-            onClick={sendPaymentWithTronLink}
-            disabled={!cartItems.length || paymentInProgress || paymentStatus === 'success'}
-          >
-            <Send size={14} />
-            {paymentStatus === 'waiting_wallet' ? 'Open TronLink' : 'Send USDT'}
-          </button>
-        </div>
-        {walletMessage && <p>{walletMessage}</p>}
-      </div>
+            placeholder="Paste your TRC20 transaction hash"
+          />
+        </label>
 
-      <p className="crypto-payment-warning">
-        Send USDT on the TRON/TRC20 network only. Transfers from other networks may be unrecoverable.
-      </p>
+        <button type="button" className="crypto-submit-payment" disabled={!txHash.trim()} onClick={submitPaymentProof}>
+          Verify transaction
+        </button>
 
-      <label className="crypto-tx-field">
-        <span>Transaction hash</span>
-        <input
-          type="text"
-          value={txHash}
-          onChange={(event) => {
-            setTxHash(event.target.value)
-            setTxIdToVerify('')
-            setPaymentStatus('idle')
-            setPaymentMessage('')
-          }}
-          placeholder="Paste your TRC20 transaction hash"
-        />
-      </label>
-
-      <button type="button" className="crypto-submit-payment" disabled={!txHash.trim()} onClick={submitPaymentProof}>
-        Verify transaction
-      </button>
-
-      {paymentStatus !== 'idle' && (
-        <div className={`crypto-payment-status ${paymentStatus}`}>
-          {paymentStatus === 'success' && <Check size={16} />}
-          {paymentStatus === 'failed' && <AlertCircle size={16} />}
-          {(paymentStatus === 'pending' || paymentStatus === 'waiting_wallet') && (
-            <LoaderCircle className="crypto-status-spinner" size={16} />
-          )}
-          <div>
-            <strong>{paymentStatusCopy[paymentStatus]}</strong>
-            <span>{paymentMessage}</span>
-            {txIdToVerify && <code>{txIdToVerify}</code>}
+        {paymentStatus !== 'idle' && (
+          <div className={`crypto-payment-status ${paymentStatus}`}>
+            {paymentStatus === 'success' && <Check size={16} />}
+            {paymentStatus === 'failed' && <AlertCircle size={16} />}
+            {(paymentStatus === 'pending' || paymentStatus === 'waiting_wallet') && (
+              <LoaderCircle className="crypto-status-spinner" size={16} />
+            )}
+            <div>
+              <strong>{paymentStatusCopy[paymentStatus]}</strong>
+              <span>{paymentMessage}</span>
+              {txIdToVerify && <code>{txIdToVerify}</code>}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

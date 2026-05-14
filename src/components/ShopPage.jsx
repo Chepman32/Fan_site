@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet } from 'lucide-react'
+import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet, X } from 'lucide-react'
 import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import ProductPreviewModal from './ProductPreviewModal'
-import { STREAM_OVERLAY_PRODUCTS, categoryTabs } from '../shop/shopData'
+import { SHOP_PRODUCTS_BY_CATEGORY, categoryTabs } from '../shop/shopData'
 import './ShopPage.css'
 
 function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onRemoveCartItem = () => {} }) {
-  const products = STREAM_OVERLAY_PRODUCTS
+  const defaultProducts = SHOP_PRODUCTS_BY_CATEGORY['stream-overlays'] || []
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
-  const [featuredId, setFeaturedId] = useState(products[0]?.id || '')
+  const [featuredId, setFeaturedId] = useState(defaultProducts[0]?.id || '')
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [previewProduct, setPreviewProduct] = useState(null)
+  const products = SHOP_PRODUCTS_BY_CATEGORY[selectedCategory] || []
+  const selectedCategoryMeta = categoryTabs.find((category) => category.id === selectedCategory)
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
@@ -22,10 +24,30 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
     }
   }, [])
 
+  useEffect(() => {
+    if (!paymentOpen) return undefined
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setPaymentOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [paymentOpen])
+
   const featuredProduct = products.find((product) => product.id === featuredId) || products[0]
+  const activeFeaturedId = featuredProduct?.id
 
   const openCheckout = () => {
     setPaymentOpen(true)
+  }
+
+  const selectCategory = (categoryId) => {
+    const nextProducts = SHOP_PRODUCTS_BY_CATEGORY[categoryId] || []
+    setSelectedCategory(categoryId)
+    setFeaturedId(nextProducts[0]?.id || '')
   }
 
   const removeCartItem = (productId) => {
@@ -55,7 +77,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
             </span>
             <h1>Stream-ready GTA VI assets</h1>
             <p>
-              Leonida-styled overlays for fan streams, trailer watch parties, countdowns, and community broadcasts.
+              Leonida-styled overlays and profile banners for fan streams, community pages, and creator channels.
             </p>
           </div>
 
@@ -75,7 +97,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               type="button"
               className={selectedCategory === category.id ? 'active' : ''}
               disabled={!category.active}
-              onClick={() => setSelectedCategory(category.id)}
+              onClick={() => selectCategory(category.id)}
             >
               <span>{category.label}</span>
               <em>{category.active ? category.count : 'Soon'}</em>
@@ -83,11 +105,19 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
           ))}
         </div>
 
+        {selectedCategoryMeta && (
+          <div className="shop-category-strip">
+            <strong>{selectedCategoryMeta.count}</strong>
+            <span>{selectedCategoryMeta.label} available</span>
+          </div>
+        )}
+
         {featuredProduct && (
-          <article className="shop-featured">
+          <article className={`shop-featured ${featuredProduct.categoryId}`}>
             <button
               type="button"
               className="shop-featured-media"
+              style={{ aspectRatio: featuredProduct.aspectRatio }}
               onClick={() => openProductPreview(featuredProduct)}
               onContextMenu={preventPreviewContextMenu}
               aria-label={`Open ${featuredProduct.title} fullscreen preview`}
@@ -102,7 +132,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
             <div className="shop-featured-copy">
               <span className="shop-pack-label">
                 <MonitorPlay size={15} />
-                Featured overlay pack
+                Featured {featuredProduct.categoryLabel}
               </span>
               <h2>{featuredProduct.title}</h2>
               <div className="shop-featured-specs">
@@ -131,11 +161,12 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               return (
                 <article
                   key={product.id}
-                  className={`shop-product-card ${featuredId === product.id ? 'featured' : ''}`}
+                  className={`shop-product-card ${product.categoryId} ${activeFeaturedId === product.id ? 'featured' : ''}`}
                 >
                   <button
                     type="button"
                     className="shop-product-preview"
+                    style={{ aspectRatio: product.aspectRatio }}
                     onClick={() => openProductPreview(product)}
                     onContextMenu={preventPreviewContextMenu}
                     aria-label={`Preview ${product.title}`}
@@ -209,18 +240,38 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               <Wallet size={16} />
               Pay with USDT
             </button>
-
-            {paymentOpen && cartItems.length > 0 && (
-              <CryptoCheckoutPanel
-                key={checkoutKey}
-                cartItems={cartItems}
-                cartTotal={cartTotal}
-                onRemoveItem={removeCartItem}
-              />
-            )}
           </aside>
         </div>
       </div>
+
+      {paymentOpen && cartItems.length > 0 && (
+        <div className="shop-checkout-overlay" role="presentation" onMouseDown={() => setPaymentOpen(false)}>
+          <div
+            className="shop-checkout-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Crypto checkout"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="shop-checkout-modal-head">
+              <div>
+                <span>Secure USDT checkout</span>
+                <strong>${cartTotal}</strong>
+              </div>
+              <button type="button" aria-label="Close checkout" onClick={() => setPaymentOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
+            <CryptoCheckoutPanel
+              key={checkoutKey}
+              cartItems={cartItems}
+              cartTotal={cartTotal}
+              onRemoveItem={removeCartItem}
+              wide
+            />
+          </div>
+        </div>
+      )}
 
       <ProductPreviewModal
         product={previewProduct}

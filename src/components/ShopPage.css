@@ -123,6 +123,32 @@
   color: var(--accent-cyan);
 }
 
+.shop-category-strip {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 12px;
+  background: rgba(0, 217, 255, 0.065);
+  border: 1px solid rgba(0, 217, 255, 0.18);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.shop-category-strip strong {
+  color: var(--accent-cyan);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.shop-category-strip span {
+  text-transform: uppercase;
+}
+
 .shop-featured {
   display: grid;
   grid-template-columns: minmax(0, 1.55fr) minmax(310px, 0.75fr);
@@ -354,10 +380,29 @@
   top: 96px;
   display: grid;
   gap: 16px;
+  max-height: calc(100dvh - 116px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 18px;
   background: rgba(26, 26, 37, 0.8);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  scrollbar-color: rgba(0, 217, 255, 0.5) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+.shop-cart-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.shop-cart-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.shop-cart-panel::-webkit-scrollbar-thumb {
+  background: rgba(0, 217, 255, 0.5);
+  border-radius: 999px;
 }
 
 .shop-cart-heading {
@@ -452,6 +497,73 @@
   opacity: 0.45;
 }
 
+.shop-checkout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 320;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 74% 24%, rgba(0, 217, 255, 0.16), transparent 34%),
+    rgba(6, 6, 10, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.shop-checkout-modal {
+  position: relative;
+  display: grid;
+  width: min(980px, calc(100vw - 48px));
+  max-height: calc(100dvh - 48px);
+  animation: checkout-modal-enter 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.shop-checkout-modal-head {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.shop-checkout-modal-head div {
+  display: none;
+}
+
+.shop-checkout-modal-head button {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: color 0.22s ease, border-color 0.22s ease, transform 0.22s ease;
+}
+
+.shop-checkout-modal-head button:hover {
+  color: var(--accent-cyan);
+  border-color: rgba(0, 217, 255, 0.36);
+  transform: translateY(-1px);
+}
+
+@keyframes checkout-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 1080px) {
   .shop-header,
   .shop-featured,
@@ -462,6 +574,8 @@
   .shop-cart-summary,
   .shop-cart-panel {
     position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -477,5 +591,14 @@
 
   .shop-featured-copy h2 {
     font-size: 36px;
+  }
+
+  .shop-checkout-overlay {
+    padding: 14px;
+  }
+
+  .shop-checkout-modal {
+    width: 100%;
+    max-height: calc(100dvh - 28px);
   }
 }

@@ -72,7 +72,7 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
 
             <header className="product-preview-header">
               <div>
-                <span>Stream overlay preview</span>
+                <span>{product.previewLabel || 'Product preview'}</span>
                 <h2>{product.title}</h2>
               </div>
               <button type="button" className="product-preview-close" onClick={onClose} aria-label="Close preview">

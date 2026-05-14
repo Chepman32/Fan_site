@@ -17,6 +17,39 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.48);
 }
 
+.crypto-checkout-panel.wide {
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1fr);
+  gap: 12px 14px;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  padding: 14px;
+  background:
+    linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(255, 45, 149, 0.08)),
+    #151722;
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.46);
+  scrollbar-color: rgba(0, 217, 255, 0.5) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+.crypto-checkout-panel.wide::-webkit-scrollbar {
+  width: 8px;
+}
+
+.crypto-checkout-panel.wide::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+}
+
+.crypto-checkout-panel.wide::-webkit-scrollbar-thumb {
+  background: rgba(0, 217, 255, 0.5);
+  border-radius: 999px;
+}
+
+.crypto-checkout-panel.wide .crypto-checkout-heading {
+  grid-column: 1 / -1;
+}
+
 .crypto-checkout-heading {
   display: flex;
   align-items: center;
@@ -40,6 +73,34 @@
   font-size: 11px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.crypto-checkout-summary,
+.crypto-checkout-payment {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.crypto-checkout-panel.wide .crypto-checkout-summary,
+.crypto-checkout-panel.wide .crypto-checkout-payment {
+  align-content: start;
+  gap: 10px;
+}
+
+.crypto-checkout-panel.wide .crypto-checkout-items {
+  max-height: 148px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.crypto-checkout-panel.wide .crypto-checkout-heading h3 {
+  font-size: 22px;
+}
+
+.crypto-checkout-panel.wide .crypto-checkout-item {
+  grid-template-columns: 62px minmax(0, 1fr);
+  padding: 8px;
 }
 
 .crypto-checkout-items {
@@ -132,6 +193,46 @@
 
 .crypto-checkout-panel.compact .crypto-qr-box {
   width: 128px;
+}
+
+.crypto-checkout-panel.wide .crypto-qr-box {
+  width: 152px;
+}
+
+.crypto-checkout-panel.wide .crypto-qr-row,
+.crypto-checkout-panel.wide .crypto-payment-amount,
+.crypto-checkout-panel.wide .crypto-payment-address,
+.crypto-checkout-panel.wide .crypto-wallet-box {
+  gap: 6px;
+  padding: 9px 10px;
+}
+
+.crypto-checkout-panel.wide .crypto-payment-warning {
+  padding: 8px 10px;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.crypto-checkout-panel.wide .crypto-payment-amount strong {
+  font-size: 28px;
+}
+
+.crypto-checkout-panel.wide .crypto-payment-amount button,
+.crypto-checkout-panel.wide .crypto-payment-address button,
+.crypto-checkout-panel.wide .crypto-wallet-actions button {
+  min-height: 30px;
+}
+
+.crypto-checkout-panel.wide .crypto-tx-field {
+  gap: 6px;
+}
+
+.crypto-checkout-panel.wide .crypto-tx-field input {
+  min-height: 36px;
+}
+
+.crypto-checkout-panel.wide .crypto-submit-payment {
+  min-height: 38px;
 }
 
 .crypto-qr-box img {
@@ -365,12 +466,18 @@
 }
 
 @media (max-width: 560px) {
+  .crypto-checkout-panel.wide {
+    grid-template-columns: 1fr;
+    max-height: calc(100dvh - 178px);
+  }
+
   .crypto-qr-row {
     grid-template-columns: 1fr;
   }
 
   .crypto-qr-box,
-  .crypto-checkout-panel.compact .crypto-qr-box {
+  .crypto-checkout-panel.compact .crypto-qr-box,
+  .crypto-checkout-panel.wide .crypto-qr-box {
     width: 100%;
     max-width: 180px;
   }
