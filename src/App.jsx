@@ -14,6 +14,7 @@ import ProfilePage from './components/ProfilePage'
 import UserProfilePage from './components/UserProfilePage'
 import AuthModal from './components/AuthModal'
 import Footer from './components/Footer'
+import { logAnalyticsPageView } from './firebase/firebaseClient'
 import { SocialProvider, useSocial } from './social/SocialContext'
 import { LanguageProvider } from './i18n/useTranslation.jsx'
 import './App.css'
@@ -35,7 +36,10 @@ function AppContent() {
   const { currentProfile, logout } = useSocial()
 
   useEffect(() => {
-    const handlePopState = () => setRoute(currentRoute())
+    const handlePopState = () => {
+      setRoute(currentRoute())
+      logAnalyticsPageView()
+    }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
@@ -60,6 +64,7 @@ function AppContent() {
 
     window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.hash}`)
     setRoute(nextRoute)
+    logAnalyticsPageView(`${nextUrl.pathname}${nextUrl.hash}`)
     scrollToHash(nextUrl.hash)
   }
 

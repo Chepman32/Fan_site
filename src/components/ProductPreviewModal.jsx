@@ -7,6 +7,8 @@ const backdropTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
 const sheetSpring = { type: 'spring', stiffness: 420, damping: 34, mass: 0.9 }
 
 function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
+  const hasImageSet = product?.images?.length > 1
+
   const preventPreviewContextMenu = (event) => {
     event.preventDefault()
   }
@@ -81,15 +83,35 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
             </header>
 
             <div className="product-preview-stage">
-              <motion.img
-                src={product.image}
-                alt={product.title}
-                onContextMenu={preventPreviewContextMenu}
-                initial={{ scale: 1.05, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ ...sheetSpring, delay: 0.04 }}
-                draggable="false"
-              />
+              {hasImageSet ? (
+                <motion.div
+                  className="product-preview-emote-grid"
+                  initial={{ scale: 1.04, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ ...sheetSpring, delay: 0.04 }}
+                >
+                  {product.images.map((image) => (
+                    <img
+                      key={image}
+                      src={image}
+                      alt=""
+                      aria-hidden="true"
+                      onContextMenu={preventPreviewContextMenu}
+                      draggable="false"
+                    />
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.img
+                  src={product.image}
+                  alt={product.title}
+                  onContextMenu={preventPreviewContextMenu}
+                  initial={{ scale: 1.05, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ ...sheetSpring, delay: 0.04 }}
+                  draggable="false"
+                />
+              )}
             </div>
 
             <footer className="product-preview-footer">

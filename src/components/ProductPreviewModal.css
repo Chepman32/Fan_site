@@ -104,6 +104,36 @@
   -webkit-user-drag: none;
 }
 
+.product-preview-emote-grid {
+  display: grid;
+  width: min(980px, 100%);
+  max-height: min(68vh, 760px);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(10px, 1.5vw, 16px);
+  overflow: auto;
+  padding: clamp(12px, 1.8vw, 18px);
+  background:
+    radial-gradient(circle at 10% 8%, rgba(0, 217, 255, 0.18), transparent 32%),
+    radial-gradient(circle at 92% 88%, rgba(255, 45, 149, 0.16), transparent 36%),
+    #050509;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.48);
+  scrollbar-color: rgba(0, 217, 255, 0.5) rgba(255, 255, 255, 0.06);
+  scrollbar-width: thin;
+}
+
+.product-preview-emote-grid img {
+  aspect-ratio: 1;
+  max-height: none;
+  padding: clamp(7px, 1.1vw, 12px);
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  box-shadow: none;
+}
+
 .product-preview-footer {
   flex-wrap: wrap;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -184,6 +214,13 @@
 
   .product-preview-stage img {
     max-height: 58vh;
+  }
+
+  .product-preview-emote-grid {
+    max-height: 58vh;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 10px;
   }
 
   .product-preview-cart {

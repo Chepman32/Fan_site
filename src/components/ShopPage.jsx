@@ -5,6 +5,27 @@ import ProductPreviewModal from './ProductPreviewModal'
 import { SHOP_PRODUCTS_BY_CATEGORY, categoryTabs } from '../shop/shopData'
 import './ShopPage.css'
 
+function ShopProductArtwork({ product, loading = 'eager' }) {
+  if (product.images?.length > 1) {
+    return (
+      <span className="shop-emote-pack-preview" aria-hidden="true">
+        {product.images.map((image) => (
+          <img key={image} src={image} alt="" loading={loading} draggable="false" />
+        ))}
+      </span>
+    )
+  }
+
+  return (
+    <img
+      src={product.image}
+      alt={product.title}
+      loading={loading}
+      draggable="false"
+    />
+  )
+}
+
 function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onRemoveCartItem = () => {} }) {
   const defaultProducts = SHOP_PRODUCTS_BY_CATEGORY['stream-overlays'] || []
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
@@ -77,7 +98,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
             </span>
             <h1>Stream-ready GTA VI assets</h1>
             <p>
-              Leonida-styled overlays and profile banners for fan streams, community pages, and creator channels.
+              Leonida-styled overlays, profile banners, and emote packs for fan streams, community pages, and creator channels.
             </p>
           </div>
 
@@ -122,12 +143,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               onContextMenu={preventPreviewContextMenu}
               aria-label={`Open ${featuredProduct.title} fullscreen preview`}
             >
-              <img
-                src={featuredProduct.image}
-                alt={featuredProduct.title}
-                draggable="false"
-                onContextMenu={preventPreviewContextMenu}
-              />
+              <ShopProductArtwork product={featuredProduct} />
             </button>
             <div className="shop-featured-copy">
               <span className="shop-pack-label">
@@ -171,13 +187,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                     onContextMenu={preventPreviewContextMenu}
                     aria-label={`Preview ${product.title}`}
                   >
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      loading="lazy"
-                      draggable="false"
-                      onContextMenu={preventPreviewContextMenu}
-                    />
+                    <ShopProductArtwork product={product} loading="lazy" />
                   </button>
 
                   <div className="shop-product-body">

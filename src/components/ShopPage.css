@@ -187,6 +187,35 @@
   -webkit-user-drag: none;
 }
 
+.shop-emote-pack-preview {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: clamp(6px, 1vw, 10px);
+  padding: clamp(10px, 2vw, 18px);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(0, 217, 255, 0.2), transparent 31%),
+    radial-gradient(circle at 88% 82%, rgba(255, 45, 149, 0.17), transparent 34%),
+    #07070d;
+}
+
+.shop-product-preview .shop-emote-pack-preview {
+  gap: 7px;
+  padding: 10px;
+}
+
+.shop-emote-pack-preview img {
+  aspect-ratio: 1;
+  min-width: 0;
+  padding: clamp(4px, 0.7vw, 8px);
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+}
+
 .shop-featured-media img {
   transition: transform 0.35s ease;
 }

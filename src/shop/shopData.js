@@ -27,6 +27,17 @@ const profileBannerImageModules = {
   }),
 }
 
+const emotePackImageModules = {
+  ...import.meta.glob('../assets/shop/Emote packs/*/*.png', {
+    eager: true,
+    import: 'default',
+  }),
+  ...import.meta.glob('../assets/shop/Emote packs/*/*.PNG', {
+    eager: true,
+    import: 'default',
+  }),
+}
+
 const overlayNames = [
   'Vice Nights Broadcast Kit',
   'Ocean Drive Stream Suite',
@@ -116,13 +127,52 @@ const profileBannerStandardStems = new Set([
   'CFAF8C74-53F3-4008-966B-1F5C09995244',
 ])
 
+const emotePackMeta = {
+  gta_vi_emote_pack_01: {
+    title: 'Vice Hustle Emote Pack',
+    price: 16,
+    tags: ['10 emotes', 'Chat reactions', 'Vice City style'],
+  },
+  gta_vi_emote_pack_02: {
+    title: 'Leonida Heat Emote Pack',
+    price: 16,
+    tags: ['10 emotes', 'Creator chat', 'Neon reactions'],
+  },
+  gta_vi_emote_pack_03: {
+    title: 'Keys Flex Emote Pack',
+    price: 16,
+    tags: ['10 emotes', 'Streamer-ready', 'Transparent PNG'],
+  },
+}
+
 function overlayFileStem(path) {
   return path.split('/').pop()?.replace(/\.png$/i, '') || ''
+}
+
+function emotePackFolder(path) {
+  const segments = path.split('/')
+  return segments[segments.length - 2] || ''
 }
 
 function sortedImageEntries(modules) {
   return Object.entries(modules)
     .sort(([pathA], [pathB]) => pathA.localeCompare(pathB, undefined, { numeric: true, sensitivity: 'base' }))
+}
+
+function sortedEmotePacks() {
+  const packs = new Map()
+
+  sortedImageEntries(emotePackImageModules).forEach(([path, image]) => {
+    const folder = emotePackFolder(path)
+    if (!folder) return
+
+    const pack = packs.get(folder) || { folder, images: [] }
+    pack.images.push(image)
+    packs.set(folder, pack)
+  })
+
+  return Array.from(packs.values())
+    .sort((packA, packB) => packA.folder.localeCompare(packB.folder, undefined, { numeric: true, sensitivity: 'base' }))
 }
 
 function profileBannerResolution(stem) {
@@ -171,14 +221,35 @@ export const PROFILE_BANNER_PRODUCTS = sortedImageEntries(profileBannerImageModu
     }
   })
 
+export const EMOTE_PACK_PRODUCTS = sortedEmotePacks()
+  .map((pack, index) => {
+    const meta = emotePackMeta[pack.folder] || {}
+
+    return {
+      id: `emotes-${pack.folder.replace(/_/g, '-')}`,
+      categoryId: 'emote-packs',
+      categoryLabel: 'Emote packs',
+      previewLabel: 'Emote pack preview',
+      title: meta.title || `Leonida Emote Pack ${index + 1}`,
+      image: pack.images[0],
+      images: pack.images,
+      price: meta.price || 16,
+      format: `${pack.images.length} emote PNGs`,
+      resolution: '1024 x 1024 each',
+      aspectRatio: '16 / 9',
+      tags: meta.tags || ['Emote pack', 'Streamer-ready', 'Transparent PNG'],
+    }
+  })
+
 export const SHOP_PRODUCTS_BY_CATEGORY = {
   'stream-overlays': STREAM_OVERLAY_PRODUCTS,
   'profile-banners': PROFILE_BANNER_PRODUCTS,
+  'emote-packs': EMOTE_PACK_PRODUCTS,
 }
 
 export const categoryTabs = [
   { id: 'stream-overlays', label: 'Stream overlays', count: STREAM_OVERLAY_PRODUCTS.length, active: true },
   { id: 'profile-banners', label: 'Profile banners', count: PROFILE_BANNER_PRODUCTS.length, active: true },
-  { id: 'emote-packs', label: 'Emote packs', count: 0 },
+  { id: 'emote-packs', label: 'Emote packs', count: EMOTE_PACK_PRODUCTS.length, active: true },
   { id: 'logo-kits', label: 'Logo kits', count: 0 },
 ]

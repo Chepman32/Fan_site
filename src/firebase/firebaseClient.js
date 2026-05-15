@@ -1,4 +1,6 @@
+let firebaseAppPromise
 let firebaseServicesPromise
+let firebaseAnalyticsPromise
 
 function envConfig() {
   const config = {
@@ -8,9 +10,18 @@ function envConfig() {
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
   }
+  const requiredConfig = [
+    config.apiKey,
+    config.authDomain,
+    config.projectId,
+    config.storageBucket,
+    config.messagingSenderId,
+    config.appId,
+  ]
 
-  return Object.values(config).every(Boolean) ? config : null
+  return requiredConfig.every(Boolean) ? config : null
 }
 
 async function hostingConfig() {
@@ -29,15 +40,81 @@ async function loadFirebaseConfig() {
   return hostingConfig()
 }
 
+async function getFirebaseApp() {
+  if (!firebaseAppPromise) {
+    firebaseAppPromise = import('firebase/app').then(async (appModule) => {
+      const { getApps, initializeApp } = appModule
+      const existingApp = getApps()[0]
+
+      if (existingApp) return existingApp
+
+      return initializeApp(await loadFirebaseConfig())
+    }).catch((error) => {
+      firebaseAppPromise = null
+      throw error
+    })
+  }
+
+  return firebaseAppPromise
+}
+
+export async function initializeFirebaseAnalytics() {
+  if (!firebaseAnalyticsPromise) {
+    firebaseAnalyticsPromise = Promise.all([
+      getFirebaseApp(),
+      import('firebase/analytics'),
+    ])
+      .then(async ([app, analyticsModule]) => {
+        const { initializeAnalytics, isSupported } = analyticsModule
+
+        if (!app.options.measurementId || !(await isSupported())) {
+          return null
+        }
+
+        return initializeAnalytics(app, {
+          config: {
+            send_page_view: false,
+          },
+        })
+      })
+      .catch((error) => {
+        if (import.meta.env.DEV) {
+          console.warn('Firebase Analytics was not initialized.', error)
+        }
+
+        return null
+      })
+  }
+
+  return firebaseAnalyticsPromise
+}
+
+export async function logAnalyticsPageView(pagePath = `${window.location.pathname}${window.location.hash}`) {
+  try {
+    const analytics = await initializeFirebaseAnalytics()
+    if (!analytics) return
+
+    const { logEvent } = await import('firebase/analytics')
+
+    logEvent(analytics, 'page_view', {
+      page_path: pagePath,
+      page_location: window.location.href,
+      page_title: document.title,
+    })
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.warn('Firebase page view was not logged.', error)
+    }
+  }
+}
+
 export async function getFirebaseServices() {
   if (!firebaseServicesPromise) {
     firebaseServicesPromise = Promise.all([
-      loadFirebaseConfig(),
-      import('firebase/app'),
+      getFirebaseApp(),
       import('firebase/auth'),
       import('firebase/firestore'),
-    ]).then(([config, appModule, authModule, firestoreModule]) => {
-      const { initializeApp } = appModule
+    ]).then(([app, authModule, firestoreModule]) => {
       const {
         createUserWithEmailAndPassword,
         getAuth,
@@ -63,7 +140,7 @@ export async function getFirebaseServices() {
         updateDoc,
         where,
       } = firestoreModule
-      const app = initializeApp(config)
+
       return {
         app,
         auth: getAuth(app),
