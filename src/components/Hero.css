@@ -357,6 +357,14 @@
   .nav-links {
     display: none;
   }
+
+  .hero {
+    padding-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+
+  .scroll-indicator {
+    bottom: calc(92px + env(safe-area-inset-bottom));
+  }
 }
 
 @media (max-width: 768px) {

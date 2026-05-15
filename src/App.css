@@ -6,3 +6,9 @@
 .page-main {
   padding-top: 70px;
 }
+
+@media (max-width: 1120px) {
+  .app {
+    padding-bottom: calc(86px + env(safe-area-inset-bottom));
+  }
+}
