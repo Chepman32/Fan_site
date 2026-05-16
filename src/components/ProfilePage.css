@@ -59,7 +59,8 @@
 }
 
 .profile-status-panel,
-.profile-side-stack {
+.profile-side-stack,
+.profile-main-stack {
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -313,6 +314,12 @@
   gap: 14px;
 }
 
+.profile-community-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
 .profile-bookmark-card,
 .profile-mini-source,
 .profile-leader-row,
@@ -338,6 +345,10 @@
   flex: 1;
   min-width: 0;
   flex-direction: column;
+}
+
+.profile-bookmark-meta.compact {
+  margin-bottom: 8px;
 }
 
 .profile-bookmark-top strong,
@@ -367,6 +378,11 @@
   color: var(--text-secondary);
   font-size: 14px;
   line-height: 1.6;
+}
+
+.profile-bookmark-card .post-attachment,
+.profile-bookmark-card .post-link-card {
+  margin-bottom: 12px;
 }
 
 .profile-empty-state {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Image as ImageIcon, Loader, UserRound, Users } from 'lucide-react'
+import { Image as ImageIcon, Loader, UserRound } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import ImageZoomModal from './ImageZoomModal'
 import './Characters.css'

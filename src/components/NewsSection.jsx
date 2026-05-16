@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Newspaper, Loader, ArrowUpRight, Clock, UserRound } from 'lucide-react'
+import { Loader, ArrowUpRight, Clock, UserRound } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 

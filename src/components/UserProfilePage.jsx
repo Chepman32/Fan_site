@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { BadgeCheck, FileText, MessageSquare } from 'lucide-react'
 import { getUserProfile, useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import CommunityPostCard from './CommunityPostCard.jsx'
 import './ProfilePage.css'
 
 function formatDate(date, lang = 'en') {
@@ -33,8 +34,17 @@ function ProfileAvatar({ user, size = 'md' }) {
   )
 }
 
-function UserProfilePage({ userId, onNavigate }) {
-  const { state, publicUsers } = useSocial()
+function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
+  const {
+    currentProfile: socialCurrentProfile,
+    currentUser,
+    deletePost,
+    isSignedIn,
+    publicUsers,
+    reactToPost,
+    state,
+    toggleBookmark,
+  } = useSocial()
   const { t, lang } = useTranslation()
   const s = t.social
 
@@ -89,25 +99,29 @@ function UserProfilePage({ userId, onNavigate }) {
           <section className="profile-bookmarks-panel">
             <div className="profile-panel-heading">
               <MessageSquare size={16} />
-              <h2>Posts</h2>
+              <h2>{s.tabs.posts}</h2>
             </div>
             {userPosts.length === 0 ? (
               <div className="profile-empty-state">
                 <MessageSquare size={20} />
-                <p>No posts yet.</p>
+                <p>{s.noPosts ?? 'No posts yet.'}</p>
               </div>
             ) : (
-              <div className="profile-bookmark-list">
+              <div className="profile-community-post-list">
                 {userPosts.map((post) => (
-                  <article key={post.id} className="profile-bookmark-card">
-                    <div className="profile-bookmark-meta" style={{ marginBottom: 8 }}>
-                      <span>{formatRelative(post.createdAt, s)}</span>
-                    </div>
-                    <p>{post.body}</p>
-                    <div className="profile-bookmark-tags">
-                      {post.tags.map((tag) => <span key={tag}>#{tag}</span>)}
-                    </div>
-                  </article>
+                  <CommunityPostCard
+                    key={post.id}
+                    post={post}
+                    author={profile}
+                    currentUser={currentUser}
+                    currentProfile={socialCurrentProfile}
+                    isSignedIn={isSignedIn}
+                    onOpenAuth={onOpenAuth}
+                    onViewUser={(nextUserId) => onNavigate(`/profile/${nextUserId}`)}
+                    onToggleBookmark={toggleBookmark}
+                    onDeletePost={deletePost}
+                    onReactToPost={reactToPost}
+                  />
                 ))}
               </div>
             )}

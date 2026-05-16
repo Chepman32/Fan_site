@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Play, Film, ExternalLink } from 'lucide-react'
+import { Play, ExternalLink } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './MediaGallery.css'
 

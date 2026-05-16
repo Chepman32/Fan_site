@@ -165,9 +165,6 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                   <ShoppingCart size={16} />
                   Add ${featuredProduct.price}
                 </button>
-                <button type="button" className="shop-preview-link" onClick={() => openProductPreview(featuredProduct)}>
-                  Preview fullscreen
-                </button>
               </div>
             </div>
           </article>

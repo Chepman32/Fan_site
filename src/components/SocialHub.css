@@ -378,6 +378,7 @@
 }
 
 .post-composer textarea,
+.post-composer input,
 .source-form textarea,
 .source-form input,
 .source-form select,
@@ -401,6 +402,7 @@
 }
 
 .source-form input,
+.post-composer input,
 .source-form select,
 .comment-form input,
 .message-form input {
@@ -411,6 +413,7 @@
 .source-form input:focus,
 .source-form select:focus,
 .source-form textarea:focus,
+.post-composer input:focus,
 .post-composer textarea:focus,
 .comment-form input:focus,
 .message-form input:focus {
@@ -418,11 +421,35 @@
 }
 
 .post-composer textarea::placeholder,
+.post-composer input::placeholder,
 .source-form textarea::placeholder,
 .source-form input::placeholder,
 .comment-form input::placeholder,
 .message-form input::placeholder {
   color: var(--text-muted);
+}
+
+.composer-link-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.composer-link-field span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.composer-error {
+  margin-top: -6px;
+  color: #ffc1d8;
+  font-size: 13px;
 }
 
 .composer-bottom {

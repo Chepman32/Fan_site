@@ -110,7 +110,7 @@ function AppContent() {
       <div className="app">
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <UserProfilePage userId={userId} onNavigate={navigateTo} />
+          <UserProfilePage userId={userId} onNavigate={navigateTo} onOpenAuth={() => setAuthOpen(true)} />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}

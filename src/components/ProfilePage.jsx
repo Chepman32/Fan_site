@@ -4,6 +4,7 @@ import {
   Bookmark,
   Camera,
   FileText,
+  MessageSquare,
   Save,
   Trash2,
   Upload,
@@ -11,6 +12,8 @@ import {
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import CommunityPostCard from './CommunityPostCard.jsx'
+import PostAttachment from './PostAttachment.jsx'
 import './ProfilePage.css'
 
 function formatDate(date, lang = 'en') {
@@ -98,9 +101,12 @@ function resizePhoto(file, errors) {
 function ProfilePage({ onOpenAuth, onNavigate }) {
   const {
     backendError,
+    currentUser,
     currentProfile,
+    deletePost,
     isSignedIn,
     publicUsers,
+    reactToPost,
     state,
     toggleBookmark,
     updateUserProfile,
@@ -120,6 +126,11 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
       .map((postId) => state.posts.find((post) => post.id === postId))
       .filter(Boolean)
   }, [currentProfile?.bookmarkedPostIds, state.posts])
+
+  const myPosts = useMemo(() => {
+    if (!currentProfile) return []
+    return state.posts.filter((post) => post.authorId === currentProfile.id)
+  }, [currentProfile, state.posts])
 
   const mySources = useMemo(() => {
     if (!currentProfile) return []
@@ -177,6 +188,10 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
     } else {
       window.location.href = '/community'
     }
+  }
+
+  const viewUser = (userId) => {
+    onNavigate?.(`/profile/${userId}`)
   }
 
   if (!isSignedIn) {
@@ -286,50 +301,80 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
         </div>
 
         <div className="profile-content-grid">
-          <section className="profile-bookmarks-panel">
-            <div className="profile-panel-heading">
-              <Bookmark size={16} />
-              <h2>{s.bookmarks}</h2>
-              <button type="button" onClick={goToCommunity}>{s.browsePosts}</button>
-            </div>
+          <div className="profile-main-stack">
+            {myPosts.length > 0 && (
+              <section className="profile-bookmarks-panel">
+                <div className="profile-panel-heading">
+                  <MessageSquare size={16} />
+                  <h2>{s.tabs.posts}</h2>
+                </div>
 
-            {bookmarkedPosts.length === 0 ? (
-              <div className="profile-empty-state">
-                <Camera size={20} />
-                <p>{s.noBookmarks}</p>
-              </div>
-            ) : (
-              <div className="profile-bookmark-list">
-                {bookmarkedPosts.map((post) => {
-                  const author = usersById[post.authorId] ?? userFallback(post.authorId)
-                  return (
-                    <article key={post.id} className="profile-bookmark-card">
-                      <div className="profile-bookmark-top">
-                        <ProfileAvatar user={author} size="sm" />
-                        <div className="profile-bookmark-meta">
-                          <strong>{author.username}</strong>
-                          <span>{formatRelative(post.createdAt, s)}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => toggleBookmark(post.id)}
-                          aria-label={s.removeBookmark}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                      <p>{post.body}</p>
-                      <div className="profile-bookmark-tags">
-                        {post.tags.map((tag) => (
-                          <span key={tag}>#{tag}</span>
-                        ))}
-                      </div>
-                    </article>
-                  )
-                })}
-              </div>
+                <div className="profile-community-post-list">
+                  {myPosts.map((post) => (
+                    <CommunityPostCard
+                      key={post.id}
+                      post={post}
+                      author={currentProfile}
+                      currentUser={currentUser}
+                      currentProfile={currentProfile}
+                      isSignedIn={isSignedIn}
+                      onOpenAuth={onOpenAuth}
+                      onViewUser={viewUser}
+                      onToggleBookmark={toggleBookmark}
+                      onDeletePost={deletePost}
+                      onReactToPost={reactToPost}
+                    />
+                  ))}
+                </div>
+              </section>
             )}
-          </section>
+
+            <section className="profile-bookmarks-panel">
+              <div className="profile-panel-heading">
+                <Bookmark size={16} />
+                <h2>{s.bookmarks}</h2>
+                <button type="button" onClick={goToCommunity}>{s.browsePosts}</button>
+              </div>
+
+              {bookmarkedPosts.length === 0 ? (
+                <div className="profile-empty-state">
+                  <Camera size={20} />
+                  <p>{s.noBookmarks}</p>
+                </div>
+              ) : (
+                <div className="profile-bookmark-list">
+                  {bookmarkedPosts.map((post) => {
+                    const author = usersById[post.authorId] ?? userFallback(post.authorId)
+                    return (
+                      <article key={post.id} className="profile-bookmark-card">
+                        <div className="profile-bookmark-top">
+                          <ProfileAvatar user={author} size="sm" />
+                          <div className="profile-bookmark-meta">
+                            <strong>{author.username}</strong>
+                            <span>{formatRelative(post.createdAt, s)}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleBookmark(post.id)}
+                            aria-label={s.removeBookmark}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                        <p>{post.body}</p>
+                        <PostAttachment post={post} />
+                        <div className="profile-bookmark-tags">
+                          {post.tags.map((tag) => (
+                            <span key={tag}>#{tag}</span>
+                          ))}
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
+          </div>
 
           <aside className="profile-side-stack">
             <section className="profile-source-log">

@@ -984,7 +984,6 @@ function OverviewPanel({ copy, data, stats, images = [] }) {
 function SimpleGuideSection({ config }) {
   const { t } = useTranslation()
   const copy = guideCopy(t, config.key)
-  const Icon = config.icon
   const [data, setData] = useState(config.fallback)
   const [loading, setLoading] = useState(true)
   const [zoomed, setZoomed] = useState(null)

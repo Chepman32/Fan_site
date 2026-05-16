@@ -6,6 +6,7 @@ import {
   RUMOR_VOTE_OPTIONS,
   createSeedSocialState,
 } from './socialData'
+import { normalizePostUrl } from './postLinks'
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
@@ -547,19 +548,30 @@ export function SocialProvider({ children }) {
     setAuthError('')
   }
 
-  const createPost = async ({ body, tags }) => {
+  const createPost = async ({ body, tags, linkUrl = '' }) => {
     if (!requireUser()) return false
     const cleanBody = body.trim()
+    const cleanLinkUrl = normalizePostUrl(linkUrl)
     if (!cleanBody) return false
+    if (linkUrl.trim() && !cleanLinkUrl) {
+      setBackendError('Enter a valid http or https link.')
+      return false
+    }
+
+    const payload = {
+      authorId: authUser.uid,
+      body: cleanBody,
+      tags,
+      createdAt: services.serverTimestamp(),
+      reactions: emptyReactionMap(),
+    }
+
+    if (cleanLinkUrl) {
+      payload.linkUrl = cleanLinkUrl
+    }
 
     try {
-      await services.addDoc(services.collection(services.db, 'posts'), {
-        authorId: authUser.uid,
-        body: cleanBody,
-        tags,
-        createdAt: services.serverTimestamp(),
-        reactions: emptyReactionMap(),
-      })
+      await services.addDoc(services.collection(services.db, 'posts'), payload)
       return true
     } catch (error) {
       setBackendError(firebaseErrorMessage(error))

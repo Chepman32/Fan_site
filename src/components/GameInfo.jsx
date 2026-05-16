@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Info, Loader, AlertCircle, Monitor, Users, Globe, Sparkles } from 'lucide-react'
+import { Loader, AlertCircle, Monitor, Users, Globe, Sparkles } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './GameInfo.css'
 

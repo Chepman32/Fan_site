@@ -107,6 +107,7 @@ export function createSeedSocialState() {
         id: 'post-leonida-signs',
         authorId: 'user-maprunner',
         body: 'The freeway sign sequence in Trailer 2 looks like it confirms at least two inland county routes. I added a map thread for marker comparisons.',
+        linkUrl: 'https://www.youtube.com/watch?v=VQRLujxTm3c',
         tags: ['Map / Leonida', 'Trailers'],
         createdAt: '2026-05-06T09:31:00.000Z',
         reactions: makeReactions([

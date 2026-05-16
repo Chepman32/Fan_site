@@ -1,26 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Bell,
-  Bookmark,
-  BookmarkCheck,
   CheckCircle2,
   Clock,
-  Eye,
   Hash,
-  HelpCircle,
   Link,
   LogIn,
   Mail,
   MessageSquare,
-  MoreVertical,
   Plus,
   Radio,
   Send,
-  Share2,
   ShieldCheck,
-  ThumbsUp,
-  Trash2,
   Trophy,
   Users,
   Vote,
@@ -28,22 +19,17 @@ import {
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import CommunityPostCard from './CommunityPostCard.jsx'
 import {
-  REACTION_OPTIONS,
   RUMOR_VOTE_OPTIONS,
   SOCIAL_TOPICS,
   SOURCE_CATEGORIES,
 } from '../social/socialData'
+import { normalizePostUrl } from '../social/postLinks'
 import './SocialHub.css'
 
 const TAB_IDS = ['feed', 'rumors', 'sources', 'polls', 'messages']
 const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote, messages: Mail }
-
-const REACTION_ICONS = {
-  useful: ThumbsUp,
-  interesting: Eye,
-  doubtful: HelpCircle,
-}
 
 const SOURCE_STATUS_ICONS = {
   accepted: CheckCircle2,
@@ -222,6 +208,8 @@ function PostComposer({ onOpenAuth }) {
   const { createPost, isSignedIn } = useSocial()
   const { t } = useTranslation()
   const [body, setBody] = useState('')
+  const [linkUrl, setLinkUrl] = useState('')
+  const [linkError, setLinkError] = useState('')
   const [selectedTags, setSelectedTags] = useState(['Trailers'])
 
   const toggleTag = (topic) => {
@@ -234,8 +222,19 @@ function PostComposer({ onOpenAuth }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!isSignedIn) { onOpenAuth(); return }
-    const didCreate = await createPost({ body, tags: selectedTags })
-    if (didCreate) { setBody(''); setSelectedTags(['Trailers']) }
+    const cleanLinkUrl = normalizePostUrl(linkUrl)
+    if (linkUrl.trim() && !cleanLinkUrl) {
+      setLinkError(t.social.postLinkInvalid ?? 'Enter a valid http or https link.')
+      return
+    }
+
+    const didCreate = await createPost({ body, tags: selectedTags, linkUrl: cleanLinkUrl })
+    if (didCreate) {
+      setBody('')
+      setLinkUrl('')
+      setLinkError('')
+      setSelectedTags(['Trailers'])
+    }
   }
 
   return (
@@ -246,6 +245,23 @@ function PostComposer({ onOpenAuth }) {
         placeholder={isSignedIn ? t.social.postPlaceholder : t.social.postPlaceholderGuest}
         rows={4}
       />
+      <label className="composer-link-field">
+        <span>
+          <Link size={14} />
+          {t.social.postLinkLabel ?? 'Link'}
+        </span>
+        <input
+          value={linkUrl}
+          onChange={(event) => {
+            setLinkUrl(event.target.value)
+            setLinkError('')
+          }}
+          placeholder={t.social.postLinkPlaceholder ?? 'Paste a YouTube, Vimeo, Facebook, VK, or article link'}
+          inputMode="url"
+          autoComplete="off"
+        />
+      </label>
+      {linkError && <p className="composer-error">{linkError}</p>}
       <div className="composer-bottom">
         <div className="composer-tags" aria-label="Post topics">
           {SOCIAL_TOPICS.slice(0, 6).map((topic) => (
@@ -268,68 +284,6 @@ function PostComposer({ onOpenAuth }) {
   )
 }
 
-function PostMenu({ postId, onDelete }) {
-  const [open, setOpen] = useState(false)
-  const menuRef = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    const handleClick = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [open])
-
-  const handleShare = async () => {
-    const url = `${window.location.origin}/community`
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'Community Post', url })
-      } else if (navigator.clipboard) {
-        await navigator.clipboard.writeText(url)
-      }
-    } catch {
-      // share cancelled or failed
-    }
-    setOpen(false)
-  }
-
-  const handleDelete = async () => {
-    setOpen(false)
-    await onDelete(postId)
-  }
-
-  return (
-    <div ref={menuRef} className="post-menu">
-      <button
-        className="post-menu-button"
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label="Post options"
-      >
-        <MoreVertical size={17} />
-      </button>
-      {open && (
-        <div className="post-menu-dropdown" role="menu">
-          <button type="button" role="menuitem" onClick={handleShare}>
-            <Share2 size={14} />
-            Share
-          </button>
-          <button type="button" role="menuitem" onClick={handleDelete}>
-            <Trash2 size={14} />
-            Remove
-          </button>
-        </div>
-      )}
-    </div>
-  )
-}
-
 function FeedTab({ onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark, deletePost } = useSocial()
 
@@ -342,76 +296,28 @@ function FeedTab({ onOpenAuth, onViewUser }) {
       <AnimatePresence initial={false}>
       {state.posts.map((post) => {
         const author = usersById[post.authorId] ?? userFallback(post.authorId)
-        const currentReaction = REACTION_OPTIONS.find((option) =>
-          post.reactions[option.id]?.includes(currentUser?.id),
-        )
-        const bookmarked = currentProfile?.bookmarkedPostIds.includes(post.id)
-        const canBookmark = post.authorId !== currentUser?.id
 
         return (
-          <motion.article
+          <motion.div
             key={post.id}
-            className="community-post"
             layout
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 30 } }}
             exit={{ opacity: 0, scale: 0.94, height: 0, marginBottom: 0, transition: { type: 'spring', stiffness: 400, damping: 35, opacity: { duration: 0.15 } } }}
           >
-            <header className="post-header">
-              <div className="post-author">
-                <Avatar user={author} onClick={() => onViewUser(post.authorId)} />
-                <div>
-                  <h3>{author.username}</h3>
-                  <span>{formatRelative(post.createdAt)}</span>
-                </div>
-              </div>
-              <div className="post-header-actions">
-                {canBookmark && (
-                  <button
-                    className={bookmarked ? 'post-bookmark-button active' : 'post-bookmark-button'}
-                    type="button"
-                    onClick={() => (isSignedIn ? toggleBookmark(post.id) : onOpenAuth())}
-                    aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                    aria-pressed={Boolean(bookmarked)}
-                    title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
-                  >
-                    {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
-                  </button>
-                )}
-                {post.authorId === currentUser?.id && (
-                  <PostMenu postId={post.id} onDelete={deletePost} />
-                )}
-              </div>
-            </header>
-
-            <p className="post-body">{post.body}</p>
-
-            <div className="post-tags">
-              {post.tags.map((tag) => (
-                <span key={tag}>#{tag}</span>
-              ))}
-            </div>
-
-            <div className="reaction-row">
-              {REACTION_OPTIONS.map((reaction) => {
-                const Icon = REACTION_ICONS[reaction.id]
-                const active = currentReaction?.id === reaction.id
-                return (
-                  <button
-                    key={reaction.id}
-                    className={active ? 'reaction-button active' : 'reaction-button'}
-                    type="button"
-                    onClick={() => (isSignedIn ? reactToPost(post.id, reaction.id) : onOpenAuth())}
-                    aria-pressed={active}
-                  >
-                    <Icon size={15} />
-                    <span>{reaction.icon} {reaction.label}</span>
-                    <strong>{post.reactions[reaction.id]?.length ?? 0}</strong>
-                  </button>
-                )
-              })}
-            </div>
-          </motion.article>
+            <CommunityPostCard
+              post={post}
+              author={author}
+              currentUser={currentUser}
+              currentProfile={currentProfile}
+              isSignedIn={isSignedIn}
+              onOpenAuth={onOpenAuth}
+              onViewUser={onViewUser}
+              onToggleBookmark={toggleBookmark}
+              onDeletePost={deletePost}
+              onReactToPost={reactToPost}
+            />
+          </motion.div>
         )
       })}
       </AnimatePresence>
