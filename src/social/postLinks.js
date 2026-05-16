@@ -33,8 +33,32 @@ export function normalizePostUrl(value = '') {
 }
 
 export function getFirstPostUrl(text = '') {
+  return getFirstPostLink(text)?.url ?? ''
+}
+
+export function getFirstPostLink(text = '') {
   const match = text.match(URL_PATTERN)
-  return match ? normalizePostUrl(match[0]) : ''
+  if (!match) return null
+
+  const raw = trimUrlCandidate(match[0])
+  const url = normalizePostUrl(raw)
+  if (!url) return null
+
+  return {
+    url,
+    raw,
+    index: match.index ?? 0,
+    matchText: match[0],
+  }
+}
+
+export function removeFirstPostUrl(text = '') {
+  const link = getFirstPostLink(text)
+  if (!link) return text.trim()
+
+  const before = text.slice(0, link.index).trimEnd()
+  const after = text.slice(link.index + link.matchText.length).trimStart()
+  return [before, after].filter(Boolean).join('\n').replace(/\n{3,}/g, '\n\n').trim()
 }
 
 function getYoutubeEmbed(url, hostname) {

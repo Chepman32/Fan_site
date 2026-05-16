@@ -56,7 +56,6 @@
 
 .profile-summary h3,
 .panel-heading h3,
-.social-main-top h3,
 .community-post h3,
 .rumor-card h3,
 .source-card h3,
@@ -289,27 +288,6 @@
   padding: 20px;
 }
 
-.social-main-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
-}
-
-.social-main-top span {
-  color: var(--accent-cyan);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-.social-main-top h3 {
-  margin-top: 3px;
-  font-size: 24px;
-}
-
 .analysis-toggle {
   display: inline-flex;
   align-items: center;
@@ -332,7 +310,7 @@
 
 .social-tabs {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 20px;
 }
@@ -429,27 +407,13 @@
   color: var(--text-muted);
 }
 
-.composer-link-field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+.composer-preview {
+  min-width: 0;
 }
 
-.composer-link-field span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.7px;
-  text-transform: uppercase;
-}
-
-.composer-error {
-  margin-top: -6px;
-  color: #ffc1d8;
-  font-size: 13px;
+.composer-preview .post-attachment,
+.composer-preview .post-link-card {
+  margin-top: 0;
 }
 
 .composer-bottom {
@@ -1195,7 +1159,6 @@
     padding: 14px;
   }
 
-  .social-main-top,
   .composer-bottom,
   .social-auth-prompt,
   .source-card-top,

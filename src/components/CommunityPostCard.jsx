@@ -10,6 +10,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { REACTION_OPTIONS } from '../social/socialData'
+import { getPostAttachment, removeFirstPostUrl } from '../social/postLinks'
 import PostAttachment from './PostAttachment.jsx'
 import './SocialHub.css'
 
@@ -137,6 +138,8 @@ function CommunityPostCard({
   const bookmarked = currentProfile?.bookmarkedPostIds?.includes(post.id)
   const canBookmark = post.authorId !== currentUser?.id && onToggleBookmark
   const canDelete = post.authorId === currentUser?.id && onDeletePost
+  const attachment = getPostAttachment(post)
+  const displayBody = attachment ? removeFirstPostUrl(post.body) : post.body
 
   return (
     <article className="community-post">
@@ -165,7 +168,7 @@ function CommunityPostCard({
         </div>
       </header>
 
-      <p className="post-body">{post.body}</p>
+      {displayBody && <p className="post-body">{displayBody}</p>}
       <PostAttachment post={post} />
 
       <div className="post-tags">

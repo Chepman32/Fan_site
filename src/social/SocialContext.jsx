@@ -552,7 +552,7 @@ export function SocialProvider({ children }) {
     if (!requireUser()) return false
     const cleanBody = body.trim()
     const cleanLinkUrl = normalizePostUrl(linkUrl)
-    if (!cleanBody) return false
+    if (!cleanBody && !cleanLinkUrl) return false
     if (linkUrl.trim() && !cleanLinkUrl) {
       setBackendError('Enter a valid http or https link.')
       return false

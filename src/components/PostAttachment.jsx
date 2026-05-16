@@ -1,4 +1,4 @@
-import { ExternalLink, Link as LinkIcon, Play } from 'lucide-react'
+import { ExternalLink, Link as LinkIcon } from 'lucide-react'
 import { getPostAttachment } from '../social/postLinks'
 import './PostAttachment.css'
 
@@ -8,16 +8,7 @@ function PostAttachment({ post }) {
 
   if (attachment.type === 'video') {
     return (
-      <div className="post-attachment">
-        <div className="post-attachment-header">
-          <span>
-            <Play size={14} />
-            {attachment.provider}
-          </span>
-          <a href={attachment.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open ${attachment.provider} video`}>
-            <ExternalLink size={14} />
-          </a>
-        </div>
+      <div className="post-attachment video-only">
         <div className="post-video-frame">
           <iframe
             title={`${attachment.provider} video`}

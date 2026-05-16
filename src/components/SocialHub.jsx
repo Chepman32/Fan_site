@@ -6,7 +6,6 @@ import {
   Hash,
   Link,
   LogIn,
-  Mail,
   MessageSquare,
   Plus,
   Radio,
@@ -20,16 +19,17 @@ import {
 import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import CommunityPostCard from './CommunityPostCard.jsx'
+import PostAttachment from './PostAttachment.jsx'
 import {
   RUMOR_VOTE_OPTIONS,
   SOCIAL_TOPICS,
   SOURCE_CATEGORIES,
 } from '../social/socialData'
-import { normalizePostUrl } from '../social/postLinks'
+import { getFirstPostUrl, removeFirstPostUrl } from '../social/postLinks'
 import './SocialHub.css'
 
-const TAB_IDS = ['feed', 'rumors', 'sources', 'polls', 'messages']
-const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote, messages: Mail }
+const TAB_IDS = ['feed', 'rumors', 'sources', 'polls']
+const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote }
 
 const SOURCE_STATUS_ICONS = {
   accepted: CheckCircle2,
@@ -208,9 +208,16 @@ function PostComposer({ onOpenAuth }) {
   const { createPost, isSignedIn } = useSocial()
   const { t } = useTranslation()
   const [body, setBody] = useState('')
-  const [linkUrl, setLinkUrl] = useState('')
-  const [linkError, setLinkError] = useState('')
   const [selectedTags, setSelectedTags] = useState(['Trailers'])
+  const bodyUrl = getFirstPostUrl(body)
+  const previewPost = bodyUrl
+    ? {
+      body: '',
+      linkUrl: bodyUrl,
+      tags: selectedTags,
+      reactions: {},
+    }
+    : null
 
   const toggleTag = (topic) => {
     setSelectedTags((tags) => {
@@ -222,17 +229,10 @@ function PostComposer({ onOpenAuth }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!isSignedIn) { onOpenAuth(); return }
-    const cleanLinkUrl = normalizePostUrl(linkUrl)
-    if (linkUrl.trim() && !cleanLinkUrl) {
-      setLinkError(t.social.postLinkInvalid ?? 'Enter a valid http or https link.')
-      return
-    }
-
-    const didCreate = await createPost({ body, tags: selectedTags, linkUrl: cleanLinkUrl })
+    const cleanBody = bodyUrl ? removeFirstPostUrl(body) : body.trim()
+    const didCreate = await createPost({ body: cleanBody, tags: selectedTags, linkUrl: bodyUrl })
     if (didCreate) {
       setBody('')
-      setLinkUrl('')
-      setLinkError('')
       setSelectedTags(['Trailers'])
     }
   }
@@ -245,23 +245,11 @@ function PostComposer({ onOpenAuth }) {
         placeholder={isSignedIn ? t.social.postPlaceholder : t.social.postPlaceholderGuest}
         rows={4}
       />
-      <label className="composer-link-field">
-        <span>
-          <Link size={14} />
-          {t.social.postLinkLabel ?? 'Link'}
-        </span>
-        <input
-          value={linkUrl}
-          onChange={(event) => {
-            setLinkUrl(event.target.value)
-            setLinkError('')
-          }}
-          placeholder={t.social.postLinkPlaceholder ?? 'Paste a YouTube, Vimeo, Facebook, VK, or article link'}
-          inputMode="url"
-          autoComplete="off"
-        />
-      </label>
-      {linkError && <p className="composer-error">{linkError}</p>}
+      {previewPost && (
+        <div className="composer-preview" aria-label="Post attachment preview">
+          <PostAttachment post={previewPost} />
+        </div>
+      )}
       <div className="composer-bottom">
         <div className="composer-tags" aria-label="Post topics">
           {SOCIAL_TOPICS.slice(0, 6).map((topic) => (
@@ -600,91 +588,9 @@ function PollsTab({ onOpenAuth, onViewUser }) {
   )
 }
 
-function MessagesTab({ onOpenAuth }) {
-  const { state, publicUsers, currentUser, isSignedIn, usersById, sendMessage } = useSocial()
-  const { t } = useTranslation()
-  const recipients = publicUsers.filter((user) => user.id !== currentUser?.id)
-  const [selectedUserId, setSelectedUserId] = useState(recipients[0]?.id ?? '')
-  const [body, setBody] = useState('')
-
-  const activeRecipientId = selectedUserId || recipients[0]?.id
-  const activeRecipient = usersById[activeRecipientId]
-  const thread = state.messages.filter((message) => {
-    return (
-      (message.fromId === currentUser?.id && message.toId === activeRecipientId) ||
-      (message.fromId === activeRecipientId && message.toId === currentUser?.id)
-    )
-  })
-
-  const submitMessage = async (event) => {
-    event.preventDefault()
-    if (!isSignedIn) {
-      onOpenAuth()
-      return
-    }
-
-    const didSend = await sendMessage({ toId: activeRecipientId, body })
-    if (didSend) setBody('')
-  }
-
-  if (!isSignedIn) {
-    return <AuthPrompt onOpenAuth={onOpenAuth} />
-  }
-
-  return (
-    <div className="messages-layout">
-      <div className="recipient-list">
-        {recipients.map((user) => (
-          <button
-            key={user.id}
-            className={activeRecipientId === user.id ? 'recipient active' : 'recipient'}
-            type="button"
-            onClick={() => setSelectedUserId(user.id)}
-          >
-            <Avatar user={user} size="sm" />
-            <span>{user.username}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="message-thread">
-        <header>
-          <Mail size={16} />
-          <span>{activeRecipient?.username ?? 'Select a member'}</span>
-        </header>
-
-        <div className="message-list">
-          {thread.length === 0 && <p className="empty-state">{t.social.noMessages}</p>}
-          {thread.map((message) => {
-            const mine = message.fromId === currentUser.id
-            const author = usersById[message.fromId] ?? userFallback(message.fromId)
-            return (
-              <div key={message.id} className={mine ? 'message-bubble mine' : 'message-bubble'}>
-                <span>{author.username} · {formatRelative(message.createdAt)}</span>
-                <p>{message.body}</p>
-              </div>
-            )
-          })}
-        </div>
-
-        <form className="message-form" onSubmit={submitMessage}>
-          <input
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-            placeholder="Write a message..."
-          />
-          <button type="submit" aria-label="Send message">
-            <Send size={16} />
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
-
 function SocialHub({ onOpenAuth, onNavigate }) {
   const [activeTab, setActiveTab] = useState('feed')
-  const { backendError, isSignedIn } = useSocial()
+  const { backendError } = useSocial()
   const { t } = useTranslation()
 
   const onViewUser = (userId) => onNavigate(`/profile/${userId}`)
@@ -694,10 +600,8 @@ function SocialHub({ onOpenAuth, onNavigate }) {
     rumors: t.social.tabs.rumors,
     sources: t.social.tabs.sources,
     polls: t.social.tabs.polls,
-    messages: t.social.tabs.messages,
   }
   const TABS = TAB_IDS.map((id) => ({ id, label: TAB_LABELS[id], icon: TAB_ICONS[id] }))
-  const activeTitle = TAB_LABELS[activeTab] ?? t.social.tabs.posts
 
   return (
     <section id="community" className="section-padding social-hub">
@@ -712,13 +616,6 @@ function SocialHub({ onOpenAuth, onNavigate }) {
           <Sidebar onOpenAuth={onOpenAuth} />
 
           <div className="social-main">
-            <div className="social-main-top">
-              <div>
-                <span>{isSignedIn ? t.social.signedInAs : t.social.guestMode}</span>
-                <h3>{activeTitle}</h3>
-              </div>
-            </div>
-
             <div className="social-tabs" role="tablist" aria-label="Social sections">
               {TABS.map((tab) => {
                 const Icon = tab.icon
@@ -747,7 +644,6 @@ function SocialHub({ onOpenAuth, onNavigate }) {
             {activeTab === 'rumors' && <RumorsTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
             {activeTab === 'sources' && <SourcesTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
             {activeTab === 'polls' && <PollsTab onOpenAuth={onOpenAuth} onViewUser={onViewUser} />}
-            {activeTab === 'messages' && <MessagesTab onOpenAuth={onOpenAuth} />}
           </div>
         </div>
       </div>
