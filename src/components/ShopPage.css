@@ -75,7 +75,7 @@
 
 .shop-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -411,7 +411,6 @@
   gap: 16px;
   max-height: calc(100dvh - 116px);
   overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 18px;
   background: rgba(26, 26, 37, 0.8);
   border: 1px solid var(--border-color);
