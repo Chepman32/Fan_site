@@ -143,6 +143,21 @@ const emotePackMeta = {
     price: 16,
     tags: ['10 emotes', 'Streamer-ready', 'Transparent PNG'],
   },
+  gta_vi_emote_pack_04: {
+    title: 'Vice Motion Emote Pack',
+    price: 18,
+    tags: ['11 emotes', 'Vehicle reactions', 'Neon chat'],
+  },
+  gta_vi_emote_pack_05: {
+    title: 'Tropical Flex Emote Pack',
+    price: 16,
+    tags: ['10 emotes', 'Tropical reactions', 'Gold trim'],
+  },
+  gta_vi_emote_pack_06: {
+    title: 'Vice Radio Emote Pack',
+    price: 16,
+    tags: ['10 emotes', 'Broadcast chat', 'Arcade reactions'],
+  },
 }
 
 function overlayFileStem(path) {

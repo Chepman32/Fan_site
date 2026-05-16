@@ -200,6 +200,10 @@
     #07070d;
 }
 
+.shop-emote-pack-preview.dense {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
 .shop-product-preview .shop-emote-pack-preview {
   gap: 7px;
   padding: 10px;

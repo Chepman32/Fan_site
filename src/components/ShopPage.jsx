@@ -8,7 +8,7 @@ import './ShopPage.css'
 function ShopProductArtwork({ product, loading = 'eager' }) {
   if (product.images?.length > 1) {
     return (
-      <span className="shop-emote-pack-preview" aria-hidden="true">
+      <span className={`shop-emote-pack-preview ${product.images.length > 10 ? 'dense' : ''}`} aria-hidden="true">
         {product.images.map((image) => (
           <img key={image} src={image} alt="" loading={loading} draggable="false" />
         ))}
@@ -26,10 +26,14 @@ function ShopProductArtwork({ product, loading = 'eager' }) {
   )
 }
 
+function getMiddleProduct(products) {
+  return products[Math.floor(products.length / 2)] || null
+}
+
 function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onRemoveCartItem = () => {} }) {
   const defaultProducts = SHOP_PRODUCTS_BY_CATEGORY['stream-overlays'] || []
   const [selectedCategory, setSelectedCategory] = useState('stream-overlays')
-  const [featuredId, setFeaturedId] = useState(defaultProducts[0]?.id || '')
+  const [featuredId, setFeaturedId] = useState(getMiddleProduct(defaultProducts)?.id || '')
   const [paymentOpen, setPaymentOpen] = useState(false)
   const [previewProduct, setPreviewProduct] = useState(null)
   const products = SHOP_PRODUCTS_BY_CATEGORY[selectedCategory] || []
@@ -58,7 +62,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [paymentOpen])
 
-  const featuredProduct = products.find((product) => product.id === featuredId) || products[0]
+  const featuredProduct = products.find((product) => product.id === featuredId) || getMiddleProduct(products)
   const activeFeaturedId = featuredProduct?.id
 
   const openCheckout = () => {
@@ -68,7 +72,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
   const selectCategory = (categoryId) => {
     const nextProducts = SHOP_PRODUCTS_BY_CATEGORY[categoryId] || []
     setSelectedCategory(categoryId)
-    setFeaturedId(nextProducts[0]?.id || '')
+    setFeaturedId(getMiddleProduct(nextProducts)?.id || '')
   }
 
   const removeCartItem = (productId) => {
