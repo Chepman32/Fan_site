@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   Car,
   Crosshair,
@@ -45,8 +45,10 @@ function Header({
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
+  const [desktopMoreOpen, setDesktopMoreOpen] = useState(false)
   const [bottomMoreOpen, setBottomMoreOpen] = useState(false)
   const [locationKey, setLocationKey] = useState(getLocationKey)
+  const desktopMoreRef = useRef(null)
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
@@ -67,22 +69,62 @@ function Header({
   }, [])
 
   useEffect(() => {
-    if (!langOpen && !bottomMoreOpen) return undefined
+    if (!langOpen && !desktopMoreOpen && !bottomMoreOpen) return undefined
     const close = () => {
       setLangOpen(false)
+      setDesktopMoreOpen(false)
       setBottomMoreOpen(false)
     }
     window.addEventListener('click', close)
     return () => window.removeEventListener('click', close)
-  }, [langOpen, bottomMoreOpen])
+  }, [langOpen, desktopMoreOpen, bottomMoreOpen])
 
-  const navigate = (event, href) => {
+  useEffect(() => {
+    if (!desktopMoreOpen) return undefined
+
+    const closeWhenPointerLeaves = (event) => {
+      const wrapper = desktopMoreRef.current
+      const menu = wrapper?.querySelector('.nav-more-menu')
+      if (!wrapper || !menu) return
+
+      const wrapperRect = wrapper.getBoundingClientRect()
+      const menuRect = menu.getBoundingClientRect()
+      const hoverArea = {
+        top: Math.min(wrapperRect.top, menuRect.top) - 10,
+        right: Math.max(wrapperRect.right, menuRect.right) + 10,
+        bottom: Math.max(wrapperRect.bottom, menuRect.bottom) + 10,
+        left: Math.min(wrapperRect.left, menuRect.left) - 10,
+      }
+
+      const isInsideHoverArea = event.clientX >= hoverArea.left
+        && event.clientX <= hoverArea.right
+        && event.clientY >= hoverArea.top
+        && event.clientY <= hoverArea.bottom
+
+      if (!isInsideHoverArea) setDesktopMoreOpen(false)
+    }
+
+    window.addEventListener('mousemove', closeWhenPointerLeaves)
+    return () => window.removeEventListener('mousemove', closeWhenPointerLeaves)
+  }, [desktopMoreOpen])
+
+  const closeHeaderMenus = () => {
+    setLangOpen(false)
+    setDesktopMoreOpen(false)
+    setBottomMoreOpen(false)
+  }
+
+  const navigate = (event, href, options = {}) => {
     if (!onNavigate || !isPlainLeftClick(event)) return
+    const { closeMenus = true, blurTarget = true, stopPropagation = false } = options
+
     event.preventDefault()
+    if (stopPropagation) event.stopPropagation()
     onNavigate(href)
     const nextUrl = new URL(href, window.location.origin)
     setLocationKey(`${nextUrl.pathname}${nextUrl.hash}`)
-    setBottomMoreOpen(false)
+    if (closeMenus) closeHeaderMenus()
+    if (blurTarget) event.currentTarget.blur()
   }
 
   const currentPath = locationKey.split('#')[0] || '/'
@@ -126,21 +168,73 @@ function Header({
         <div className="nav-links">
           <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
           <a href="/#characters" onClick={(event) => navigate(event, '/#characters')}>{t.nav.characters}</a>
-          <div className="nav-more">
-            <button type="button" className="nav-more-toggle" aria-label="Show more guide links" aria-haspopup="true">
+          <div
+            ref={desktopMoreRef}
+            className={`nav-more ${desktopMoreOpen ? 'open' : ''}`}
+            onMouseEnter={() => setDesktopMoreOpen(true)}
+            onMouseLeave={() => setDesktopMoreOpen(false)}
+            onFocusCapture={() => setDesktopMoreOpen(true)}
+            onBlurCapture={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setDesktopMoreOpen(false)
+              }
+            }}
+          >
+            <button
+              type="button"
+              className="nav-more-toggle"
+              aria-label="Show more guide links"
+              aria-haspopup="true"
+              aria-expanded={desktopMoreOpen}
+              onClick={(event) => {
+                event.stopPropagation()
+                setDesktopMoreOpen(true)
+              }}
+            >
               <Ellipsis size={20} />
             </button>
             <div className="nav-more-menu" role="menu">
-              <a href="/#weapons" role="menuitem" onClick={(event) => navigate(event, '/#weapons')}>
+              <a
+                href="/#characters"
+                role="menuitem"
+                onClick={(event) => navigate(event, '/#characters', {
+                  closeMenus: false,
+                  blurTarget: false,
+                  stopPropagation: true,
+                })}
+              >
+                {t.nav.characters || 'Characters'}
+              </a>
+              <a
+                href="/#weapons"
+                role="menuitem"
+                onClick={(event) => navigate(event, '/#weapons', {
+                  closeMenus: false,
+                  blurTarget: false,
+                  stopPropagation: true,
+                })}
+              >
                 {t.nav.weapons || 'Weapons'}
               </a>
-              <a href="/#vehicles" role="menuitem" onClick={(event) => navigate(event, '/#vehicles')}>
+              <a
+                href="/#vehicles"
+                role="menuitem"
+                onClick={(event) => navigate(event, '/#vehicles', {
+                  closeMenus: false,
+                  blurTarget: false,
+                  stopPropagation: true,
+                })}
+              >
                 {t.nav.vehicles || 'Vehicles'}
               </a>
               <a
                 href="/#social-media-guide"
                 role="menuitem"
-                onClick={(event) => navigate(event, '/#social-media-guide')}
+                onClick={(event) => navigate(event, '/#social-media-guide', {
+                  closeMenus: false,
+                  blurTarget: false,
+                  stopPropagation: true,
+                })}
               >
                 {t.nav.socialMedia || 'Social Media'}
               </a>

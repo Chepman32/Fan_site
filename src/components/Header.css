@@ -90,8 +90,7 @@
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.nav-more:hover .nav-more-toggle,
-.nav-more:focus-within .nav-more-toggle {
+.nav-more.open .nav-more-toggle {
   color: var(--accent-cyan);
   background: rgba(0, 217, 255, 0.1);
   border-color: rgba(0, 217, 255, 0.35);
@@ -117,8 +116,7 @@
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
-.nav-more:hover .nav-more-menu,
-.nav-more:focus-within .nav-more-menu {
+.nav-more.open .nav-more-menu {
   opacity: 1;
   pointer-events: auto;
   transform: translate(-50%, 0);

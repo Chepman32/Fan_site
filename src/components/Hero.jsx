@@ -10,7 +10,14 @@ function Hero({ currentUser, onOpenAuth, onLogout, onNavigate, cartItems, cartTo
   const { t } = useTranslation()
 
   const scrollToInfo = () => {
-    document.getElementById('game-info')?.scrollIntoView({ behavior: 'smooth' })
+    if (onNavigate) {
+      onNavigate('/#game-info')
+      return
+    }
+
+    const section = document.getElementById('game-info')
+    const target = section?.querySelector('.section-title') || section
+    target?.scrollIntoView({ behavior: 'smooth' })
   }
 
   return (

@@ -20,6 +20,48 @@ import { LanguageProvider } from './i18n/useTranslation.jsx'
 import './App.css'
 
 const APP_ROUTES = new Set(['/community', '/profile', '/shop'])
+const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
+
+function getFixedHeaderOffset() {
+  const headerHeight = document.querySelector('.navbar')?.getBoundingClientRect().height || 0
+  return Math.ceil(headerHeight + 16)
+}
+
+function getHashScrollTarget(hash) {
+  const section = document.getElementById(hash.slice(1))
+  return section?.querySelector('.section-title') || section
+}
+
+function scrollHashTargetIntoView(hash, behavior) {
+  const target = getHashScrollTarget(hash)
+  if (!target) return false
+
+  const targetTop = target.getBoundingClientRect().top + window.scrollY - getFixedHeaderOffset()
+  window.scrollTo({
+    top: Math.max(0, targetTop),
+    behavior,
+  })
+  return true
+}
+
+function scrollToHash(hash) {
+  if (!hash) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
+
+  let attemptCount = 0
+  const tryInitialScroll = () => {
+    attemptCount += 1
+    if (scrollHashTargetIntoView(hash, 'smooth') || attemptCount >= 12) return
+    window.requestAnimationFrame(tryInitialScroll)
+  }
+
+  window.requestAnimationFrame(tryInitialScroll)
+  HASH_SCROLL_CORRECTION_DELAYS.forEach((delay) => {
+    window.setTimeout(() => scrollHashTargetIntoView(hash, 'auto'), delay)
+  })
+}
 
 function currentRoute() {
   const { pathname } = window.location
@@ -37,23 +79,18 @@ function AppContent() {
 
   useEffect(() => {
     const handlePopState = () => {
-      setRoute(currentRoute())
+      const nextRoute = currentRoute()
+      setRoute(nextRoute)
       logAnalyticsPageView()
+      if (nextRoute === '/') scrollToHash(window.location.hash)
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const scrollToHash = (hash) => {
-    if (!hash) {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      return
-    }
-
-    window.setTimeout(() => {
-      document.getElementById(hash.slice(1))?.scrollIntoView({ behavior: 'smooth' })
-    }, 0)
-  }
+  useEffect(() => {
+    if (route === '/' && window.location.hash) scrollToHash(window.location.hash)
+  }, [route])
 
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
