@@ -1,7 +1,7 @@
 export const PAYMENT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
 export const PAYMENT_NETWORK = 'USDT TRC20'
 export const TRONGRID_FULL_HOST = 'https://api.trongrid.io'
-export const USDT_CONTRACT_ADDRESS = 'TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj'
+export const USDT_CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 export const USDT_DECIMALS = 6
 export const USDT_TRANSFER_FEE_LIMIT = 100_000_000
 
@@ -311,15 +311,16 @@ function profileBannerAspectRatio(stem) {
 export const STREAM_OVERLAY_PRODUCTS = sortedImageEntries(overlayImageModules)
   .map(([path, image], index) => {
     const stem = overlayFileStem(path)
+    const title = overlayNames[index] || `Leonida Stream Overlay ${index + 1}`
 
     return {
       id: stem ? `stream-${stem.toLowerCase()}` : `stream-overlay-${index + 1}`,
       categoryId: 'stream-overlays',
       categoryLabel: 'Stream overlays',
       previewLabel: 'Stream overlay preview',
-      title: overlayNames[index] || `Leonida Stream Overlay ${index + 1}`,
+      title,
       image,
-      price: 12 + (index % 4) * 3,
+      price: title === 'Ocean View Intermission Kit' ? 2.6 : 12 + (index % 4) * 3,
       format: 'PNG pack',
       resolution: '7680 x 4320',
       aspectRatio: stem.startsWith('IMG_') ? '1376 / 768' : '1672 / 941',

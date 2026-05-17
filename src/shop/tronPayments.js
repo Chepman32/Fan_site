@@ -7,10 +7,10 @@ import {
   USDT_TRANSFER_FEE_LIMIT,
 } from './shopData'
 
-const TRANSFER_EVENT_TOPIC = 'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef'
+const RECENT_TRANSFER_LIMIT = 20
 
-function cleanHex(value = '') {
-  return String(value).replace(/^0x/i, '').toLowerCase()
+function normalizedTxIdEquals(left, right) {
+  return normalizeTxId(left).toLowerCase() === normalizeTxId(right).toLowerCase()
 }
 
 export function normalizeTxId(value) {
@@ -32,6 +32,44 @@ export function usdtToSmallestUnit(amount) {
   const paddedFraction = fraction.padEnd(USDT_DECIMALS, '0')
 
   return BigInt(whole) * (10n ** BigInt(USDT_DECIMALS)) + BigInt(paddedFraction || '0')
+}
+
+function usdtFromSmallestUnit(amountInUnits) {
+  const unit = 10n ** BigInt(USDT_DECIMALS)
+  const whole = amountInUnits / unit
+  const fraction = (amountInUnits % unit).toString().padStart(USDT_DECIMALS, '0').replace(/0+$/, '')
+
+  return fraction ? `${whole}.${fraction}` : whole.toString()
+}
+
+function createRecentUsdtTransfersUrl() {
+  const url = new URL(`/v1/accounts/${PAYMENT_ADDRESS}/transactions/trc20`, TRONGRID_FULL_HOST)
+  url.searchParams.set('limit', String(RECENT_TRANSFER_LIMIT))
+  url.searchParams.set('contract_address', USDT_CONTRACT_ADDRESS)
+
+  return url.toString()
+}
+
+async function fetchRecentUsdtTransfers() {
+  const response = await fetch(createRecentUsdtTransfersUrl())
+
+  if (!response.ok) {
+    throw new Error(`TRONGrid returned HTTP ${response.status}.`)
+  }
+
+  const payload = await response.json()
+
+  if (payload?.success === false) {
+    throw new Error('TRONGrid did not return a successful transfer response.')
+  }
+
+  return Array.isArray(payload?.data) ? payload.data : []
+}
+
+function transferAmountInSmallestUnit(transfer) {
+  const value = String(transfer?.value ?? '').trim()
+
+  return /^\d+$/.test(value) ? BigInt(value) : null
 }
 
 export async function connectTronLinkWallet() {
@@ -69,49 +107,6 @@ export async function sendUsdtTransfer(tronWeb, amount) {
   throw new Error('TronLink did not return a transaction id.')
 }
 
-function tronAddressFromHex(tronWeb, value) {
-  const hex = cleanHex(value)
-  if (!hex) return ''
-
-  const tronHex = hex.startsWith('41') ? hex : `41${hex.slice(-40)}`
-  return tronWeb.address.fromHex(tronHex)
-}
-
-function tronAddressFromTopic(tronWeb, topic) {
-  const hex = cleanHex(topic)
-  if (!hex) return ''
-
-  return tronWeb.address.fromHex(`41${hex.slice(-40)}`)
-}
-
-function parseTransferLog(tronWeb, log) {
-  const topics = log?.topics || []
-  const eventTopic = cleanHex(topics[0])
-
-  if (eventTopic !== TRANSFER_EVENT_TOPIC || topics.length < 3) {
-    return null
-  }
-
-  return {
-    tokenAddress: tronAddressFromHex(tronWeb, log.address),
-    toAddress: tronAddressFromTopic(tronWeb, topics[2]),
-    amount: BigInt(`0x${cleanHex(log.data || '0') || '0'}`),
-  }
-}
-
-function findMatchingUsdtTransfer(tronWeb, transactionInfo, expectedAmountInUnits) {
-  const logs = transactionInfo?.log || []
-
-  return logs.some((log) => {
-    const transfer = parseTransferLog(tronWeb, log)
-
-    return transfer
-      && transfer.tokenAddress === USDT_CONTRACT_ADDRESS
-      && transfer.toAddress === PAYMENT_ADDRESS
-      && transfer.amount === expectedAmountInUnits
-  })
-}
-
 export async function checkUsdtTransaction(txId, amount) {
   const normalizedTxId = normalizeTxId(txId)
 
@@ -122,41 +117,37 @@ export async function checkUsdtTransaction(txId, amount) {
     }
   }
 
-  const tronWeb = createTronGridClient()
   const expectedAmountInUnits = usdtToSmallestUnit(amount)
-  const [transaction, transactionInfo] = await Promise.all([
-    tronWeb.trx.getTransaction(normalizedTxId),
-    tronWeb.trx.getTransactionInfo(normalizedTxId),
-  ])
+  const transfers = await fetchRecentUsdtTransfers()
+  const transfer = transfers.find((candidate) => normalizedTxIdEquals(candidate?.transaction_id, normalizedTxId))
 
-  if (!transactionInfo?.id) {
+  if (!transfer) {
     return {
       status: 'pending',
-      message: 'Transaction found is not confirmed yet. Checking again shortly.',
+      message: 'Transaction is not in the checkout USDT transfer feed yet. Checking again shortly.',
     }
   }
 
-  const contractResult = transaction?.ret?.[0]?.contractRet
-  const receiptResult = transactionInfo?.receipt?.result
-
-  if (contractResult && contractResult !== 'SUCCESS') {
+  if (transfer?.to !== PAYMENT_ADDRESS) {
     return {
       status: 'failed',
-      message: `TRON returned ${contractResult.toLowerCase()} for this transaction.`,
+      message: 'Transaction was confirmed, but it was not sent to this checkout address.',
     }
   }
 
-  if (receiptResult && receiptResult !== 'SUCCESS') {
+  if (transfer?.token_info?.address !== USDT_CONTRACT_ADDRESS) {
     return {
       status: 'failed',
-      message: `The transaction receipt is ${receiptResult.toLowerCase()}.`,
+      message: 'Transaction was confirmed, but it was not a USDT TRC20 transfer.',
     }
   }
 
-  if (!findMatchingUsdtTransfer(tronWeb, transactionInfo, expectedAmountInUnits)) {
+  const foundAmount = transferAmountInSmallestUnit(transfer)
+
+  if (foundAmount !== expectedAmountInUnits) {
     return {
       status: 'failed',
-      message: `Transaction confirmed, but it is not an exact ${amount} USDT transfer to this checkout address.`,
+      message: `Transaction confirmed, but it sent ${usdtFromSmallestUnit(foundAmount ?? 0n)} USDT instead of ${amount} USDT.`,
     }
   }
 
