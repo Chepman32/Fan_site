@@ -17,6 +17,7 @@ import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
 import { SocialProvider, useSocial } from './social/SocialContext'
 import { LanguageProvider } from './i18n/useTranslation.jsx'
+import { shopCentsToPrice, shopPriceToCents } from './shop/shopData'
 import './App.css'
 
 const APP_ROUTES = new Set(['/community', '/profile', '/shop'])
@@ -116,7 +117,9 @@ function AppContent() {
     setCartItems((items) => items.filter((item) => item.id !== productId))
   }
 
-  const cartTotal = cartItems.reduce((total, item) => total + item.price, 0)
+  const cartTotal = shopCentsToPrice(
+    cartItems.reduce((total, item) => total + shopPriceToCents(item.price), 0),
+  )
 
   const sharedHeaderProps = {
     currentUser: currentProfile,

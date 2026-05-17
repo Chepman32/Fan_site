@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, ShoppingCart, X } from 'lucide-react'
+import { formatShopPrice } from '../shop/shopData'
 import './ProductPreviewModal.css'
 
 const backdropTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
@@ -122,7 +123,7 @@ function ProductPreviewModal({ product, cartProduct = product, inCart, onAddToCa
 
             <footer className="product-preview-footer">
               <div className="product-preview-meta">
-                <strong>${product.price}</strong>
+                <strong>${formatShopPrice(product.price)}</strong>
                 <span>{product.format}</span>
                 <span>{product.resolution}</span>
               </div>

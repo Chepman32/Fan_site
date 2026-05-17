@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import { AlertCircle, Check, Copy, Download, LoaderCircle, PlugZap, Send, ShieldCheck } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { PAYMENT_ADDRESS, PAYMENT_NETWORK, PAYMENT_NETWORK_SUFFIX } from '../shop/shopData'
+import { PAYMENT_ADDRESS, PAYMENT_NETWORK, PAYMENT_NETWORK_SUFFIX, formatShopPrice } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import { useSocial } from '../social/SocialContext'
 import ShopLineItemThumbnail from './ShopLineItemThumbnail'
@@ -40,7 +40,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
   const [walletStatus, setWalletStatus] = useState('idle')
   const [walletMessage, setWalletMessage] = useState('')
   const [qrSrc, setQrSrc] = useState('')
-  const paymentAmount = cartTotal.toFixed(2)
+  const paymentAmount = formatShopPrice(cartTotal)
   const paymentInProgress = paymentStatus === 'waiting_wallet' || paymentStatus === 'pending'
 
   const finalizeConfirmedPayment = useCallback((confirmedTxId) => {
@@ -206,7 +206,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
                   <ShopLineItemThumbnail product={item} />
                   <div>
                     <strong>{displayItem.title}</strong>
-                    <span>${item.price}</span>
+                    <span>${formatShopPrice(item.price)}</span>
                   </div>
                   {onRemoveItem && (
                     <button type="button" onClick={() => onRemoveItem(item.id)}>
@@ -221,7 +221,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
 
         <div className="crypto-checkout-total">
           <span>{shopCopy.total}</span>
-          <strong>${cartTotal}</strong>
+          <strong>${formatShopPrice(cartTotal)}</strong>
         </div>
 
         <div className="crypto-qr-row">

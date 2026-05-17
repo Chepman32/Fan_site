@@ -6,6 +6,26 @@ export const USDT_CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 export const USDT_DECIMALS = 6
 export const USDT_TRANSFER_FEE_LIMIT = 100_000_000
 
+const PRICE_INCREMENT_CENTS = 1
+
+export function shopPriceToCents(price) {
+  const cents = Math.round(Number(price) * 100)
+
+  if (!Number.isFinite(cents)) {
+    throw new Error(`Invalid shop price: ${price}`)
+  }
+
+  return cents
+}
+
+export function shopCentsToPrice(cents) {
+  return Number((cents / 100).toFixed(2))
+}
+
+export function formatShopPrice(price) {
+  return (shopPriceToCents(price) / 100).toFixed(2)
+}
+
 const overlayImageModules = {
   ...import.meta.glob('../assets/shop/Stream overlay previews/*.webp', {
     eager: true,
@@ -344,6 +364,15 @@ const emotePackMeta = {
   },
 }
 
+const emotePackDownloadsByFolder = {
+  gta_vi_emote_pack_01: 'https://drive.google.com/file/d/1Skcb1WERpbPyiTpb8x7UXKeQO6vHYq94/view?usp=sharing',
+  gta_vi_emote_pack_02: 'https://drive.google.com/file/d/1wIX76V9M-0ZMvLCJVJPKdwlazON_1HDH/view?usp=sharing',
+  gta_vi_emote_pack_03: 'https://drive.google.com/file/d/1OCGcmJXJG6kZivkWHp-X80h3VRH4cmjy/view?usp=sharing',
+  gta_vi_emote_pack_04: 'https://drive.google.com/file/d/1TRK9HOuJdDAGbV3lXxbM1bL2Ne-Dd4ee/view?usp=sharing',
+  gta_vi_emote_pack_05: 'https://drive.google.com/file/d/1KaLU94IVWsG9tE1_9m6CGNjhCVY9urA2/view?usp=sharing',
+  gta_vi_emote_pack_06: 'https://drive.google.com/file/d/1vjd2w40IjiwNXWxFYAZru7gzzMvAsL0E/view?usp=sharing',
+}
+
 function overlayFileStem(path) {
   return path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || ''
 }
@@ -381,7 +410,28 @@ function profileBannerAspectRatio(stem) {
   return profileBannerStandardStems.has(stem) ? '1983 / 793' : '1916 / 821'
 }
 
-export const STREAM_OVERLAY_PRODUCTS = sortedImageEntries(overlayImageModules)
+function assignUniqueShopPrices(productGroups) {
+  const usedPrices = new Set()
+
+  return productGroups.map((products) => (
+    products.map((product) => {
+      const basePriceCents = shopPriceToCents(product.price)
+      let uniquePriceCents = basePriceCents
+
+      while (usedPrices.has(uniquePriceCents)) {
+        uniquePriceCents += PRICE_INCREMENT_CENTS
+      }
+
+      usedPrices.add(uniquePriceCents)
+
+      return uniquePriceCents === basePriceCents
+        ? product
+        : { ...product, price: shopCentsToPrice(uniquePriceCents) }
+    })
+  ))
+}
+
+const streamOverlayProducts = sortedImageEntries(overlayImageModules)
   .map(([path, image], index) => {
     const stem = overlayFileStem(path)
     const title = overlayNames[index] || `Leonida Stream Overlay ${index + 1}`
@@ -403,7 +453,7 @@ export const STREAM_OVERLAY_PRODUCTS = sortedImageEntries(overlayImageModules)
     }
   })
 
-export const PROFILE_BANNER_PRODUCTS = sortedImageEntries(profileBannerImageModules)
+const profileBannerProducts = sortedImageEntries(profileBannerImageModules)
   .map(([path, image], index) => {
     const stem = overlayFileStem(path)
     const meta = profileBannerMetaByStem[stem]
@@ -425,7 +475,7 @@ export const PROFILE_BANNER_PRODUCTS = sortedImageEntries(profileBannerImageModu
     }
   })
 
-export const EMOTE_PACK_PRODUCTS = sortedEmotePacks()
+const emotePackProducts = sortedEmotePacks()
   .map((pack, index) => {
     const meta = emotePackMeta[pack.folder] || {}
 
@@ -442,9 +492,21 @@ export const EMOTE_PACK_PRODUCTS = sortedEmotePacks()
       format: `${pack.images.length} emote PNGs`,
       resolution: '1024 x 1024 each',
       aspectRatio: '16 / 9',
+      downloadUrl: emotePackDownloadsByFolder[pack.folder],
+      downloadFileName: `${pack.folder}.zip`,
       tags: meta.tags || ['Emote pack', 'Streamer-ready', 'Transparent PNG'],
     }
   })
+
+const uniquelyPricedProductGroups = assignUniqueShopPrices([
+  streamOverlayProducts,
+  profileBannerProducts,
+  emotePackProducts,
+])
+
+export const STREAM_OVERLAY_PRODUCTS = uniquelyPricedProductGroups[0]
+export const PROFILE_BANNER_PRODUCTS = uniquelyPricedProductGroups[1]
+export const EMOTE_PACK_PRODUCTS = uniquelyPricedProductGroups[2]
 
 export const SHOP_PRODUCTS_BY_CATEGORY = {
   'stream-overlays': STREAM_OVERLAY_PRODUCTS,

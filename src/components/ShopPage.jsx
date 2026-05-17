@@ -4,7 +4,7 @@ import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import ProductPreviewModal from './ProductPreviewModal'
 import ShopLineItemThumbnail from './ShopLineItemThumbnail'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs } from '../shop/shopData'
+import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs, formatShopPrice } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import './ShopPage.css'
 
@@ -139,7 +139,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               <ShoppingCart size={18} />
               {shopCopy.itemCount(cartItems.length)}
             </span>
-            <strong>${cartTotal}</strong>
+            <strong>${formatShopPrice(cartTotal)}</strong>
           </div>
         </header>
 
@@ -184,7 +184,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               <div className="shop-featured-actions">
                 <button type="button" className="shop-buy-button" onClick={() => onAddCartItem(featuredProduct)}>
                   <ShoppingCart size={16} />
-                  {shopCopy.addPrice(featuredProduct.price)}
+                  {shopCopy.addPrice(formatShopPrice(featuredProduct.price))}
                 </button>
               </div>
             </div>
@@ -218,7 +218,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                       <h3>{displayProduct.title}</h3>
                       <p>{displayProduct.format} / {displayProduct.resolution}</p>
                     </div>
-                    <strong>${product.price}</strong>
+                    <strong>${formatShopPrice(product.price)}</strong>
                   </div>
 
                   <div className="shop-product-tags">
@@ -256,7 +256,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                       <ShopLineItemThumbnail product={item} />
                       <div>
                         <strong>{displayItem.title}</strong>
-                        <span>${item.price}</span>
+                        <span>${formatShopPrice(item.price)}</span>
                       </div>
                       <button type="button" onClick={() => removeCartItem(item.id)}>
                         {shopCopy.remove}
@@ -271,7 +271,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
 
             <div className="shop-cart-total">
               <span>{shopCopy.total}</span>
-              <strong>${cartTotal}</strong>
+              <strong>${formatShopPrice(cartTotal)}</strong>
             </div>
             <button type="button" className="shop-checkout-button" disabled={!cartItems.length} onClick={openCheckout}>
               <Wallet size={16} />
@@ -293,7 +293,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
             <div className="shop-checkout-modal-head">
               <div>
                 <span>{shopCopy.secureCheckout}</span>
-                <strong>${cartTotal}</strong>
+                <strong>${formatShopPrice(cartTotal)}</strong>
               </div>
               <button type="button" aria-label={shopCopy.closeCheckout} onClick={() => setPaymentOpen(false)}>
                 <X size={18} />
