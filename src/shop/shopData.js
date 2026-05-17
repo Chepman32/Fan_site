@@ -88,6 +88,8 @@ const fallbackOverlayTags = [
   ['Race scene', 'Goal bar', 'High contrast'],
 ]
 
+const streamOverlayAlternateAspectRatioStems = new Set(['40', '41', '42', '43', '44', '45'])
+
 const profileBannerTags = [
   ['Profile header', 'Creator page', 'Wide format'],
   ['Social banner', 'Neon grade', 'Fan profile'],
@@ -323,7 +325,7 @@ export const STREAM_OVERLAY_PRODUCTS = sortedImageEntries(overlayImageModules)
       price: title === 'Ocean View Intermission Kit' ? 2.6 : 12 + (index % 4) * 3,
       format: 'PNG pack',
       resolution: '7680 x 4320',
-      aspectRatio: stem.startsWith('IMG_') ? '1376 / 768' : '1672 / 941',
+      aspectRatio: streamOverlayAlternateAspectRatioStems.has(stem) ? '1376 / 768' : '1672 / 941',
       tags: overlayTags[index] || fallbackOverlayTags[index % fallbackOverlayTags.length],
     }
   })
