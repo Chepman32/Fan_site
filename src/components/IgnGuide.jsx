@@ -288,7 +288,7 @@ function imageAsset(title, url) {
 
 function guideCopy(t, key) {
   const fallback = DEFAULT_COPY[key]
-  const local = t[key] || {}
+  const local = t.guides?.[key] || t[key] || {}
 
   return {
     ...fallback,
@@ -301,7 +301,15 @@ function guideCopy(t, key) {
       ...(fallback.tabs || {}),
       ...(local.tabs || {}),
     },
+    collectionTitles: {
+      ...(fallback.collectionTitles || {}),
+      ...(local.collectionTitles || {}),
+    },
   }
+}
+
+function translatedCollectionTitle(copy, collection) {
+  return copy.collectionTitles?.[collection.id] || collection.title
 }
 
 const WEAPONS_FALLBACK = {
@@ -1049,7 +1057,7 @@ function SimpleGuideSection({ config }) {
             {data.collections.map((collection) => (
               <article key={collection.id} className="ign-guide-collection">
                 <div className="ign-guide-collection-heading">
-                  <h3>{collection.title}</h3>
+                  <h3>{translatedCollectionTitle(copy, collection)}</h3>
                   <span>{collection.items.length} {copy.itemsLabel}</span>
                 </div>
                 <div className="ign-guide-grid">
@@ -1234,7 +1242,7 @@ function VehiclesGuide() {
               {activeCategory.collections.map((collection) => (
                 <div key={collection.id} className="ign-guide-collection">
                   <div className="ign-guide-collection-heading">
-                    <h3>{collection.title}</h3>
+                    <h3>{translatedCollectionTitle(copy, collection)}</h3>
                     <span>{collection.items.length} {copy.itemsLabel}</span>
                   </div>
                   <div className="ign-guide-grid">

@@ -1,9 +1,266 @@
 // GTA VI Fan Site — i18n translations
 // Languages: en, zh, ru, it, id, pl, hi, ms
 
+const enGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'WEAPONS',
+    stats: { items: 'Weapons', images: 'Images', groups: 'Groups' },
+    itemsLabel: 'items',
+    collectionTitles: { 'weapons-list': 'Weapons List' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'VEHICLES',
+    stats: { categories: 'Subpages', vehicles: 'Vehicles', images: 'Images' },
+    itemsLabel: 'vehicles',
+    subpageLabel: 'Vehicle subpage',
+    tabs: { cars: 'Cars', motorcycles: 'Motorcycles', aircrafts: 'Aircrafts', boats: 'Boats' },
+    collectionTitles: {
+      'muscle-cars': 'Muscle Cars',
+      'sports-cars': 'Sports Cars',
+      'new-cars': 'New Cars',
+      suvs: 'SUVs',
+      'off-road-cars': 'Off-Road Cars',
+      'vans-emergency-commercial': 'Vans, Emergency, Commercial',
+      'returning-motorcycles': 'Returning Motorcycles',
+      'new-and-updated-motorcycles': 'New and Updated Motorcycles',
+      'bikes-and-others': 'Bikes and Others',
+      'airplanes-list': 'Airplanes List',
+      'helicopters-list': 'Helicopters List',
+      'watercraft-and-boats-list': 'Watercraft and Boats List',
+    },
+  },
+}
+
+const zhGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: '武器',
+    stats: { items: '武器', images: '图片', groups: '分组' },
+    itemsLabel: '项',
+    collectionTitles: { 'weapons-list': '武器列表' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: '载具',
+    stats: { categories: '子页面', vehicles: '载具', images: '图片' },
+    itemsLabel: '辆载具',
+    subpageLabel: '载具子页面',
+    tabs: { cars: '汽车', motorcycles: '摩托车', aircrafts: '飞行器', boats: '船只' },
+    collectionTitles: {
+      'muscle-cars': '肌肉车',
+      'sports-cars': '跑车',
+      'new-cars': '新车',
+      suvs: 'SUV',
+      'off-road-cars': '越野车',
+      'vans-emergency-commercial': '厢式车、应急与商用车',
+      'returning-motorcycles': '回归摩托车',
+      'new-and-updated-motorcycles': '新增与更新摩托车',
+      'bikes-and-others': '自行车及其他',
+      'airplanes-list': '飞机列表',
+      'helicopters-list': '直升机列表',
+      'watercraft-and-boats-list': '水上载具与船只列表',
+    },
+  },
+}
+
+const ruGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'ОРУЖИЕ',
+    stats: { items: 'Оружие', images: 'Изображения', groups: 'Группы' },
+    itemsLabel: 'предм.',
+    collectionTitles: { 'weapons-list': 'Список оружия' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'ТРАНСПОРТ',
+    stats: { categories: 'Подстраницы', vehicles: 'Транспорт', images: 'Изображения' },
+    itemsLabel: 'ед. транспорта',
+    subpageLabel: 'Подстраница транспорта',
+    tabs: { cars: 'Авто', motorcycles: 'Мотоциклы', aircrafts: 'Авиация', boats: 'Лодки' },
+    collectionTitles: {
+      'muscle-cars': 'Маслкары',
+      'sports-cars': 'Спорткары',
+      'new-cars': 'Новые автомобили',
+      suvs: 'Внедорожники',
+      'off-road-cars': 'Внедорожные авто',
+      'vans-emergency-commercial': 'Фургоны, спецслужбы и коммерческий транспорт',
+      'returning-motorcycles': 'Возвращающиеся мотоциклы',
+      'new-and-updated-motorcycles': 'Новые и обновленные мотоциклы',
+      'bikes-and-others': 'Велосипеды и другое',
+      'airplanes-list': 'Список самолетов',
+      'helicopters-list': 'Список вертолетов',
+      'watercraft-and-boats-list': 'Список водного транспорта',
+    },
+  },
+}
+
+const itGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'ARMI',
+    stats: { items: 'Armi', images: 'Immagini', groups: 'Gruppi' },
+    itemsLabel: 'oggetti',
+    collectionTitles: { 'weapons-list': 'Lista armi' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'VEICOLI',
+    stats: { categories: 'Sottopagine', vehicles: 'Veicoli', images: 'Immagini' },
+    itemsLabel: 'veicoli',
+    subpageLabel: 'Sottopagina veicoli',
+    tabs: { cars: 'Auto', motorcycles: 'Moto', aircrafts: 'Aerei', boats: 'Barche' },
+    collectionTitles: {
+      'muscle-cars': 'Muscle car',
+      'sports-cars': 'Auto sportive',
+      'new-cars': 'Nuove auto',
+      suvs: 'SUV',
+      'off-road-cars': 'Fuoristrada',
+      'vans-emergency-commercial': 'Furgoni, emergenza e commerciali',
+      'returning-motorcycles': 'Moto di ritorno',
+      'new-and-updated-motorcycles': 'Moto nuove e aggiornate',
+      'bikes-and-others': 'Bici e altri mezzi',
+      'airplanes-list': 'Lista aerei',
+      'helicopters-list': 'Lista elicotteri',
+      'watercraft-and-boats-list': 'Lista imbarcazioni',
+    },
+  },
+}
+
+const idGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'SENJATA',
+    stats: { items: 'Senjata', images: 'Gambar', groups: 'Grup' },
+    itemsLabel: 'item',
+    collectionTitles: { 'weapons-list': 'Daftar Senjata' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'KENDARAAN',
+    stats: { categories: 'Subhalaman', vehicles: 'Kendaraan', images: 'Gambar' },
+    itemsLabel: 'kendaraan',
+    subpageLabel: 'Subhalaman kendaraan',
+    tabs: { cars: 'Mobil', motorcycles: 'Motor', aircrafts: 'Pesawat', boats: 'Perahu' },
+    collectionTitles: {
+      'muscle-cars': 'Mobil Muscle',
+      'sports-cars': 'Mobil Sport',
+      'new-cars': 'Mobil Baru',
+      suvs: 'SUV',
+      'off-road-cars': 'Mobil Off-Road',
+      'vans-emergency-commercial': 'Van, Darurat, Komersial',
+      'returning-motorcycles': 'Motor yang Kembali',
+      'new-and-updated-motorcycles': 'Motor Baru dan Diperbarui',
+      'bikes-and-others': 'Sepeda dan Lainnya',
+      'airplanes-list': 'Daftar Pesawat',
+      'helicopters-list': 'Daftar Helikopter',
+      'watercraft-and-boats-list': 'Daftar Perahu dan Kendaraan Air',
+    },
+  },
+}
+
+const plGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'BROŃ',
+    stats: { items: 'Broń', images: 'Obrazy', groups: 'Grupy' },
+    itemsLabel: 'pozycji',
+    collectionTitles: { 'weapons-list': 'Lista broni' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'POJAZDY',
+    stats: { categories: 'Podstrony', vehicles: 'Pojazdy', images: 'Obrazy' },
+    itemsLabel: 'pojazdów',
+    subpageLabel: 'Podstrona pojazdów',
+    tabs: { cars: 'Samochody', motorcycles: 'Motocykle', aircrafts: 'Statki powietrzne', boats: 'Łodzie' },
+    collectionTitles: {
+      'muscle-cars': 'Muscle cary',
+      'sports-cars': 'Samochody sportowe',
+      'new-cars': 'Nowe samochody',
+      suvs: 'SUV-y',
+      'off-road-cars': 'Samochody terenowe',
+      'vans-emergency-commercial': 'Vany, pojazdy służb i komercyjne',
+      'returning-motorcycles': 'Powracające motocykle',
+      'new-and-updated-motorcycles': 'Nowe i zaktualizowane motocykle',
+      'bikes-and-others': 'Rowery i inne',
+      'airplanes-list': 'Lista samolotów',
+      'helicopters-list': 'Lista helikopterów',
+      'watercraft-and-boats-list': 'Lista jednostek wodnych i łodzi',
+    },
+  },
+}
+
+const hiGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'हथियार',
+    stats: { items: 'हथियार', images: 'तस्वीरें', groups: 'ग्रुप' },
+    itemsLabel: 'आइटम',
+    collectionTitles: { 'weapons-list': 'हथियारों की सूची' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'वाहन',
+    stats: { categories: 'सबपेज', vehicles: 'वाहन', images: 'तस्वीरें' },
+    itemsLabel: 'वाहन',
+    subpageLabel: 'वाहन सबपेज',
+    tabs: { cars: 'कारें', motorcycles: 'मोटरसाइकिलें', aircrafts: 'विमान', boats: 'नावें' },
+    collectionTitles: {
+      'muscle-cars': 'मसल कारें',
+      'sports-cars': 'स्पोर्ट्स कारें',
+      'new-cars': 'नई कारें',
+      suvs: 'SUV',
+      'off-road-cars': 'ऑफ-रोड कारें',
+      'vans-emergency-commercial': 'वैन, इमरजेंसी और कमर्शियल',
+      'returning-motorcycles': 'वापसी करने वाली मोटरसाइकिलें',
+      'new-and-updated-motorcycles': 'नई और अपडेटेड मोटरसाइकिलें',
+      'bikes-and-others': 'बाइक और अन्य',
+      'airplanes-list': 'विमानों की सूची',
+      'helicopters-list': 'हेलिकॉप्टरों की सूची',
+      'watercraft-and-boats-list': 'वॉटरक्राफ्ट और नावों की सूची',
+    },
+  },
+}
+
+const msGuides = {
+  weapons: {
+    title: 'GTA 6',
+    titleHighlight: 'SENJATA',
+    stats: { items: 'Senjata', images: 'Imej', groups: 'Kumpulan' },
+    itemsLabel: 'item',
+    collectionTitles: { 'weapons-list': 'Senarai Senjata' },
+  },
+  vehicles: {
+    title: 'GTA 6',
+    titleHighlight: 'KENDERAAN',
+    stats: { categories: 'Subhalaman', vehicles: 'Kenderaan', images: 'Imej' },
+    itemsLabel: 'kenderaan',
+    subpageLabel: 'Subhalaman kenderaan',
+    tabs: { cars: 'Kereta', motorcycles: 'Motosikal', aircrafts: 'Pesawat', boats: 'Bot' },
+    collectionTitles: {
+      'muscle-cars': 'Kereta Muscle',
+      'sports-cars': 'Kereta Sukan',
+      'new-cars': 'Kereta Baharu',
+      suvs: 'SUV',
+      'off-road-cars': 'Kereta Off-Road',
+      'vans-emergency-commercial': 'Van, Kecemasan, Komersial',
+      'returning-motorcycles': 'Motosikal Kembali',
+      'new-and-updated-motorcycles': 'Motosikal Baharu dan Dikemas Kini',
+      'bikes-and-others': 'Basikal dan Lain-lain',
+      'airplanes-list': 'Senarai Kapal Terbang',
+      'helicopters-list': 'Senarai Helikopter',
+      'watercraft-and-boats-list': 'Senarai Kenderaan Air dan Bot',
+    },
+  },
+}
+
 const en = {
   // Nav
   nav: {
+    main: 'Main',
     about: 'About',
     characters: 'Characters',
     weapons: 'Weapons',
@@ -12,7 +269,9 @@ const en = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'News',
+    shop: 'Shop',
     social: 'Community',
+    more: 'More',
     signIn: 'Sign in',
     logOut: 'Log out',
   },
@@ -96,6 +355,7 @@ const en = {
     otherLocations: 'Other spotted locations',
     shopsAndBusinesses: 'Shops and businesses',
   },
+  guides: enGuides,
   // NewsSection
   news: {
     badge: 'IGN COVERAGE',
@@ -239,6 +499,7 @@ const en = {
 
 const zh = {
   nav: {
+    main: '主页',
     about: '关于',
     characters: '角色',
     weapons: '武器',
@@ -247,7 +508,9 @@ const zh = {
     media: '媒体',
     leonida: '莱昂尼达',
     news: '新闻',
+    shop: '商店',
     social: '社区',
+    more: '更多',
     signIn: '登录',
     logOut: '退出',
   },
@@ -314,6 +577,7 @@ const zh = {
     otherLocations: '其他已发现地点',
     shopsAndBusinesses: '商店与商家',
   },
+  guides: zhGuides,
   news: {
     badge: 'IGN 报道',
     title: '最新',
@@ -434,6 +698,7 @@ const zh = {
 
 const ru = {
   nav: {
+    main: 'Главная',
     about: 'О игре',
     characters: 'Персонажи',
     weapons: 'Оружие',
@@ -442,7 +707,9 @@ const ru = {
     media: 'Медиа',
     leonida: 'Леонида',
     news: 'Новости',
+    shop: 'Магазин',
     social: 'Сообщество',
+    more: 'Ещё',
     signIn: 'Войти',
     logOut: 'Выйти',
   },
@@ -509,6 +776,7 @@ const ru = {
     otherLocations: 'Другие замеченные места',
     shopsAndBusinesses: 'Магазины и заведения',
   },
+  guides: ruGuides,
   news: {
     badge: 'МАТЕРИАЛЫ IGN',
     title: 'ПОСЛЕДНИЕ',
@@ -629,6 +897,7 @@ const ru = {
 
 const it = {
   nav: {
+    main: 'Home',
     about: 'Info',
     characters: 'Personaggi',
     weapons: 'Armi',
@@ -637,7 +906,9 @@ const it = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'Notizie',
+    shop: 'Negozio',
     social: 'Community',
+    more: 'Altro',
     signIn: 'Accedi',
     logOut: 'Esci',
   },
@@ -704,6 +975,7 @@ const it = {
     otherLocations: 'Altri luoghi avvistati',
     shopsAndBusinesses: 'Negozi e attività',
   },
+  guides: itGuides,
   news: {
     badge: 'COPERTURA IGN',
     title: 'ULTIMI',
@@ -823,6 +1095,7 @@ const it = {
 
 const id = {
   nav: {
+    main: 'Utama',
     about: 'Tentang',
     characters: 'Karakter',
     weapons: 'Senjata',
@@ -831,7 +1104,9 @@ const id = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'Berita',
+    shop: 'Toko',
     social: 'Komunitas',
+    more: 'Lainnya',
     signIn: 'Masuk',
     logOut: 'Keluar',
   },
@@ -898,6 +1173,7 @@ const id = {
     otherLocations: 'Lokasi lain yang terlihat',
     shopsAndBusinesses: 'Toko dan bisnis',
   },
+  guides: idGuides,
   news: {
     badge: 'LIPUTAN IGN',
     title: 'UPDATE',
@@ -1017,6 +1293,7 @@ const id = {
 
 const pl = {
   nav: {
+    main: 'Główna',
     about: 'O grze',
     characters: 'Postacie',
     weapons: 'Broń',
@@ -1025,7 +1302,9 @@ const pl = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'Aktualności',
+    shop: 'Sklep',
     social: 'Społeczność',
+    more: 'Więcej',
     signIn: 'Zaloguj się',
     logOut: 'Wyloguj',
   },
@@ -1092,6 +1371,7 @@ const pl = {
     otherLocations: 'Inne zauważone lokacje',
     shopsAndBusinesses: 'Sklepy i biznesy',
   },
+  guides: plGuides,
   news: {
     badge: 'RELACJE IGN',
     title: 'NAJNOWSZE',
@@ -1211,6 +1491,7 @@ const pl = {
 
 const hi = {
   nav: {
+    main: 'मुख्य',
     about: 'परिचय',
     characters: 'किरदार',
     weapons: 'हथियार',
@@ -1219,7 +1500,9 @@ const hi = {
     media: 'मीडिया',
     leonida: 'लियोनिडा',
     news: 'खबरें',
+    shop: 'दुकान',
     social: 'कम्युनिटी',
+    more: 'और',
     signIn: 'साइन इन',
     logOut: 'लॉग आउट',
   },
@@ -1286,6 +1569,7 @@ const hi = {
     otherLocations: 'अन्य देखी गई जगहें',
     shopsAndBusinesses: 'दुकानें और व्यवसाय',
   },
+  guides: hiGuides,
   news: {
     badge: 'IGN कवरेज',
     title: 'ताज़ा',
@@ -1405,6 +1689,7 @@ const hi = {
 
 const ms = {
   nav: {
+    main: 'Utama',
     about: 'Tentang',
     characters: 'Watak',
     weapons: 'Senjata',
@@ -1413,7 +1698,9 @@ const ms = {
     media: 'Media',
     leonida: 'Leonida',
     news: 'Berita',
+    shop: 'Kedai',
     social: 'Komuniti',
+    more: 'Lagi',
     signIn: 'Log Masuk',
     logOut: 'Log Keluar',
   },
@@ -1480,6 +1767,7 @@ const ms = {
     otherLocations: 'Lokasi lain yang ditemui',
     shopsAndBusinesses: 'Kedai dan perniagaan',
   },
+  guides: msGuides,
   news: {
     badge: 'LIPUTAN IGN',
     title: 'KEMASKINI',
