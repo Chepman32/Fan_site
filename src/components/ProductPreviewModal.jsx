@@ -6,7 +6,7 @@ import './ProductPreviewModal.css'
 const backdropTransition = { duration: 0.22, ease: [0.22, 1, 0.36, 1] }
 const sheetSpring = { type: 'spring', stiffness: 420, damping: 34, mass: 0.9 }
 
-function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
+function ProductPreviewModal({ product, cartProduct = product, inCart, onAddToCart, onClose, copy = {} }) {
   const hasImageSet = product?.images?.length > 1
 
   const preventPreviewContextMenu = (event) => {
@@ -45,7 +45,7 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
           <motion.button
             type="button"
             className="product-preview-backdrop"
-            aria-label="Close preview"
+            aria-label={copy.preview?.closePreview || 'Close preview'}
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -57,7 +57,7 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
             className="product-preview-sheet"
             role="dialog"
             aria-modal="true"
-            aria-label={`${product.title} fullscreen preview`}
+            aria-label={copy.previewFullscreen?.(product.title) || `${product.title} fullscreen preview`}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0.04, bottom: 0.42 }}
@@ -74,10 +74,10 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
 
             <header className="product-preview-header">
               <div>
-                <span>{product.previewLabel || 'Product preview'}</span>
+                <span>{product.previewLabel || copy.preview?.productPreview || 'Product preview'}</span>
                 <h2>{product.title}</h2>
               </div>
-              <button type="button" className="product-preview-close" onClick={onClose} aria-label="Close preview">
+              <button type="button" className="product-preview-close" onClick={onClose} aria-label={copy.preview?.closePreview || 'Close preview'}>
                 <X size={20} />
               </button>
             </header>
@@ -128,10 +128,10 @@ function ProductPreviewModal({ product, inCart, onAddToCart, onClose }) {
               <button
                 type="button"
                 className={`product-preview-cart ${inCart ? 'selected' : ''}`}
-                onClick={() => onAddToCart(product)}
+                onClick={() => onAddToCart(cartProduct)}
               >
                 {inCart ? <Check size={16} /> : <ShoppingCart size={16} />}
-                {inCart ? 'Added to cart' : 'Add to cart'}
+                {inCart ? copy.addedToCart || 'Added to cart' : copy.addToCart || 'Add to cart'}
               </button>
             </footer>
           </motion.article>
