@@ -9,6 +9,14 @@ const enGuides = {
     itemsLabel: 'items',
     collectionTitles: { 'weapons-list': 'Weapons List' },
   },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'SOCIAL MEDIA',
+    stats: { items: 'Accounts', images: 'Images', groups: 'Groups' },
+    itemsLabel: 'accounts',
+    sourceLabel: 'Trailer account',
+    collectionTitles: { account: 'Account', accounts: 'Accounts' },
+  },
   vehicles: {
     title: 'GTA 6',
     titleHighlight: 'VEHICLES',
@@ -40,6 +48,14 @@ const zhGuides = {
     stats: { items: '武器', images: '图片', groups: '分组' },
     itemsLabel: '项',
     collectionTitles: { 'weapons-list': '武器列表' },
+  },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: '社交媒体',
+    stats: { items: '账号', images: '图片', groups: '分组' },
+    itemsLabel: '个账号',
+    sourceLabel: '预告片账号',
+    collectionTitles: { account: '账号', accounts: '账号' },
   },
   vehicles: {
     title: 'GTA 6',
@@ -73,6 +89,14 @@ const ruGuides = {
     itemsLabel: 'предм.',
     collectionTitles: { 'weapons-list': 'Список оружия' },
   },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'СОЦСЕТИ',
+    stats: { items: 'Аккаунты', images: 'Изображения', groups: 'Группы' },
+    itemsLabel: 'аккаунтов',
+    sourceLabel: 'Аккаунт из трейлера',
+    collectionTitles: { account: 'Аккаунт', accounts: 'Аккаунты' },
+  },
   vehicles: {
     title: 'GTA 6',
     titleHighlight: 'ТРАНСПОРТ',
@@ -104,6 +128,14 @@ const itGuides = {
     stats: { items: 'Armi', images: 'Immagini', groups: 'Gruppi' },
     itemsLabel: 'oggetti',
     collectionTitles: { 'weapons-list': 'Lista armi' },
+  },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'SOCIAL',
+    stats: { items: 'Account', images: 'Immagini', groups: 'Gruppi' },
+    itemsLabel: 'account',
+    sourceLabel: 'Account del trailer',
+    collectionTitles: { account: 'Account', accounts: 'Account' },
   },
   vehicles: {
     title: 'GTA 6',
@@ -137,6 +169,14 @@ const idGuides = {
     itemsLabel: 'item',
     collectionTitles: { 'weapons-list': 'Daftar Senjata' },
   },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'MEDIA SOSIAL',
+    stats: { items: 'Akun', images: 'Gambar', groups: 'Grup' },
+    itemsLabel: 'akun',
+    sourceLabel: 'Akun trailer',
+    collectionTitles: { account: 'Akun', accounts: 'Akun' },
+  },
   vehicles: {
     title: 'GTA 6',
     titleHighlight: 'KENDARAAN',
@@ -168,6 +208,14 @@ const plGuides = {
     stats: { items: 'Broń', images: 'Obrazy', groups: 'Grupy' },
     itemsLabel: 'pozycji',
     collectionTitles: { 'weapons-list': 'Lista broni' },
+  },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'SOCIAL MEDIA',
+    stats: { items: 'Konta', images: 'Obrazy', groups: 'Grupy' },
+    itemsLabel: 'kont',
+    sourceLabel: 'Konto z trailera',
+    collectionTitles: { account: 'Konto', accounts: 'Konta' },
   },
   vehicles: {
     title: 'GTA 6',
@@ -201,6 +249,14 @@ const hiGuides = {
     itemsLabel: 'आइटम',
     collectionTitles: { 'weapons-list': 'हथियारों की सूची' },
   },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'सोशल मीडिया',
+    stats: { items: 'अकाउंट', images: 'तस्वीरें', groups: 'ग्रुप' },
+    itemsLabel: 'अकाउंट',
+    sourceLabel: 'ट्रेलर अकाउंट',
+    collectionTitles: { account: 'अकाउंट', accounts: 'अकाउंट' },
+  },
   vehicles: {
     title: 'GTA 6',
     titleHighlight: 'वाहन',
@@ -232,6 +288,14 @@ const msGuides = {
     stats: { items: 'Senjata', images: 'Imej', groups: 'Kumpulan' },
     itemsLabel: 'item',
     collectionTitles: { 'weapons-list': 'Senarai Senjata' },
+  },
+  socialMedia: {
+    title: 'GTA 6',
+    titleHighlight: 'MEDIA SOSIAL',
+    stats: { items: 'Akaun', images: 'Imej', groups: 'Kumpulan' },
+    itemsLabel: 'akaun',
+    sourceLabel: 'Akaun trailer',
+    collectionTitles: { account: 'Akaun', accounts: 'Akaun' },
   },
   vehicles: {
     title: 'GTA 6',

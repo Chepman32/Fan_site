@@ -911,7 +911,11 @@ function countImages(collections = [], extraImages = []) {
 }
 
 function flatItems(collections = []) {
-  return collections.flatMap((collection) => collection.items.map((item) => ({ ...item, groupTitle: collection.title })))
+  return collections.flatMap((collection) => collection.items.map((item) => ({
+    ...item,
+    groupId: collection.id,
+    groupTitle: collection.title,
+  })))
 }
 
 function GuideImage({ image }) {
@@ -926,7 +930,11 @@ function GuideImage({ image }) {
   )
 }
 
-function GuideCard({ item, sourceLabel, index = 0, onZoom }) {
+function GuideCard({ item, sourceLabel, copy, index = 0, onZoom }) {
+  const groupLabel = item.groupId
+    ? translatedCollectionTitle(copy, { id: item.groupId, title: item.groupTitle })
+    : item.groupTitle
+
   return (
     <button
       type="button"
@@ -946,7 +954,7 @@ function GuideCard({ item, sourceLabel, index = 0, onZoom }) {
       <div className="ign-guide-card-body">
         <span className="ign-guide-source">
           <Tag size={13} />
-          {item.groupTitle || sourceLabel}
+          <span>{groupLabel || sourceLabel}</span>
         </span>
         <h3>{item.name}</h3>
         <p>{item.description}</p>
@@ -1066,6 +1074,7 @@ function SimpleGuideSection({ config }) {
                       key={item.id}
                       item={item}
                       sourceLabel={copy.sourceLabel}
+                      copy={copy}
                       index={index}
                       onZoom={setZoomed}
                     />
@@ -1251,6 +1260,7 @@ function VehiclesGuide() {
                         key={item.id}
                         item={item}
                         sourceLabel={copy.sourceLabel}
+                        copy={copy}
                         index={index}
                         onZoom={setZoomed}
                       />

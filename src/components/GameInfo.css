@@ -8,7 +8,10 @@
 }
 
 .section-title {
+  max-width: 100%;
   font-size: clamp(36px, 6vw, 64px);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .loading-state,

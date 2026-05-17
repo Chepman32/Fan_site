@@ -36,6 +36,8 @@
   font-size: 78px;
   font-weight: 400;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 .shop-header p {
@@ -81,6 +83,7 @@
 
 .shop-tabs button {
   display: flex;
+  min-width: 0;
   min-height: 58px;
   align-items: center;
   justify-content: space-between;
@@ -97,6 +100,13 @@
   transition: background 0.22s ease, border-color 0.22s ease, color 0.22s ease;
 }
 
+.shop-tabs button span {
+  min-width: 0;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
 .shop-tabs button:hover:not(:disabled),
 .shop-tabs button.active {
   color: var(--text-primary);
@@ -110,6 +120,7 @@
 }
 
 .shop-tabs em {
+  flex: 0 0 auto;
   padding: 4px 7px;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 999px;
@@ -125,7 +136,9 @@
 
 .shop-category-strip {
   display: inline-flex;
+  flex-wrap: wrap;
   width: fit-content;
+  max-width: 100%;
   align-items: center;
   gap: 9px;
   padding: 9px 12px;
@@ -143,10 +156,13 @@
   font-size: 24px;
   font-weight: 400;
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .shop-category-strip span {
+  min-width: 0;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .shop-featured {
@@ -242,6 +258,7 @@
   font-size: 46px;
   font-weight: 400;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .shop-featured-specs {
@@ -253,6 +270,7 @@
 
 .shop-featured-specs span,
 .shop-product-tags span {
+  min-width: 0;
   padding: 7px 9px;
   background: rgba(255, 255, 255, 0.055);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -260,6 +278,8 @@
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .shop-featured-actions {
@@ -273,6 +293,7 @@
 .shop-card-action,
 .shop-checkout-button {
   display: inline-flex;
+  min-width: 0;
   min-height: 42px;
   align-items: center;
   justify-content: center;
@@ -282,7 +303,11 @@
   font: inherit;
   font-size: 13px;
   font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
   text-decoration: none;
+  overflow-wrap: anywhere;
   cursor: pointer;
   transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease, color 0.22s ease;
 }
@@ -371,6 +396,7 @@
   font-size: 27px;
   font-weight: 400;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .shop-product-body p {
@@ -378,6 +404,7 @@
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .shop-product-body strong {
@@ -444,6 +471,7 @@
   font-size: 28px;
   font-weight: 400;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .shop-cart-empty {
@@ -476,6 +504,7 @@
   color: var(--text-primary);
   font-size: 12px;
   line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .shop-cart-item span {
