@@ -2,9 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
 import { AlertCircle, Check, Copy, Download, LoaderCircle, PlugZap, Send, ShieldCheck } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { PAYMENT_ADDRESS, PAYMENT_NETWORK } from '../shop/shopData'
+import { PAYMENT_ADDRESS, PAYMENT_NETWORK, PAYMENT_NETWORK_SUFFIX } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import { useSocial } from '../social/SocialContext'
+import ShopLineItemThumbnail from './ShopLineItemThumbnail'
 import {
   checkUsdtTransaction,
   connectTronLinkWallet,
@@ -202,7 +203,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
 
               return (
                 <div key={item.id} className="crypto-checkout-item">
-                  <img src={item.image} alt="" aria-hidden="true" />
+                  <ShopLineItemThumbnail product={item} />
                   <div>
                     <strong>{displayItem.title}</strong>
                     <span>${item.price}</span>
@@ -234,7 +235,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
       <div className="crypto-checkout-payment">
         <div className="crypto-payment-amount">
           <span>{checkoutCopy.sendExactly}</span>
-          <strong>{paymentAmount} USDT</strong>
+          <strong>{paymentAmount} USDT {PAYMENT_NETWORK_SUFFIX}</strong>
           <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
             <Copy size={14} />
             {copiedField === 'amount' ? checkoutCopy.copied : checkoutCopy.copyAmount}

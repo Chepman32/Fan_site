@@ -1,5 +1,6 @@
 export const PAYMENT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
 export const PAYMENT_NETWORK = 'USDT TRC20'
+export const PAYMENT_NETWORK_SUFFIX = '(TRC 20)'
 export const TRONGRID_FULL_HOST = 'https://api.trongrid.io'
 export const USDT_CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 export const USDT_DECIMALS = 6
@@ -430,6 +431,12 @@ export const SHOP_PRODUCT_BY_ID = Object.fromEntries(
     .flat()
     .map((product) => [product.id, product]),
 )
+
+export function getShopProductThumbnail(product) {
+  if (!product) return ''
+
+  return product.previewImage || product.image || product.images?.[0] || ''
+}
 
 export const categoryTabs = [
   { id: 'stream-overlays', label: 'Stream overlays', count: STREAM_OVERLAY_PRODUCTS.length, active: true },

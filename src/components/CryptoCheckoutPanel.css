@@ -118,13 +118,6 @@
   border-radius: 8px;
 }
 
-.crypto-checkout-item img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  border-radius: 6px;
-}
-
 .crypto-checkout-item strong {
   display: block;
   color: var(--text-primary);

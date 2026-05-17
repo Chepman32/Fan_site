@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Check, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet, X } from 'lucide-react'
 import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import ProductPreviewModal from './ProductPreviewModal'
+import ShopLineItemThumbnail from './ShopLineItemThumbnail'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { SHOP_PRODUCTS_BY_CATEGORY, categoryTabs } from '../shop/shopData'
+import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import './ShopPage.css'
 
@@ -252,7 +253,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
 
                   return (
                     <div key={item.id} className="shop-cart-item">
-                      <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                      <ShopLineItemThumbnail product={item} />
                       <div>
                         <strong>{displayItem.title}</strong>
                         <span>${item.price}</span>
@@ -274,7 +275,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
             </div>
             <button type="button" className="shop-checkout-button" disabled={!cartItems.length} onClick={openCheckout}>
               <Wallet size={16} />
-              {shopCopy.payWithUsdt}
+              {shopCopy.payWithUsdt} {PAYMENT_NETWORK_SUFFIX}
             </button>
           </aside>
         </div>

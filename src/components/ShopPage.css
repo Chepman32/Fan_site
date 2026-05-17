@@ -162,8 +162,7 @@
 }
 
 .shop-featured-media img,
-.shop-product-preview img,
-.shop-cart-item img {
+.shop-product-preview img {
   width: 100%;
   height: 100%;
   display: block;
@@ -471,11 +470,6 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
-}
-
-.shop-cart-item img {
-  aspect-ratio: 16 / 9;
-  border-radius: 6px;
 }
 
 .shop-cart-item strong {
