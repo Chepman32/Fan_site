@@ -69,7 +69,7 @@
 
 .shop-cart-summary strong {
   color: var(--text-primary);
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 38px;
   font-weight: 400;
   line-height: 1;
@@ -152,7 +152,7 @@
 
 .shop-category-strip strong {
   color: var(--accent-cyan);
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 400;
   line-height: 1;
@@ -409,7 +409,7 @@
 
 .shop-product-body strong {
   color: var(--accent-cyan);
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 30px;
   font-weight: 400;
   line-height: 1;

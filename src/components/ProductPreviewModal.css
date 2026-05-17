@@ -149,7 +149,7 @@
 
 .product-preview-meta strong {
   color: var(--accent-cyan);
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 34px;
   font-weight: 400;
   line-height: 1;

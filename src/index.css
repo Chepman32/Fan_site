@@ -18,6 +18,8 @@
   --border-color: #2a2a3a;
   --glow-pink: 0 0 20px rgba(255, 45, 149, 0.3);
   --glow-purple: 0 0 20px rgba(157, 78, 221, 0.3);
+  --font-body: 'Inter', sans-serif;
+  --font-display: 'Oswald', sans-serif;
 }
 
 html {
@@ -25,7 +27,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
@@ -33,7 +35,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: 1px;
   line-height: 1.1;
 }
@@ -154,7 +156,7 @@ h1, h2, h3, h4, h5, h6 {
   color: white;
   border: none;
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
@@ -176,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;

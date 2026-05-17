@@ -100,7 +100,7 @@
 }
 
 .video-meta h4 {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
@@ -125,7 +125,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 1px;
   margin-bottom: 20px;

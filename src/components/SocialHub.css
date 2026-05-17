@@ -62,7 +62,7 @@
 .poll-card h3,
 .trailer-thread h3,
 .profile-detail h3 {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-body);
   letter-spacing: 0;
 }
 
@@ -92,7 +92,7 @@
   overflow: hidden;
   border: 1px solid currentColor;
   border-radius: 50%;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   letter-spacing: 1px;
 }
 

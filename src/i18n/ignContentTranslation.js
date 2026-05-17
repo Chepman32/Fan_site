@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 const CACHE_PREFIX = 'gtavi:ign-translation'
-const CACHE_VERSION = 'v1'
+const CACHE_VERSION = 'v2'
 const MAX_CACHE_ENTRIES = 48
 const MAX_BATCH_ITEMS = 80
 const MAX_BATCH_CHARS = 24000
@@ -191,6 +191,7 @@ export function charactersTranslationSource(data) {
     intro: data.intro,
     characters: data.characters.map((character) => ({
       id: character.id,
+      name: character.name,
       bio: character.bio,
     })),
   }
@@ -199,7 +200,9 @@ export function charactersTranslationSource(data) {
 export async function translateCharactersData(data, lang) {
   const map = await translateTextMap([
     ...data.intro,
+    ...data.characters.map((character) => character.name),
     ...data.characters.map((character) => character.bio),
+    ...data.characters.map((character) => character.imageTitle),
   ], lang)
 
   return {
@@ -207,7 +210,9 @@ export async function translateCharactersData(data, lang) {
     intro: data.intro.map((paragraph) => translated(map, paragraph)),
     characters: data.characters.map((character) => ({
       ...character,
+      name: translated(map, character.name),
       bio: translated(map, character.bio),
+      imageTitle: translated(map, character.imageTitle),
     })),
   }
 }
@@ -220,8 +225,13 @@ export function guideTranslationSource(data) {
       title: collection.title,
       items: collection.items.map((item) => ({
         id: item.id,
+        name: item.name,
         description: item.description,
       })),
+    })),
+    extraImages: data.extraImages.map((image) => ({
+      id: image.id,
+      title: image.title,
     })),
   }
 }
@@ -230,7 +240,10 @@ export async function translateGuideData(data, lang) {
   const map = await translateTextMap([
     ...data.intro,
     ...data.collections.map((collection) => collection.title),
+    ...data.collections.flatMap((collection) => collection.items.map((item) => item.name)),
     ...data.collections.flatMap((collection) => collection.items.map((item) => item.description)),
+    ...data.collections.flatMap((collection) => collection.items.map((item) => item.imageTitle)),
+    ...data.extraImages.map((image) => image.title),
   ], lang)
 
   return {
@@ -241,8 +254,14 @@ export async function translateGuideData(data, lang) {
       title: translated(map, collection.title),
       items: collection.items.map((item) => ({
         ...item,
+        name: translated(map, item.name),
         description: translated(map, item.description),
+        imageTitle: translated(map, item.imageTitle),
       })),
+    })),
+    extraImages: data.extraImages.map((image) => ({
+      ...image,
+      title: translated(map, image.title),
     })),
   }
 }
@@ -258,9 +277,18 @@ export function vehiclesTranslationSource(data) {
         title: collection.title,
         items: collection.items.map((item) => ({
           id: item.id,
+          name: item.name,
           description: item.description,
         })),
       })),
+      extraImages: category.extraImages.map((image) => ({
+        id: image.id,
+        title: image.title,
+      })),
+    })),
+    images: data.images.map((image) => ({
+      id: image.id,
+      title: image.title,
     })),
   }
 }
@@ -271,8 +299,16 @@ export async function translateVehiclesData(data, lang) {
     ...data.categories.flatMap((category) => category.intro),
     ...data.categories.flatMap((category) => category.collections.map((collection) => collection.title)),
     ...data.categories.flatMap((category) => (
+      category.collections.flatMap((collection) => collection.items.map((item) => item.name))
+    )),
+    ...data.categories.flatMap((category) => (
       category.collections.flatMap((collection) => collection.items.map((item) => item.description))
     )),
+    ...data.categories.flatMap((category) => (
+      category.collections.flatMap((collection) => collection.items.map((item) => item.imageTitle))
+    )),
+    ...data.images.map((image) => image.title),
+    ...data.categories.flatMap((category) => category.extraImages.map((image) => image.title)),
   ], lang)
 
   return {
@@ -286,9 +322,19 @@ export async function translateVehiclesData(data, lang) {
         title: translated(map, collection.title),
         items: collection.items.map((item) => ({
           ...item,
+          name: translated(map, item.name),
           description: translated(map, item.description),
+          imageTitle: translated(map, item.imageTitle),
         })),
       })),
+      extraImages: category.extraImages.map((image) => ({
+        ...image,
+        title: translated(map, image.title),
+      })),
+    })),
+    images: data.images.map((image) => ({
+      ...image,
+      title: translated(map, image.title),
     })),
   }
 }
@@ -296,46 +342,102 @@ export async function translateVehiclesData(data, lang) {
 export function leonidaTranslationSource(data) {
   return {
     intro: data.intro,
+    majorLocations: data.majorLocations.map((location) => ({
+      id: location.id,
+      name: location.name,
+    })),
+    otherLocations: data.otherLocations,
+    businesses: data.businesses,
+    images: data.images.map((image) => ({
+      id: image.id,
+      title: image.title,
+    })),
   }
 }
 
 export async function translateLeonidaData(data, lang) {
-  const map = await translateTextMap(data.intro, lang)
+  const map = await translateTextMap([
+    ...data.intro,
+    ...data.majorLocations.map((location) => location.name),
+    ...data.otherLocations,
+    ...data.businesses,
+    ...data.images.map((image) => image.title),
+  ], lang)
 
   return {
     ...data,
     intro: data.intro.map((paragraph) => translated(map, paragraph)),
+    majorLocations: data.majorLocations.map((location) => ({
+      ...location,
+      name: translated(map, location.name),
+    })),
+    otherLocations: data.otherLocations.map((location) => translated(map, location)),
+    businesses: data.businesses.map((business) => translated(map, business)),
+    images: data.images.map((image) => ({
+      ...image,
+      title: translated(map, image.title),
+    })),
   }
 }
 
 export function locationPageTranslationSource(page) {
   return {
+    title: page.title,
     description: page.description,
     intro: page.intro,
     sections: page.sections.map((section) => ({
       id: section.id,
       title: section.title,
       paragraphs: section.paragraphs,
+      links: section.links.map((link) => ({
+        id: link.id,
+        name: link.name,
+      })),
+    })),
+    relatedLinks: page.relatedLinks.map((link) => ({
+      id: link.id,
+      name: link.name,
+    })),
+    images: page.images.map((image) => ({
+      id: image.id,
+      title: image.title,
     })),
   }
 }
 
 export async function translateLocationPageData(page, lang) {
   const map = await translateTextMap([
+    page.title,
     page.description,
     ...page.intro,
     ...page.sections.map((section) => section.title),
     ...page.sections.flatMap((section) => section.paragraphs),
+    ...page.sections.flatMap((section) => section.links.map((link) => link.name)),
+    ...page.relatedLinks.map((link) => link.name),
+    ...page.images.map((image) => image.title),
   ], lang)
 
   return {
     ...page,
+    title: translated(map, page.title),
     description: translated(map, page.description),
     intro: page.intro.map((paragraph) => translated(map, paragraph)),
     sections: page.sections.map((section) => ({
       ...section,
       title: translated(map, section.title),
       paragraphs: section.paragraphs.map((paragraph) => translated(map, paragraph)),
+      links: section.links.map((link) => ({
+        ...link,
+        name: translated(map, link.name),
+      })),
+    })),
+    relatedLinks: page.relatedLinks.map((link) => ({
+      ...link,
+      name: translated(map, link.name),
+    })),
+    images: page.images.map((image) => ({
+      ...image,
+      title: translated(map, image.title),
     })),
   }
 }

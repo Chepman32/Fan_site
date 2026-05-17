@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 24px;
   letter-spacing: 2px;
   margin-bottom: 16px;
@@ -46,7 +46,7 @@
 }
 
 .footer-column h4 {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: var(--font-display);
   font-size: 18px;
   letter-spacing: 1px;
   margin-bottom: 16px;
