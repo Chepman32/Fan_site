@@ -11,6 +11,13 @@ import {
   Ship,
   Tag,
 } from 'lucide-react'
+import {
+  guideTranslationSource,
+  translateGuideData,
+  translateVehiclesData,
+  useTranslatedIgnContent,
+  vehiclesTranslationSource,
+} from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import ImageZoomModal from './ImageZoomModal'
 import './IgnGuide.css'
@@ -998,7 +1005,7 @@ function OverviewPanel({ copy, data, stats, images = [] }) {
 }
 
 function SimpleGuideSection({ config }) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const copy = guideCopy(t, config.key)
   const [data, setData] = useState(config.fallback)
   const [loading, setLoading] = useState(true)
@@ -1032,14 +1039,23 @@ function SimpleGuideSection({ config }) {
     }
   }, [config])
 
-  const itemCount = useMemo(() => flatItems(data.collections).length, [data.collections])
+  const translationSource = useMemo(() => guideTranslationSource(data), [data])
+  const { data: displayData } = useTranslatedIgnContent(data, {
+    enabled: !loading,
+    lang,
+    scope: `guide-${config.key}`,
+    source: translationSource,
+    translate: translateGuideData,
+  })
+
+  const itemCount = useMemo(() => flatItems(displayData.collections).length, [displayData.collections])
   const stats = useMemo(
     () => [
       { label: copy.stats.items, value: itemCount },
-      { label: copy.stats.images, value: countImages(data.collections, data.extraImages) },
-      { label: copy.stats.groups, value: data.collections.length },
+      { label: copy.stats.images, value: countImages(displayData.collections, displayData.extraImages) },
+      { label: copy.stats.groups, value: displayData.collections.length },
     ],
-    [copy, data.collections, data.extraImages, itemCount],
+    [copy, displayData.collections, displayData.extraImages, itemCount],
   )
 
   return (
@@ -1060,9 +1076,9 @@ function SimpleGuideSection({ config }) {
 
         {!loading && (
           <div className="ign-guide-content">
-            <OverviewPanel copy={copy} data={data} stats={stats} images={data.extraImages} />
+            <OverviewPanel copy={copy} data={displayData} stats={stats} images={displayData.extraImages} />
 
-            {data.collections.map((collection) => (
+            {displayData.collections.map((collection) => (
               <article key={collection.id} className="ign-guide-collection">
                 <div className="ign-guide-collection-heading">
                   <h3>{translatedCollectionTitle(copy, collection)}</h3>
@@ -1097,7 +1113,7 @@ function SimpleGuideSection({ config }) {
 }
 
 function VehiclesGuide() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const copy = guideCopy(t, 'vehicles')
   const [data, setData] = useState(VEHICLES_FALLBACK)
   const [activeCategoryId, setActiveCategoryId] = useState('cars')
@@ -1153,27 +1169,36 @@ function VehiclesGuide() {
     }
   }, [])
 
-  const activeCategory = data.categories.find((category) => category.id === activeCategoryId) || data.categories[0]
+  const translationSource = useMemo(() => vehiclesTranslationSource(data), [data])
+  const { data: displayData } = useTranslatedIgnContent(data, {
+    enabled: !loading,
+    lang,
+    scope: 'vehicles',
+    source: translationSource,
+    translate: translateVehiclesData,
+  })
+
+  const activeCategory = displayData.categories.find((category) => category.id === activeCategoryId) || displayData.categories[0]
   const activeConfig = VEHICLE_CATEGORIES.find((category) => category.id === activeCategory?.id) || VEHICLE_CATEGORIES[0]
   const ActiveIcon = activeConfig.icon
 
   const vehicleCount = useMemo(
-    () => data.categories.reduce((total, category) => total + flatItems(category.collections).length, 0),
-    [data.categories],
+    () => displayData.categories.reduce((total, category) => total + flatItems(category.collections).length, 0),
+    [displayData.categories],
   )
 
   const imageCount = useMemo(
-    () => data.categories.reduce((total, category) => total + countImages(category.collections, category.extraImages), data.images.length),
-    [data.categories, data.images],
+    () => displayData.categories.reduce((total, category) => total + countImages(category.collections, category.extraImages), displayData.images.length),
+    [displayData.categories, displayData.images],
   )
 
   const stats = useMemo(
     () => [
-      { label: copy.stats.categories, value: data.categories.length },
+      { label: copy.stats.categories, value: displayData.categories.length },
       { label: copy.stats.vehicles, value: vehicleCount },
       { label: copy.stats.images, value: imageCount },
     ],
-    [copy, data.categories.length, imageCount, vehicleCount],
+    [copy, displayData.categories.length, imageCount, vehicleCount],
   )
 
   return (
@@ -1194,10 +1219,10 @@ function VehiclesGuide() {
 
         {!loading && activeCategory && (
           <div className="ign-guide-content">
-            <OverviewPanel copy={copy} data={data} stats={stats} images={data.images} />
+            <OverviewPanel copy={copy} data={displayData} stats={stats} images={displayData.images} />
 
             <div className="vehicle-tabs" role="tablist" aria-label="GTA 6 vehicle subpages">
-              {data.categories.map((category) => {
+              {displayData.categories.map((category) => {
                 const tabConfig = VEHICLE_CATEGORIES.find((item) => item.id === category.id) || VEHICLE_CATEGORIES[0]
                 const TabIcon = tabConfig.icon
                 const count = flatItems(category.collections).length

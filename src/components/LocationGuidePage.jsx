@@ -7,6 +7,11 @@ import {
   getLocationGuideBySlug,
   parseLocationGuidePage,
 } from '../data/ignWiki'
+import {
+  locationPageTranslationSource,
+  translateLocationPageData,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LocationGuidePage.css'
 
@@ -15,7 +20,7 @@ function isPlainLeftClick(event) {
 }
 
 function LocationGuidePage({ locationSlug, onNavigate }) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const guide = useMemo(() => getLocationGuideBySlug(locationSlug), [locationSlug])
   const fallbackPage = useMemo(() => (guide ? createFallbackLocationPage(guide) : null), [guide])
   const [remoteState, setRemoteState] = useState({ guideId: '', page: null, failed: false })
@@ -52,16 +57,25 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
     }
   }, [guide])
 
+  const translationSource = useMemo(() => (page ? locationPageTranslationSource(page) : null), [page])
+  const { data: displayPage } = useTranslatedIgnContent(page, {
+    enabled: !loading && Boolean(page),
+    lang,
+    scope: `location-${guide?.id || locationSlug}`,
+    source: translationSource,
+    translate: translateLocationPageData,
+  })
+
   useEffect(() => {
-    if (!page?.title) return undefined
+    if (!displayPage?.title) return undefined
 
     const previousTitle = document.title
-    document.title = `${page.title} | GTA VI Hub`
+    document.title = `${displayPage.title} | GTA VI Hub`
 
     return () => {
       document.title = previousTitle
     }
-  }, [page?.title])
+  }, [displayPage?.title])
 
   const navigate = (event, href) => {
     if (!onNavigate || !isPlainLeftClick(event)) return
@@ -87,8 +101,8 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
     )
   }
 
-  const heroImage = page?.images[0]
-  const galleryImages = page?.images.slice(1) || []
+  const heroImage = displayPage?.images[0]
+  const galleryImages = displayPage?.images.slice(1) || []
 
   return (
     <section className="section-padding location-detail-section">
@@ -105,7 +119,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
           </div>
         )}
 
-        {!loading && page && (
+        {!loading && displayPage && (
           <>
             <header className={`location-detail-hero ${heroImage ? '' : 'no-image'}`}>
               <div className="location-detail-copy">
@@ -113,14 +127,14 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
                   <MapPin size={15} />
                   IGN wiki location guide
                 </span>
-                <h1>{page.title}</h1>
-                {page.description && <p>{page.description}</p>}
+                <h1>{displayPage.title}</h1>
+                {displayPage.description && <p>{displayPage.description}</p>}
                 <div className="location-detail-meta">
                   <span>
                     <CalendarDays size={15} />
-                    {t.leonida.updatedOn} {formatUpdatedAt(page.updatedAt)}
+                    {t.leonida.updatedOn} {formatUpdatedAt(displayPage.updatedAt)}
                   </span>
-                  <a href={page.sourceUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={displayPage.sourceUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink size={15} />
                     IGN source
                   </a>
@@ -145,13 +159,13 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
             )}
 
             <div className="location-detail-intro">
-              {page.intro.map((paragraph) => (
+              {displayPage.intro.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
 
             {galleryImages.length > 0 && (
-              <div className="location-detail-gallery" aria-label={`${page.title} images`}>
+              <div className="location-detail-gallery" aria-label={`${displayPage.title} images`}>
                 {galleryImages.map((image) => (
                   <figure key={image.id}>
                     <img src={image.url} alt={image.title} loading="lazy" />
@@ -164,9 +178,9 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
               </div>
             )}
 
-            {page.sections.length > 0 ? (
+            {displayPage.sections.length > 0 ? (
               <div className="location-detail-article">
-                {page.sections.map((section) => (
+                {displayPage.sections.map((section) => (
                   <article key={section.id} className="location-article-section">
                     <h2>{section.title}</h2>
                     {section.paragraphs.map((paragraph) => (
@@ -196,11 +210,11 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
               </div>
             )}
 
-            {page.relatedLinks.length > 0 && (
+            {displayPage.relatedLinks.length > 0 && (
               <aside className="location-related-panel">
                 <h2>Other Leonida locations</h2>
                 <div>
-                  {page.relatedLinks.map((link) => (
+                  {displayPage.relatedLinks.map((link) => (
                     <a
                       key={link.id || link.path || link.name}
                       href={link.path || link.url}

@@ -9,6 +9,8 @@ The news section parses live GTA VI coverage from IGN in the frontend at runtime
 
 For local development, either run through Firebase Hosting's reserved config endpoint or set the Vite variables from `.env.example`. The Vite dev server proxies `/__/firebase/init.json` to the configured Firebase Hosting project.
 
+IGN wiki sections can translate parsed English content in the browser through Google Cloud Translation Basic. Set `VITE_GOOGLE_TRANSLATE_API_KEY` in `.env.local`; translated payloads are cached in `localStorage` by language and parsed content hash, so unchanged IGN text is not translated again on the same browser.
+
 Before sign-up, posting, voting, source submissions, comments, and messages can work against the live project:
 
 - Enable Firebase Authentication with the Email/Password provider.

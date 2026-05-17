@@ -8,6 +8,11 @@ import {
   locationPathFromIgnUrl,
   parseLeonidaPage,
 } from '../data/ignWiki'
+import {
+  leonidaTranslationSource,
+  translateLeonidaData,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaLocations.css'
 
@@ -16,7 +21,7 @@ function isPlainLeftClick(event) {
 }
 
 function LeonidaLocations({ onNavigate }) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [data, setData] = useState(FALLBACK_LEONIDA_DATA)
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -47,13 +52,22 @@ function LeonidaLocations({ onNavigate }) {
     }
   }, [])
 
+  const translationSource = useMemo(() => leonidaTranslationSource(data), [data])
+  const { data: displayData } = useTranslatedIgnContent(data, {
+    enabled: !loading,
+    lang,
+    scope: 'leonida',
+    source: translationSource,
+    translate: translateLeonidaData,
+  })
+
   const locationStats = useMemo(
     () => [
-      { label: t.leonida.stats.majorRegions, value: data.majorLocations.length },
-      { label: t.leonida.stats.spottedPlaces, value: data.otherLocations.length },
-      { label: t.leonida.stats.businesses, value: data.businesses.length },
+      { label: t.leonida.stats.majorRegions, value: displayData.majorLocations.length },
+      { label: t.leonida.stats.spottedPlaces, value: displayData.otherLocations.length },
+      { label: t.leonida.stats.businesses, value: displayData.businesses.length },
     ],
-    [data, t],
+    [displayData, t],
   )
 
   const navigateToLocation = (event, href) => {
@@ -85,7 +99,7 @@ function LeonidaLocations({ onNavigate }) {
               <div>
                 <span className="leonida-kicker">{t.leonida.updatedOn} {formatUpdatedAt(data.updatedAt)}</span>
                 <div className="leonida-copy">
-                  {data.intro.map((paragraph) => (
+                  {displayData.intro.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>
@@ -102,7 +116,7 @@ function LeonidaLocations({ onNavigate }) {
             </div>
 
             <div className="leonida-images" aria-label="IGN Leonida location images">
-              {data.images.map((image) => (
+              {displayData.images.map((image) => (
                 <figure key={image.id} className="leonida-image-card">
                   <img src={image.url} alt={image.title} loading="lazy" />
                   <figcaption>
@@ -114,7 +128,7 @@ function LeonidaLocations({ onNavigate }) {
             </div>
 
             <div className="major-locations-grid">
-              {data.majorLocations.map((location) => {
+              {displayData.majorLocations.map((location) => {
                 const href = location.path || locationPathFromIgnUrl(location.url) || (location.id ? `/locations/${location.id}` : LEONIDA_URL)
 
                 return (
@@ -144,7 +158,7 @@ function LeonidaLocations({ onNavigate }) {
                   {t.leonida.otherLocations}
                 </h3>
                 <div className="tag-list">
-                  {data.otherLocations.map((location) => (
+                  {displayData.otherLocations.map((location) => (
                     <span key={location}>{location}</span>
                   ))}
                 </div>
@@ -156,7 +170,7 @@ function LeonidaLocations({ onNavigate }) {
                   {t.leonida.shopsAndBusinesses}
                 </h3>
                 <div className="tag-list">
-                  {data.businesses.map((business) => (
+                  {displayData.businesses.map((business) => (
                     <span key={business}>{business}</span>
                   ))}
                 </div>

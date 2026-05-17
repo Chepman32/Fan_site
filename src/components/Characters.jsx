@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Image as ImageIcon, Loader, UserRound } from 'lucide-react'
+import {
+  charactersTranslationSource,
+  translateCharactersData,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import ImageZoomModal from './ImageZoomModal'
 import './Characters.css'
@@ -296,7 +301,7 @@ function CharacterCard({ character, featured = false, index = 0, onZoom }) {
 }
 
 function Characters() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
   const [loading, setLoading] = useState(true)
   const [zoomed, setZoomed] = useState(null)
@@ -329,17 +334,26 @@ function Characters() {
     }
   }, [])
 
+  const translationSource = useMemo(() => charactersTranslationSource(data), [data])
+  const { data: displayData } = useTranslatedIgnContent(data, {
+    enabled: !loading,
+    lang,
+    scope: 'characters',
+    source: translationSource,
+    translate: translateCharactersData,
+  })
+
   const stats = useMemo(
     () => [
-      { label: t.characters.stats.characters, value: data.characters.length },
-      { label: t.characters.stats.profileImages, value: data.characters.filter((character) => character.imageUrl).length },
-      { label: t.characters.stats.leadDuo, value: data.characters.slice(0, 2).length },
+      { label: t.characters.stats.characters, value: displayData.characters.length },
+      { label: t.characters.stats.profileImages, value: displayData.characters.filter((character) => character.imageUrl).length },
+      { label: t.characters.stats.leadDuo, value: displayData.characters.slice(0, 2).length },
     ],
-    [data.characters, t],
+    [displayData.characters, t],
   )
 
-  const featuredCharacters = data.characters.slice(0, 2)
-  const supportingCharacters = data.characters.slice(2)
+  const featuredCharacters = displayData.characters.slice(0, 2)
+  const supportingCharacters = displayData.characters.slice(2)
 
   return (
     <section id="characters" className="section-padding characters">
@@ -363,7 +377,7 @@ function Characters() {
               <div>
                 <span className="characters-kicker">{t.characters.updatedOn} {formatUpdatedAt(data.updatedAt)}</span>
                 <div className="characters-copy">
-                  {data.intro.map((paragraph) => (
+                  {displayData.intro.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
                 </div>

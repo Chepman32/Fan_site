@@ -1,5 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Loader, ArrowUpRight, Clock, UserRound } from 'lucide-react'
+import {
+  newsTranslationSource,
+  translateNewsArticles,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 
@@ -293,13 +298,22 @@ function formatTimeAgo(value, t) {
 }
 
 function NewsSection() {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
 
-  const visibleArticles = showAll ? articles : articles.slice(0, INITIAL_ARTICLE_COUNT)
-  const hasMoreArticles = articles.length > INITIAL_ARTICLE_COUNT
+  const translationSource = useMemo(() => newsTranslationSource(articles), [articles])
+  const { data: displayArticles } = useTranslatedIgnContent(articles, {
+    enabled: !loading && articles.length > 0,
+    lang,
+    scope: 'news',
+    source: translationSource,
+    translate: translateNewsArticles,
+  })
+
+  const visibleArticles = showAll ? displayArticles : displayArticles.slice(0, INITIAL_ARTICLE_COUNT)
+  const hasMoreArticles = displayArticles.length > INITIAL_ARTICLE_COUNT
 
   useEffect(() => {
     let canceled = false
@@ -380,7 +394,7 @@ function NewsSection() {
             {hasMoreArticles && (
               <div className="news-actions">
                 <span className="news-count">
-                  {t.news.showing} {visibleArticles.length} {t.news.of} {articles.length}
+                  {t.news.showing} {visibleArticles.length} {t.news.of} {displayArticles.length}
                 </span>
                 <button type="button" className="show-more-button" onClick={() => setShowAll((c) => !c)}>
                   {showAll ? t.news.showLess : t.news.showMore}
