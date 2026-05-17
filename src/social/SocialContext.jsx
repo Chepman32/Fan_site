@@ -156,6 +156,7 @@ export function getUserProfile(user, state) {
     followedTopics: user.followedTopics ?? [],
     badges: user.badges ?? [],
     bookmarkedPostIds: user.bookmarkedPostIds ?? [],
+    purchasesByTx: user.purchasesByTx ?? {},
   }
   const submittedSources = state.sources.filter((source) => source.authorId === safeUser.id)
   const acceptedSources = submittedSources.filter((source) => source.status === 'accepted')
@@ -188,6 +189,7 @@ function authUserFallback(authUser) {
     followedTopics: [],
     badges: [],
     bookmarkedPostIds: [],
+    purchasesByTx: {},
   }
 }
 
@@ -202,6 +204,7 @@ function publicUserDocument(user, updatedAt) {
     followedTopics: user.followedTopics ?? [],
     badges: user.badges ?? [],
     bookmarkedPostIds: user.bookmarkedPostIds ?? [],
+    purchasesByTx: user.purchasesByTx ?? {},
     updatedAt,
   }
 }
@@ -244,6 +247,7 @@ async function ensureUserDocument(services, authUser) {
       followedTopics: [],
       badges: [],
       bookmarkedPostIds: [],
+      purchasesByTx: {},
     }, services.serverTimestamp()))
   })
 }
@@ -496,6 +500,7 @@ export function SocialProvider({ children }) {
         followedTopics: [],
         badges: [],
         bookmarkedPostIds: [],
+        purchasesByTx: {},
       }
 
       setState((currentState) => ({
@@ -683,6 +688,44 @@ export function SocialProvider({ children }) {
     }
   }
 
+  const recordPurchase = async ({ txId, amount, network, items = [] }) => {
+    if (!requireUser()) return false
+
+    const safeTxId = txId?.trim()
+    if (!safeTxId || items.length === 0) return false
+
+    const purchase = {
+      txId: safeTxId,
+      amount,
+      network,
+      purchasedAt: new Date().toISOString(),
+      items: items.map((item) => ({
+        productId: item.id,
+        categoryId: item.categoryId,
+        price: item.price,
+      })),
+    }
+
+    try {
+      await withFirebaseTimeout(
+        services.setDoc(
+          services.doc(services.db, 'users', authUser.uid),
+          {
+            purchasesByTx: {
+              [safeTxId]: purchase,
+            },
+            updatedAt: services.serverTimestamp(),
+          },
+          { merge: true },
+        ),
+      )
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
   const toggleBookmark = async (postId) => {
     if (!requireUser()) return false
 
@@ -808,6 +851,7 @@ export function SocialProvider({ children }) {
     voteRumor,
     followTopic,
     updateUserProfile,
+    recordPurchase,
     toggleBookmark,
     submitSource,
     votePoll,

@@ -60,6 +60,12 @@ const en = {
     transactionHash: 'Transaction hash',
     transactionPlaceholder: 'Paste your TRC20 transaction hash',
     verifyTransaction: 'Verify transaction',
+    downloadReady: '8K downloads unlocked',
+    downloadReadyNote: 'Google Drive links are available for the confirmed stream overlay files.',
+    download8k: 'Download 8K',
+    purchaseSaved: 'Saved to My Purchases.',
+    purchaseGuest: 'Sign in before checkout to keep purchases in your profile.',
+    purchaseSaveFailed: 'Payment was confirmed, but the purchase could not be saved to your profile.',
     statuses: {
       idle: 'Awaiting transaction',
       waiting_wallet: 'Waiting for wallet',

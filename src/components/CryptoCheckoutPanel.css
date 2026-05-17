@@ -454,6 +454,116 @@
   line-height: 1.45;
 }
 
+.crypto-downloads-box {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(51, 214, 159, 0.09);
+  border: 1px solid rgba(51, 214, 159, 0.28);
+  border-radius: 8px;
+}
+
+.crypto-downloads-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #33d69f;
+}
+
+.crypto-downloads-heading div {
+  display: grid;
+  gap: 3px;
+}
+
+.crypto-downloads-heading strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.crypto-downloads-heading span,
+.crypto-purchase-save {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.crypto-download-list {
+  display: grid;
+  gap: 8px;
+}
+
+.crypto-download-link {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  color: inherit;
+  background: rgba(10, 10, 15, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: border-color 0.22s ease, transform 0.22s ease;
+}
+
+.crypto-download-link:hover {
+  border-color: rgba(51, 214, 159, 0.45);
+  transform: translateY(-1px);
+}
+
+.crypto-download-link img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.crypto-download-link span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.crypto-download-link strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crypto-download-link em {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.crypto-download-link b {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 9px;
+  color: #06100d;
+  background: #33d69f;
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.crypto-purchase-save.saved {
+  color: #dfffee;
+}
+
+.crypto-purchase-save.failed {
+  color: #ffb99d;
+}
+
 .crypto-status-spinner {
   color: var(--accent-cyan);
   animation: crypto-status-spin 0.9s linear infinite;
@@ -480,5 +590,14 @@
   .crypto-checkout-panel.wide .crypto-qr-box {
     width: 100%;
     max-width: 180px;
+  }
+
+  .crypto-download-link {
+    grid-template-columns: 54px minmax(0, 1fr);
+  }
+
+  .crypto-download-link b {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }

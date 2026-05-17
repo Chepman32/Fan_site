@@ -3,15 +3,19 @@ import {
   BadgeCheck,
   Bookmark,
   Camera,
+  Download,
   FileText,
   MessageSquare,
   Save,
+  ShoppingBag,
   Trash2,
   Upload,
   User,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import { SHOP_PRODUCT_BY_ID } from '../shop/shopData'
+import { localizeShopProduct } from '../shop/shopLocalization'
 import CommunityPostCard from './CommunityPostCard.jsx'
 import PostAttachment from './PostAttachment.jsx'
 import './ProfilePage.css'
@@ -34,6 +38,11 @@ function formatRelative(date, s) {
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}${s.relativeDay}`
   return formatDate(date)
+}
+
+function shortenTxId(txId = '') {
+  if (txId.length <= 18) return txId
+  return `${txId.slice(0, 10)}...${txId.slice(-8)}`
 }
 
 function userFallback(userId) {
@@ -114,6 +123,7 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
   } = useSocial()
   const { t, lang } = useTranslation()
   const s = t.social
+  const shopCopy = { ...t.shop, lang }
   const [formDraft, setFormDraft] = useState(null)
   const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -136,6 +146,30 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
     if (!currentProfile) return []
     return state.sources.filter((source) => source.authorId === currentProfile.id)
   }, [currentProfile, state.sources])
+
+  const purchasedItems = useMemo(() => {
+    const purchasesByTx = currentProfile?.purchasesByTx ?? {}
+    const purchases = Object.values(purchasesByTx)
+      .sort((purchaseA, purchaseB) => new Date(purchaseB.purchasedAt ?? 0) - new Date(purchaseA.purchasedAt ?? 0))
+    const itemsByProductId = new Map()
+
+    purchases.forEach((purchase) => {
+      const purchaseItems = purchase.items ?? []
+
+      purchaseItems.forEach((item) => {
+        const productId = item.productId
+        if (!productId || itemsByProductId.has(productId)) return
+
+        itemsByProductId.set(productId, {
+          product: SHOP_PRODUCT_BY_ID[productId],
+          purchase,
+          purchaseItem: item,
+        })
+      })
+    })
+
+    return Array.from(itemsByProductId.values())
+  }, [currentProfile?.purchasesByTx])
 
   const leaderboard = useMemo(() => {
     return [...publicUsers].sort((a, b) => b.reputation.score - a.reputation.score).slice(0, 5)
@@ -328,6 +362,48 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
                 </div>
               </section>
             )}
+
+            <section className="profile-bookmarks-panel profile-purchases-panel">
+              <div className="profile-panel-heading">
+                <ShoppingBag size={16} />
+                <h2>{s.myPurchases || 'My Purchases'}</h2>
+                <button type="button" onClick={() => onNavigate?.('/shop')}>{s.browseShop || 'Browse shop'}</button>
+              </div>
+
+              {purchasedItems.length === 0 ? (
+                <div className="profile-empty-state">
+                  <ShoppingBag size={20} />
+                  <p>{s.noPurchases || 'No purchases yet.'}</p>
+                </div>
+              ) : (
+                <div className="profile-purchase-list">
+                  {purchasedItems.map(({ product, purchase, purchaseItem }) => {
+                    const displayProduct = product ? localizeShopProduct(product, shopCopy) : null
+                    const title = displayProduct?.title || purchaseItem.productId
+                    const category = displayProduct?.categoryLabel || purchaseItem.categoryId
+
+                    return (
+                      <article key={`${purchase.txId}-${purchaseItem.productId}`} className="profile-purchase-card">
+                        {product?.image && <img src={product.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
+                        <div className="profile-purchase-copy">
+                          <strong>{title}</strong>
+                          <span>{category} · {formatDate(purchase.purchasedAt || new Date(), lang)}</span>
+                          <code>{shortenTxId(purchase.txId)}</code>
+                        </div>
+                        {product?.downloadUrl ? (
+                          <a href={product.downloadUrl} target="_blank" rel="noreferrer" className="profile-download-action">
+                            <Download size={15} />
+                            {s.download8k || 'Download 8K'}
+                          </a>
+                        ) : (
+                          <span className="profile-download-action disabled">{s.noDownload || 'No download'}</span>
+                        )}
+                      </article>
+                    )
+                  })}
+                </div>
+              )}
+            </section>
 
             <section className="profile-bookmarks-panel">
               <div className="profile-panel-heading">

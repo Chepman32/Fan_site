@@ -85,6 +85,54 @@ const fallbackOverlayTags = [
 
 const streamOverlayAlternateAspectRatioStems = new Set(['40', '41', '42', '43', '44', '45'])
 
+const streamOverlayDownloadsByStem = {
+  1: 'https://drive.google.com/file/d/1J3EOza0DZTuD2cPEWpqeSdxgy0GZw8E3/view?usp=sharing',
+  2: 'https://drive.google.com/file/d/1oe1YjJkWDxMsVh2eJdOcCxi_dMTB_o7a/view?usp=sharing',
+  3: 'https://drive.google.com/file/d/1eK3ONLP49nQjuKO7ObXEPPfYKqavVljS/view?usp=sharing',
+  4: 'https://drive.google.com/file/d/1VOeRyXvXBoeCTQXeeHepLMx3WK93SnZG/view?usp=sharing',
+  5: 'https://drive.google.com/file/d/1YkW1DvHlTC6vT0Wkklu-M-sf_mw4SACs/view?usp=sharing',
+  6: 'https://drive.google.com/file/d/1qQYoeJwYV1WO4sfREcxi1h3zYuUhIgT4/view?usp=sharing',
+  7: 'https://drive.google.com/file/d/10APZkJcuNjyrCYMv1F5u-COumwQxb3_s/view?usp=sharing',
+  8: 'https://drive.google.com/file/d/14GAuI0ZZoTqpSqdBaRJ1rBUJzx8yW_Zh/view?usp=sharing',
+  9: 'https://drive.google.com/file/d/1Wk9NRXO8g8JDlAoMFGAi4QwZQKP98hkK/view?usp=sharing',
+  10: 'https://drive.google.com/file/d/1ufEWsL8K97C2hwvaqZuN9raU42N1oF2R/view?usp=sharing',
+  11: 'https://drive.google.com/file/d/1rZO4cRtT5N5NlEAYeGgl0ZBER4AY6zxa/view?usp=sharing',
+  12: 'https://drive.google.com/file/d/158AwKhZV7tBgmgTUHPqf4Rq3YWkRF8br/view?usp=sharing',
+  13: 'https://drive.google.com/file/d/1l_YBZA7Ef1H5fnZ1RMxwIuPWkz6UTvPL/view?usp=sharing',
+  14: 'https://drive.google.com/file/d/1yve4jjShFDdZsYJD7JrKXYy_TzS8pEjr/view?usp=sharing',
+  15: 'https://drive.google.com/file/d/1Q3bDN21x0-kXKDjDtmqfh8QkkAA9qLbU/view?usp=sharing',
+  16: 'https://drive.google.com/file/d/15zmPyg2JVoVmDxM7waN8nbbmsMRjFkCf/view?usp=sharing',
+  17: 'https://drive.google.com/file/d/17OvSKvm1BzN72MjX9sCLLwUNirniW3zo/view?usp=sharing',
+  18: 'https://drive.google.com/file/d/1HXrRpPdw89KavHraU1cVLJFPeOmazr5c/view?usp=sharing',
+  19: 'https://drive.google.com/file/d/1HOkfiOufoy5nqbLZ_-GUTltpuZ22i9R5/view?usp=sharing',
+  20: 'https://drive.google.com/file/d/18McDihyQux3molQBCP5q0Img8p8Z-B3U/view?usp=sharing',
+  21: 'https://drive.google.com/file/d/1Di-Eyq0eANv5NRSIC_cn2G26na7OB9V6/view?usp=sharing',
+  22: 'https://drive.google.com/file/d/1nEYkSoqzZwohkdd-M1cSJbJvWou-tYKJ/view?usp=sharing',
+  23: 'https://drive.google.com/file/d/18eCwI2N5fA4KfzkGmZae9CueOc7IsbSP/view?usp=sharing',
+  24: 'https://drive.google.com/file/d/1N4cwFGKTpL3e9soGbyEOUy9CMgo3_Zwn/view?usp=sharing',
+  25: 'https://drive.google.com/file/d/1YubBUNa3ulHJ9JHl8zR8HmSPQkYhkFSV/view?usp=sharing',
+  26: 'https://drive.google.com/file/d/1Viy5rrgZ0Aqqx6HCGvMFFDqvpHPNBhml/view?usp=sharing',
+  27: 'https://drive.google.com/file/d/1PolUxCRLc1p9NtvCjJhip3RHqo_Gn08k/view?usp=sharing',
+  28: 'https://drive.google.com/file/d/13WiMFRQmgq4HVcS6ZL780_u8vftF_zsc/view?usp=sharing',
+  29: 'https://drive.google.com/file/d/1I1tRpi_If3BSnXt-OST5sUPrhO8sQUMp/view?usp=sharing',
+  30: 'https://drive.google.com/file/d/1vWFpOQaZeSIyHLQYzHBaFEZGFbI1uO8o/view?usp=sharing',
+  31: 'https://drive.google.com/file/d/1NZbD9jfSN975oyks6KmdqJuFRMvtxi0t/view?usp=sharing',
+  32: 'https://drive.google.com/file/d/1Io8AKWg96MMCg6ANxhnIfbLCpUfHfkMb/view?usp=sharing',
+  33: 'https://drive.google.com/file/d/17TtnDQ2U-Ntcqss9SN_1fdVL321x6KaI/view?usp=sharing',
+  34: 'https://drive.google.com/file/d/1fqauPpPXs52WN3fSuPk2JZPhXDNqNycL/view?usp=sharing',
+  35: 'https://drive.google.com/file/d/1ajOpXjib5XfwlYh9mvovL2nvim2f8TYf/view?usp=sharing',
+  36: 'https://drive.google.com/file/d/1tdk8exbxDPwtV4JinnEhad7rBjwCwRTl/view?usp=sharing',
+  37: 'https://drive.google.com/file/d/1GTnfhkMl0r-KeJFE5cu4qtz6O6goDH32/view?usp=sharing',
+  38: 'https://drive.google.com/file/d/1k9ybuAwA6SKNT7NN01hRYN_UwW3pLlTe/view?usp=sharing',
+  39: 'https://drive.google.com/file/d/19nKB8I0ewWWEVA-YdBLTNO83PMq24L59/view?usp=sharing',
+  40: 'https://drive.google.com/file/d/10n0zcjGsj6THe5drc_EJQRz63kRlGZoa/view?usp=sharing',
+  41: 'https://drive.google.com/file/d/1Cw-rMaO9tmYDAwQiWNxQOVj2fgSfwHwv/view?usp=sharing',
+  42: 'https://drive.google.com/file/d/1XcXjjiAOR_JFBCtOhucWW3W_tt6O2LTE/view?usp=sharing',
+  43: 'https://drive.google.com/file/d/1Weyer6Gwb9ItLyzBWeNt6dLD9ORX-M3R/view?usp=sharing',
+  44: 'https://drive.google.com/file/d/1GNR7ZGAwC3SfI3nzOq-YLk6jc30BPT7M/view?usp=sharing',
+  45: 'https://drive.google.com/file/d/1NSOon_XdtbY2MgafzO-muhC6KKROgdok/view?usp=sharing',
+}
+
 const profileBannerTags = [
   ['Profile header', 'Creator page', 'Wide format'],
   ['Social banner', 'Neon grade', 'Fan profile'],
@@ -324,6 +372,8 @@ export const STREAM_OVERLAY_PRODUCTS = sortedImageEntries(overlayImageModules)
       format: 'PNG pack',
       resolution: '7680 x 4320',
       aspectRatio: streamOverlayAlternateAspectRatioStems.has(stem) ? '1376 / 768' : '1672 / 941',
+      downloadUrl: streamOverlayDownloadsByStem[stem],
+      downloadFileName: `${stem}-big.png`,
       tags: overlayTags[index] || fallbackOverlayTags[index % fallbackOverlayTags.length],
     }
   })
@@ -374,6 +424,12 @@ export const SHOP_PRODUCTS_BY_CATEGORY = {
   'profile-banners': PROFILE_BANNER_PRODUCTS,
   'emote-packs': EMOTE_PACK_PRODUCTS,
 }
+
+export const SHOP_PRODUCT_BY_ID = Object.fromEntries(
+  Object.values(SHOP_PRODUCTS_BY_CATEGORY)
+    .flat()
+    .map((product) => [product.id, product]),
+)
 
 export const categoryTabs = [
   { id: 'stream-overlays', label: 'Stream overlays', count: STREAM_OVERLAY_PRODUCTS.length, active: true },

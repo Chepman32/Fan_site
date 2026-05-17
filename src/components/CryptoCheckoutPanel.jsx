@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import QRCode from 'qrcode'
-import { AlertCircle, Check, Copy, LoaderCircle, PlugZap, Send, ShieldCheck } from 'lucide-react'
+import { AlertCircle, Check, Copy, Download, LoaderCircle, PlugZap, Send, ShieldCheck } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { PAYMENT_ADDRESS, PAYMENT_NETWORK } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
+import { useSocial } from '../social/SocialContext'
 import {
   checkUsdtTransaction,
   connectTronLinkWallet,
@@ -21,14 +22,18 @@ function shortenAddress(value = '') {
 
 function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = false, wide = false }) {
   const { t, lang } = useTranslation()
+  const { isSignedIn, recordPurchase } = useSocial()
   const shopCopy = { ...t.shop, lang }
   const checkoutCopy = shopCopy.checkout
   const tronGridRetryMessage = checkoutCopy.messages.tronGridRetry
+  const deliveredTxIdsRef = useRef(new Set())
   const [copiedField, setCopiedField] = useState('')
   const [txHash, setTxHash] = useState('')
   const [txIdToVerify, setTxIdToVerify] = useState('')
   const [paymentStatus, setPaymentStatus] = useState('idle')
   const [paymentMessage, setPaymentMessage] = useState('')
+  const [confirmedItems, setConfirmedItems] = useState([])
+  const [purchaseSaveStatus, setPurchaseSaveStatus] = useState('idle')
   const [walletAccount, setWalletAccount] = useState('')
   const [walletTronWeb, setWalletTronWeb] = useState(null)
   const [walletStatus, setWalletStatus] = useState('idle')
@@ -36,6 +41,28 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
   const [qrSrc, setQrSrc] = useState('')
   const paymentAmount = cartTotal.toFixed(2)
   const paymentInProgress = paymentStatus === 'waiting_wallet' || paymentStatus === 'pending'
+
+  const finalizeConfirmedPayment = useCallback((confirmedTxId) => {
+    if (!confirmedTxId || deliveredTxIdsRef.current.has(confirmedTxId)) return
+
+    deliveredTxIdsRef.current.add(confirmedTxId)
+    setConfirmedItems(cartItems)
+
+    if (!isSignedIn) {
+      setPurchaseSaveStatus('guest')
+      return
+    }
+
+    setPurchaseSaveStatus('saving')
+    recordPurchase({
+      txId: confirmedTxId,
+      amount: paymentAmount,
+      network: PAYMENT_NETWORK,
+      items: cartItems,
+    }).then((saved) => {
+      setPurchaseSaveStatus(saved ? 'saved' : 'failed')
+    })
+  }, [cartItems, isSignedIn, paymentAmount, recordPurchase])
 
   useEffect(() => {
     let canceled = false
@@ -77,6 +104,8 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
 
         if (result.status === 'pending') {
           timerId = window.setTimeout(pollTransaction, POLL_INTERVAL_MS)
+        } else if (result.status === 'success') {
+          finalizeConfirmedPayment(txIdToVerify)
         }
       } catch (error) {
         if (canceled) return
@@ -93,7 +122,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
       canceled = true
       window.clearTimeout(timerId)
     }
-  }, [paymentAmount, tronGridRetryMessage, txIdToVerify])
+  }, [finalizeConfirmedPayment, paymentAmount, tronGridRetryMessage, txIdToVerify])
 
   const copyPaymentValue = async (value, field) => {
     try {
@@ -266,6 +295,8 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
               setTxIdToVerify('')
               setPaymentStatus('idle')
               setPaymentMessage('')
+              setConfirmedItems([])
+              setPurchaseSaveStatus('idle')
             }}
             placeholder={checkoutCopy.transactionPlaceholder}
           />
@@ -287,6 +318,54 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
               <span>{paymentMessage}</span>
               {txIdToVerify && <code>{txIdToVerify}</code>}
             </div>
+          </div>
+        )}
+
+        {paymentStatus === 'success' && confirmedItems.some((item) => item.downloadUrl) && (
+          <div className="crypto-downloads-box">
+            <div className="crypto-downloads-heading">
+              <Download size={16} />
+              <div>
+                <strong>{checkoutCopy.downloadReady}</strong>
+                <span>{checkoutCopy.downloadReadyNote}</span>
+              </div>
+            </div>
+
+            <div className="crypto-download-list">
+              {confirmedItems
+                .filter((item) => item.downloadUrl)
+                .map((item) => {
+                  const displayItem = localizeShopProduct(item, shopCopy)
+
+                  return (
+                    <a
+                      key={item.id}
+                      className="crypto-download-link"
+                      href={item.downloadUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+                      <span>
+                        <strong>{displayItem.title}</strong>
+                        <em>{item.downloadFileName}</em>
+                      </span>
+                      <b>
+                        <Download size={14} />
+                        {checkoutCopy.download8k}
+                      </b>
+                    </a>
+                  )
+                })}
+            </div>
+
+            {purchaseSaveStatus !== 'idle' && purchaseSaveStatus !== 'saving' && (
+              <p className={`crypto-purchase-save ${purchaseSaveStatus}`}>
+                {purchaseSaveStatus === 'saved' && checkoutCopy.purchaseSaved}
+                {purchaseSaveStatus === 'guest' && checkoutCopy.purchaseGuest}
+                {purchaseSaveStatus === 'failed' && checkoutCopy.purchaseSaveFailed}
+              </p>
+            )}
           </div>
         )}
       </div>
