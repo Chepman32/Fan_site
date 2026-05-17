@@ -142,6 +142,34 @@ const profileBannerTags = [
   ['Profile art', 'Cinematic crop', 'Ready to upload'],
 ]
 
+const profileBannerDownloadsByStem = {
+  '1E26FFA9-C375-436A-8A94-EAB5E3852A24': 'https://drive.google.com/file/d/1QKj2vn9SAmSDSGK6Mye6YVVXoOUZKVeB/view?usp=sharing',
+  '3B8210F2-85D5-4CB4-AC5B-5E70C8D921E0': 'https://drive.google.com/file/d/1nnfrmCxE5PRbrMFik_fxt1j8xTdg5lnF/view?usp=sharing',
+  '03CEC807-70AF-454F-94CB-80960BCA6D42': 'https://drive.google.com/file/d/1X8qS-0nkcVCZjScJmakIEaa8Q6ijPBMo/view?usp=sharing',
+  '4A84227E-728E-4910-8DDA-C72E2B38EB03': 'https://drive.google.com/file/d/1CxjWZEJXSeZQeE3PdhA6eD6UQKKlvYp4/view?usp=sharing',
+  '5C9F78B2-0BEC-4A88-AEB8-04DFE0A10271': 'https://drive.google.com/file/d/1vtSKBqPify5JZvacqMc6M6ZvhmfYKdRn/view?usp=sharing',
+  '6CD700E5-3310-42CB-99C3-3F8854511101': 'https://drive.google.com/file/d/1nUbujBY6V1X0LfIrdv6FA_APgL2K5mZl/view?usp=sharing',
+  '7D6C2FBB-4B35-4F4B-A393-0E94841F5548': 'https://drive.google.com/file/d/1sH6VkUCX-yzYODDVNPXwNPL5T8Y9CS3m/view?usp=sharing',
+  '8EB5B9EB-E21B-498C-8019-3C75C52BF082': 'https://drive.google.com/file/d/1iIfSx-UvpID7pfzxyDPmMPMV99leq-by/view?usp=sharing',
+  '24C2F4DA-EEA8-4A0E-AEE0-B5CE70E8B8DA': 'https://drive.google.com/file/d/1YzQdJ05HgZ6yO3kjV3ZVRxrrLar6e5Gq/view?usp=sharing',
+  '27FF00B9-8899-4880-B937-3E22D93CBA84': 'https://drive.google.com/file/d/1lDF2Vy5bMy_LIxaYMRN9hTA_y78XyNhp/view?usp=sharing',
+  '60BC3A78-1EB0-4784-89D1-5DE090584F4F': 'https://drive.google.com/file/d/1oakAqAtADmsPgf2pXud2p-nuLQFd_4GN/view?usp=sharing',
+  '93F89890-F642-4EFF-A3B3-7ABEF9AAAC2F': 'https://drive.google.com/file/d/1FVgQa1hOd7Gm2kBJtq4bKubuczIpGZsa/view?usp=sharing',
+  '187E7061-ABAE-42C5-B451-D3D44FFA74F3': 'https://drive.google.com/file/d/1yWlCIRLMfWyxBUES6w5hv1WPdqRgtMtH/view?usp=sharing',
+  '191F89AE-9293-46C6-9D0E-216C149CE783': 'https://drive.google.com/file/d/1aiGZYWFRwdAFD0mla-bR3GxvB-_5TrkZy/view?usp=sharing',
+  '452BAB35-D9CC-4512-8133-5B19F6544977': 'https://drive.google.com/file/d/1s_0d3y1mBwXa7shtuRPwLZCeLyfJ4v00/view?usp=sharing',
+  '74169517-2A97-4BF8-A8E4-84C0082CC604': 'https://drive.google.com/file/d/1_iQCIvXKknPgtB83DLhAPG7AhnRH7EgS/view?usp=sharing',
+  'A2FF8B11-C8FB-494A-9919-B1A51888B9F0': 'https://drive.google.com/file/d/17wsmFN31oXiI4J5PWcUIcDe9YdDFaut6/view?usp=sharing',
+  'ACD228CA-D222-4B57-8ABF-7190AD7FE2D8': 'https://drive.google.com/file/d/1zWRFSYx6GC56BJRJUiprTtRdBrptxIMH/view?usp=sharing',
+  'B7A7EEDD-4A0B-43A9-9D41-893635EA6D91': 'https://drive.google.com/file/d/1tJKB1oVHCdXP5sYOFX49gSTEjnqjenSa/view?usp=sharing',
+  'B258C7DE-E4DF-422E-9367-771E272E552A': 'https://drive.google.com/file/d/1uDBfOcX-QyEBOaSmJ5ZxZ2FQ2lyS0FU2/view?usp=sharing',
+  'C2BF7912-21C5-4F17-B7D0-F7325483262C': 'https://drive.google.com/file/d/12V8irE7kvn3mQZuTRIXGiG-ssr_-ZuHq/view?usp=sharing',
+  'CFAF8C74-53F3-4008-966B-1F5C09995244': 'https://drive.google.com/file/d/1jwTI782-rC9t_MKuDtAiWwo6s5hII3Wy/view?usp=sharing',
+  'D0EB85B5-8209-4C00-A5DB-36646775452D': 'https://drive.google.com/file/d/15_1h18PJVbOH_MnFfZAYUGlIoGC8F17-/view?usp=sharing',
+  'D5CAD551-10E1-486A-B688-725F8781E266': 'https://drive.google.com/file/d/1eKCC8ns5qR5HCsN5qqzspVZtH0uDCkZy/view?usp=sharing',
+  'FCEBA9CE-0A07-42A5-8023-C4FD0D231637': 'https://drive.google.com/file/d/1YfEUFOhZUjJN0g8Ly-CfChIoS_BtWKgS/view?usp=sharing',
+}
+
 const profileBannerMetaByStem = {
   '1E26FFA9-C375-436A-8A94-EAB5E3852A24': {
     title: 'Vice Skyline Profile Banner',
@@ -349,10 +377,6 @@ function sortedEmotePacks() {
     .sort((packA, packB) => packA.folder.localeCompare(packB.folder, undefined, { numeric: true, sensitivity: 'base' }))
 }
 
-function profileBannerResolution(stem) {
-  return profileBannerStandardStems.has(stem) ? '1983 x 793' : '1916 x 821'
-}
-
 function profileBannerAspectRatio(stem) {
   return profileBannerStandardStems.has(stem) ? '1983 / 793' : '1916 / 821'
 }
@@ -393,8 +417,10 @@ export const PROFILE_BANNER_PRODUCTS = sortedImageEntries(profileBannerImageModu
       image,
       price: meta?.price ?? 8 + (index % 3) * 2,
       format: 'Profile banner PNG',
-      resolution: profileBannerResolution(stem),
+      resolution: '7680 x 3070',
       aspectRatio: profileBannerAspectRatio(stem),
+      downloadUrl: profileBannerDownloadsByStem[stem],
+      downloadFileName: `${stem}.jpeg`,
       tags: meta?.tags || profileBannerTags[index % profileBannerTags.length],
     }
   })

@@ -61,7 +61,7 @@ const en = {
     transactionPlaceholder: 'Paste your TRC20 transaction hash',
     verifyTransaction: 'Verify transaction',
     downloadReady: '8K downloads unlocked',
-    downloadReadyNote: 'Google Drive links are available for the confirmed stream overlay files.',
+    downloadReadyNote: 'Google Drive links are available for the confirmed full-resolution files.',
     download8k: 'Download 8K',
     purchaseSaved: 'Saved to My Purchases.',
     purchaseGuest: 'Sign in before checkout to keep purchases in your profile.',
