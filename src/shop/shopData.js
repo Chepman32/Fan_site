@@ -6,33 +6,28 @@ export const USDT_DECIMALS = 6
 export const USDT_TRANSFER_FEE_LIMIT = 100_000_000
 
 const overlayImageModules = {
-  ...import.meta.glob('../assets/shop/Stream overlays/*.png', {
-    eager: true,
-    import: 'default',
-  }),
-  ...import.meta.glob('../assets/shop/Stream overlays/*.PNG', {
+  ...import.meta.glob('../assets/shop/Stream overlay previews/*.webp', {
     eager: true,
     import: 'default',
   }),
 }
 
 const profileBannerImageModules = {
-  ...import.meta.glob('../assets/shop/Profile banners/*.png', {
-    eager: true,
-    import: 'default',
-  }),
-  ...import.meta.glob('../assets/shop/Profile banners/*.PNG', {
+  ...import.meta.glob('../assets/shop/Profile banner previews/*.webp', {
     eager: true,
     import: 'default',
   }),
 }
 
-const emotePackImageModules = {
-  ...import.meta.glob('../assets/shop/Emote packs/*/*.png', {
+const emotePackPreviewImageModules = {
+  ...import.meta.glob('../assets/shop/Emote pack previews/*/*.webp', {
     eager: true,
     import: 'default',
   }),
-  ...import.meta.glob('../assets/shop/Emote packs/*/*.PNG', {
+}
+
+const emotePackSheetImageModules = {
+  ...import.meta.glob('../assets/shop/Emote pack sheet previews/*.webp', {
     eager: true,
     import: 'default',
   }),
@@ -273,7 +268,7 @@ const emotePackMeta = {
 }
 
 function overlayFileStem(path) {
-  return path.split('/').pop()?.replace(/\.png$/i, '') || ''
+  return path.split('/').pop()?.replace(/\.(png|webp)$/i, '') || ''
 }
 
 function emotePackFolder(path) {
@@ -287,13 +282,16 @@ function sortedImageEntries(modules) {
 }
 
 function sortedEmotePacks() {
+  const sheetImagesByFolder = new Map(
+    sortedImageEntries(emotePackSheetImageModules).map(([path, image]) => [overlayFileStem(path), image]),
+  )
   const packs = new Map()
 
-  sortedImageEntries(emotePackImageModules).forEach(([path, image]) => {
+  sortedImageEntries(emotePackPreviewImageModules).forEach(([path, image]) => {
     const folder = emotePackFolder(path)
     if (!folder) return
 
-    const pack = packs.get(folder) || { folder, images: [] }
+    const pack = packs.get(folder) || { folder, previewImage: sheetImagesByFolder.get(folder), images: [] }
     pack.images.push(image)
     packs.set(folder, pack)
   })
@@ -360,7 +358,8 @@ export const EMOTE_PACK_PRODUCTS = sortedEmotePacks()
       categoryLabel: 'Emote packs',
       previewLabel: 'Emote pack preview',
       title: meta.title || `Leonida Emote Pack ${index + 1}`,
-      image: pack.images[0],
+      image: pack.previewImage || pack.images[0],
+      previewImage: pack.previewImage,
       images: pack.images,
       price: meta.price || 16,
       format: `${pack.images.length} emote PNGs`,

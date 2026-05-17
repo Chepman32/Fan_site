@@ -172,6 +172,16 @@
   -webkit-user-drag: none;
 }
 
+.shop-featured-media img.shop-pack-sheet-preview,
+.shop-product-preview img.shop-pack-sheet-preview {
+  object-fit: contain;
+  padding: clamp(12px, 2vw, 20px);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(0, 217, 255, 0.2), transparent 31%),
+    radial-gradient(circle at 88% 82%, rgba(255, 45, 149, 0.17), transparent 34%),
+    #07070d;
+}
+
 .shop-emote-pack-preview {
   display: grid;
   width: 100%;

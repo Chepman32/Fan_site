@@ -8,11 +8,35 @@ import { localizeShopProduct } from '../shop/shopLocalization'
 import './ShopPage.css'
 
 function ShopProductArtwork({ product, loading = 'eager' }) {
+  if (product.previewImage) {
+    return (
+      <img
+        className="shop-pack-sheet-preview"
+        src={product.previewImage}
+        alt={product.title}
+        width="960"
+        height="540"
+        loading={loading}
+        decoding="async"
+        draggable="false"
+      />
+    )
+  }
+
   if (product.images?.length > 1) {
     return (
       <span className={`shop-emote-pack-preview ${product.images.length > 10 ? 'dense' : ''}`} aria-hidden="true">
         {product.images.map((image) => (
-          <img key={image} src={image} alt="" loading={loading} draggable="false" />
+          <img
+            key={image}
+            src={image}
+            alt=""
+            width="360"
+            height="360"
+            loading={loading}
+            decoding="async"
+            draggable="false"
+          />
         ))}
       </span>
     )
@@ -23,6 +47,7 @@ function ShopProductArtwork({ product, loading = 'eager' }) {
       src={product.image}
       alt={product.title}
       loading={loading}
+      decoding="async"
       draggable="false"
     />
   )
@@ -227,7 +252,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
 
                   return (
                     <div key={item.id} className="shop-cart-item">
-                      <img src={item.image} alt="" aria-hidden="true" />
+                      <img src={item.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
                       <div>
                         <strong>{displayItem.title}</strong>
                         <span>${item.price}</span>
