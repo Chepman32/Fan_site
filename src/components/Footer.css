@@ -88,11 +88,6 @@
   color: var(--accent-pink);
 }
 
-.footer-disclaimer {
-  margin-top: 8px;
-  font-size: 12px !important;
-}
-
 @media (max-width: 768px) {
   .footer-content {
     grid-template-columns: 1fr;

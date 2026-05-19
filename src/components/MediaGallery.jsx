@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Play, ExternalLink } from 'lucide-react'
+import { Play } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './MediaGallery.css'
 
 function MediaGallery() {
   const { t } = useTranslation()
   const [activeVideo, setActiveVideo] = useState('QdBZY2fkU-0')
+  const [failedScreenshotUrls, setFailedScreenshotUrls] = useState([])
 
   const videos = [
     { id: 'QdBZY2fkU-0', title: t.media.videos.trailer1.title, duration: '1:31', description: t.media.videos.trailer1.description },
@@ -14,8 +15,13 @@ function MediaGallery() {
 
   const screenshots = [
     { url: 'https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png', caption: t.media.screenshots.boxArt },
-    { url: 'https://upload.wikimedia.org/wikipedia/en/c/c5/Grand_Theft_Auto_VI_screenshot.png', caption: t.media.screenshots.inGame },
+    { url: 'https://www.rockstargames.com/VI/_next/static/media/Vice_City_01.332891cf.jpg', caption: t.media.screenshots.inGame },
   ]
+  const visibleScreenshots = screenshots.filter((shot) => !failedScreenshotUrls.includes(shot.url))
+
+  const hideFailedScreenshot = (url) => {
+    setFailedScreenshotUrls((urls) => (urls.includes(url) ? urls : [...urls, url]))
+  }
 
   return (
     <section id="media" className="section-padding media-gallery">
@@ -66,22 +72,29 @@ function MediaGallery() {
         </div>
 
         {/* Screenshots */}
-        <div className="screenshots-section">
-          <h3 className="screenshots-title">
-            <ExternalLink size={16} />
-            {t.media.officialScreenshots}
-          </h3>
-          <div className="screenshots-grid">
-            {screenshots.map((shot, index) => (
-              <div key={index} className="screenshot-card">
-                <img src={shot.url} alt={shot.caption} />
-                <div className="screenshot-caption">
-                  <span>{shot.caption}</span>
+        {visibleScreenshots.length > 0 && (
+          <div className="screenshots-section">
+            <h3 className="screenshots-title">
+              {t.media.officialScreenshots}
+            </h3>
+            <div className="screenshots-grid">
+              {visibleScreenshots.map((shot) => (
+                <div key={shot.url} className="screenshot-card">
+                  <img
+                    src={shot.url}
+                    alt={shot.caption}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => hideFailedScreenshot(shot.url)}
+                  />
+                  <div className="screenshot-caption">
+                    <span>{shot.caption}</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   )

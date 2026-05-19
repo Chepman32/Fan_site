@@ -54,7 +54,6 @@ function Footer() {
           <p>
             {t.footer.madeByFans} <Heart size={14} className="heart-icon" /> {t.footer.byFans} • © {copyrightName} {currentYear}
           </p>
-          <p className="footer-disclaimer">{t.footer.disclaimer}</p>
         </div>
       </div>
     </footer>

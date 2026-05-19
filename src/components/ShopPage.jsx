@@ -153,7 +153,6 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               onClick={() => selectCategory(category.id)}
             >
               <span>{shopCopy.categories?.[category.id] || category.label}</span>
-              <em>{category.active ? category.count : shopCopy.soon}</em>
             </button>
           ))}
         </div>

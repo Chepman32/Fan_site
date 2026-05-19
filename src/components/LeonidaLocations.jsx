@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Building2, Image as ImageIcon, Loader, Map, MapPin } from 'lucide-react'
+import { Building2, Image as ImageIcon, Loader, MapPin } from 'lucide-react'
 import {
   FALLBACK_LEONIDA_DATA,
   LEONIDA_URL,
@@ -142,10 +142,6 @@ function LeonidaLocations({ onNavigate }) {
                       <MapPin size={18} />
                     </span>
                     <strong>{location.name}</strong>
-                    <span>
-                      {t.leonida.ignGuide}
-                      <Map size={13} />
-                    </span>
                   </a>
                 )
               })}
