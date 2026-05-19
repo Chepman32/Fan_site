@@ -163,10 +163,12 @@ const profileBannerTags = [
 ]
 
 const profileBannerDownloadsByStem = {
+  '0759a51c-607d-4d04-bf21-7e1c9c502c1c_0': 'https://drive.google.com/file/d/1HdL4IT4X09Niy6hcZcWLlwSNPOa7_qOm/view?usp=sharing',
   '1E26FFA9-C375-436A-8A94-EAB5E3852A24': 'https://drive.google.com/file/d/1QKj2vn9SAmSDSGK6Mye6YVVXoOUZKVeB/view?usp=sharing',
   '3B8210F2-85D5-4CB4-AC5B-5E70C8D921E0': 'https://drive.google.com/file/d/1nnfrmCxE5PRbrMFik_fxt1j8xTdg5lnF/view?usp=sharing',
   '03CEC807-70AF-454F-94CB-80960BCA6D42': 'https://drive.google.com/file/d/1X8qS-0nkcVCZjScJmakIEaa8Q6ijPBMo/view?usp=sharing',
   '4A84227E-728E-4910-8DDA-C72E2B38EB03': 'https://drive.google.com/file/d/1CxjWZEJXSeZQeE3PdhA6eD6UQKKlvYp4/view?usp=sharing',
+  '549a1ce9-7bb8-4947-9d3f-93de45b6892f_0': 'https://drive.google.com/file/d/1_QVrAtsWXVY1lUXD7w-2jhhzpOvSDq2x/view?usp=sharing',
   '5C9F78B2-0BEC-4A88-AEB8-04DFE0A10271': 'https://drive.google.com/file/d/1vtSKBqPify5JZvacqMc6M6ZvhmfYKdRn/view?usp=sharing',
   '6CD700E5-3310-42CB-99C3-3F8854511101': 'https://drive.google.com/file/d/1nUbujBY6V1X0LfIrdv6FA_APgL2K5mZl/view?usp=sharing',
   '7D6C2FBB-4B35-4F4B-A393-0E94841F5548': 'https://drive.google.com/file/d/1sH6VkUCX-yzYODDVNPXwNPL5T8Y9CS3m/view?usp=sharing',
@@ -188,9 +190,31 @@ const profileBannerDownloadsByStem = {
   'D0EB85B5-8209-4C00-A5DB-36646775452D': 'https://drive.google.com/file/d/15_1h18PJVbOH_MnFfZAYUGlIoGC8F17-/view?usp=sharing',
   'D5CAD551-10E1-486A-B688-725F8781E266': 'https://drive.google.com/file/d/1eKCC8ns5qR5HCsN5qqzspVZtH0uDCkZy/view?usp=sharing',
   'FCEBA9CE-0A07-42A5-8023-C4FD0D231637': 'https://drive.google.com/file/d/1YfEUFOhZUjJN0g8Ly-CfChIoS_BtWKgS/view?usp=sharing',
+  'IMG_2762-processed(lightpdf.com)': 'https://drive.google.com/file/d/1tOlM1A82VtdPHuOZTuAbsKpzawEunFKo/view?usp=sharing',
+  'IMG_2763-processed(lightpdf.com)': 'https://drive.google.com/file/d/1nsRWnjNLYFeyGkhIOcTO1WNXbGdNMSau/view?usp=sharing',
+  'IMG_2764-processed(lightpdf.com)': 'https://drive.google.com/file/d/1wTpil5VW-qoUDdW1sDIcwqrUaLUhoEgQ/view?usp=sharing',
+  'd6755c77-d2f8-435e-ab20-a30ac15e7d60_0': 'https://drive.google.com/file/d/1HI6zic_H-kFJVyHZZo5_PwIATjcetyIw/view?usp=sharing',
+  'wmremove-transformed': 'https://drive.google.com/file/d/109f4pmR9BUNT4XPAK9Z6IRPDsst83YvW/view?usp=sharing',
+  'wmremove-transformed(1)': 'https://drive.google.com/file/d/1G1dy4i2d62g5xAc7nRn9RlFpDTmdXZkk/view?usp=sharing',
+}
+
+const profileBannerDownloadFileNamesByStem = {
+  '0759a51c-607d-4d04-bf21-7e1c9c502c1c_0': '0759a51c-607d-4d04-bf21-7e1c9c502c1c_0.jpg',
+  '549a1ce9-7bb8-4947-9d3f-93de45b6892f_0': '549a1ce9-7bb8-4947-9d3f-93de45b6892f_0.jpeg',
+  'IMG_2762-processed(lightpdf.com)': 'IMG_2762-processed(lightpdf.com).jpeg',
+  'IMG_2763-processed(lightpdf.com)': 'IMG_2763-processed(lightpdf.com).jpeg',
+  'IMG_2764-processed(lightpdf.com)': 'IMG_2764-processed(lightpdf.com).jpeg',
+  'd6755c77-d2f8-435e-ab20-a30ac15e7d60_0': 'd6755c77-d2f8-435e-ab20-a30ac15e7d60_0.jpg',
+  'wmremove-transformed': 'wmremove-transformed.jpeg',
+  'wmremove-transformed(1)': 'wmremove-transformed(1).jpeg',
 }
 
 const profileBannerMetaByStem = {
+  '0759a51c-607d-4d04-bf21-7e1c9c502c1c_0': {
+    title: 'Vice Glow Social Header',
+    price: 10,
+    tags: profileBannerTags[1],
+  },
   '1E26FFA9-C375-436A-8A94-EAB5E3852A24': {
     title: 'Vice Skyline Profile Banner',
     price: 8,
@@ -205,6 +229,11 @@ const profileBannerMetaByStem = {
     title: 'Port Gellhorn Banner',
     price: 12,
     tags: profileBannerTags[2],
+  },
+  '549a1ce9-7bb8-4947-9d3f-93de45b6892f_0': {
+    title: 'Vice Afterglow Profile Banner',
+    price: 12,
+    tags: profileBannerTags[3],
   },
   '5C9F78B2-0BEC-4A88-AEB8-04DFE0A10271': {
     title: 'Ocean Drive Social Header',
@@ -316,6 +345,47 @@ const profileBannerMetaByStem = {
     price: 12,
     tags: profileBannerTags[0],
   },
+  'IMG_2762-processed(lightpdf.com)': {
+    title: 'Leonida Chase Profile Banner',
+    price: 8,
+    tags: profileBannerTags[4],
+  },
+  'IMG_2763-processed(lightpdf.com)': {
+    title: 'Vice Palms Cover Banner',
+    price: 10,
+    tags: profileBannerTags[0],
+  },
+  'IMG_2764-processed(lightpdf.com)': {
+    title: 'Downtown Fade Social Header',
+    price: 12,
+    tags: profileBannerTags[2],
+  },
+  'd6755c77-d2f8-435e-ab20-a30ac15e7d60_0': {
+    title: 'Leonida Lights Profile Header',
+    price: 8,
+    tags: profileBannerTags[3],
+  },
+  'wmremove-transformed': {
+    title: 'Vice Wave Profile Banner',
+    price: 10,
+    tags: profileBannerTags[1],
+  },
+  'wmremove-transformed(1)': {
+    title: 'Keys Mirage Social Header',
+    price: 12,
+    tags: profileBannerTags[2],
+  },
+}
+
+const profileBannerAspectRatiosByStem = {
+  '0759a51c-607d-4d04-bf21-7e1c9c502c1c_0': '1624 / 600',
+  '549a1ce9-7bb8-4947-9d3f-93de45b6892f_0': '1280 / 473',
+  'IMG_2762-processed(lightpdf.com)': '1696 / 624',
+  'IMG_2763-processed(lightpdf.com)': '1696 / 624',
+  'IMG_2764-processed(lightpdf.com)': '1696 / 624',
+  'd6755c77-d2f8-435e-ab20-a30ac15e7d60_0': '1624 / 600',
+  'wmremove-transformed': '1696 / 624',
+  'wmremove-transformed(1)': '1696 / 624',
 }
 
 const profileBannerStandardStems = new Set([
@@ -407,6 +477,8 @@ function sortedEmotePacks() {
 }
 
 function profileBannerAspectRatio(stem) {
+  if (profileBannerAspectRatiosByStem[stem]) return profileBannerAspectRatiosByStem[stem]
+
   return profileBannerStandardStems.has(stem) ? '1983 / 793' : '1916 / 821'
 }
 
@@ -470,7 +542,7 @@ const profileBannerProducts = sortedImageEntries(profileBannerImageModules)
       resolution: '7680 x 3070',
       aspectRatio: profileBannerAspectRatio(stem),
       downloadUrl: profileBannerDownloadsByStem[stem],
-      downloadFileName: `${stem}.jpeg`,
+      downloadFileName: profileBannerDownloadFileNamesByStem[stem] || `${stem}.jpeg`,
       tags: meta?.tags || profileBannerTags[index % profileBannerTags.length],
     }
   })
