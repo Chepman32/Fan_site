@@ -61,6 +61,21 @@
   color: var(--accent-pink);
 }
 
+.nav-links .nav-shop-link {
+  background: linear-gradient(135deg, #4d63c8 0%, #d77fb8 48%, #ffc37a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.nav-links .nav-shop-link:hover,
+.nav-links .nav-shop-link:focus-visible {
+  color: transparent;
+  filter: brightness(1.1);
+}
+
 .nav-more {
   position: relative;
   display: flex;
