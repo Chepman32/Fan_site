@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckCircle2,
   Clock,
+  Copy,
   Hash,
   Link,
   LogIn,
@@ -30,6 +31,10 @@ import './SocialHub.css'
 
 const TAB_IDS = ['feed', 'rumors', 'sources', 'polls']
 const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote }
+const createDefaultQueryOptions = () => [
+  { id: 'option-1', name: 'Option 1' },
+  { id: 'option-2', name: 'Option 2' },
+]
 
 const SOURCE_STATUS_ICONS = {
   accepted: CheckCircle2,
@@ -63,6 +68,17 @@ function getHostname(url) {
   } catch {
     return 'submitted source'
   }
+}
+
+function formatAttachedQuery(query) {
+  if (!query) return ''
+  const options = query.options
+    .map((option, index) => `${index + 1}. ${option}`)
+    .join('\n')
+
+  return [`Query: ${query.title}`, options ? `Options:\n${options}` : '']
+    .filter(Boolean)
+    .join('\n')
 }
 
 function userFallback(userId) {
@@ -209,7 +225,17 @@ function PostComposer({ onOpenAuth }) {
   const { t } = useTranslation()
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState(['Trailers'])
-  const bodyUrl = getFirstPostUrl(body)
+  const [attachMenuOpen, setAttachMenuOpen] = useState(false)
+  const [attachmentModal, setAttachmentModal] = useState(null)
+  const [linkDraft, setLinkDraft] = useState('')
+  const [queryTitleDraft, setQueryTitleDraft] = useState('')
+  const [queryOptionsDraft, setQueryOptionsDraft] = useState(createDefaultQueryOptions)
+  const [attachedLink, setAttachedLink] = useState('')
+  const [attachedQuery, setAttachedQuery] = useState(null)
+  const attachMenuRef = useRef(null)
+  const nextQueryOptionIdRef = useRef(3)
+  const typedBodyUrl = getFirstPostUrl(body)
+  const bodyUrl = attachedLink || typedBodyUrl
   const previewPost = bodyUrl
     ? {
       body: '',
@@ -218,6 +244,15 @@ function PostComposer({ onOpenAuth }) {
       reactions: {},
     }
     : null
+
+  useEffect(() => {
+    if (!attachMenuOpen) return undefined
+    const close = (event) => {
+      if (!attachMenuRef.current?.contains(event.target)) setAttachMenuOpen(false)
+    }
+    window.addEventListener('click', close)
+    return () => window.removeEventListener('click', close)
+  }, [attachMenuOpen])
 
   const toggleTag = (topic) => {
     setSelectedTags((tags) => {
@@ -229,25 +264,140 @@ function PostComposer({ onOpenAuth }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!isSignedIn) { onOpenAuth(); return }
-    const cleanBody = bodyUrl ? removeFirstPostUrl(body) : body.trim()
+    const cleanTextBody = typedBodyUrl ? removeFirstPostUrl(body) : body.trim()
+    const cleanQuery = formatAttachedQuery(attachedQuery)
+    const cleanBody = cleanQuery
+      ? [cleanTextBody, cleanQuery].filter(Boolean).join('\n\n')
+      : cleanTextBody
     const didCreate = await createPost({ body: cleanBody, tags: selectedTags, linkUrl: bodyUrl })
     if (didCreate) {
       setBody('')
+      setAttachedLink('')
+      setAttachedQuery(null)
       setSelectedTags(['Trailers'])
     }
   }
 
+  const openAttachmentModal = (type) => {
+    setAttachMenuOpen(false)
+    setAttachmentModal(type)
+    if (type === 'link') setLinkDraft(attachedLink || typedBodyUrl || '')
+    if (type === 'query' && attachedQuery) {
+      setQueryTitleDraft(attachedQuery.title)
+      setQueryOptionsDraft(attachedQuery.options.map((name, index) => ({
+        id: `option-${index + 1}`,
+        name,
+      })))
+      nextQueryOptionIdRef.current = attachedQuery.options.length + 1
+    }
+    if (type === 'query' && !attachedQuery) {
+      setQueryTitleDraft('')
+      setQueryOptionsDraft(createDefaultQueryOptions())
+      nextQueryOptionIdRef.current = 3
+    }
+  }
+
+  const copyLinkDraft = async () => {
+    const value = linkDraft.trim()
+    if (!value || typeof navigator === 'undefined' || !navigator.clipboard) return
+
+    try {
+      await navigator.clipboard.writeText(value)
+    } catch {
+      // Clipboard permission can be unavailable in some browser contexts.
+    }
+  }
+
+  const updateQueryOption = (id, name) => {
+    setQueryOptionsDraft((options) => options.map((option) => (
+      option.id === id ? { ...option, name } : option
+    )))
+  }
+
+  const addQueryOption = () => {
+    const id = `option-${nextQueryOptionIdRef.current}`
+    nextQueryOptionIdRef.current += 1
+    setQueryOptionsDraft((options) => [...options, { id, name: `Option ${options.length + 1}` }])
+  }
+
+  const removeQueryOption = (id) => {
+    setQueryOptionsDraft((options) => {
+      if (options.length <= 2) return options
+      return options.filter((option) => option.id !== id)
+    })
+  }
+
+  const saveAttachment = () => {
+    if (attachmentModal === 'link') {
+      setAttachedLink(linkDraft.trim())
+    }
+
+    if (attachmentModal === 'query') {
+      const title = queryTitleDraft.trim()
+      const options = queryOptionsDraft
+        .map((option) => option.name.trim())
+        .filter(Boolean)
+      setAttachedQuery({
+        title: title || 'Untitled query',
+        options: options.length >= 2 ? options : ['Option 1', 'Option 2'],
+      })
+    }
+
+    setAttachmentModal(null)
+  }
+
   return (
     <form className="post-composer" onSubmit={handleSubmit}>
-      <textarea
-        value={body}
-        onChange={(event) => setBody(event.target.value)}
-        placeholder={isSignedIn ? t.social.postPlaceholder : t.social.postPlaceholderGuest}
-        rows={4}
-      />
+      <div className="composer-input-wrap">
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          placeholder={isSignedIn ? t.social.postPlaceholder : t.social.postPlaceholderGuest}
+          rows={4}
+        />
+        <div ref={attachMenuRef} className="composer-attach">
+          <button
+            className="composer-attach-button"
+            type="button"
+            aria-label="Attach content"
+            aria-haspopup="menu"
+            aria-expanded={attachMenuOpen}
+            onClick={(event) => {
+              event.stopPropagation()
+              setAttachMenuOpen((open) => !open)
+            }}
+          >
+            <Plus size={18} />
+          </button>
+          {attachMenuOpen && (
+            <div className="composer-attach-menu" role="menu">
+              <button type="button" role="menuitem" onClick={() => openAttachmentModal('link')}>
+                <Link size={15} />
+                Link
+              </button>
+              <button type="button" role="menuitem" onClick={() => openAttachmentModal('query')}>
+                <MessageSquare size={15} />
+                Query
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
       {previewPost && (
         <div className="composer-preview" aria-label="Post attachment preview">
           <PostAttachment post={previewPost} />
+        </div>
+      )}
+      {attachedQuery && (
+        <div className="composer-query-preview">
+          <MessageSquare size={15} />
+          <span className="composer-query-preview-text">
+            <strong>{attachedQuery.title}</strong>
+            <small>{attachedQuery.options.join(' / ')}</small>
+          </span>
+          <button type="button" aria-label="Remove query attachment" onClick={() => setAttachedQuery(null)}>
+            <XCircle size={15} />
+          </button>
         </div>
       )}
       <div className="composer-bottom">
@@ -268,6 +418,108 @@ function PostComposer({ onOpenAuth }) {
           {t.social.post}
         </button>
       </div>
+      {attachmentModal && (
+        <div className="composer-modal-backdrop" role="presentation" onMouseDown={() => setAttachmentModal(null)}>
+          <div
+            className="composer-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="composer-attachment-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="composer-modal-header">
+              <h3 id="composer-attachment-title">
+                {attachmentModal === 'link' ? 'Attach link' : 'Attach query'}
+              </h3>
+              <button type="button" aria-label="Close attachment modal" onClick={() => setAttachmentModal(null)}>
+                <XCircle size={18} />
+              </button>
+            </div>
+
+            {attachmentModal === 'link' ? (
+              <label>
+                <span>Link URL</span>
+                <div className="composer-icon-input">
+                  <button type="button" aria-label="Copy link URL" onClick={copyLinkDraft}>
+                    <Copy size={16} />
+                  </button>
+                  <input
+                    autoFocus
+                    value={linkDraft}
+                    onChange={(event) => setLinkDraft(event.target.value)}
+                    placeholder="https://..."
+                  />
+                </div>
+              </label>
+            ) : (
+              <div className="query-builder">
+                <label>
+                  <span>Query title</span>
+                  <input
+                    autoFocus
+                    value={queryTitleDraft}
+                    onChange={(event) => setQueryTitleDraft(event.target.value)}
+                    placeholder="What should this post ask?"
+                  />
+                </label>
+                <div className="query-options-header">
+                  <span>Options</span>
+                  <button type="button" onClick={addQueryOption}>
+                    <Plus size={14} />
+                    Add option
+                  </button>
+                </div>
+                <div className="query-option-list">
+                  <AnimatePresence initial={false}>
+                    {queryOptionsDraft.map((option, index) => (
+                      <motion.div
+                        key={option.id}
+                        layout
+                        className="query-option-row"
+                        initial={{ opacity: 0, scale: 0.92, y: -14, filter: 'blur(5px)' }}
+                        animate={{
+                          opacity: 1,
+                          scale: 1,
+                          y: 0,
+                          filter: 'blur(0px)',
+                          transition: { type: 'spring', stiffness: 620, damping: 28, mass: 0.72, velocity: 4 },
+                        }}
+                        exit={{
+                          opacity: 0,
+                          scale: 0.9,
+                          x: 34,
+                          filter: 'blur(4px)',
+                          transition: { type: 'spring', stiffness: 700, damping: 32, mass: 0.6, velocity: 6 },
+                        }}
+                        transition={{ layout: { type: 'spring', stiffness: 520, damping: 34, mass: 0.7 } }}
+                      >
+                        <input
+                          value={option.name}
+                          onChange={(event) => updateQueryOption(option.id, event.target.value)}
+                          placeholder={`Option ${index + 1}`}
+                        />
+                        <button
+                          type="button"
+                          aria-label={`Remove option ${index + 1}`}
+                          disabled={queryOptionsDraft.length <= 2}
+                          onClick={() => removeQueryOption(option.id)}
+                        >
+                          <XCircle size={16} />
+                        </button>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            )}
+
+            <div className="composer-modal-actions">
+              <button type="button" onClick={() => setAttachmentModal(null)}>Cancel</button>
+              <button className="compose-button" type="button" onClick={saveAttachment}>Attach</button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }

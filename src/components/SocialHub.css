@@ -379,6 +379,79 @@
   line-height: 1.5;
 }
 
+.composer-input-wrap {
+  position: relative;
+}
+
+.composer-input-wrap textarea {
+  padding-bottom: 56px;
+}
+
+.composer-attach {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+}
+
+.composer-attach-button {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.composer-attach-button:hover,
+.composer-attach-button:focus-visible {
+  color: var(--accent-cyan);
+  background: rgba(0, 217, 255, 0.1);
+  border-color: rgba(0, 217, 255, 0.34);
+}
+
+.composer-attach-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  display: grid;
+  gap: 6px;
+  width: 150px;
+  padding: 8px;
+  background: rgba(16, 16, 25, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+}
+
+.composer-attach-menu button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.composer-attach-menu button:hover,
+.composer-attach-menu button:focus-visible {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.07);
+}
+
 .source-form input,
 .post-composer input,
 .source-form select,
@@ -414,6 +487,63 @@
 .composer-preview .post-attachment,
 .composer-preview .post-link-card {
   margin-top: 0;
+}
+
+.composer-query-preview {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 9px 10px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.composer-query-preview-text {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.composer-query-preview-text strong,
+.composer-query-preview-text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer-query-preview-text strong {
+  color: var(--text-primary);
+}
+
+.composer-query-preview-text small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.composer-query-preview button,
+.composer-modal-header button,
+.composer-icon-input button,
+.query-option-row button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.composer-query-preview button:hover,
+.composer-modal-header button:hover,
+.composer-icon-input button:hover,
+.query-option-row button:hover {
+  color: var(--text-primary);
 }
 
 .composer-bottom {
@@ -460,6 +590,193 @@
   font-weight: 900;
   white-space: nowrap;
   cursor: pointer;
+}
+
+.composer-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.composer-modal {
+  width: min(94vw, 520px);
+  padding: 18px;
+  background: rgba(22, 22, 33, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+
+.composer-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.composer-modal h3 {
+  font-family: var(--font-body);
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.composer-modal label {
+  display: grid;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.composer-modal input,
+.composer-modal textarea {
+  width: 100%;
+  min-width: 0;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  outline: 0;
+  font: inherit;
+}
+
+.composer-icon-input {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.24);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.composer-icon-input:focus-within {
+  border-color: var(--accent-cyan);
+}
+
+.composer-icon-input button {
+  width: 42px;
+  height: 42px;
+  border-right: 1px solid var(--border-color);
+}
+
+.composer-icon-input input {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.composer-modal input {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.composer-modal textarea {
+  resize: vertical;
+  padding: 12px;
+  line-height: 1.5;
+}
+
+.composer-modal input:focus,
+.composer-modal textarea:focus {
+  border-color: var(--accent-cyan);
+}
+
+.composer-icon-input input:focus {
+  border-color: transparent;
+}
+
+.query-builder {
+  display: grid;
+  gap: 14px;
+}
+
+.query-options-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.query-options-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  color: var(--accent-cyan);
+  background: rgba(0, 217, 255, 0.08);
+  border: 1px solid rgba(0, 217, 255, 0.24);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.query-options-header button:hover {
+  color: var(--text-primary);
+  border-color: rgba(0, 217, 255, 0.4);
+}
+
+.query-option-list {
+  display: grid;
+  gap: 8px;
+}
+
+.query-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  gap: 8px;
+  align-items: center;
+}
+
+.query-option-row button {
+  width: 38px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.query-option-row button:disabled {
+  opacity: 0.36;
+  cursor: not-allowed;
+}
+
+.query-option-row button:disabled:hover {
+  color: var(--text-muted);
+}
+
+.composer-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.composer-modal-actions > button:not(.compose-button) {
+  min-height: 40px;
+  padding: 0 14px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.composer-modal-actions > button:not(.compose-button):hover {
+  color: var(--text-primary);
 }
 
 .community-post,
