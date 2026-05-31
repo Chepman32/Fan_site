@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckCircle2,
+  ClipboardPaste,
   Clock,
-  Copy,
   Hash,
   Link,
   LogIn,
@@ -233,6 +233,7 @@ function PostComposer({ onOpenAuth }) {
   const [attachedLink, setAttachedLink] = useState('')
   const [attachedQuery, setAttachedQuery] = useState(null)
   const attachMenuRef = useRef(null)
+  const linkInputRef = useRef(null)
   const nextQueryOptionIdRef = useRef(3)
   const typedBodyUrl = getFirstPostUrl(body)
   const bodyUrl = attachedLink || typedBodyUrl
@@ -297,14 +298,18 @@ function PostComposer({ onOpenAuth }) {
     }
   }
 
-  const copyLinkDraft = async () => {
-    const value = linkDraft.trim()
-    if (!value || typeof navigator === 'undefined' || !navigator.clipboard) return
+  const pasteLinkDraft = async () => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) {
+      linkInputRef.current?.focus()
+      return
+    }
 
     try {
-      await navigator.clipboard.writeText(value)
+      const value = await navigator.clipboard.readText()
+      if (value) setLinkDraft(value.trim())
     } catch {
       // Clipboard permission can be unavailable in some browser contexts.
+      linkInputRef.current?.focus()
     }
   }
 
@@ -325,6 +330,16 @@ function PostComposer({ onOpenAuth }) {
       if (options.length <= 2) return options
       return options.filter((option) => option.id !== id)
     })
+  }
+
+  const removeAttachedLink = () => {
+    if (attachedLink) {
+      setAttachedLink('')
+      setLinkDraft('')
+      return
+    }
+
+    if (typedBodyUrl) setBody(removeFirstPostUrl(body))
   }
 
   const saveAttachment = () => {
@@ -386,6 +401,14 @@ function PostComposer({ onOpenAuth }) {
       {previewPost && (
         <div className="composer-preview" aria-label="Post attachment preview">
           <PostAttachment post={previewPost} />
+          <button
+            className="composer-remove-attachment"
+            type="button"
+            aria-label="Remove attached link"
+            onClick={removeAttachedLink}
+          >
+            <XCircle size={16} />
+          </button>
         </div>
       )}
       {attachedQuery && (
@@ -440,10 +463,11 @@ function PostComposer({ onOpenAuth }) {
               <label>
                 <span>Link URL</span>
                 <div className="composer-icon-input">
-                  <button type="button" aria-label="Copy link URL" onClick={copyLinkDraft}>
-                    <Copy size={16} />
+                  <button type="button" aria-label="Paste link URL" onClick={pasteLinkDraft}>
+                    <ClipboardPaste size={16} />
                   </button>
                   <input
+                    ref={linkInputRef}
                     autoFocus
                     value={linkDraft}
                     onChange={(event) => setLinkDraft(event.target.value)}

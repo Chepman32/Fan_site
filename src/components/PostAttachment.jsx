@@ -23,9 +23,16 @@ function PostAttachment({ post }) {
 
   return (
     <a className="post-link-card" href={attachment.sourceUrl} target="_blank" rel="noopener noreferrer">
-      <LinkIcon size={16} />
-      <span>{attachment.host}</span>
-      <ExternalLink size={14} />
+      <span className="post-link-preview-media" aria-hidden="true">
+        <img src={attachment.faviconUrl} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+        <LinkIcon size={22} />
+      </span>
+      <span className="post-link-preview-copy">
+        <span className="post-link-preview-title">{attachment.title}</span>
+        <span className="post-link-preview-description">{attachment.description}</span>
+        <span className="post-link-preview-host">{attachment.host}</span>
+      </span>
+      <ExternalLink className="post-link-preview-open" size={16} />
     </a>
   )
 }

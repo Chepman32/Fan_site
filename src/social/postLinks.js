@@ -17,6 +17,44 @@ function getPathParts(url) {
   return url.pathname.split('/').filter(Boolean)
 }
 
+function titleCase(value) {
+  return value
+    .replace(/[-_+]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function getLinkPreviewTitle(url, host) {
+  const parts = getPathParts(url)
+  const lastUsefulPart = [...parts].reverse().find((part) => !/^\d+$/.test(part))
+  if (!lastUsefulPart) return host
+
+  try {
+    return titleCase(decodeURIComponent(lastUsefulPart.replace(/\.[a-z0-9]{2,5}$/i, '')))
+  } catch {
+    return titleCase(lastUsefulPart.replace(/\.[a-z0-9]{2,5}$/i, ''))
+  }
+}
+
+function getLinkPreviewDescription(url, host) {
+  const parts = getPathParts(url)
+  if (!parts.length) return `Open ${host}`
+
+  const path = parts
+    .slice(0, 3)
+    .map((part) => {
+      try {
+        return decodeURIComponent(part)
+      } catch {
+        return part
+      }
+    })
+    .join(' / ')
+
+  return path || `Open ${host}`
+}
+
 export function normalizePostUrl(value = '') {
   const raw = trimUrlCandidate(value)
   if (!raw) return ''
@@ -206,6 +244,9 @@ export function getPostAttachment(post) {
   return {
     type: 'link',
     host,
+    title: getLinkPreviewTitle(url, host),
+    description: getLinkPreviewDescription(url, host),
+    faviconUrl: `${url.origin}/favicon.ico`,
     sourceUrl,
   }
 }
