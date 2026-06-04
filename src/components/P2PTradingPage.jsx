@@ -34,6 +34,7 @@ import {
   p2pPaymentMethodLabel,
 } from '../p2p/p2pData'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
+import MessageConversationModal from './MessageConversationModal.jsx'
 import './P2PTradingPage.css'
 
 const MAX_LISTING_FILES = 8
@@ -458,7 +459,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     updateP2PListing,
     updateP2PListingStatus,
     deleteP2PListing,
-    sendMessage,
   } = useSocial()
   const [activeTab, setActiveTab] = useState('market')
   const [formOpen, setFormOpen] = useState(false)
@@ -478,6 +478,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const [submitting, setSubmitting] = useState(false)
   const [busyListingId, setBusyListingId] = useState('')
   const [selectedListingId, setSelectedListingId] = useState('')
+  const [conversationListingId, setConversationListingId] = useState('')
   const [formResetKey, setFormResetKey] = useState(0)
 
   useEffect(() => {
@@ -516,6 +517,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const selectedListing = useMemo(() => {
     return listings.find((listing) => listing.id === selectedListingId) || null
   }, [listings, selectedListingId])
+
+  const conversationListing = useMemo(() => {
+    return listings.find((listing) => listing.id === conversationListingId) || null
+  }, [conversationListingId, listings])
 
   const filteredListings = useMemo(() => {
     const cleanQuery = searchQuery.trim().toLowerCase()
@@ -784,7 +789,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     }
   }
 
-  const handleMessageSeller = async (listing) => {
+  const handleMessageSeller = (listing) => {
     setActionNotice('')
 
     if (!isSignedIn) {
@@ -794,13 +799,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (currentProfileId === listing.sellerId) return
 
-    setBusyListingId(listing.id)
-    const sent = await sendMessage({
-      toId: listing.sellerId,
-      body: `Hi, I am interested in your P2P listing "${listing.title}".`,
-    })
-    setBusyListingId('')
-    setActionNotice(sent ? 'Message sent to the seller.' : 'Could not send the message.')
+    setSelectedListingId('')
+    setConversationListingId(listing.id)
   }
 
   const handleMarkSold = async (listing) => {
@@ -1177,6 +1177,16 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             busy={busyListingId === selectedListing.id}
             onClose={() => setSelectedListingId('')}
             onMessageSeller={handleMessageSeller}
+          />
+        )}
+
+        {conversationListing && (
+          <MessageConversationModal
+            key={conversationListing.id}
+            recipient={usersById[conversationListing.sellerId]}
+            contextLabel={conversationListing.title}
+            initialBody={`Hi, I am interested in your P2P listing "${conversationListing.title}".`}
+            onClose={() => setConversationListingId('')}
           />
         )}
       </div>

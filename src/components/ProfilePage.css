@@ -260,6 +260,52 @@
   font-size: 24px;
 }
 
+.profile-messages-card {
+  display: flex;
+  width: 100%;
+  min-height: 74px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  color: var(--text-primary);
+  background:
+    linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(255, 45, 149, 0.08)),
+    rgba(26, 26, 37, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.profile-messages-card:hover {
+  border-color: rgba(0, 217, 255, 0.32);
+  transform: translateY(-1px);
+}
+
+.profile-messages-card > svg {
+  flex: 0 0 auto;
+  color: var(--accent-cyan);
+}
+
+.profile-messages-card span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.profile-messages-card strong {
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.profile-messages-card small {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .profile-badges-card {
   padding: 18px;
   background: rgba(26, 26, 37, 0.86);

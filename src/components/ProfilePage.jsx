@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import { buildMessageDialogs } from '../messages/messageHelpers'
 import { SHOP_PRODUCT_BY_ID } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import CommunityPostCard from './CommunityPostCard.jsx'
@@ -129,6 +130,7 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const form = formDraft?.profileId === currentProfile?.id ? formDraft : profileToForm(currentProfile)
+  const currentProfileId = currentProfile?.id || ''
 
   const bookmarkedPosts = useMemo(() => {
     const bookmarkIds = currentProfile?.bookmarkedPostIds ?? []
@@ -174,6 +176,11 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
   const leaderboard = useMemo(() => {
     return [...publicUsers].sort((a, b) => b.reputation.score - a.reputation.score).slice(0, 5)
   }, [publicUsers])
+
+  const messageDialogCount = useMemo(() => {
+    if (!currentProfileId) return 0
+    return buildMessageDialogs(state.messages, currentProfileId).length
+  }, [currentProfileId, state.messages])
 
   const updateField = (field, value) => {
     setSaved(false)
@@ -319,6 +326,14 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
               <span><strong>{currentProfile.acceptedSources}</strong>{s.accepted}</span>
               <span><strong>{bookmarkedPosts.length}</strong>{s.bookmarks}</span>
             </div>
+
+            <button type="button" className="profile-messages-card" onClick={() => onNavigate?.('/messages')}>
+              <MessageSquare size={18} />
+              <span>
+                <strong>{t.social.tabs.messages}</strong>
+                <small>{messageDialogCount} dialog{messageDialogCount === 1 ? '' : 's'}</small>
+              </span>
+            </button>
 
             <div className="profile-badges-card">
               <div className="profile-panel-heading">

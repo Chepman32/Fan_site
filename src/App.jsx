@@ -13,6 +13,7 @@ import P2PTradingPage from './components/P2PTradingPage'
 import Header from './components/Header'
 import ProfilePage from './components/ProfilePage'
 import UserProfilePage from './components/UserProfilePage'
+import MessagesPage from './components/MessagesPage'
 import AuthModal from './components/AuthModal'
 import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
@@ -21,7 +22,7 @@ import { LanguageProvider } from './i18n/useTranslation.jsx'
 import { shopCentsToPrice, shopPriceToCents } from './shop/shopData'
 import './App.css'
 
-const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p'])
+const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p', '/messages'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 
 function getFixedHeaderOffset() {
@@ -197,6 +198,19 @@ function AppContent() {
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <P2PTradingPage onOpenAuth={() => setAuthOpen(true)} />
+        </main>
+        <Footer />
+        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      </div>
+    )
+  }
+
+  if (route === '/messages') {
+    return (
+      <div className="app">
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <MessagesPage onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
