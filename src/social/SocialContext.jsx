@@ -7,10 +7,13 @@ import {
   createSeedSocialState,
 } from './socialData'
 import { normalizePostUrl } from './postLinks'
+import { P2P_SEED_LISTINGS } from '../p2p/p2pData'
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
 const FIREBASE_REQUEST_TIMEOUT_MS = 20000
+const P2P_MAX_FILES = 8
+const P2P_MAX_PROPERTIES = 12
 
 function withFirebaseTimeout(promise) {
   let timeoutId
@@ -97,6 +100,53 @@ function setSingleChoice(collectionValue, optionIds, targetId, userId) {
 
 function totalVotes(votes) {
   return Object.values(votes).reduce((total, entries) => total + entries.length, 0)
+}
+
+function normalizeP2PListingPayload({
+  title = '',
+  description = '',
+  category = 'other',
+  price = 0,
+  currency = 'USD',
+  deliveryMethod = '',
+  properties = [],
+  previewDataUrl = '',
+  files = [],
+}) {
+  const cleanTitle = title.trim().slice(0, 90)
+  const cleanDescription = description.trim().slice(0, 520)
+  const cleanDeliveryMethod = deliveryMethod.trim().slice(0, 80)
+  const numericPrice = Number(price)
+  const cleanProperties = properties
+    .map((property) => ({
+      key: property.key?.trim().slice(0, 30) || '',
+      value: property.value?.trim().slice(0, 64) || '',
+    }))
+    .filter((property) => property.key && property.value)
+    .slice(0, P2P_MAX_PROPERTIES)
+  const cleanFiles = files.map((file) => ({
+    name: file.name || file.fileName || 'listing-file',
+    size: Number(file.size || file.fileSize || 0),
+    type: file.type || file.mimeType || 'application/octet-stream',
+    provider: file.provider || 'telegram_bot',
+    fileId: file.fileId || '',
+    fileUniqueId: file.fileUniqueId || '',
+    messageId: file.messageId || '',
+    kind: file.kind || 'p2p-listing-file',
+    storageStatus: file.storageStatus || 'stored',
+  })).slice(0, P2P_MAX_FILES)
+
+  return {
+    title: cleanTitle,
+    description: cleanDescription,
+    category,
+    price: numericPrice,
+    currency,
+    deliveryMethod: cleanDeliveryMethod,
+    properties: cleanProperties,
+    previewDataUrl,
+    files: cleanFiles,
+  }
 }
 
 function emptyReactionMap() {
@@ -316,6 +366,7 @@ const initialState = {
   polls: seedState.polls,
   comments: sortOldest(seedState.comments),
   messages: [],
+  p2pListings: sortNewest(P2P_SEED_LISTINGS),
 }
 
 export function SocialProvider({ children }) {
@@ -406,6 +457,13 @@ export function SocialProvider({ children }) {
         setState((currentState) => ({
           ...currentState,
           comments: sortOldest(mergeById(seedState.comments, comments)),
+        }))
+      }, (error) => setBackendError(firebaseErrorMessage(error))),
+      services.onSnapshot(services.collection(services.db, 'p2pListings'), (snapshot) => {
+        const p2pListings = snapshot.docs.map(docData)
+        setState((currentState) => ({
+          ...currentState,
+          p2pListings: sortNewest(mergeById(P2P_SEED_LISTINGS, p2pListings)),
         }))
       }, (error) => setBackendError(firebaseErrorMessage(error))),
     ]
@@ -832,6 +890,122 @@ export function SocialProvider({ children }) {
     }
   }
 
+  const createP2PListing = async ({
+    title,
+    description,
+    category,
+    price,
+    currency,
+    deliveryMethod,
+    properties = [],
+    previewDataUrl = '',
+    files = [],
+  }) => {
+    if (!requireUser()) return false
+
+    setBackendError('')
+    const payload = normalizeP2PListingPayload({
+      title,
+      description,
+      category,
+      price,
+      currency,
+      deliveryMethod,
+      properties,
+      previewDataUrl,
+      files,
+    })
+
+    if (
+      payload.title.length < 3 ||
+      !Number.isFinite(payload.price) ||
+      payload.price < 0 ||
+      !payload.properties.length
+    ) {
+      setBackendError('Complete the listing title, price, and properties.')
+      return false
+    }
+
+    try {
+      await services.addDoc(services.collection(services.db, 'p2pListings'), {
+        sellerId: authUser.uid,
+        ...payload,
+        status: 'active',
+        createdAt: services.serverTimestamp(),
+        updatedAt: services.serverTimestamp(),
+      })
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
+  const updateP2PListing = async (listingId, updates) => {
+    if (!requireUser()) return false
+
+    const listing = state.p2pListings.find((item) => item.id === listingId)
+    if (!listing || listing.sellerId !== authUser.uid) return false
+
+    setBackendError('')
+    const payload = normalizeP2PListingPayload(updates)
+
+    if (
+      payload.title.length < 3 ||
+      !Number.isFinite(payload.price) ||
+      payload.price < 0 ||
+      !payload.properties.length
+    ) {
+      setBackendError('Complete the listing title, price, and properties.')
+      return false
+    }
+
+    try {
+      await services.updateDoc(services.doc(services.db, 'p2pListings', listingId), {
+        ...payload,
+        updatedAt: services.serverTimestamp(),
+      })
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
+  const updateP2PListingStatus = async (listingId, status) => {
+    if (!requireUser()) return false
+    if (!['active', 'sold'].includes(status)) return false
+
+    const listing = state.p2pListings.find((item) => item.id === listingId)
+    if (!listing || listing.sellerId !== authUser.uid) return false
+
+    try {
+      await services.updateDoc(services.doc(services.db, 'p2pListings', listingId), {
+        status,
+        updatedAt: services.serverTimestamp(),
+      })
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
+  const deleteP2PListing = async (listingId) => {
+    if (!requireUser()) return false
+
+    const listing = state.p2pListings.find((item) => item.id === listingId)
+    if (!listing || listing.sellerId !== authUser.uid) return false
+
+    try {
+      await services.deleteDoc(services.doc(services.db, 'p2pListings', listingId))
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
   const value = {
     state,
     usersById,
@@ -857,6 +1031,10 @@ export function SocialProvider({ children }) {
     votePoll,
     addComment,
     sendMessage,
+    createP2PListing,
+    updateP2PListing,
+    updateP2PListingStatus,
+    deleteP2PListing,
     totalVotes,
     getUserProfile: (userId) => getUserProfile(getUserById(state, userId), state),
   }

@@ -9,6 +9,7 @@ import LocationGuidePage from './components/LocationGuidePage'
 import NewsSection from './components/NewsSection'
 import SocialHub from './components/SocialHub'
 import ShopPage from './components/ShopPage'
+import P2PTradingPage from './components/P2PTradingPage'
 import Header from './components/Header'
 import ProfilePage from './components/ProfilePage'
 import UserProfilePage from './components/UserProfilePage'
@@ -20,7 +21,7 @@ import { LanguageProvider } from './i18n/useTranslation.jsx'
 import { shopCentsToPrice, shopPriceToCents } from './shop/shopData'
 import './App.css'
 
-const APP_ROUTES = new Set(['/community', '/profile', '/shop'])
+const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 
 function getFixedHeaderOffset() {
@@ -183,6 +184,19 @@ function AppContent() {
             onAddCartItem={addCartItem}
             onRemoveCartItem={removeCartItem}
           />
+        </main>
+        <Footer />
+        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      </div>
+    )
+  }
+
+  if (route === '/p2p') {
+    return (
+      <div className="app">
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <P2PTradingPage onOpenAuth={() => setAuthOpen(true)} />
         </main>
         <Footer />
         {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}

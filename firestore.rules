@@ -44,6 +44,47 @@ service cloud.firestore {
       ];
     }
 
+    function validP2PStatus() {
+      return request.resource.data.status in [
+        'active',
+        'sold'
+      ];
+    }
+
+    function validP2PListingShape() {
+      return request.resource.data.keys().hasOnly([
+          'sellerId',
+          'title',
+          'description',
+          'category',
+          'price',
+          'currency',
+          'deliveryMethod',
+          'properties',
+          'previewDataUrl',
+          'files',
+          'status',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 90
+        && request.resource.data.description is string
+        && request.resource.data.category is string
+        && request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.currency is string
+        && request.resource.data.deliveryMethod is string
+        && request.resource.data.properties is list
+        && request.resource.data.properties.size() > 0
+        && request.resource.data.properties.size() <= 12
+        && request.resource.data.previewDataUrl is string
+        && request.resource.data.files is list
+        && request.resource.data.files.size() <= 8
+        && validP2PStatus();
+    }
+
     match /users/{userId} {
       allow read: if true;
       allow create: if owns(userId)
@@ -57,6 +98,7 @@ service cloud.firestore {
           'followedTopics',
           'badges',
           'bookmarkedPostIds',
+          'purchasesByTx',
           'updatedAt'
         ])
         && request.resource.data.username is string
@@ -65,7 +107,8 @@ service cloud.firestore {
         && request.resource.data.badges is list
         && (!('bio' in request.resource.data) || request.resource.data.bio is string)
         && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
-        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list);
+        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list)
+        && (!('purchasesByTx' in request.resource.data) || request.resource.data.purchasesByTx is map);
       allow update: if owns(userId)
         && changedOnly([
           'username',
@@ -76,13 +119,15 @@ service cloud.firestore {
           'followedTopics',
           'badges',
           'bookmarkedPostIds',
+          'purchasesByTx',
           'updatedAt'
         ])
         && request.resource.data.followedTopics is list
         && request.resource.data.badges is list
         && (!('bio' in request.resource.data) || request.resource.data.bio is string)
         && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
-        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list);
+        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list)
+        && (!('purchasesByTx' in request.resource.data) || request.resource.data.purchasesByTx is map);
       allow delete: if false;
     }
 
@@ -159,6 +204,33 @@ service cloud.firestore {
         && request.resource.data.toId in request.resource.data.participantIds
         && request.resource.data.participantIds.size() == 2;
       allow update, delete: if false;
+    }
+
+    match /p2pListings/{listingId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && request.resource.data.sellerId == request.auth.uid
+        && validP2PListingShape();
+      allow update: if signedIn()
+        && resource.data.sellerId == request.auth.uid
+        && request.resource.data.sellerId == resource.data.sellerId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && changedOnly([
+          'title',
+          'description',
+          'category',
+          'price',
+          'currency',
+          'deliveryMethod',
+          'properties',
+          'previewDataUrl',
+          'files',
+          'status',
+          'updatedAt'
+        ])
+        && validP2PListingShape();
+      allow delete: if signedIn()
+        && (resource.data.sellerId == request.auth.uid || isAdmin());
     }
   }
 }

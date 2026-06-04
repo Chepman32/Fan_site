@@ -1,0 +1,14 @@
+{
+  "name": "gta-vi-p2p-telegram-upload-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "secret:bot": "wrangler secret put TELEGRAM_BOT_TOKEN",
+    "secret:chat": "wrangler secret put TELEGRAM_STORAGE_CHAT_ID"
+  },
+  "devDependencies": {
+    "wrangler": "^4.50.0"
+  }
+}

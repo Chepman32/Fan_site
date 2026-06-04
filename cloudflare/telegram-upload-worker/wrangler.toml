@@ -1,0 +1,9 @@
+name = "gta-vi-p2p-telegram-upload"
+main = "src/index.js"
+compatibility_date = "2026-06-02"
+
+[vars]
+TELEGRAM_API_BASE_URL = "https://api.telegram.org"
+TELEGRAM_MAX_UPLOAD_BYTES = "52428800"
+FIREBASE_PROJECT_ID = "gta-vi-fan-site"
+ALLOWED_ORIGIN = "http://127.0.0.1:5173,http://localhost:5173,https://gta-vi-fan-site.web.app,https://gta-vi-fan-site.firebaseapp.com"

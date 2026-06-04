@@ -4,8 +4,8 @@ import {
   Crosshair,
   Ellipsis,
   Globe,
+  Handshake,
   Home,
-  Images,
   Info,
   LogOut,
   MapPinned,
@@ -134,9 +134,10 @@ function Header({
   const isActive = (target) => {
     if (target === 'main') return currentPath === '/' && !currentHash
     if (target === 'shop') return currentPath === '/shop'
+    if (target === 'p2p') return currentPath === '/p2p'
     if (target === 'news') return currentPath === '/' && currentHash === '#news'
     if (target === 'community') return currentPath === '/community'
-    if (target === 'more') return bottomMoreOpen || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
+    if (target === 'more') return bottomMoreOpen || currentPath === '/p2p' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
     return false
   }
 
@@ -153,7 +154,7 @@ function Header({
     { href: '/#leonida', label: t.nav.locations || 'Locations', icon: MapPinned },
     { href: '/#vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
     { href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
-    { href: '/#media', label: t.nav.media || 'Media', icon: Images },
+    { href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
     { href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
   ]
 
@@ -242,7 +243,7 @@ function Header({
               </a>
             </div>
           </div>
-          <a href="/#media" onClick={(event) => navigate(event, '/#media')}>{t.nav.media}</a>
+          <a href="/p2p" onClick={(event) => navigate(event, '/p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
           <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
           <a href="/#news" onClick={(event) => navigate(event, '/#news')}>{t.nav.news}</a>
           <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
