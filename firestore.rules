@@ -60,6 +60,7 @@ service cloud.firestore {
           'price',
           'currency',
           'deliveryMethod',
+          'paymentMethods',
           'properties',
           'previewDataUrl',
           'files',
@@ -76,6 +77,11 @@ service cloud.firestore {
         && request.resource.data.price >= 0
         && request.resource.data.currency is string
         && request.resource.data.deliveryMethod is string
+        && (!('paymentMethods' in request.resource.data)
+          || (request.resource.data.paymentMethods is list
+            && request.resource.data.paymentMethods.size() > 0
+            && request.resource.data.paymentMethods.size() <= 2
+            && request.resource.data.paymentMethods.hasOnly(['crypto', 'card'])))
         && request.resource.data.properties is list
         && request.resource.data.properties.size() > 0
         && request.resource.data.properties.size() <= 12
@@ -222,6 +228,7 @@ service cloud.firestore {
           'price',
           'currency',
           'deliveryMethod',
+          'paymentMethods',
           'properties',
           'previewDataUrl',
           'files',

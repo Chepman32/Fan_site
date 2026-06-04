@@ -13,6 +13,11 @@ export const P2P_CATEGORIES = [
 
 export const P2P_CURRENCIES = ['USD', 'USDT', 'TRX']
 
+export const P2P_PAYMENT_METHODS = [
+  { id: 'crypto', label: 'Crypto', detail: 'USDT, TRX, or seller-confirmed wallet' },
+  { id: 'card', label: 'Card', detail: 'Card transfer or seller-confirmed checkout' },
+]
+
 export const P2P_SEED_LISTINGS = [
   {
     id: 'p2p-vice-overlay-pack',
@@ -23,6 +28,7 @@ export const P2P_SEED_LISTINGS = [
     price: 18,
     currency: 'USD',
     deliveryMethod: 'Instant file handoff',
+    paymentMethods: ['card', 'crypto'],
     previewDataUrl: overlayPreview,
     properties: [
       { key: 'Format', value: 'PNG, MOV, PSD' },
@@ -51,6 +57,7 @@ export const P2P_SEED_LISTINGS = [
     price: 12,
     currency: 'USD',
     deliveryMethod: 'Seller delivery after payment',
+    paymentMethods: ['card'],
     previewDataUrl: emotePackPreview,
     properties: [
       { key: 'Files', value: '10 transparent WebP' },
@@ -79,6 +86,7 @@ export const P2P_SEED_LISTINGS = [
     price: 9,
     currency: 'USDT',
     deliveryMethod: 'Telegram file bundle',
+    paymentMethods: ['crypto'],
     previewDataUrl: bannerPreview,
     properties: [
       { key: 'Count', value: '32 banners' },
@@ -102,6 +110,10 @@ export const P2P_SEED_LISTINGS = [
 
 export function p2pCategoryLabel(categoryId) {
   return P2P_CATEGORIES.find((category) => category.id === categoryId)?.label || 'Other'
+}
+
+export function p2pPaymentMethodLabel(methodId) {
+  return P2P_PAYMENT_METHODS.find((method) => method.id === methodId)?.label || methodId
 }
 
 export function formatP2PPrice(listing) {

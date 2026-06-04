@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   BadgeDollarSign,
   Check,
+  CreditCard,
   Edit3,
   FileArchive,
   Handshake,
   ImagePlus,
+  Info,
+  ListChecks,
   Loader2,
   MessageCircle,
   PackagePlus,
@@ -17,21 +20,28 @@ import {
   Tag,
   Trash2,
   UploadCloud,
+  Wallet,
   X,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
 import {
   P2P_CATEGORIES,
   P2P_CURRENCIES,
+  P2P_PAYMENT_METHODS,
   formatFileSize,
   formatP2PPrice,
   p2pCategoryLabel,
+  p2pPaymentMethodLabel,
 } from '../p2p/p2pData'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
 import './P2PTradingPage.css'
 
 const MAX_LISTING_FILES = 8
 const EMPTY_LISTINGS = []
+const PAYMENT_METHOD_DETAILS = P2P_PAYMENT_METHODS.reduce((details, method) => {
+  details[method.id] = method.detail
+  return details
+}, {})
 
 function initialListingForm() {
   return {
@@ -40,6 +50,7 @@ function initialListingForm() {
     price: '',
     currency: 'USD',
     deliveryMethod: 'Telegram handoff',
+    paymentMethods: ['crypto'],
     description: '',
   }
 }
@@ -111,6 +122,15 @@ function cleanProperties(properties) {
     .slice(0, 12)
 }
 
+function listingPaymentMethods(listing) {
+  const methods = (listing.paymentMethods || []).filter((method) => {
+    return P2P_PAYMENT_METHODS.some((paymentMethod) => paymentMethod.id === method)
+  })
+
+  if (methods.length) return methods
+  return ['USDT', 'TRX'].includes(listing.currency) ? ['crypto'] : ['card']
+}
+
 function P2PListingCard({
   listing,
   seller,
@@ -119,6 +139,7 @@ function P2PListingCard({
   management = false,
   onEdit,
   onDelete,
+  onViewDetails,
   onMessageSeller,
   onMarkSold,
   onToggleStatus,
@@ -126,9 +147,28 @@ function P2PListingCard({
   const fileCount = listing.files?.length || 0
   const isSeller = currentUserId && currentUserId === listing.sellerId
   const isSold = listing.status === 'sold'
+  const canViewDetails = !management && Boolean(onViewDetails)
+  const openDetails = () => {
+    if (canViewDetails) onViewDetails(listing)
+  }
+  const handleCardKeyDown = (event) => {
+    if (!canViewDetails || !['Enter', ' '].includes(event.key)) return
+    event.preventDefault()
+    onViewDetails(listing)
+  }
+  const handleActionClick = (event, action) => {
+    event.stopPropagation()
+    action(listing)
+  }
 
   return (
-    <article className={`p2p-listing-card ${isSold ? 'sold' : ''}`}>
+    <article
+      className={`p2p-listing-card ${isSold ? 'sold' : ''} ${canViewDetails ? 'interactive' : ''}`}
+      role={canViewDetails ? 'button' : undefined}
+      tabIndex={canViewDetails ? 0 : undefined}
+      onClick={openDetails}
+      onKeyDown={handleCardKeyDown}
+    >
       <div className="p2p-listing-media">
         {listing.previewDataUrl ? (
           <img src={listing.previewDataUrl} alt={listing.title} loading="lazy" decoding="async" />
@@ -198,7 +238,7 @@ function P2PListingCard({
                 type="button"
                 className="p2p-secondary-action"
                 disabled={busy}
-                onClick={() => onEdit(listing)}
+                onClick={(event) => handleActionClick(event, onEdit)}
               >
                 <Edit3 size={15} />
                 Edit
@@ -207,7 +247,7 @@ function P2PListingCard({
                 type="button"
                 className="p2p-secondary-action"
                 disabled={busy}
-                onClick={() => onToggleStatus(listing)}
+                onClick={(event) => handleActionClick(event, onToggleStatus)}
               >
                 {busy ? (
                   <Loader2 size={15} className="p2p-spin" />
@@ -222,7 +262,7 @@ function P2PListingCard({
                 type="button"
                 className="p2p-danger-action"
                 disabled={busy}
-                onClick={() => onDelete(listing)}
+                onClick={(event) => handleActionClick(event, onDelete)}
               >
                 {busy ? <Loader2 size={15} className="p2p-spin" /> : <Trash2 size={15} />}
                 Remove
@@ -233,7 +273,7 @@ function P2PListingCard({
               type="button"
               className="p2p-secondary-action"
               disabled={isSold || busy}
-              onClick={() => onMarkSold(listing)}
+              onClick={(event) => handleActionClick(event, onMarkSold)}
             >
               {busy ? <Loader2 size={15} className="p2p-spin" /> : <Check size={15} />}
               {isSold ? 'Sold' : 'Mark sold'}
@@ -243,7 +283,7 @@ function P2PListingCard({
               type="button"
               className="p2p-primary-action"
               disabled={isSold || busy}
-              onClick={() => onMessageSeller(listing)}
+              onClick={(event) => handleActionClick(event, onMessageSeller)}
             >
               {busy ? <Loader2 size={15} className="p2p-spin" /> : <MessageCircle size={15} />}
               Message seller
@@ -252,6 +292,157 @@ function P2PListingCard({
         </div>
       </div>
     </article>
+  )
+}
+
+function P2PProductDetailsModal({
+  listing,
+  seller,
+  currentUserId,
+  busy,
+  onClose,
+  onMessageSeller,
+}) {
+  const fileCount = listing.files?.length || 0
+  const isSold = listing.status === 'sold'
+  const isSeller = currentUserId && currentUserId === listing.sellerId
+  const paymentMethods = listingPaymentMethods(listing)
+
+  return (
+    <div className="p2p-modal-backdrop" onClick={onClose}>
+      <section
+        className="p2p-product-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="p2p-product-details-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="p2p-modal-head">
+          <div>
+            <span className="p2p-kicker">
+              <Info size={15} />
+              Product details
+            </span>
+            <h2 id="p2p-product-details-title">{listing.title}</h2>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close product details">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="p2p-modal-layout">
+          <div className="p2p-modal-media">
+            {listing.previewDataUrl ? (
+              <img src={listing.previewDataUrl} alt={listing.title} />
+            ) : (
+              <div className="p2p-listing-placeholder" aria-hidden="true">
+                <FileArchive size={42} />
+              </div>
+            )}
+            <span className={`p2p-listing-status ${isSold ? 'sold' : ''}`}>
+              {isSold ? 'Sold' : 'Active'}
+            </span>
+          </div>
+
+          <div className="p2p-modal-summary">
+            <div className="p2p-modal-price-row">
+              <span className="p2p-listing-category">
+                <Tag size={14} />
+                {p2pCategoryLabel(listing.category)}
+              </span>
+              <strong>{formatP2PPrice(listing)}</strong>
+            </div>
+
+            <p>{listing.description || 'The seller can share extra context in chat before you make a deal.'}</p>
+
+            <div className="p2p-modal-seller">
+              <span
+                style={{ backgroundColor: `${seller?.avatarColor || '#00d9ff'}22`, color: seller?.avatarColor || '#00d9ff' }}
+              >
+                {(seller?.username || 'P2P').slice(0, 2).toUpperCase()}
+              </span>
+              <div>
+                <b>{seller?.username || 'Seller'}</b>
+                <small>Listed {listingDateLabel(listing.createdAt)}</small>
+              </div>
+            </div>
+
+            <div className="p2p-modal-payment-block">
+              <h3>Payment options</h3>
+              <div className="p2p-modal-payment-list">
+                {paymentMethods.map((methodId) => (
+                  <span key={methodId}>
+                    {methodId === 'card' ? <CreditCard size={15} /> : <Wallet size={15} />}
+                    <b>{p2pPaymentMethodLabel(methodId)}</b>
+                    <small>{PAYMENT_METHOD_DETAILS[methodId]}</small>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {isSeller ? (
+              <div className="p2p-modal-note">This is your listing. Manage it from My Products.</div>
+            ) : (
+              <button
+                type="button"
+                className="p2p-primary-action"
+                disabled={isSold || busy}
+                onClick={() => onMessageSeller(listing)}
+              >
+                {busy ? <Loader2 size={16} className="p2p-spin" /> : <MessageCircle size={16} />}
+                Message seller
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="p2p-modal-sections">
+          <section>
+            <h3>
+              <ListChecks size={16} />
+              What's included
+            </h3>
+            <div className="p2p-included-list">
+              <span>
+                <b>Delivery</b>
+                {listing.deliveryMethod || 'Seller handoff after payment'}
+              </span>
+              <span>
+                <b>Files</b>
+                {fileCount ? `${fileCount} stored file${fileCount === 1 ? '' : 's'}` : 'No uploaded file bundle yet'}
+              </span>
+            </div>
+
+            {fileCount > 0 && (
+              <div className="p2p-modal-file-list">
+                {listing.files.map((file) => (
+                  <span key={`${file.name}-${file.size}-${file.messageId || file.fileUniqueId || ''}`}>
+                    <FileArchive size={15} />
+                    <b>{file.name}</b>
+                    <small>{formatFileSize(file.size)}</small>
+                  </span>
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h3>
+              <Tag size={16} />
+              Other properties
+            </h3>
+            <div className="p2p-detail-properties">
+              {(listing.properties || []).map((property) => (
+                <span key={`${property.key}-${property.value}`}>
+                  <b>{property.key}</b>
+                  {property.value}
+                </span>
+              ))}
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
   )
 }
 
@@ -286,6 +477,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const [uploadProgress, setUploadProgress] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [busyListingId, setBusyListingId] = useState('')
+  const [selectedListingId, setSelectedListingId] = useState('')
   const [formResetKey, setFormResetKey] = useState(0)
 
   useEffect(() => {
@@ -296,6 +488,17 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       document.title = previousTitle
     }
   }, [])
+
+  useEffect(() => {
+    if (!selectedListingId) return undefined
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') setSelectedListingId('')
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [selectedListingId])
 
   const listings = state.p2pListings || EMPTY_LISTINGS
   const isEditing = Boolean(editingListingId)
@@ -310,6 +513,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       .sort((first, second) => new Date(second.createdAt ?? 0) - new Date(first.createdAt ?? 0))
   }, [currentProfileId, listings])
 
+  const selectedListing = useMemo(() => {
+    return listings.find((listing) => listing.id === selectedListingId) || null
+  }, [listings, selectedListingId])
+
   const filteredListings = useMemo(() => {
     const cleanQuery = searchQuery.trim().toLowerCase()
     const baseListings = activeTab === 'mine' ? myListings : listings
@@ -322,6 +529,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           listing.title,
           listing.description,
           p2pCategoryLabel(listing.category),
+          ...listingPaymentMethods(listing).map(p2pPaymentMethodLabel),
           seller?.username,
           ...(listing.properties || []).flatMap((property) => [property.key, property.value]),
         ].join(' ').toLowerCase()
@@ -337,6 +545,17 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
   const updateFormField = (field, value) => {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
+  }
+
+  const togglePaymentMethod = (methodId) => {
+    setForm((currentForm) => {
+      const currentMethods = currentForm.paymentMethods || []
+      const paymentMethods = currentMethods.includes(methodId)
+        ? currentMethods.filter((currentMethodId) => currentMethodId !== methodId)
+        : [...currentMethods, methodId]
+
+      return { ...currentForm, paymentMethods }
+    })
   }
 
   const resetForm = () => {
@@ -462,6 +681,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       price: listing.price === undefined || listing.price === null ? '' : String(listing.price),
       currency: listing.currency || 'USD',
       deliveryMethod: listing.deliveryMethod || '',
+      paymentMethods: listingPaymentMethods(listing),
       description: listing.description || '',
     })
     setProperties(listing.properties?.length ? listing.properties : initialProperties())
@@ -489,6 +709,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const price = Number(form.price)
     const nextProperties = cleanProperties(properties)
     const totalFileCount = existingFiles.length + listingFiles.length
+    const paymentMethods = form.paymentMethods || []
 
     if (title.length < 3) {
       setFormError('Add a title with at least 3 characters.')
@@ -502,6 +723,11 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (!nextProperties.length) {
       setFormError('Add at least one property.')
+      return
+    }
+
+    if (!paymentMethods.length) {
+      setFormError('Choose at least one payment option.')
       return
     }
 
@@ -532,6 +758,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         price,
         currency: form.currency,
         deliveryMethod: form.deliveryMethod,
+        paymentMethods,
         properties: nextProperties,
         previewDataUrl,
         files: [...existingFiles, ...uploadedFiles],
@@ -606,6 +833,11 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     if (deleted && editingListingId === listing.id) {
       closeForm()
     }
+  }
+
+  const handleViewListingDetails = (listing) => {
+    if (activeTab !== 'market') return
+    setSelectedListingId(listing.id)
   }
 
   return (
@@ -759,6 +991,26 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                 </select>
               </label>
 
+              <div className="p2p-payment-field p2p-form-wide">
+                <span>Payment options</span>
+                <div className="p2p-payment-selector">
+                  {P2P_PAYMENT_METHODS.map((method) => (
+                    <label key={method.id}>
+                      <input
+                        type="checkbox"
+                        checked={(form.paymentMethods || []).includes(method.id)}
+                        onChange={() => togglePaymentMethod(method.id)}
+                      />
+                      {method.id === 'card' ? <CreditCard size={16} /> : <Wallet size={16} />}
+                      <span>
+                        <b>{method.label}</b>
+                        <small>{method.detail}</small>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               <label className="p2p-form-wide">
                 <span>Delivery</span>
                 <input
@@ -897,6 +1149,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               management={activeTab === 'mine'}
               onEdit={handleEditListing}
               onDelete={handleDeleteListing}
+              onViewDetails={handleViewListingDetails}
               onMessageSeller={handleMessageSeller}
               onMarkSold={handleMarkSold}
               onToggleStatus={handleToggleListingStatus}
@@ -914,6 +1167,17 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                 : 'Try another category or search term.'}
             </span>
           </div>
+        )}
+
+        {selectedListing && (
+          <P2PProductDetailsModal
+            listing={selectedListing}
+            seller={usersById[selectedListing.sellerId]}
+            currentUserId={currentProfileId}
+            busy={busyListingId === selectedListing.id}
+            onClose={() => setSelectedListingId('')}
+            onMessageSeller={handleMessageSeller}
+          />
         )}
       </div>
     </section>

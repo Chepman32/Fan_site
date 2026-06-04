@@ -7,13 +7,14 @@ import {
   createSeedSocialState,
 } from './socialData'
 import { normalizePostUrl } from './postLinks'
-import { P2P_SEED_LISTINGS } from '../p2p/p2pData'
+import { P2P_PAYMENT_METHODS, P2P_SEED_LISTINGS } from '../p2p/p2pData'
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
 const FIREBASE_REQUEST_TIMEOUT_MS = 20000
 const P2P_MAX_FILES = 8
 const P2P_MAX_PROPERTIES = 12
+const P2P_PAYMENT_METHOD_IDS = P2P_PAYMENT_METHODS.map((method) => method.id)
 
 function withFirebaseTimeout(promise) {
   let timeoutId
@@ -109,6 +110,7 @@ function normalizeP2PListingPayload({
   price = 0,
   currency = 'USD',
   deliveryMethod = '',
+  paymentMethods = ['crypto'],
   properties = [],
   previewDataUrl = '',
   files = [],
@@ -124,6 +126,9 @@ function normalizeP2PListingPayload({
     }))
     .filter((property) => property.key && property.value)
     .slice(0, P2P_MAX_PROPERTIES)
+  const cleanPaymentMethods = paymentMethods
+    .filter((method) => P2P_PAYMENT_METHOD_IDS.includes(method))
+    .slice(0, P2P_PAYMENT_METHOD_IDS.length)
   const cleanFiles = files.map((file) => ({
     name: file.name || file.fileName || 'listing-file',
     size: Number(file.size || file.fileSize || 0),
@@ -143,6 +148,7 @@ function normalizeP2PListingPayload({
     price: numericPrice,
     currency,
     deliveryMethod: cleanDeliveryMethod,
+    paymentMethods: cleanPaymentMethods.length ? cleanPaymentMethods : ['crypto'],
     properties: cleanProperties,
     previewDataUrl,
     files: cleanFiles,
@@ -897,6 +903,7 @@ export function SocialProvider({ children }) {
     price,
     currency,
     deliveryMethod,
+    paymentMethods = ['crypto'],
     properties = [],
     previewDataUrl = '',
     files = [],
@@ -911,6 +918,7 @@ export function SocialProvider({ children }) {
       price,
       currency,
       deliveryMethod,
+      paymentMethods,
       properties,
       previewDataUrl,
       files,
