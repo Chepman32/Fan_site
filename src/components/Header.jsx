@@ -170,7 +170,13 @@ function Header({
           <a className="nav-shop-link" href="/shop" onClick={(event) => navigate(event, '/shop')}>
             {t.nav.shop || 'Shop'}
           </a>
-          <a href="/#characters" onClick={(event) => navigate(event, '/#characters')}>{t.nav.characters}</a>
+          <a href="/p2p" onClick={(event) => navigate(event, '/p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
+          <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
+          <a href="/#news" onClick={(event) => navigate(event, '/#news')}>{t.nav.news}</a>
+          <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
+          <a href="/community" onClick={(event) => navigate(event, '/community')}>
+            {t.nav.community || t.nav.social || 'Community'}
+          </a>
           <div
             ref={desktopMoreRef}
             className={`nav-more ${desktopMoreOpen ? 'open' : ''}`}
@@ -243,13 +249,6 @@ function Header({
               </a>
             </div>
           </div>
-          <a href="/p2p" onClick={(event) => navigate(event, '/p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
-          <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
-          <a href="/#news" onClick={(event) => navigate(event, '/#news')}>{t.nav.news}</a>
-          <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
-          <a href="/community" onClick={(event) => navigate(event, '/community')}>
-            {t.nav.community || t.nav.social || 'Community'}
-          </a>
         </div>
 
         <div className="nav-auth">

@@ -114,7 +114,7 @@
 .nav-more-menu {
   position: absolute;
   top: calc(100% + 12px);
-  left: 50%;
+  right: 0;
   z-index: 220;
   display: flex;
   flex-wrap: wrap;
@@ -128,14 +128,14 @@
   box-shadow: 0 14px 42px rgba(0, 0, 0, 0.45);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, -5px);
+  transform: translateY(-5px);
   transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .nav-more.open .nav-more-menu {
   opacity: 1;
   pointer-events: auto;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 .nav-more-menu a {
