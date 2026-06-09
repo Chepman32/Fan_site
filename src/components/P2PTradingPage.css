@@ -144,7 +144,8 @@
 .p2p-form-head > button,
 .p2p-modal-head > button,
 .p2p-property-row button,
-.p2p-existing-file button {
+.p2p-existing-file button,
+.p2p-checkout-values button {
   display: inline-flex;
   min-width: 0;
   min-height: 42px;
@@ -220,7 +221,8 @@
 .p2p-form-head > button:hover,
 .p2p-modal-head > button:hover,
 .p2p-property-row button:hover,
-.p2p-existing-file button:hover {
+.p2p-existing-file button:hover,
+.p2p-checkout-values button:hover {
   transform: translateY(-1px);
 }
 
@@ -252,6 +254,9 @@
     var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, opacity, filter;
 }
 
 .p2p-form-head,
@@ -949,6 +954,188 @@
   font-weight: 800;
 }
 
+.p2p-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.p2p-modal-actions button {
+  width: 100%;
+}
+
+.p2p-checkout-panel {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.p2p-checkout-head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  color: var(--text-primary);
+}
+
+.p2p-checkout-head svg {
+  flex: 0 0 auto;
+  color: var(--accent-cyan);
+}
+
+.p2p-checkout-head div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.p2p-checkout-head h3 {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.p2p-checkout-head span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.p2p-checkout-values {
+  display: grid;
+  gap: 8px;
+}
+
+.p2p-checkout-values > span {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.75fr) minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.p2p-checkout-values b {
+  color: var(--text-muted);
+  font-weight: 900;
+}
+
+.p2p-checkout-values strong,
+.p2p-checkout-values code,
+.p2p-checkout-status code {
+  min-width: 0;
+  padding: 8px 9px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.p2p-checkout-values strong {
+  color: var(--accent-cyan);
+}
+
+.p2p-checkout-values button {
+  min-height: 34px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.p2p-checkout-field {
+  display: grid;
+  gap: 7px;
+}
+
+.p2p-checkout-field span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.p2p-checkout-field input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+}
+
+.p2p-checkout-field input:focus {
+  border-color: rgba(0, 217, 255, 0.42);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.1);
+}
+
+.p2p-checkout-submit,
+.p2p-checkout-message {
+  width: 100%;
+}
+
+.p2p-checkout-status {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-secondary);
+}
+
+.p2p-checkout-status > svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.p2p-checkout-status.success {
+  background: rgba(61, 220, 151, 0.08);
+  border-color: rgba(61, 220, 151, 0.24);
+}
+
+.p2p-checkout-status.success > svg {
+  color: var(--accent-green);
+}
+
+.p2p-checkout-status.failed {
+  background: rgba(255, 77, 115, 0.08);
+  border-color: rgba(255, 77, 115, 0.22);
+}
+
+.p2p-checkout-status.failed > svg {
+  color: #ff7b9a;
+}
+
+.p2p-checkout-status.pending > svg {
+  color: var(--accent-cyan);
+}
+
+.p2p-checkout-status div {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+
+.p2p-checkout-status strong {
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.p2p-checkout-status span {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .p2p-modal-sections {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1082,6 +1269,10 @@
   }
 
   .p2p-management-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .p2p-modal-actions {
     grid-template-columns: 1fr;
   }
 

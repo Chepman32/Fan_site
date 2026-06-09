@@ -42,16 +42,21 @@ function usdtFromSmallestUnit(amountInUnits) {
   return fraction ? `${whole}.${fraction}` : whole.toString()
 }
 
-function createRecentUsdtTransfersUrl() {
-  const url = new URL(`/v1/accounts/${PAYMENT_ADDRESS}/transactions/trc20`, TRONGRID_FULL_HOST)
+function paymentAddressForRequest(recipientAddress = PAYMENT_ADDRESS) {
+  return String(recipientAddress || PAYMENT_ADDRESS).trim()
+}
+
+function createRecentUsdtTransfersUrl(recipientAddress = PAYMENT_ADDRESS) {
+  const paymentAddress = paymentAddressForRequest(recipientAddress)
+  const url = new URL(`/v1/accounts/${paymentAddress}/transactions/trc20`, TRONGRID_FULL_HOST)
   url.searchParams.set('limit', String(RECENT_TRANSFER_LIMIT))
   url.searchParams.set('contract_address', USDT_CONTRACT_ADDRESS)
 
   return url.toString()
 }
 
-async function fetchRecentUsdtTransfers() {
-  const response = await fetch(createRecentUsdtTransfersUrl())
+async function fetchRecentUsdtTransfers(recipientAddress = PAYMENT_ADDRESS) {
+  const response = await fetch(createRecentUsdtTransfersUrl(recipientAddress))
 
   if (!response.ok) {
     throw new Error(`TRONGrid returned HTTP ${response.status}.`)
@@ -93,10 +98,11 @@ export async function connectTronLinkWallet() {
   return { tronWeb: injectedTronWeb, account }
 }
 
-export async function sendUsdtTransfer(tronWeb, amount) {
+export async function sendUsdtTransfer(tronWeb, amount, recipientAddress = PAYMENT_ADDRESS) {
   const amountInUnits = usdtToSmallestUnit(amount)
+  const paymentAddress = paymentAddressForRequest(recipientAddress)
   const contract = await tronWeb.contract().at(USDT_CONTRACT_ADDRESS)
-  const tx = await contract.transfer(PAYMENT_ADDRESS, amountInUnits.toString()).send({
+  const tx = await contract.transfer(paymentAddress, amountInUnits.toString()).send({
     feeLimit: USDT_TRANSFER_FEE_LIMIT,
   })
 
@@ -107,8 +113,9 @@ export async function sendUsdtTransfer(tronWeb, amount) {
   throw new Error('TronLink did not return a transaction id.')
 }
 
-export async function checkUsdtTransaction(txId, amount) {
+export async function checkUsdtTransaction(txId, amount, recipientAddress = PAYMENT_ADDRESS) {
   const normalizedTxId = normalizeTxId(txId)
+  const paymentAddress = paymentAddressForRequest(recipientAddress)
 
   if (!/^[a-fA-F0-9]{64}$/.test(normalizedTxId)) {
     return {
@@ -118,7 +125,7 @@ export async function checkUsdtTransaction(txId, amount) {
   }
 
   const expectedAmountInUnits = usdtToSmallestUnit(amount)
-  const transfers = await fetchRecentUsdtTransfers()
+  const transfers = await fetchRecentUsdtTransfers(paymentAddress)
   const transfer = transfers.find((candidate) => normalizedTxIdEquals(candidate?.transaction_id, normalizedTxId))
 
   if (!transfer) {
@@ -128,7 +135,7 @@ export async function checkUsdtTransaction(txId, amount) {
     }
   }
 
-  if (transfer?.to !== PAYMENT_ADDRESS) {
+  if (transfer?.to !== paymentAddress) {
     return {
       status: 'failed',
       message: 'Transaction was confirmed, but it was not sent to this checkout address.',

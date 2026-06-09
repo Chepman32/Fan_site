@@ -59,6 +59,7 @@ service cloud.firestore {
           'category',
           'price',
           'currency',
+          'cryptoWalletAddress',
           'deliveryMethod',
           'paymentMethods',
           'properties',
@@ -76,6 +77,9 @@ service cloud.firestore {
         && request.resource.data.price is number
         && request.resource.data.price >= 0
         && request.resource.data.currency is string
+        && (!('cryptoWalletAddress' in request.resource.data)
+          || (request.resource.data.cryptoWalletAddress is string
+            && request.resource.data.cryptoWalletAddress.size() <= 128))
         && request.resource.data.deliveryMethod is string
         && (!('paymentMethods' in request.resource.data)
           || (request.resource.data.paymentMethods is list
@@ -227,6 +231,7 @@ service cloud.firestore {
           'category',
           'price',
           'currency',
+          'cryptoWalletAddress',
           'deliveryMethod',
           'paymentMethods',
           'properties',

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { getFirebaseServices } from '../firebase/firebaseClient'
 import {
   REACTION_OPTIONS,
@@ -109,6 +109,7 @@ function normalizeP2PListingPayload({
   category = 'other',
   price = 0,
   currency = 'USD',
+  cryptoWalletAddress = '',
   deliveryMethod = '',
   paymentMethods = ['crypto'],
   properties = [],
@@ -117,6 +118,7 @@ function normalizeP2PListingPayload({
 }) {
   const cleanTitle = title.trim().slice(0, 90)
   const cleanDescription = description.trim().slice(0, 520)
+  const cleanCryptoWalletAddress = cryptoWalletAddress.trim().slice(0, 128)
   const cleanDeliveryMethod = deliveryMethod.trim().slice(0, 80)
   const numericPrice = Number(price)
   const cleanProperties = properties
@@ -147,6 +149,7 @@ function normalizeP2PListingPayload({
     category,
     price: numericPrice,
     currency,
+    cryptoWalletAddress: cleanCryptoWalletAddress,
     deliveryMethod: cleanDeliveryMethod,
     paymentMethods: cleanPaymentMethods.length ? cleanPaymentMethods : ['crypto'],
     properties: cleanProperties,
@@ -382,6 +385,7 @@ export function SocialProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState('')
   const [backendError, setBackendError] = useState('')
+  const clearBackendError = useCallback(() => setBackendError(''), [])
 
   useEffect(() => {
     let canceled = false
@@ -411,7 +415,7 @@ export function SocialProvider({ children }) {
 
       if (nextAuthUser) {
         withFirebaseTimeout(ensureUserDocument(services, nextAuthUser)).catch((error) => {
-          setBackendError(firebaseErrorMessage(error))
+          console.warn('Profile sync failed:', error)
         })
       } else {
         setState((currentState) => ({ ...currentState, messages: [] }))
@@ -902,6 +906,7 @@ export function SocialProvider({ children }) {
     category,
     price,
     currency,
+    cryptoWalletAddress,
     deliveryMethod,
     paymentMethods = ['crypto'],
     properties = [],
@@ -917,6 +922,7 @@ export function SocialProvider({ children }) {
       category,
       price,
       currency,
+      cryptoWalletAddress,
       deliveryMethod,
       paymentMethods,
       properties,
@@ -1022,6 +1028,7 @@ export function SocialProvider({ children }) {
     currentProfile,
     authError,
     backendError,
+    clearBackendError,
     authLoading,
     isSignedIn: Boolean(authUser),
     signup,

@@ -1,7 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
+  AlertCircle,
   BadgeDollarSign,
   Check,
+  Copy,
   CreditCard,
   Edit3,
   FileArchive,
@@ -24,9 +27,10 @@ import {
   X,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
+import { PAYMENT_ADDRESS, PAYMENT_NETWORK, PAYMENT_NETWORK_SUFFIX, formatShopPrice } from '../shop/shopData'
+import { checkUsdtTransaction, normalizeTxId } from '../shop/tronPayments'
 import {
   P2P_CATEGORIES,
-  P2P_CURRENCIES,
   P2P_PAYMENT_METHODS,
   formatFileSize,
   formatP2PPrice,
@@ -39,17 +43,35 @@ import './P2PTradingPage.css'
 
 const MAX_LISTING_FILES = 8
 const EMPTY_LISTINGS = []
+const POLL_INTERVAL_MS = 3000
 const PAYMENT_METHOD_DETAILS = P2P_PAYMENT_METHODS.reduce((details, method) => {
   details[method.id] = method.detail
   return details
 }, {})
+const USDT_CHECKOUT_CURRENCIES = new Set(['USD', 'USDT'])
+const TRON_ADDRESS_PATTERN = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
+const FORM_SPRING = {
+  type: 'spring',
+  stiffness: 430,
+  damping: 34,
+  mass: 0.82,
+  velocity: 2.6,
+}
+const FORM_EXIT_SPRING = {
+  type: 'spring',
+  stiffness: 560,
+  damping: 40,
+  mass: 0.72,
+  velocity: -3,
+}
 
 function initialListingForm() {
   return {
     title: '',
     category: 'digital-assets',
     price: '',
-    currency: 'USD',
+    currency: 'USDT',
+    cryptoWalletAddress: '',
     deliveryMethod: 'Telegram handoff',
     paymentMethods: ['crypto'],
     description: '',
@@ -132,6 +154,28 @@ function listingPaymentMethods(listing) {
   return ['USDT', 'TRX'].includes(listing.currency) ? ['crypto'] : ['card']
 }
 
+function p2pUsdtPaymentAmount(listing) {
+  return formatShopPrice(Number(listing.price) || 0)
+}
+
+function p2pPaymentAddress(listing) {
+  return String(listing.cryptoWalletAddress || PAYMENT_ADDRESS).trim()
+}
+
+function canUseUsdtCheckout(listing) {
+  const price = Number(listing.price)
+  return (
+    listingPaymentMethods(listing).includes('crypto') &&
+    USDT_CHECKOUT_CURRENCIES.has(listing.currency || 'USD') &&
+    Number.isFinite(price) &&
+    price > 0
+  )
+}
+
+function defaultP2PMessage(listing) {
+  return `Hi, I am interested in your P2P listing "${listing.title}".`
+}
+
 function P2PListingCard({
   listing,
   seller,
@@ -141,7 +185,6 @@ function P2PListingCard({
   onEdit,
   onDelete,
   onViewDetails,
-  onMessageSeller,
   onMarkSold,
   onToggleStatus,
 }) {
@@ -159,7 +202,7 @@ function P2PListingCard({
   }
   const handleActionClick = (event, action) => {
     event.stopPropagation()
-    action(listing)
+    if (action) action(listing)
   }
 
   return (
@@ -284,15 +327,165 @@ function P2PListingCard({
               type="button"
               className="p2p-primary-action"
               disabled={isSold || busy}
-              onClick={(event) => handleActionClick(event, onMessageSeller)}
+              onClick={(event) => handleActionClick(event, onViewDetails)}
             >
-              {busy ? <Loader2 size={15} className="p2p-spin" /> : <MessageCircle size={15} />}
-              Message seller
+              {busy ? <Loader2 size={15} className="p2p-spin" /> : <BadgeDollarSign size={15} />}
+              Buy
             </button>
           )}
         </div>
       </div>
     </article>
+  )
+}
+
+function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
+  const [copiedField, setCopiedField] = useState('')
+  const [txHash, setTxHash] = useState('')
+  const [txIdToVerify, setTxIdToVerify] = useState('')
+  const [paymentStatus, setPaymentStatus] = useState('idle')
+  const [paymentMessage, setPaymentMessage] = useState('')
+  const paymentAmount = p2pUsdtPaymentAmount(listing)
+  const receivingAddress = p2pPaymentAddress(listing)
+  const isChecking = paymentStatus === 'pending'
+
+  useEffect(() => {
+    if (!txIdToVerify) return undefined
+
+    let canceled = false
+    let timerId
+
+    const pollTransaction = async () => {
+      try {
+        const result = await checkUsdtTransaction(txIdToVerify, paymentAmount, receivingAddress)
+
+        if (canceled) return
+
+        setPaymentStatus(result.status)
+        setPaymentMessage(result.message)
+
+        if (result.status === 'pending') {
+          timerId = window.setTimeout(pollTransaction, POLL_INTERVAL_MS)
+        }
+      } catch (error) {
+        if (canceled) return
+
+        setPaymentStatus('pending')
+        setPaymentMessage(error.message || 'TRONGrid is not responding. Checking again shortly.')
+        timerId = window.setTimeout(pollTransaction, POLL_INTERVAL_MS)
+      }
+    }
+
+    pollTransaction()
+
+    return () => {
+      canceled = true
+      window.clearTimeout(timerId)
+    }
+  }, [paymentAmount, receivingAddress, txIdToVerify])
+
+  const copyPaymentValue = async (value, field) => {
+    try {
+      await navigator.clipboard.writeText(value)
+      setCopiedField(field)
+      window.setTimeout(() => setCopiedField(''), 1400)
+    } catch (error) {
+      console.log('Could not copy P2P checkout value:', error)
+    }
+  }
+
+  const submitPaymentProof = () => {
+    const normalizedTxId = normalizeTxId(txHash)
+    if (!normalizedTxId) return
+
+    setTxHash(normalizedTxId)
+    setPaymentStatus('pending')
+    setPaymentMessage('Checking TRON network...')
+    setTxIdToVerify(normalizedTxId)
+  }
+
+  return (
+    <div className="p2p-checkout-panel" ref={panelRef}>
+      <div className="p2p-checkout-head">
+        <ShieldCheck size={16} />
+        <div>
+          <h3>USDT TRC20 checkout</h3>
+          <span>{PAYMENT_NETWORK} proof verification</span>
+        </div>
+      </div>
+
+      <div className="p2p-checkout-values">
+        <span>
+          <b>Send exactly</b>
+          <strong>{paymentAmount} USDT {PAYMENT_NETWORK_SUFFIX}</strong>
+          <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
+            <Copy size={13} />
+            {copiedField === 'amount' ? 'Copied' : 'Copy'}
+          </button>
+        </span>
+        <span>
+          <b>Receiving address</b>
+          <code>{receivingAddress}</code>
+          <button type="button" onClick={() => copyPaymentValue(receivingAddress, 'address')}>
+            <Copy size={13} />
+            {copiedField === 'address' ? 'Copied' : 'Copy'}
+          </button>
+        </span>
+      </div>
+
+      <label className="p2p-checkout-field">
+        <span>Transaction hash</span>
+        <input
+          type="text"
+          value={txHash}
+          onChange={(event) => {
+            setTxHash(event.target.value)
+            setTxIdToVerify('')
+            setPaymentStatus('idle')
+            setPaymentMessage('')
+          }}
+          placeholder="Paste your TRC20 transaction hash"
+        />
+      </label>
+
+      <button
+        type="button"
+        className="p2p-primary-action p2p-checkout-submit"
+        disabled={!txHash.trim() || isChecking || paymentStatus === 'success'}
+        onClick={submitPaymentProof}
+      >
+        {isChecking ? <Loader2 size={15} className="p2p-spin" /> : <ShieldCheck size={15} />}
+        Verify hash
+      </button>
+
+      {paymentStatus !== 'idle' && (
+        <div className={`p2p-checkout-status ${paymentStatus}`}>
+          {paymentStatus === 'success' && <Check size={16} />}
+          {paymentStatus === 'failed' && <AlertCircle size={16} />}
+          {paymentStatus === 'pending' && <Loader2 size={16} className="p2p-spin" />}
+          <div>
+            <strong>
+              {paymentStatus === 'success' && 'Payment verified'}
+              {paymentStatus === 'failed' && 'Verification failed'}
+              {paymentStatus === 'pending' && 'Checking payment'}
+            </strong>
+            <span>{paymentMessage}</span>
+            {txIdToVerify && <code>{txIdToVerify}</code>}
+          </div>
+        </div>
+      )}
+
+      {paymentStatus === 'success' && (
+        <button
+          type="button"
+          className="p2p-secondary-action p2p-checkout-message"
+          onClick={() => onMessageSeller(listing, txIdToVerify)}
+        >
+          <MessageCircle size={15} />
+          Message seller with proof
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -308,6 +501,20 @@ function P2PProductDetailsModal({
   const isSold = listing.status === 'sold'
   const isSeller = currentUserId && currentUserId === listing.sellerId
   const paymentMethods = listingPaymentMethods(listing)
+  const showUsdtCheckout = !isSeller && !isSold && canUseUsdtCheckout(listing)
+  const checkoutPanelRef = useRef(null)
+
+  const handleBuyClick = () => {
+    if (showUsdtCheckout && checkoutPanelRef.current) {
+      checkoutPanelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      window.setTimeout(() => {
+        checkoutPanelRef.current?.querySelector('input')?.focus({ preventScroll: true })
+      }, 280)
+      return
+    }
+
+    onMessageSeller(listing)
+  }
 
   return (
     <div className="p2p-modal-backdrop" onClick={onClose}>
@@ -381,18 +588,37 @@ function P2PProductDetailsModal({
               </div>
             </div>
 
+            {showUsdtCheckout && (
+              <P2PUsdtCheckoutBox
+                listing={listing}
+                onMessageSeller={onMessageSeller}
+                panelRef={checkoutPanelRef}
+              />
+            )}
+
             {isSeller ? (
               <div className="p2p-modal-note">This is your listing. Manage it from My Products.</div>
             ) : (
-              <button
-                type="button"
-                className="p2p-primary-action"
-                disabled={isSold || busy}
-                onClick={() => onMessageSeller(listing)}
-              >
-                {busy ? <Loader2 size={16} className="p2p-spin" /> : <MessageCircle size={16} />}
-                Message seller
-              </button>
+              <div className="p2p-modal-actions">
+                <button
+                  type="button"
+                  className="p2p-primary-action"
+                  disabled={isSold || busy}
+                  onClick={handleBuyClick}
+                >
+                  {busy ? <Loader2 size={16} className="p2p-spin" /> : <BadgeDollarSign size={16} />}
+                  Buy
+                </button>
+                <button
+                  type="button"
+                  className="p2p-secondary-action"
+                  disabled={isSold || busy}
+                  onClick={() => onMessageSeller(listing)}
+                >
+                  {busy ? <Loader2 size={16} className="p2p-spin" /> : <MessageCircle size={16} />}
+                  Message seller
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -454,7 +680,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     currentProfile,
     isSignedIn,
     authLoading,
-    backendError,
+    clearBackendError,
     createP2PListing,
     updateP2PListing,
     updateP2PListingStatus,
@@ -479,7 +705,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const [busyListingId, setBusyListingId] = useState('')
   const [selectedListingId, setSelectedListingId] = useState('')
   const [conversationListingId, setConversationListingId] = useState('')
+  const [conversationDraft, setConversationDraft] = useState('')
   const [formResetKey, setFormResetKey] = useState(0)
+
+  useEffect(() => {
+    clearBackendError()
+  }, [clearBackendError])
 
   useEffect(() => {
     const previousTitle = document.title
@@ -533,6 +764,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         const searchText = [
           listing.title,
           listing.description,
+          listing.cryptoWalletAddress,
           p2pCategoryLabel(listing.category),
           ...listingPaymentMethods(listing).map(p2pPaymentMethodLabel),
           seller?.username,
@@ -576,7 +808,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }
 
   const closeForm = () => {
-    resetForm()
     setFormError('')
     setFormOpen(false)
   }
@@ -684,7 +915,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       title: listing.title || '',
       category: listing.category || 'other',
       price: listing.price === undefined || listing.price === null ? '' : String(listing.price),
-      currency: listing.currency || 'USD',
+      currency: listing.currency || 'USDT',
+      cryptoWalletAddress: listing.cryptoWalletAddress || '',
       deliveryMethod: listing.deliveryMethod || '',
       paymentMethods: listingPaymentMethods(listing),
       description: listing.description || '',
@@ -715,6 +947,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const nextProperties = cleanProperties(properties)
     const totalFileCount = existingFiles.length + listingFiles.length
     const paymentMethods = form.paymentMethods || []
+    const cryptoWalletAddress = form.cryptoWalletAddress.trim()
 
     if (title.length < 3) {
       setFormError('Add a title with at least 3 characters.')
@@ -733,6 +966,11 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (!paymentMethods.length) {
       setFormError('Choose at least one payment option.')
+      return
+    }
+
+    if (paymentMethods.includes('crypto') && !TRON_ADDRESS_PATTERN.test(cryptoWalletAddress)) {
+      setFormError('Add a valid USDT TRC20 wallet address.')
       return
     }
 
@@ -761,7 +999,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         description: form.description,
         category: form.category,
         price,
-        currency: form.currency,
+        currency: form.currency || 'USDT',
+        cryptoWalletAddress,
         deliveryMethod: form.deliveryMethod,
         paymentMethods,
         properties: nextProperties,
@@ -777,7 +1016,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         throw new Error(isEditing ? 'Could not update the listing.' : 'Could not publish the listing.')
       }
 
-      resetForm()
       setFormOpen(false)
       setActiveTab('mine')
       setFormSuccess(isEditing ? 'Product updated.' : 'Listing published to the P2P market.')
@@ -789,7 +1027,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     }
   }
 
-  const handleMessageSeller = (listing) => {
+  const handleMessageSeller = (listing, paymentTxId = '') => {
     setActionNotice('')
 
     if (!isSignedIn) {
@@ -799,6 +1037,9 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (currentProfileId === listing.sellerId) return
 
+    setConversationDraft(paymentTxId
+      ? `Hi, I paid for your P2P listing "${listing.title}" with USDT TRC20.\n\nTransaction hash: ${paymentTxId}`
+      : '')
     setSelectedListingId('')
     setConversationListingId(listing.id)
   }
@@ -929,14 +1170,29 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           </button>
         </div>
 
-        {(formSuccess || actionNotice || backendError) && (
+        {(formSuccess || actionNotice) && (
           <div className="p2p-status-line" aria-live="polite">
-            {formSuccess || actionNotice || backendError}
+            {formSuccess || actionNotice}
           </div>
         )}
 
-        {formOpen && (
-          <form className="p2p-listing-form" onSubmit={handleSubmit}>
+        <AnimatePresence
+          initial={false}
+          onExitComplete={() => {
+            if (!formOpen) resetForm()
+          }}
+        >
+          {formOpen && (
+          <motion.form
+            key="p2p-listing-form"
+            layout
+            className="p2p-listing-form"
+            initial={{ opacity: 0, y: -22, scale: 0.975, filter: 'blur(12px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: FORM_SPRING }}
+            exit={{ opacity: 0, y: -18, scale: 0.985, filter: 'blur(10px)', transition: FORM_EXIT_SPRING }}
+            style={{ transformOrigin: 'top center' }}
+            onSubmit={handleSubmit}
+          >
             <div className="p2p-form-head">
               <div>
                 <span className="p2p-kicker">
@@ -983,12 +1239,13 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               </label>
 
               <label>
-                <span>Currency</span>
-                <select value={form.currency} onChange={(event) => updateFormField('currency', event.target.value)}>
-                  {P2P_CURRENCIES.map((currency) => (
-                    <option key={currency} value={currency}>{currency}</option>
-                  ))}
-                </select>
+                <span>Crypto wallet address</span>
+                <input
+                  value={form.cryptoWalletAddress}
+                  onChange={(event) => updateFormField('cryptoWalletAddress', event.target.value)}
+                  placeholder="USDT TRC20 wallet address"
+                  maxLength="128"
+                />
               </label>
 
               <div className="p2p-payment-field p2p-form-wide">
@@ -1135,8 +1392,9 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             </div>
 
             {formError && <div className="p2p-form-error" role="alert">{formError}</div>}
-          </form>
-        )}
+          </motion.form>
+          )}
+        </AnimatePresence>
 
         <div className="p2p-market-grid">
           {filteredListings.map((listing) => (
@@ -1150,7 +1408,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               onEdit={handleEditListing}
               onDelete={handleDeleteListing}
               onViewDetails={handleViewListingDetails}
-              onMessageSeller={handleMessageSeller}
               onMarkSold={handleMarkSold}
               onToggleStatus={handleToggleListingStatus}
             />
@@ -1182,11 +1439,14 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
         {conversationListing && (
           <MessageConversationModal
-            key={conversationListing.id}
+            key={`${conversationListing.id}:${conversationDraft}`}
             recipient={usersById[conversationListing.sellerId]}
             contextLabel={conversationListing.title}
-            initialBody={`Hi, I am interested in your P2P listing "${conversationListing.title}".`}
-            onClose={() => setConversationListingId('')}
+            initialBody={conversationDraft || defaultP2PMessage(conversationListing)}
+            onClose={() => {
+              setConversationListingId('')
+              setConversationDraft('')
+            }}
           />
         )}
       </div>
