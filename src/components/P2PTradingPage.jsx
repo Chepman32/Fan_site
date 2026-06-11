@@ -27,8 +27,16 @@ import {
   X,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
-import { PAYMENT_ADDRESS, PAYMENT_NETWORK, PAYMENT_NETWORK_SUFFIX, formatShopPrice } from '../shop/shopData'
-import { checkUsdtTransaction, normalizeTxId } from '../shop/tronPayments'
+import {
+  P2P_COMMISSION_PERCENT_LABEL,
+  P2P_COMMISSION_RATE,
+  P2P_PLATFORM_USDT_ADDRESS,
+  PAYMENT_NETWORK,
+  PAYMENT_NETWORK_SUFFIX,
+  formatShopPrice,
+  formatUsdtAmount,
+} from '../shop/shopData'
+import { normalizeTxId } from '../shop/tronPayments'
 import {
   P2P_CATEGORIES,
   P2P_PAYMENT_METHODS,
@@ -37,6 +45,7 @@ import {
   p2pCategoryLabel,
   p2pPaymentMethodLabel,
 } from '../p2p/p2pData'
+import { settleP2PUsdtPayment } from '../p2p/p2pPayouts'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
 import MessageConversationModal from './MessageConversationModal.jsx'
 import './P2PTradingPage.css'
@@ -162,15 +171,28 @@ function p2pUsdtPaymentAmount(listing) {
   return formatShopPrice(Number(listing.price) || 0)
 }
 
-function p2pPaymentAddress(listing) {
-  return String(listing.cryptoWalletAddress || PAYMENT_ADDRESS).trim()
+function p2pCommissionAmount(listing) {
+  const price = Number(listing.price) || 0
+  return Math.floor(price * P2P_COMMISSION_RATE * 1_000_000) / 1_000_000
+}
+
+function p2pSellerPayoutAmount(listing) {
+  const price = Number(listing.price) || 0
+  return Math.max(0, price - p2pCommissionAmount(listing))
+}
+
+function p2pPaymentAddress() {
+  return P2P_PLATFORM_USDT_ADDRESS
 }
 
 function canUseUsdtCheckout(listing) {
   const price = Number(listing.price)
+  const sellerPayoutAddress = String(listing.cryptoWalletAddress || '').trim()
+
   return (
     listingPaymentMethods(listing).includes('crypto') &&
     USDT_CHECKOUT_CURRENCIES.has(listing.currency || 'USD') &&
+    TRON_ADDRESS_PATTERN.test(sellerPayoutAddress) &&
     Number.isFinite(price) &&
     price > 0
   )
@@ -343,14 +365,17 @@ function P2PListingCard({
   )
 }
 
-function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
+function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSeller, panelRef }) {
   const [copiedField, setCopiedField] = useState('')
   const [txHash, setTxHash] = useState('')
   const [txIdToVerify, setTxIdToVerify] = useState('')
   const [paymentStatus, setPaymentStatus] = useState('idle')
   const [paymentMessage, setPaymentMessage] = useState('')
+  const [payoutTxId, setPayoutTxId] = useState('')
   const paymentAmount = p2pUsdtPaymentAmount(listing)
-  const receivingAddress = p2pPaymentAddress(listing)
+  const receivingAddress = p2pPaymentAddress()
+  const commissionAmount = formatUsdtAmount(p2pCommissionAmount(listing))
+  const sellerPayoutAmount = formatUsdtAmount(p2pSellerPayoutAmount(listing))
   const isChecking = paymentStatus === 'pending'
 
   useEffect(() => {
@@ -361,12 +386,16 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
 
     const pollTransaction = async () => {
       try {
-        const result = await checkUsdtTransaction(txIdToVerify, paymentAmount, receivingAddress)
+        const result = await settleP2PUsdtPayment({
+          listingId: listing.id,
+          txId: txIdToVerify,
+        })
 
         if (canceled) return
 
-        setPaymentStatus(result.status)
-        setPaymentMessage(result.message)
+        setPaymentStatus(result.status === 'success' ? 'success' : 'pending')
+        setPaymentMessage(result.message || 'Checking TRON network...')
+        setPayoutTxId(result.payoutTxId || '')
 
         if (result.status === 'pending') {
           timerId = window.setTimeout(pollTransaction, POLL_INTERVAL_MS)
@@ -374,9 +403,8 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
       } catch (error) {
         if (canceled) return
 
-        setPaymentStatus('pending')
-        setPaymentMessage(error.message || 'TRONGrid is not responding. Checking again shortly.')
-        timerId = window.setTimeout(pollTransaction, POLL_INTERVAL_MS)
+        setPaymentStatus('failed')
+        setPaymentMessage(error.message || 'Could not verify payment or submit payout.')
       }
     }
 
@@ -386,7 +414,7 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
       canceled = true
       window.clearTimeout(timerId)
     }
-  }, [paymentAmount, receivingAddress, txIdToVerify])
+  }, [listing.id, txIdToVerify])
 
   const copyPaymentValue = async (value, field) => {
     try {
@@ -399,12 +427,20 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
   }
 
   const submitPaymentProof = () => {
+    if (!isSignedIn) {
+      setPaymentStatus('failed')
+      setPaymentMessage('Sign in before verifying a P2P payment.')
+      onRequireAuth()
+      return
+    }
+
     const normalizedTxId = normalizeTxId(txHash)
     if (!normalizedTxId) return
 
     setTxHash(normalizedTxId)
+    setPayoutTxId('')
     setPaymentStatus('pending')
-    setPaymentMessage('Checking TRON network...')
+    setPaymentMessage('Checking payment and preparing automatic seller payout...')
     setTxIdToVerify(normalizedTxId)
   }
 
@@ -413,8 +449,8 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
       <div className="p2p-checkout-head">
         <ShieldCheck size={16} />
         <div>
-          <h3>USDT TRC20 checkout</h3>
-          <span>{PAYMENT_NETWORK} proof verification</span>
+          <h3>USDT TRC20 escrow checkout</h3>
+          <span>{PAYMENT_NETWORK} automatic seller payout</span>
         </div>
       </div>
 
@@ -428,12 +464,20 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
           </button>
         </span>
         <span>
-          <b>Receiving address</b>
+          <b>Platform address</b>
           <code>{receivingAddress}</code>
           <button type="button" onClick={() => copyPaymentValue(receivingAddress, 'address')}>
             <Copy size={13} />
             {copiedField === 'address' ? 'Copied' : 'Copy'}
           </button>
+        </span>
+        <span>
+          <b>Commission</b>
+          <strong>{commissionAmount} USDT ({P2P_COMMISSION_PERCENT_LABEL})</strong>
+        </span>
+        <span>
+          <b>Seller payout</b>
+          <strong>{sellerPayoutAmount} USDT</strong>
         </span>
       </div>
 
@@ -445,6 +489,7 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
           onChange={(event) => {
             setTxHash(event.target.value)
             setTxIdToVerify('')
+            setPayoutTxId('')
             setPaymentStatus('idle')
             setPaymentMessage('')
           }}
@@ -475,6 +520,7 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
             </strong>
             <span>{paymentMessage}</span>
             {txIdToVerify && <code>{txIdToVerify}</code>}
+            {payoutTxId && <code>{payoutTxId}</code>}
           </div>
         </div>
       )}
@@ -483,7 +529,7 @@ function P2PUsdtCheckoutBox({ listing, onMessageSeller, panelRef }) {
         <button
           type="button"
           className="p2p-secondary-action p2p-checkout-message"
-          onClick={() => onMessageSeller(listing, txIdToVerify)}
+          onClick={() => onMessageSeller(listing, txIdToVerify, payoutTxId)}
         >
           <MessageCircle size={15} />
           Message seller with proof
@@ -497,8 +543,10 @@ function P2PProductDetailsModal({
   listing,
   seller,
   currentUserId,
+  isSignedIn,
   busy,
   onClose,
+  onRequireAuth,
   onMessageSeller,
 }) {
   const fileCount = listing.files?.length || 0
@@ -595,6 +643,8 @@ function P2PProductDetailsModal({
             {showUsdtCheckout && (
               <P2PUsdtCheckoutBox
                 listing={listing}
+                isSignedIn={isSignedIn}
+                onRequireAuth={onRequireAuth}
                 onMessageSeller={onMessageSeller}
                 panelRef={checkoutPanelRef}
               />
@@ -1048,7 +1098,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     }
   }
 
-  const handleMessageSeller = (listing, paymentTxId = '') => {
+  const handleMessageSeller = (listing, paymentTxId = '', payoutTxId = '') => {
     setActionNotice('')
 
     if (!isSignedIn) {
@@ -1059,7 +1109,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     if (currentProfileId === listing.sellerId) return
 
     setConversationDraft(paymentTxId
-      ? `Hi, I paid for your P2P listing "${listing.title}" with USDT TRC20.\n\nTransaction hash: ${paymentTxId}`
+      ? [
+          `Hi, I paid for your P2P listing "${listing.title}" with USDT TRC20.`,
+          '',
+          `Buyer payment hash: ${paymentTxId}`,
+          payoutTxId ? `Seller payout hash: ${payoutTxId}` : '',
+        ].filter(Boolean).join('\n')
       : '')
     setSelectedListingId('')
     setConversationListingId(listing.id)
@@ -1457,8 +1512,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             listing={selectedListing}
             seller={usersById[selectedListing.sellerId]}
             currentUserId={currentProfileId}
+            isSignedIn={isSignedIn}
             busy={busyListingId === selectedListing.id}
             onClose={() => setSelectedListingId('')}
+            onRequireAuth={onOpenAuth}
             onMessageSeller={handleMessageSeller}
           />
         )}

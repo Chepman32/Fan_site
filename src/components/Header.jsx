@@ -137,7 +137,7 @@ function Header({
     if (target === 'p2p') return currentPath === '/p2p'
     if (target === 'news') return currentPath === '/' && currentHash === '#news'
     if (target === 'community') return currentPath === '/community'
-    if (target === 'more') return bottomMoreOpen || currentPath === '/p2p' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
+    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
     return false
   }
 
@@ -145,7 +145,7 @@ function Header({
     { key: 'main', href: '/', label: t.nav.main || 'Main', icon: Home },
     { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
     { key: 'news', href: '/#news', label: t.nav.news || 'News', icon: Newspaper },
-    { key: 'community', href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
+    { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
   ]
 
   const moreLinks = [
@@ -154,7 +154,7 @@ function Header({
     { href: '/#leonida', label: t.nav.locations || 'Locations', icon: MapPinned },
     { href: '/#vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
     { href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
-    { href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
+    { href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
     { href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
   ]
 
