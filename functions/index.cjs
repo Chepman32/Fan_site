@@ -388,6 +388,7 @@ exports.p2pUsdtPayout = onRequest({
   region: 'us-central1',
   timeoutSeconds: 120,
   memory: '512MiB',
+  secrets: ['P2P_PAYOUT_PRIVATE_KEY'],
 }, async (req, res) => {
   setCorsHeaders(req, res)
 
