@@ -144,6 +144,7 @@
 .p2p-form-head > button,
 .p2p-modal-head > button,
 .p2p-property-row button,
+.p2p-selected-file button,
 .p2p-existing-file button,
 .p2p-checkout-values button {
   display: inline-flex;
@@ -221,6 +222,7 @@
 .p2p-form-head > button:hover,
 .p2p-modal-head > button:hover,
 .p2p-property-row button:hover,
+.p2p-selected-file button:hover,
 .p2p-existing-file button:hover,
 .p2p-checkout-values button:hover {
   transform: translateY(-1px);
@@ -489,6 +491,7 @@
 .p2p-selected-files {
   display: grid;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .p2p-existing-files {
@@ -497,6 +500,7 @@
   margin-top: 8px;
 }
 
+.p2p-selected-file,
 .p2p-existing-file {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 38px;
@@ -504,7 +508,7 @@
   align-items: stretch;
 }
 
-.p2p-selected-files span,
+.p2p-selected-file > span,
 .p2p-existing-file > span,
 .p2p-file-list span {
   display: flex;
@@ -522,7 +526,7 @@
   overflow-wrap: anywhere;
 }
 
-.p2p-selected-files small,
+.p2p-selected-file small,
 .p2p-existing-file small,
 .p2p-file-list small {
   flex: 0 0 auto;
@@ -530,6 +534,7 @@
   font-size: 11px;
 }
 
+.p2p-selected-file button,
 .p2p-existing-file button {
   width: 38px;
   min-height: 38px;

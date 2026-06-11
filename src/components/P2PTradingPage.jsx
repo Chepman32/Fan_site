@@ -95,6 +95,10 @@ function readFileAsDataUrl(file) {
   })
 }
 
+function fileSelectionKey(file) {
+  return `${file.name}-${file.size}-${file.lastModified}`
+}
+
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const image = new Image()
@@ -852,26 +856,43 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }
 
   const handleFilesChange = (event) => {
-    const files = Array.from(event.target.files || [])
+    const selectedFiles = Array.from(event.target.files || [])
     setFormError('')
-    const availableSlots = Math.max(0, MAX_LISTING_FILES - existingFiles.length)
+    if (!selectedFiles.length) return
+
+    const availableSlots = Math.max(0, MAX_LISTING_FILES - existingFiles.length - listingFiles.length)
 
     if (!availableSlots) {
       setFormError('Remove an existing file before attaching another one.')
-      setListingFiles([])
+      event.target.value = ''
       return
     }
 
-    if (files.length > availableSlots) {
+    const attachedFileKeys = new Set(listingFiles.map(fileSelectionKey))
+    const newFiles = selectedFiles.filter((file) => !attachedFileKeys.has(fileSelectionKey(file)))
+
+    if (!newFiles.length) {
+      setFormError('Those files are already attached to this listing.')
+      event.target.value = ''
+      return
+    }
+
+    if (newFiles.length > availableSlots) {
       setFormError(`Attach up to ${availableSlots} new file${availableSlots === 1 ? '' : 's'} for this listing.`)
     }
 
-    setListingFiles(files.slice(0, availableSlots))
+    setListingFiles((currentFiles) => [...currentFiles, ...newFiles.slice(0, availableSlots)])
+    event.target.value = ''
   }
 
   const removeExistingFile = (index) => {
     setFormError('')
     setExistingFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))
+  }
+
+  const removeListingFile = (index) => {
+    setFormError('')
+    setListingFiles((files) => files.filter((_, fileIndex) => fileIndex !== index))
   }
 
   const handleOpenForm = () => {
@@ -1346,7 +1367,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                     key={`files-${formResetKey}`}
                     type="file"
                     multiple
-                    disabled={existingFiles.length >= MAX_LISTING_FILES}
+                    disabled={existingFiles.length + listingFiles.length >= MAX_LISTING_FILES}
                     onChange={handleFilesChange}
                   />
                 </label>
@@ -1367,11 +1388,16 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                 )}
                 {listingFiles.length > 0 && (
                   <div className="p2p-selected-files">
-                    {listingFiles.map((file) => (
-                      <span key={`${file.name}-${file.size}`}>
-                        {file.name}
-                        <small>{formatFileSize(file.size)}</small>
-                      </span>
+                    {listingFiles.map((file, index) => (
+                      <div className="p2p-selected-file" key={fileSelectionKey(file)}>
+                        <span>
+                          {file.name}
+                          <small>{formatFileSize(file.size)}</small>
+                        </span>
+                        <button type="button" onClick={() => removeListingFile(index)} aria-label={`Remove ${file.name}`}>
+                          <X size={14} />
+                        </button>
+                      </div>
                     ))}
                   </div>
                 )}
