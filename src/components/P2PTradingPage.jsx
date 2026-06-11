@@ -43,20 +43,18 @@ import {
   formatFileSize,
   formatP2PPrice,
   p2pCategoryLabel,
+  p2pPaymentMethodDetail,
   p2pPaymentMethodLabel,
 } from '../p2p/p2pData'
 import { settleP2PUsdtPayment } from '../p2p/p2pPayouts'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import MessageConversationModal from './MessageConversationModal.jsx'
 import './P2PTradingPage.css'
 
 const MAX_LISTING_FILES = 8
 const EMPTY_LISTINGS = []
 const POLL_INTERVAL_MS = 3000
-const PAYMENT_METHOD_DETAILS = P2P_PAYMENT_METHODS.reduce((details, method) => {
-  details[method.id] = method.detail
-  return details
-}, {})
 const USDT_CHECKOUT_CURRENCIES = new Set(['USD', 'USDT'])
 const TRON_ADDRESS_PATTERN = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
 const FORM_SPRING = {
@@ -74,32 +72,43 @@ const FORM_EXIT_SPRING = {
   velocity: -3,
 }
 
-function initialListingForm() {
+const FORM_SEEDS = {
+  en: { deliveryMethod: 'Telegram handoff', properties: ['Format', 'Platform', 'License'] },
+  zh: { deliveryMethod: 'Telegram 交付', properties: ['格式', '平台', '授权'] },
+  ru: { deliveryMethod: 'Передача через Telegram', properties: ['Формат', 'Платформа', 'Лицензия'] },
+  it: { deliveryMethod: 'Consegna via Telegram', properties: ['Formato', 'Piattaforma', 'Licenza'] },
+  id: { deliveryMethod: 'Serah terima Telegram', properties: ['Format', 'Platform', 'Lisensi'] },
+  pl: { deliveryMethod: 'Przekazanie przez Telegram', properties: ['Format', 'Platforma', 'Licencja'] },
+  hi: { deliveryMethod: 'Telegram handoff', properties: ['फॉर्मैट', 'प्लेटफॉर्म', 'लाइसेंस'] },
+  ms: { deliveryMethod: 'Serahan Telegram', properties: ['Format', 'Platform', 'Lesen'] },
+}
+
+function formSeed(lang) {
+  return FORM_SEEDS[lang] || FORM_SEEDS.en
+}
+
+function initialListingForm(lang = 'en') {
   return {
     title: '',
     category: 'digital-assets',
     price: '',
     currency: 'USDT',
     cryptoWalletAddress: '',
-    deliveryMethod: 'Telegram handoff',
+    deliveryMethod: formSeed(lang).deliveryMethod,
     paymentMethods: ['crypto'],
     description: '',
   }
 }
 
-function initialProperties() {
-  return [
-    { key: 'Format', value: '' },
-    { key: 'Platform', value: '' },
-    { key: 'License', value: '' },
-  ]
+function initialProperties(lang = 'en') {
+  return formSeed(lang).properties.map((key) => ({ key, value: '' }))
 }
 
-function readFileAsDataUrl(file) {
+function readFileAsDataUrl(file, copy) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result)
-    reader.onerror = () => reject(new Error('Could not read the preview image.'))
+    reader.onerror = () => reject(new Error(copy.errors.readPreview))
     reader.readAsDataURL(file)
   })
 }
@@ -108,18 +117,18 @@ function fileSelectionKey(file) {
   return `${file.name}-${file.size}-${file.lastModified}`
 }
 
-function loadImage(src) {
+function loadImage(src, copy) {
   return new Promise((resolve, reject) => {
     const image = new Image()
     image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error('Could not render the preview image.'))
+    image.onerror = () => reject(new Error(copy.errors.renderPreview))
     image.src = src
   })
 }
 
-async function createPreviewDataUrl(file) {
-  const dataUrl = await readFileAsDataUrl(file)
-  const image = await loadImage(dataUrl)
+async function createPreviewDataUrl(file, copy) {
+  const dataUrl = await readFileAsDataUrl(file, copy)
+  const image = await loadImage(dataUrl, copy)
   const maxWidth = 960
   const maxHeight = 560
   const scale = Math.min(maxWidth / image.naturalWidth, maxHeight / image.naturalHeight, 1)
@@ -132,17 +141,17 @@ async function createPreviewDataUrl(file) {
   const compressed = canvas.toDataURL('image/jpeg', 0.82)
 
   if (compressed.length > 700000) {
-    throw new Error('Choose a smaller preview image.')
+    throw new Error(copy.errors.smallerPreview)
   }
 
   return compressed
 }
 
-function listingDateLabel(dateValue) {
+function listingDateLabel(dateValue, lang, copy) {
   const date = new Date(dateValue)
-  if (Number.isNaN(date.getTime())) return 'Today'
+  if (Number.isNaN(date.getTime())) return copy.today
 
-  return new Intl.DateTimeFormat('en-US', {
+  return new Intl.DateTimeFormat(lang || 'en', {
     month: 'short',
     day: 'numeric',
   }).format(date)
@@ -198,14 +207,16 @@ function canUseUsdtCheckout(listing) {
   )
 }
 
-function defaultP2PMessage(listing) {
-  return `Hi, I am interested in your P2P listing "${listing.title}".`
+function defaultP2PMessage(listing, copy) {
+  return copy.messages.default(listing.title)
 }
 
 function P2PListingCard({
   listing,
   seller,
   currentUserId,
+  copy,
+  lang,
   busy,
   management = false,
   onEdit,
@@ -248,7 +259,7 @@ function P2PListingCard({
           </div>
         )}
         <span className={`p2p-listing-status ${isSold ? 'sold' : ''}`}>
-          {isSold ? 'Sold' : 'Active'}
+          {isSold ? copy.status.sold : copy.status.active}
         </span>
       </div>
 
@@ -256,9 +267,9 @@ function P2PListingCard({
         <div className="p2p-listing-head">
           <span className="p2p-listing-category">
             <Tag size={13} />
-            {p2pCategoryLabel(listing.category)}
+            {p2pCategoryLabel(listing.category, copy)}
           </span>
-          <strong>{formatP2PPrice(listing)}</strong>
+          <strong>{formatP2PPrice(listing, lang)}</strong>
         </div>
 
         <h2>{listing.title}</h2>
@@ -280,22 +291,22 @@ function P2PListingCard({
             >
               {(seller?.username || 'P2P').slice(0, 2).toUpperCase()}
             </span>
-            {seller?.username || 'Seller'}
+            {seller?.username || copy.sellerFallback}
           </span>
-          <span>{listingDateLabel(listing.createdAt)}</span>
+          <span>{listingDateLabel(listing.createdAt, lang, copy)}</span>
         </div>
 
         <div className="p2p-file-strip">
           <FileArchive size={15} />
-          {fileCount ? `${fileCount} file${fileCount === 1 ? '' : 's'} stored via Telegram` : 'Seller delivers after deal'}
+          {fileCount ? copy.card.storedViaTelegram(fileCount) : copy.card.sellerDelivers}
         </div>
 
         {fileCount > 0 && (
-          <div className="p2p-file-list" aria-label="Listing files">
+          <div className="p2p-file-list" aria-label={copy.card.listingFilesLabel}>
             {listing.files.slice(0, 3).map((file) => (
               <span key={`${file.name}-${file.size}`}>
                 {file.name}
-                <small>{formatFileSize(file.size)}</small>
+                <small>{formatFileSize(file.size, lang)}</small>
               </span>
             ))}
           </div>
@@ -311,7 +322,7 @@ function P2PListingCard({
                 onClick={(event) => handleActionClick(event, onEdit)}
               >
                 <Edit3 size={15} />
-                Edit
+                {copy.actions.edit}
               </button>
               <button
                 type="button"
@@ -326,7 +337,7 @@ function P2PListingCard({
                 ) : (
                   <Check size={15} />
                 )}
-                {isSold ? 'Set active' : 'Mark sold'}
+                {isSold ? copy.actions.setActive : copy.actions.markSold}
               </button>
               <button
                 type="button"
@@ -335,7 +346,7 @@ function P2PListingCard({
                 onClick={(event) => handleActionClick(event, onDelete)}
               >
                 {busy ? <Loader2 size={15} className="p2p-spin" /> : <Trash2 size={15} />}
-                Remove
+                {copy.actions.remove}
               </button>
             </div>
           ) : isSeller ? (
@@ -346,7 +357,7 @@ function P2PListingCard({
               onClick={(event) => handleActionClick(event, onMarkSold)}
             >
               {busy ? <Loader2 size={15} className="p2p-spin" /> : <Check size={15} />}
-              {isSold ? 'Sold' : 'Mark sold'}
+              {isSold ? copy.status.sold : copy.actions.markSold}
             </button>
           ) : (
             <button
@@ -356,7 +367,7 @@ function P2PListingCard({
               onClick={(event) => handleActionClick(event, onViewDetails)}
             >
               {busy ? <Loader2 size={15} className="p2p-spin" /> : <BadgeDollarSign size={15} />}
-              Buy
+              {copy.actions.buy}
             </button>
           )}
         </div>
@@ -365,7 +376,7 @@ function P2PListingCard({
   )
 }
 
-function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSeller, panelRef }) {
+function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessageSeller, panelRef }) {
   const [copiedField, setCopiedField] = useState('')
   const [txHash, setTxHash] = useState('')
   const [txIdToVerify, setTxIdToVerify] = useState('')
@@ -394,7 +405,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
         if (canceled) return
 
         setPaymentStatus(result.status === 'success' ? 'success' : 'pending')
-        setPaymentMessage(result.message || 'Checking TRON network...')
+        setPaymentMessage(result.message || copy.checkout.messages.checkingNetwork)
         setPayoutTxId(result.payoutTxId || '')
 
         if (result.status === 'pending') {
@@ -404,7 +415,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
         if (canceled) return
 
         setPaymentStatus('failed')
-        setPaymentMessage(error.message || 'Could not verify payment or submit payout.')
+        setPaymentMessage(error.message || copy.checkout.messages.verifyFailed)
       }
     }
 
@@ -414,7 +425,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
       canceled = true
       window.clearTimeout(timerId)
     }
-  }, [listing.id, txIdToVerify])
+  }, [copy, listing.id, txIdToVerify])
 
   const copyPaymentValue = async (value, field) => {
     try {
@@ -429,7 +440,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
   const submitPaymentProof = () => {
     if (!isSignedIn) {
       setPaymentStatus('failed')
-      setPaymentMessage('Sign in before verifying a P2P payment.')
+      setPaymentMessage(copy.checkout.messages.signIn)
       onRequireAuth()
       return
     }
@@ -440,7 +451,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
     setTxHash(normalizedTxId)
     setPayoutTxId('')
     setPaymentStatus('pending')
-    setPaymentMessage('Checking payment and preparing automatic seller payout...')
+    setPaymentMessage(copy.checkout.messages.preparing)
     setTxIdToVerify(normalizedTxId)
   }
 
@@ -449,40 +460,40 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
       <div className="p2p-checkout-head">
         <ShieldCheck size={16} />
         <div>
-          <h3>USDT TRC20 escrow checkout</h3>
-          <span>{PAYMENT_NETWORK} automatic seller payout</span>
+          <h3>{copy.checkout.title}</h3>
+          <span>{copy.checkout.subtitle(PAYMENT_NETWORK)}</span>
         </div>
       </div>
 
       <div className="p2p-checkout-values">
         <span>
-          <b>Send exactly</b>
+          <b>{copy.checkout.sendExactly}</b>
           <strong>{paymentAmount} USDT {PAYMENT_NETWORK_SUFFIX}</strong>
           <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
             <Copy size={13} />
-            {copiedField === 'amount' ? 'Copied' : 'Copy'}
+            {copiedField === 'amount' ? copy.actions.copied : copy.actions.copy}
           </button>
         </span>
         <span>
-          <b>Platform address</b>
+          <b>{copy.checkout.platformAddress}</b>
           <code>{receivingAddress}</code>
           <button type="button" onClick={() => copyPaymentValue(receivingAddress, 'address')}>
             <Copy size={13} />
-            {copiedField === 'address' ? 'Copied' : 'Copy'}
+            {copiedField === 'address' ? copy.actions.copied : copy.actions.copy}
           </button>
         </span>
         <span>
-          <b>Commission</b>
+          <b>{copy.checkout.commission}</b>
           <strong>{commissionAmount} USDT ({P2P_COMMISSION_PERCENT_LABEL})</strong>
         </span>
         <span>
-          <b>Seller payout</b>
+          <b>{copy.checkout.sellerPayout}</b>
           <strong>{sellerPayoutAmount} USDT</strong>
         </span>
       </div>
 
       <label className="p2p-checkout-field">
-        <span>Transaction hash</span>
+        <span>{copy.checkout.txHash}</span>
         <input
           type="text"
           value={txHash}
@@ -493,7 +504,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
             setPaymentStatus('idle')
             setPaymentMessage('')
           }}
-          placeholder="Paste your TRC20 transaction hash"
+          placeholder={copy.checkout.txPlaceholder}
         />
       </label>
 
@@ -504,7 +515,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
         onClick={submitPaymentProof}
       >
         {isChecking ? <Loader2 size={15} className="p2p-spin" /> : <ShieldCheck size={15} />}
-        Verify hash
+        {copy.checkout.verifyHash}
       </button>
 
       {paymentStatus !== 'idle' && (
@@ -514,9 +525,9 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
           {paymentStatus === 'pending' && <Loader2 size={16} className="p2p-spin" />}
           <div>
             <strong>
-              {paymentStatus === 'success' && 'Payment verified'}
-              {paymentStatus === 'failed' && 'Verification failed'}
-              {paymentStatus === 'pending' && 'Checking payment'}
+              {paymentStatus === 'success' && copy.checkout.statuses.success}
+              {paymentStatus === 'failed' && copy.checkout.statuses.failed}
+              {paymentStatus === 'pending' && copy.checkout.statuses.pending}
             </strong>
             <span>{paymentMessage}</span>
             {txIdToVerify && <code>{txIdToVerify}</code>}
@@ -532,7 +543,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, onRequireAuth, onMessageSelle
           onClick={() => onMessageSeller(listing, txIdToVerify, payoutTxId)}
         >
           <MessageCircle size={15} />
-          Message seller with proof
+          {copy.checkout.messageProof}
         </button>
       )}
     </div>
@@ -544,6 +555,8 @@ function P2PProductDetailsModal({
   seller,
   currentUserId,
   isSignedIn,
+  copy,
+  lang,
   busy,
   onClose,
   onRequireAuth,
@@ -581,11 +594,11 @@ function P2PProductDetailsModal({
           <div>
             <span className="p2p-kicker">
               <Info size={15} />
-              Product details
+              {copy.modal.productDetails}
             </span>
             <h2 id="p2p-product-details-title">{listing.title}</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close product details">
+          <button type="button" onClick={onClose} aria-label={copy.modal.closeProductDetails}>
             <X size={18} />
           </button>
         </div>
@@ -600,7 +613,7 @@ function P2PProductDetailsModal({
               </div>
             )}
             <span className={`p2p-listing-status ${isSold ? 'sold' : ''}`}>
-              {isSold ? 'Sold' : 'Active'}
+              {isSold ? copy.status.sold : copy.status.active}
             </span>
           </div>
 
@@ -608,12 +621,12 @@ function P2PProductDetailsModal({
             <div className="p2p-modal-price-row">
               <span className="p2p-listing-category">
                 <Tag size={14} />
-                {p2pCategoryLabel(listing.category)}
+                {p2pCategoryLabel(listing.category, copy)}
               </span>
-              <strong>{formatP2PPrice(listing)}</strong>
+              <strong>{formatP2PPrice(listing, lang)}</strong>
             </div>
 
-            <p>{listing.description || 'The seller can share extra context in chat before you make a deal.'}</p>
+            <p>{listing.description || copy.modal.fallbackDescription}</p>
 
             <div className="p2p-modal-seller">
               <span
@@ -622,19 +635,19 @@ function P2PProductDetailsModal({
                 {(seller?.username || 'P2P').slice(0, 2).toUpperCase()}
               </span>
               <div>
-                <b>{seller?.username || 'Seller'}</b>
-                <small>Listed {listingDateLabel(listing.createdAt)}</small>
+                <b>{seller?.username || copy.sellerFallback}</b>
+                <small>{copy.modal.listed(listingDateLabel(listing.createdAt, lang, copy))}</small>
               </div>
             </div>
 
             <div className="p2p-modal-payment-block">
-              <h3>Payment options</h3>
+              <h3>{copy.modal.paymentOptions}</h3>
               <div className="p2p-modal-payment-list">
                 {paymentMethods.map((methodId) => (
                   <span key={methodId}>
                     {methodId === 'card' ? <CreditCard size={15} /> : <Wallet size={15} />}
-                    <b>{p2pPaymentMethodLabel(methodId)}</b>
-                    <small>{PAYMENT_METHOD_DETAILS[methodId]}</small>
+                    <b>{p2pPaymentMethodLabel(methodId, copy)}</b>
+                    <small>{p2pPaymentMethodDetail(methodId, copy)}</small>
                   </span>
                 ))}
               </div>
@@ -644,6 +657,7 @@ function P2PProductDetailsModal({
               <P2PUsdtCheckoutBox
                 listing={listing}
                 isSignedIn={isSignedIn}
+                copy={copy}
                 onRequireAuth={onRequireAuth}
                 onMessageSeller={onMessageSeller}
                 panelRef={checkoutPanelRef}
@@ -651,7 +665,7 @@ function P2PProductDetailsModal({
             )}
 
             {isSeller ? (
-              <div className="p2p-modal-note">This is your listing. Manage it from My Products.</div>
+              <div className="p2p-modal-note">{copy.modal.ownListingNote}</div>
             ) : (
               <div className="p2p-modal-actions">
                 <button
@@ -661,7 +675,7 @@ function P2PProductDetailsModal({
                   onClick={handleBuyClick}
                 >
                   {busy ? <Loader2 size={16} className="p2p-spin" /> : <BadgeDollarSign size={16} />}
-                  Buy
+                  {copy.actions.buy}
                 </button>
                 <button
                   type="button"
@@ -670,7 +684,7 @@ function P2PProductDetailsModal({
                   onClick={() => onMessageSeller(listing)}
                 >
                   {busy ? <Loader2 size={16} className="p2p-spin" /> : <MessageCircle size={16} />}
-                  Message seller
+                  {copy.actions.messageSeller}
                 </button>
               </div>
             )}
@@ -681,16 +695,16 @@ function P2PProductDetailsModal({
           <section>
             <h3>
               <ListChecks size={16} />
-              What's included
+              {copy.modal.whatsIncluded}
             </h3>
             <div className="p2p-included-list">
               <span>
-                <b>Delivery</b>
-                {listing.deliveryMethod || 'Seller handoff after payment'}
+                <b>{copy.modal.delivery}</b>
+                {listing.deliveryMethod || copy.modal.sellerHandoff}
               </span>
               <span>
-                <b>Files</b>
-                {fileCount ? `${fileCount} stored file${fileCount === 1 ? '' : 's'}` : 'No uploaded file bundle yet'}
+                <b>{copy.modal.files}</b>
+                {fileCount ? copy.modal.storedFiles(fileCount) : copy.modal.noUploadedFiles}
               </span>
             </div>
 
@@ -700,7 +714,7 @@ function P2PProductDetailsModal({
                   <span key={`${file.name}-${file.size}-${file.messageId || file.fileUniqueId || ''}`}>
                     <FileArchive size={15} />
                     <b>{file.name}</b>
-                    <small>{formatFileSize(file.size)}</small>
+                    <small>{formatFileSize(file.size, lang)}</small>
                   </span>
                 ))}
               </div>
@@ -710,7 +724,7 @@ function P2PProductDetailsModal({
           <section>
             <h3>
               <Tag size={16} />
-              Other properties
+              {copy.modal.otherProperties}
             </h3>
             <div className="p2p-detail-properties">
               {(listing.properties || []).map((property) => (
@@ -740,10 +754,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     updateP2PListingStatus,
     deleteP2PListing,
   } = useSocial()
+  const { t, lang } = useTranslation()
+  const copy = t.p2p
   const [activeTab, setActiveTab] = useState('market')
   const [formOpen, setFormOpen] = useState(false)
-  const [form, setForm] = useState(initialListingForm)
-  const [properties, setProperties] = useState(initialProperties)
+  const [form, setForm] = useState(() => initialListingForm(lang))
+  const [properties, setProperties] = useState(() => initialProperties(lang))
   const [previewFile, setPreviewFile] = useState(null)
   const [previewDataUrl, setPreviewDataUrl] = useState('')
   const [existingFiles, setExistingFiles] = useState([])
@@ -768,12 +784,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
   useEffect(() => {
     const previousTitle = document.title
-    document.title = 'P2P Trading | GTA VI Hub'
+    document.title = copy.documentTitle
 
     return () => {
       document.title = previousTitle
     }
-  }, [])
+  }, [copy.documentTitle])
 
   useEffect(() => {
     if (!selectedListingId) return undefined
@@ -819,8 +835,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           listing.title,
           listing.description,
           listing.cryptoWalletAddress,
-          p2pCategoryLabel(listing.category),
-          ...listingPaymentMethods(listing).map(p2pPaymentMethodLabel),
+          p2pCategoryLabel(listing.category, copy),
+          ...listingPaymentMethods(listing).map((methodId) => p2pPaymentMethodLabel(methodId, copy)),
           seller?.username,
           ...(listing.properties || []).flatMap((property) => [property.key, property.value]),
         ].join(' ').toLowerCase()
@@ -832,7 +848,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         if (first.status !== 'sold' && second.status === 'sold') return -1
         return new Date(second.createdAt ?? 0) - new Date(first.createdAt ?? 0)
       })
-  }, [activeTab, listings, myListings, searchQuery, selectedCategory, usersById])
+  }, [activeTab, copy, listings, myListings, searchQuery, selectedCategory, usersById])
 
   const updateFormField = (field, value) => {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
@@ -850,8 +866,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }
 
   const resetForm = () => {
-    setForm(initialListingForm())
-    setProperties(initialProperties())
+    setForm(initialListingForm(lang))
+    setProperties(initialProperties(lang))
     setPreviewFile(null)
     setPreviewDataUrl('')
     setExistingFiles([])
@@ -894,12 +910,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setFormError('Choose an image file for the preview.')
+      setFormError(copy.errors.choosePreview)
       return
     }
 
     try {
-      setPreviewDataUrl(await createPreviewDataUrl(file))
+      setPreviewDataUrl(await createPreviewDataUrl(file, copy))
     } catch (error) {
       setFormError(error.message)
     }
@@ -913,7 +929,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const availableSlots = Math.max(0, MAX_LISTING_FILES - existingFiles.length - listingFiles.length)
 
     if (!availableSlots) {
-      setFormError('Remove an existing file before attaching another one.')
+      setFormError(copy.errors.removeExistingFile)
       event.target.value = ''
       return
     }
@@ -922,13 +938,13 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const newFiles = selectedFiles.filter((file) => !attachedFileKeys.has(fileSelectionKey(file)))
 
     if (!newFiles.length) {
-      setFormError('Those files are already attached to this listing.')
+      setFormError(copy.errors.duplicateFiles)
       event.target.value = ''
       return
     }
 
     if (newFiles.length > availableSlots) {
-      setFormError(`Attach up to ${availableSlots} new file${availableSlots === 1 ? '' : 's'} for this listing.`)
+      setFormError(copy.errors.attachUpTo(availableSlots))
     }
 
     setListingFiles((currentFiles) => [...currentFiles, ...newFiles.slice(0, availableSlots)])
@@ -992,7 +1008,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       paymentMethods: listingPaymentMethods(listing),
       description: listing.description || '',
     })
-    setProperties(listing.properties?.length ? listing.properties : initialProperties())
+    setProperties(listing.properties?.length ? listing.properties : initialProperties(lang))
     setPreviewFile(null)
     setPreviewDataUrl(listing.previewDataUrl || '')
     setExistingFiles(listing.files || [])
@@ -1021,32 +1037,32 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const cryptoWalletAddress = form.cryptoWalletAddress.trim()
 
     if (title.length < 3) {
-      setFormError('Add a title with at least 3 characters.')
+      setFormError(copy.errors.minTitle)
       return
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      setFormError('Add a valid price.')
+      setFormError(copy.errors.validPrice)
       return
     }
 
     if (!nextProperties.length) {
-      setFormError('Add at least one property.')
+      setFormError(copy.errors.oneProperty)
       return
     }
 
     if (!paymentMethods.length) {
-      setFormError('Choose at least one payment option.')
+      setFormError(copy.errors.onePayment)
       return
     }
 
     if (paymentMethods.includes('crypto') && !TRON_ADDRESS_PATTERN.test(cryptoWalletAddress)) {
-      setFormError('Add a valid USDT TRC20 wallet address.')
+      setFormError(copy.errors.validWallet)
       return
     }
 
     if (totalFileCount > MAX_LISTING_FILES) {
-      setFormError(`Keep the listing to ${MAX_LISTING_FILES} files or fewer.`)
+      setFormError(copy.errors.maxFiles(MAX_LISTING_FILES))
       return
     }
 
@@ -1060,7 +1076,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           listingFiles,
           { kind: isEditing ? 'p2p-listing-edit-file' : 'p2p-listing-file', title },
           ({ file, index, total }) => {
-            setUploadProgress(`Uploading ${index + 1}/${total}: ${file.name}`)
+            setUploadProgress(copy.notices.uploading({ file, index, total, name: file.name }))
           },
         )
       }
@@ -1084,14 +1100,14 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         : await createP2PListing(payload)
 
       if (!saved) {
-        throw new Error(isEditing ? 'Could not update the listing.' : 'Could not publish the listing.')
+        throw new Error(isEditing ? copy.errors.updateFailed : copy.errors.publishFailed)
       }
 
       setFormOpen(false)
       setActiveTab('mine')
-      setFormSuccess(isEditing ? 'Product updated.' : 'Listing published to the P2P market.')
+      setFormSuccess(isEditing ? copy.notices.updated : copy.notices.published)
     } catch (error) {
-      setFormError(error.message || (isEditing ? 'Could not update the listing.' : 'Could not publish the listing.'))
+      setFormError(error.message || (isEditing ? copy.errors.updateFailed : copy.errors.publishFailed))
     } finally {
       setSubmitting(false)
       setUploadProgress('')
@@ -1108,14 +1124,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (currentProfileId === listing.sellerId) return
 
-    setConversationDraft(paymentTxId
-      ? [
-          `Hi, I paid for your P2P listing "${listing.title}" with USDT TRC20.`,
-          '',
-          `Buyer payment hash: ${paymentTxId}`,
-          payoutTxId ? `Seller payout hash: ${payoutTxId}` : '',
-        ].filter(Boolean).join('\n')
-      : '')
+    setConversationDraft(paymentTxId ? copy.messages.proof({ title: listing.title, paymentTxId, payoutTxId }) : '')
     setSelectedListingId('')
     setConversationListingId(listing.id)
   }
@@ -1125,7 +1134,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     setBusyListingId(listing.id)
     const updated = await updateP2PListingStatus(listing.id, 'sold')
     setBusyListingId('')
-    setActionNotice(updated ? 'Listing marked as sold.' : 'Could not update the listing.')
+    setActionNotice(updated ? copy.notices.markedSold : copy.errors.updateFailed)
   }
 
   const handleToggleListingStatus = async (listing) => {
@@ -1134,18 +1143,18 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     setBusyListingId(listing.id)
     const updated = await updateP2PListingStatus(listing.id, nextStatus)
     setBusyListingId('')
-    setActionNotice(updated ? `Listing marked as ${nextStatus}.` : 'Could not update the listing.')
+    setActionNotice(updated ? copy.notices.statusUpdated(copy.status[nextStatus]) : copy.errors.updateFailed)
   }
 
   const handleDeleteListing = async (listing) => {
     setActionNotice('')
 
-    if (!window.confirm(`Remove "${listing.title}" from your products?`)) return
+    if (!window.confirm(copy.confirm.removeListing(listing.title))) return
 
     setBusyListingId(listing.id)
     const deleted = await deleteP2PListing(listing.id)
     setBusyListingId('')
-    setActionNotice(deleted ? 'Product removed.' : 'Could not remove the product.')
+    setActionNotice(deleted ? copy.notices.removed : copy.errors.removeFailed)
 
     if (deleted && editingListingId === listing.id) {
       closeForm()
@@ -1164,39 +1173,36 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           <div className="p2p-hero-copy">
             <span className="p2p-kicker">
               <Handshake size={16} />
-              P2P exchange
+              {copy.hero.kicker}
             </span>
-            <h1>Trade GTA VI fan-made goods directly.</h1>
-            <p>
-              Buy and sell overlays, emotes, guides, services, collectibles, and other GTA VI related drops with
-              seller-to-buyer messaging.
-            </p>
+            <h1>{copy.hero.title}</h1>
+            <p>{copy.hero.description}</p>
           </div>
 
-          <div className="p2p-hero-panel" aria-label="Marketplace summary">
+          <div className="p2p-hero-panel" aria-label={copy.hero.summaryLabel}>
             <div>
               <strong>{activeListingCount}</strong>
-              <span>active listings</span>
+              <span>{copy.hero.activeListings}</span>
             </div>
             <div>
               <strong>{totalStoredFiles}</strong>
-              <span>stored files</span>
+              <span>{copy.hero.storedFiles}</span>
             </div>
             <div>
               <strong>{P2P_CATEGORIES.length}</strong>
-              <span>trade lanes</span>
+              <span>{copy.hero.tradeLanes}</span>
             </div>
           </div>
         </header>
 
-        <div className="p2p-view-tabs" aria-label="P2P trading views">
+        <div className="p2p-view-tabs" aria-label={copy.tabs.label}>
           <button
             type="button"
             className={activeTab === 'market' ? 'active' : ''}
             onClick={() => setActiveTab('market')}
           >
             <Handshake size={16} />
-            Marketplace
+            {copy.tabs.marketplace}
           </button>
           <button
             type="button"
@@ -1204,7 +1210,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             onClick={handleMyProductsTab}
           >
             <Store size={16} />
-            My Products
+            {copy.tabs.myProducts}
             {isSignedIn && <span>{myListings.length}</span>}
           </button>
         </div>
@@ -1216,17 +1222,17 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               type="search"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search items, sellers, properties"
+              placeholder={copy.toolbar.searchPlaceholder}
             />
           </label>
 
-          <div className="p2p-category-tabs" aria-label="Marketplace categories">
+          <div className="p2p-category-tabs" aria-label={copy.toolbar.categoriesLabel}>
             <button
               type="button"
               className={selectedCategory === 'all' ? 'active' : ''}
               onClick={() => setSelectedCategory('all')}
             >
-              All
+              {copy.toolbar.all}
             </button>
             {P2P_CATEGORIES.map((category) => (
               <button
@@ -1235,14 +1241,14 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                 className={selectedCategory === category.id ? 'active' : ''}
                 onClick={() => setSelectedCategory(category.id)}
               >
-                {category.label}
+                {p2pCategoryLabel(category.id, copy)}
               </button>
             ))}
           </div>
 
           <button type="button" className="p2p-create-toggle" onClick={handleOpenForm} disabled={authLoading}>
             <PackagePlus size={17} />
-            {formOpen && !isEditing ? 'Close form' : isSignedIn ? 'Create listing' : 'Sign in to sell'}
+            {formOpen && !isEditing ? copy.toolbar.closeForm : isSignedIn ? copy.toolbar.createListing : copy.toolbar.signInToSell}
           </button>
         </div>
 
@@ -1273,37 +1279,37 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               <div>
                 <span className="p2p-kicker">
                   <BadgeDollarSign size={15} />
-                  {isEditing ? 'Edit item' : 'New item'}
+                  {isEditing ? copy.form.editKicker : copy.form.newKicker}
                 </span>
-                <h2>{isEditing ? 'Edit product listing' : 'Create a sale listing'}</h2>
+                <h2>{isEditing ? copy.form.editTitle : copy.form.createTitle}</h2>
               </div>
-              <button type="button" onClick={closeForm} aria-label="Close listing form">
+              <button type="button" onClick={closeForm} aria-label={copy.form.closeLabel}>
                 <X size={18} />
               </button>
             </div>
 
             <div className="p2p-form-grid">
               <label>
-                <span>Title</span>
+                <span>{copy.form.title}</span>
                 <input
                   value={form.title}
                   onChange={(event) => updateFormField('title', event.target.value)}
-                  placeholder="Vice City overlay source pack"
+                  placeholder={copy.form.titlePlaceholder}
                   maxLength="90"
                 />
               </label>
 
               <label>
-                <span>Category</span>
+                <span>{copy.form.category}</span>
                 <select value={form.category} onChange={(event) => updateFormField('category', event.target.value)}>
                   {P2P_CATEGORIES.map((category) => (
-                    <option key={category.id} value={category.id}>{category.label}</option>
+                    <option key={category.id} value={category.id}>{p2pCategoryLabel(category.id, copy)}</option>
                   ))}
                 </select>
               </label>
 
               <label>
-                <span>Price</span>
+                <span>{copy.form.price}</span>
                 <input
                   type="number"
                   min="0"
@@ -1315,17 +1321,17 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               </label>
 
               <label>
-                <span>Crypto wallet address</span>
+                <span>{copy.form.wallet}</span>
                 <input
                   value={form.cryptoWalletAddress}
                   onChange={(event) => updateFormField('cryptoWalletAddress', event.target.value)}
-                  placeholder="USDT TRC20 wallet address"
+                  placeholder={copy.form.walletPlaceholder}
                   maxLength="128"
                 />
               </label>
 
               <div className="p2p-payment-field p2p-form-wide">
-                <span>Payment options</span>
+                <span>{copy.form.paymentOptions}</span>
                 <div className="p2p-payment-selector">
                   {P2P_PAYMENT_METHODS.map((method) => (
                     <label key={method.id}>
@@ -1336,8 +1342,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                       />
                       {method.id === 'card' ? <CreditCard size={16} /> : <Wallet size={16} />}
                       <span>
-                        <b>{method.label}</b>
-                        <small>{method.detail}</small>
+                        <b>{p2pPaymentMethodLabel(method.id, copy)}</b>
+                        <small>{p2pPaymentMethodDetail(method.id, copy)}</small>
                       </span>
                     </label>
                   ))}
@@ -1345,21 +1351,21 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               </div>
 
               <label className="p2p-form-wide">
-                <span>Delivery</span>
+                <span>{copy.form.delivery}</span>
                 <input
                   value={form.deliveryMethod}
                   onChange={(event) => updateFormField('deliveryMethod', event.target.value)}
-                  placeholder="Telegram handoff, Discord delivery, local meetup"
+                  placeholder={copy.form.deliveryPlaceholder}
                   maxLength="80"
                 />
               </label>
 
               <label className="p2p-form-wide">
-                <span>Description</span>
+                <span>{copy.form.description}</span>
                 <textarea
                   value={form.description}
                   onChange={(event) => updateFormField('description', event.target.value)}
-                  placeholder="What is included, what the buyer gets, and how delivery works."
+                  placeholder={copy.form.descriptionPlaceholder}
                   maxLength="520"
                 />
               </label>
@@ -1367,10 +1373,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
             <div className="p2p-properties-editor">
               <div className="p2p-subhead">
-                <h3>Properties</h3>
+                <h3>{copy.form.properties}</h3>
                 <button type="button" onClick={addProperty}>
                   <Plus size={15} />
-                  Add
+                  {copy.form.add}
                 </button>
               </div>
               {properties.map((property, index) => (
@@ -1378,16 +1384,16 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                   <input
                     value={property.key}
                     onChange={(event) => updateProperty(index, 'key', event.target.value)}
-                    placeholder="Property"
+                    placeholder={copy.form.propertyPlaceholder}
                     maxLength="30"
                   />
                   <input
                     value={property.value}
                     onChange={(event) => updateProperty(index, 'value', event.target.value)}
-                    placeholder="Value"
+                    placeholder={copy.form.valuePlaceholder}
                     maxLength="64"
                   />
-                  <button type="button" onClick={() => removeProperty(index)} aria-label="Remove property">
+                  <button type="button" onClick={() => removeProperty(index)} aria-label={copy.form.removeProperty}>
                     <X size={15} />
                   </button>
                 </div>
@@ -1398,25 +1404,25 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               <div>
                 <label className="p2p-upload-box">
                   <ImagePlus size={22} />
-                  <span>Preview image</span>
-                  <small>{previewFile ? previewFile.name : 'JPG, PNG, or WebP'}</small>
+                  <span>{copy.form.previewImage}</span>
+                  <small>{previewFile ? previewFile.name : copy.form.imageTypes}</small>
                   <input key={`preview-${formResetKey}`} type="file" accept="image/*" onChange={handlePreviewChange} />
                 </label>
                 {previewDataUrl && (
-                  <img className="p2p-preview-thumb" src={previewDataUrl} alt="Listing preview" />
+                  <img className="p2p-preview-thumb" src={previewDataUrl} alt={copy.form.listingPreviewAlt} />
                 )}
               </div>
 
               <div>
                 <label className="p2p-upload-box">
                   <UploadCloud size={22} />
-                  <span>Sale files</span>
+                  <span>{copy.form.saleFiles}</span>
                   <small>
                     {listingFiles.length
-                      ? `${listingFiles.length} selected`
+                      ? copy.form.selected(listingFiles.length)
                       : isEditing
-                        ? `${Math.max(0, MAX_LISTING_FILES - existingFiles.length)} slots available`
-                        : 'Bundles, archives, sources'}
+                        ? copy.form.slotsAvailable(Math.max(0, MAX_LISTING_FILES - existingFiles.length))
+                        : copy.form.fileTypes}
                   </small>
                   <input
                     key={`files-${formResetKey}`}
@@ -1427,14 +1433,14 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                   />
                 </label>
                 {existingFiles.length > 0 && (
-                  <div className="p2p-existing-files" aria-label="Stored listing files">
+                  <div className="p2p-existing-files" aria-label={copy.form.storedFilesLabel}>
                     {existingFiles.map((file, index) => (
                       <div className="p2p-existing-file" key={`${file.name}-${file.size}-${index}`}>
                         <span>
                           {file.name}
-                          <small>{formatFileSize(file.size)}</small>
+                          <small>{formatFileSize(file.size, lang)}</small>
                         </span>
-                        <button type="button" onClick={() => removeExistingFile(index)} aria-label={`Remove ${file.name}`}>
+                        <button type="button" onClick={() => removeExistingFile(index)} aria-label={copy.form.removeFile(file.name)}>
                           <X size={14} />
                         </button>
                       </div>
@@ -1447,9 +1453,9 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                       <div className="p2p-selected-file" key={fileSelectionKey(file)}>
                         <span>
                           {file.name}
-                          <small>{formatFileSize(file.size)}</small>
+                          <small>{formatFileSize(file.size, lang)}</small>
                         </span>
-                        <button type="button" onClick={() => removeListingFile(index)} aria-label={`Remove ${file.name}`}>
+                        <button type="button" onClick={() => removeListingFile(index)} aria-label={copy.form.removeFile(file.name)}>
                           <X size={14} />
                         </button>
                       </div>
@@ -1462,13 +1468,13 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             <div className="p2p-form-footer">
               <span>
                 <ShieldCheck size={15} />
-                Files are uploaded through the server-side Telegram bot connector.
+                {copy.form.footerNote}
               </span>
               <button type="submit" className="p2p-primary-action" disabled={submitting}>
                 {submitting ? <Loader2 size={16} className="p2p-spin" /> : <Check size={16} />}
                 {submitting
-                  ? uploadProgress || (isEditing ? 'Saving' : 'Publishing')
-                  : isEditing ? 'Save changes' : 'Publish listing'}
+                  ? uploadProgress || (isEditing ? copy.form.saving : copy.form.publishing)
+                  : isEditing ? copy.form.saveChanges : copy.form.publishListing}
               </button>
             </div>
 
@@ -1484,6 +1490,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               listing={listing}
               seller={usersById[listing.sellerId]}
               currentUserId={currentProfileId}
+              copy={copy}
+              lang={lang}
               busy={busyListingId === listing.id}
               management={activeTab === 'mine'}
               onEdit={handleEditListing}
@@ -1498,11 +1506,11 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         {!filteredListings.length && (
           <div className="p2p-empty">
             <FileArchive size={28} />
-            <strong>{activeTab === 'mine' ? 'No products yet' : 'No listings found'}</strong>
+            <strong>{activeTab === 'mine' ? copy.empty.noProducts : copy.empty.noListings}</strong>
             <span>
               {activeTab === 'mine'
-                ? 'Create your first listing to manage it here.'
-                : 'Try another category or search term.'}
+                ? copy.empty.createFirst
+                : copy.empty.tryAnother}
             </span>
           </div>
         )}
@@ -1513,6 +1521,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             seller={usersById[selectedListing.sellerId]}
             currentUserId={currentProfileId}
             isSignedIn={isSignedIn}
+            copy={copy}
+            lang={lang}
             busy={busyListingId === selectedListing.id}
             onClose={() => setSelectedListingId('')}
             onRequireAuth={onOpenAuth}
@@ -1525,7 +1535,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             key={`${conversationListing.id}:${conversationDraft}`}
             recipient={usersById[conversationListing.sellerId]}
             contextLabel={conversationListing.title}
-            initialBody={conversationDraft || defaultP2PMessage(conversationListing)}
+            initialBody={conversationDraft || defaultP2PMessage(conversationListing, copy)}
             onClose={() => {
               setConversationListingId('')
               setConversationDraft('')

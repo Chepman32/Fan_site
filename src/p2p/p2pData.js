@@ -108,18 +108,22 @@ export const P2P_SEED_LISTINGS = [
   },
 ]
 
-export function p2pCategoryLabel(categoryId) {
-  return P2P_CATEGORIES.find((category) => category.id === categoryId)?.label || 'Other'
+export function p2pCategoryLabel(categoryId, copy = {}) {
+  return copy.categories?.[categoryId] || P2P_CATEGORIES.find((category) => category.id === categoryId)?.label || copy.otherCategory || 'Other'
 }
 
-export function p2pPaymentMethodLabel(methodId) {
-  return P2P_PAYMENT_METHODS.find((method) => method.id === methodId)?.label || methodId
+export function p2pPaymentMethodLabel(methodId, copy = {}) {
+  return copy.paymentMethods?.[methodId]?.label || P2P_PAYMENT_METHODS.find((method) => method.id === methodId)?.label || methodId
 }
 
-export function formatP2PPrice(listing) {
+export function p2pPaymentMethodDetail(methodId, copy = {}) {
+  return copy.paymentMethods?.[methodId]?.detail || P2P_PAYMENT_METHODS.find((method) => method.id === methodId)?.detail || ''
+}
+
+export function formatP2PPrice(listing, lang = 'en') {
   const amount = Number(listing.price)
   const safeAmount = Number.isFinite(amount) ? amount : 0
-  const formattedAmount = new Intl.NumberFormat('en-US', {
+  const formattedAmount = new Intl.NumberFormat(lang || 'en', {
     minimumFractionDigits: safeAmount % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(safeAmount)
@@ -127,13 +131,17 @@ export function formatP2PPrice(listing) {
   return `${formattedAmount} ${listing.currency || 'USD'}`
 }
 
-export function formatFileSize(bytes = 0) {
+export function formatFileSize(bytes = 0, lang = 'en') {
   const size = Number(bytes)
   if (!Number.isFinite(size) || size <= 0) return '0 KB'
 
   const units = ['B', 'KB', 'MB', 'GB']
   const exponent = Math.min(Math.floor(Math.log(size) / Math.log(1024)), units.length - 1)
   const value = size / (1024 ** exponent)
+  const formattedValue = new Intl.NumberFormat(lang || 'en', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: value >= 10 || exponent === 0 ? 0 : 1,
+  }).format(value)
 
-  return `${value >= 10 || exponent === 0 ? value.toFixed(0) : value.toFixed(1)} ${units[exponent]}`
+  return `${formattedValue} ${units[exponent]}`
 }
