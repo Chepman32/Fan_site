@@ -6,24 +6,44 @@ const STORAGE_KEY = 'gtavi_lang'
 
 const LanguageContext = createContext(null)
 
-function storedLanguage(initialLang) {
+function preferredLanguage(initialLang) {
   if (typeof window === 'undefined' || !window.localStorage) return initialLang
 
-  return window.localStorage.getItem(STORAGE_KEY) || detectBrowserLanguage()
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) || detectBrowserLanguage()
+  } catch {
+    return detectBrowserLanguage() || initialLang
+  }
 }
 
 export function LanguageProvider({ children, initialLang = 'en' }) {
-  const [lang, setLangState] = useState(() => {
-    return storedLanguage(initialLang)
-  })
+  const [lang, setLangState] = useState(initialLang)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setLangState(preferredLanguage(initialLang))
+      setReady(true)
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [initialLang])
 
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
 
+  useEffect(() => {
+    if (ready) document.documentElement.classList.add('app-ready')
+  }, [ready])
+
   const setLang = useCallback((code) => {
     if (typeof window !== 'undefined' && window.localStorage) {
-      window.localStorage.setItem(STORAGE_KEY, code)
+      try {
+        window.localStorage.setItem(STORAGE_KEY, code)
+      } catch {
+        // Keep language switching usable even when storage is unavailable.
+      }
     }
     setLangState(code)
   }, [])

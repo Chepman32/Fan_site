@@ -107,7 +107,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
   animation: fadeInUp 0.8s ease-out forwards;
+  animation-fill-mode: both;
 }
 
 .animate-pulse {
@@ -120,6 +123,25 @@ h1, h2, h3, h4, h5, h6 {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+html.js:not(.app-ready) .hero .animate-fade-in-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+
+  html.js:not(.app-ready) .hero .animate-fade-in-up {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* Utility classes */
