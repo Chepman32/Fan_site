@@ -1,0 +1,55 @@
+/* eslint-disable react-refresh/only-export-components */
+import { StrictMode } from 'react'
+import { renderToString } from 'react-dom/server'
+import App from './App.jsx'
+import AuthModal from './components/AuthModal'
+import LocationGuidePage from './components/LocationGuidePage'
+import MessagesPage from './components/MessagesPage'
+import P2PTradingPage from './components/P2PTradingPage'
+import ProfilePage from './components/ProfilePage'
+import ShopPage from './components/ShopPage'
+import SocialHub from './components/SocialHub'
+import UserProfilePage from './components/UserProfilePage'
+import {
+  NOINDEX_PRERENDER_ROUTES,
+  PRERENDER_ROUTES,
+  SITEMAP_ROUTES,
+  SITE_ORIGIN,
+  canonicalPath,
+  createSeoMetadata,
+  createStaticSeoHead,
+} from './seo/seoConfig'
+
+const routeComponents = {
+  AuthModal,
+  LocationGuidePage,
+  MessagesPage,
+  P2PTradingPage,
+  ProfilePage,
+  ShopPage,
+  SocialHub,
+  UserProfilePage,
+}
+
+export {
+  NOINDEX_PRERENDER_ROUTES,
+  PRERENDER_ROUTES,
+  SITEMAP_ROUTES,
+  SITE_ORIGIN,
+}
+
+export function render(route = '/') {
+  const cleanRoute = canonicalPath(route)
+  const metadata = createSeoMetadata({ route: cleanRoute })
+  const html = renderToString(
+    <StrictMode>
+      <App initialRoute={cleanRoute} initialLang="en" routeComponents={routeComponents} />
+    </StrictMode>,
+  )
+
+  return {
+    html,
+    metadata,
+    head: createStaticSeoHead(metadata),
+  }
+}

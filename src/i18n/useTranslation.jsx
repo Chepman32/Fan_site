@@ -6,9 +6,15 @@ const STORAGE_KEY = 'gtavi_lang'
 
 const LanguageContext = createContext(null)
 
-export function LanguageProvider({ children }) {
+function storedLanguage(initialLang) {
+  if (typeof window === 'undefined' || !window.localStorage) return initialLang
+
+  return window.localStorage.getItem(STORAGE_KEY) || detectBrowserLanguage()
+}
+
+export function LanguageProvider({ children, initialLang = 'en' }) {
   const [lang, setLangState] = useState(() => {
-    return localStorage.getItem(STORAGE_KEY) || detectBrowserLanguage()
+    return storedLanguage(initialLang)
   })
 
   useEffect(() => {
@@ -16,7 +22,9 @@ export function LanguageProvider({ children }) {
   }, [lang])
 
   const setLang = useCallback((code) => {
-    localStorage.setItem(STORAGE_KEY, code)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem(STORAGE_KEY, code)
+    }
     setLangState(code)
   }, [])
 

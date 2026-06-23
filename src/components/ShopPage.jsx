@@ -70,15 +70,6 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
-    const previousTitle = document.title
-    document.title = `${shopCopy.title || 'Shop'} | GTA VI Hub`
-
-    return () => {
-      document.title = previousTitle
-    }
-  }, [shopCopy.title])
-
-  useEffect(() => {
     if (!paymentOpen) return undefined
 
     const handleKeyDown = (event) => {

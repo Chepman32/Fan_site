@@ -606,7 +606,7 @@ function P2PProductDetailsModal({
         <div className="p2p-modal-layout">
           <div className="p2p-modal-media">
             {listing.previewDataUrl ? (
-              <img src={listing.previewDataUrl} alt={listing.title} />
+              <img src={listing.previewDataUrl} alt={listing.title} decoding="async" />
             ) : (
               <div className="p2p-listing-placeholder" aria-hidden="true">
                 <FileArchive size={42} />
@@ -781,15 +781,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   useEffect(() => {
     clearBackendError()
   }, [clearBackendError])
-
-  useEffect(() => {
-    const previousTitle = document.title
-    document.title = copy.documentTitle
-
-    return () => {
-      document.title = previousTitle
-    }
-  }, [copy.documentTitle])
 
   useEffect(() => {
     if (!selectedListingId) return undefined
@@ -1409,7 +1400,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                   <input key={`preview-${formResetKey}`} type="file" accept="image/*" onChange={handlePreviewChange} />
                 </label>
                 {previewDataUrl && (
-                  <img className="p2p-preview-thumb" src={previewDataUrl} alt={copy.form.listingPreviewAlt} />
+                  <img className="p2p-preview-thumb" src={previewDataUrl} alt={copy.form.listingPreviewAlt} decoding="async" />
                 )}
               </div>
 

@@ -6,7 +6,16 @@ import './Hero.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
 
-function Hero({ currentUser, onOpenAuth, onLogout, onNavigate, cartItems, cartTotal, onRemoveCartItem }) {
+function Hero({
+  currentUser,
+  onOpenAuth,
+  onLogout,
+  onNavigate,
+  cartItems,
+  cartTotal,
+  onRemoveCartItem,
+  showHeader = true,
+}) {
   const { t } = useTranslation()
 
   const scrollToInfo = () => {
@@ -22,15 +31,17 @@ function Hero({ currentUser, onOpenAuth, onLogout, onNavigate, cartItems, cartTo
 
   return (
     <section className="hero">
-      <Header
-        currentUser={currentUser}
-        onOpenAuth={onOpenAuth}
-        onLogout={onLogout}
-        onNavigate={onNavigate}
-        cartItems={cartItems}
-        cartTotal={cartTotal}
-        onRemoveCartItem={onRemoveCartItem}
-      />
+      {showHeader && (
+        <Header
+          currentUser={currentUser}
+          onOpenAuth={onOpenAuth}
+          onLogout={onLogout}
+          onNavigate={onNavigate}
+          cartItems={cartItems}
+          cartTotal={cartTotal}
+          onRemoveCartItem={onRemoveCartItem}
+        />
+      )}
 
       <div className="hero-bg">
         <div className="gradient-orb orb-1"></div>
@@ -85,7 +96,7 @@ function Hero({ currentUser, onOpenAuth, onLogout, onNavigate, cartItems, cartTo
         </div>
       </div>
 
-      <button className="scroll-indicator" onClick={scrollToInfo}>
+      <button className="scroll-indicator" type="button" onClick={scrollToInfo} aria-label="Scroll to GTA VI game information">
         <ChevronDown size={24} className="animate-float" />
       </button>
     </section>

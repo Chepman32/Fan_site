@@ -169,7 +169,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
             </div>
           </aside>
 
-          <main className="messages-thread" aria-label="Conversation">
+          <section className="messages-thread" aria-label="Conversation">
             {selectedUser ? (
               <>
                 <header className="messages-thread-head">
@@ -220,7 +220,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                 <span>Your conversations will appear here.</span>
               </div>
             )}
-          </main>
+          </section>
         </div>
       </div>
     </section>

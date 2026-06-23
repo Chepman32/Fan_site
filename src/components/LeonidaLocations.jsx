@@ -118,7 +118,7 @@ function LeonidaLocations({ onNavigate }) {
             <div className="leonida-images" aria-label="IGN Leonida location images">
               {displayData.images.map((image) => (
                 <figure key={image.id} className="leonida-image-card">
-                  <img src={image.url} alt={image.title} loading="lazy" />
+                  <img src={image.url} alt={image.title} loading="lazy" decoding="async" />
                   <figcaption>
                     <ImageIcon size={14} />
                     {image.title}

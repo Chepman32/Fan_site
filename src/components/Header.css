@@ -176,6 +176,15 @@
   position: relative;
 }
 
+.nav-cart-loading {
+  min-width: 260px;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
+
 .nav-cart::after {
   content: '';
   position: absolute;

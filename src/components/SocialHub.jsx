@@ -883,9 +883,9 @@ function SocialHub({ onOpenAuth, onNavigate }) {
     <section id="community" className="section-padding social-hub">
       <div className="container">
         <div className="section-header social-header">
-          <h2 className="section-title">
+          <h1 className="section-title">
             {t.social.title} <span className="gradient-text">{t.social.titleHighlight}</span>
-          </h2>
+          </h1>
         </div>
 
         <div className="social-shell">

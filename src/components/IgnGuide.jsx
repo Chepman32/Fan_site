@@ -928,7 +928,7 @@ function flatItems(collections = []) {
 function GuideImage({ image }) {
   return (
     <figure className="ign-guide-image-card">
-      <img src={image.url} alt={image.title} loading="lazy" />
+      <img src={image.url} alt={image.title} loading="lazy" decoding="async" />
       <figcaption>
         <ImageIcon size={14} />
         {image.title}
@@ -951,7 +951,7 @@ function GuideCard({ item, sourceLabel, copy, index = 0, onZoom }) {
     >
       <div className="ign-guide-card-image">
         {item.imageUrl ? (
-          <img src={item.imageUrl} alt={item.imageTitle || item.name} loading="lazy" />
+          <img src={item.imageUrl} alt={item.imageTitle || item.name} loading="lazy" decoding="async" />
         ) : (
           <span>
             <ImageIcon size={24} />

@@ -164,7 +164,7 @@ function GameInfo() {
             <div className="info-main">
               {activeWikiData.thumbnail && (
                 <div className="info-image">
-                  <img src={activeWikiData.thumbnail} alt="GTA VI Cover" />
+                  <img src={activeWikiData.thumbnail} alt="Grand Theft Auto VI cover art" loading="lazy" decoding="async" />
                   <div className="image-glow"></div>
                 </div>
               )}

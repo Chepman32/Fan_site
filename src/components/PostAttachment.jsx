@@ -15,6 +15,7 @@ function PostAttachment({ post }) {
             src={attachment.embedUrl}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             allowFullScreen
+            loading="lazy"
           />
         </div>
       </div>
@@ -24,7 +25,13 @@ function PostAttachment({ post }) {
   return (
     <a className="post-link-card" href={attachment.sourceUrl} target="_blank" rel="noopener noreferrer">
       <span className="post-link-preview-media" aria-hidden="true">
-        <img src={attachment.faviconUrl} alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+        <img
+          src={attachment.faviconUrl}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={(event) => { event.currentTarget.style.display = 'none' }}
+        />
         <LinkIcon size={22} />
       </span>
       <span className="post-link-preview-copy">

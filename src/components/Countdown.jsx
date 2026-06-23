@@ -61,7 +61,7 @@ function Countdown({ targetDate }) {
       <div className="countdown-units">
         {timeUnits.map((unit, index) => (
           <div key={unit.label} className="countdown-unit">
-            <div className="countdown-value">
+            <div className="countdown-value" suppressHydrationWarning>
               {String(unit.value).padStart(2, '0')}
             </div>
             <div className="countdown-unit-label">{unit.label}</div>

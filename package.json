@@ -5,8 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run build:client && npm run build:ssr && npm run prerender && npm run seo:validate",
+    "build:client": "vite build",
+    "build:ssr": "vite build --ssr src/entry-server.jsx --outDir dist-ssr",
     "lint": "eslint .",
+    "prerender": "node scripts/prerender.mjs",
+    "seo:validate": "node scripts/seo-validate.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

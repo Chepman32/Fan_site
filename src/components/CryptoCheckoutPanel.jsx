@@ -226,7 +226,7 @@ function CryptoCheckoutPanel({ cartItems, cartTotal, onRemoveItem, compact = fal
 
         <div className="crypto-qr-row">
           <div className="crypto-qr-box">
-            {qrSrc ? <img src={qrSrc} alt={checkoutCopy.qrAlt(PAYMENT_NETWORK)} /> : <span>QR</span>}
+            {qrSrc ? <img src={qrSrc} alt={checkoutCopy.qrAlt(PAYMENT_NETWORK)} decoding="async" /> : <span>QR</span>}
           </div>
           <p>{checkoutCopy.qrNote}</p>
         </div>

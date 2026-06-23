@@ -1,29 +1,68 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import Hero from './components/Hero'
 import GameInfo from './components/GameInfo'
 import Characters from './components/Characters'
 import IgnGuideSections from './components/IgnGuide'
 import MediaGallery from './components/MediaGallery'
 import LeonidaLocations from './components/LeonidaLocations'
-import LocationGuidePage from './components/LocationGuidePage'
 import NewsSection from './components/NewsSection'
-import SocialHub from './components/SocialHub'
-import ShopPage from './components/ShopPage'
-import P2PTradingPage from './components/P2PTradingPage'
 import Header from './components/Header'
-import ProfilePage from './components/ProfilePage'
-import UserProfilePage from './components/UserProfilePage'
-import MessagesPage from './components/MessagesPage'
-import AuthModal from './components/AuthModal'
 import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
 import { SocialProvider, useSocial } from './social/SocialContext'
-import { LanguageProvider } from './i18n/useTranslation.jsx'
-import { shopCentsToPrice, shopPriceToCents } from './shop/shopData'
+import { LanguageProvider, useTranslation } from './i18n/useTranslation.jsx'
+import { shopCentsToPrice, shopPriceToCents } from './shop/paymentConfig'
+import SeoHead from './seo/SeoHead'
+import { createSeoMetadata } from './seo/seoConfig'
 import './App.css'
+
+const AuthModal = lazy(() => import('./components/AuthModal'))
+const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
+const MessagesPage = lazy(() => import('./components/MessagesPage'))
+const P2PTradingPage = lazy(() => import('./components/P2PTradingPage'))
+const ProfilePage = lazy(() => import('./components/ProfilePage'))
+const ShopPage = lazy(() => import('./components/ShopPage'))
+const SocialHub = lazy(() => import('./components/SocialHub'))
+const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
 const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p', '/messages'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
+const DEFAULT_ROUTE_COMPONENTS = {
+  AuthModal,
+  LocationGuidePage,
+  MessagesPage,
+  P2PTradingPage,
+  ProfilePage,
+  ShopPage,
+  SocialHub,
+  UserProfilePage,
+}
+
+function RouteLoading() {
+  return (
+    <div className="route-loading" role="status" aria-live="polite">
+      Loading...
+    </div>
+  )
+}
+
+function LazyRoute({ children }) {
+  return (
+    <Suspense fallback={<RouteLoading />}>
+      {children}
+    </Suspense>
+  )
+}
+
+function LazyAuthModal({ open, onClose, Component = AuthModal }) {
+  if (!open) return null
+
+  return (
+    <Suspense fallback={null}>
+      <Component onClose={onClose} />
+    </Suspense>
+  )
+}
 
 function getFixedHeaderOffset() {
   const headerHeight = document.querySelector('.navbar')?.getBoundingClientRect().height || 0
@@ -66,7 +105,9 @@ function scrollToHash(hash) {
   })
 }
 
-function currentRoute() {
+function currentRoute(fallbackRoute = '/') {
+  if (typeof window === 'undefined') return fallbackRoute
+
   const { pathname } = window.location
   if (APP_ROUTES.has(pathname)) return pathname
   if (pathname.startsWith('/profile/')) return pathname
@@ -74,11 +115,26 @@ function currentRoute() {
   return '/'
 }
 
-function AppContent() {
+function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPONENTS }) {
   const [authOpen, setAuthOpen] = useState(false)
-  const [route, setRoute] = useState(currentRoute)
+  const [route, setRoute] = useState(() => currentRoute(initialRoute))
   const [cartItems, setCartItems] = useState([])
-  const { currentProfile, logout } = useSocial()
+  const { currentProfile, logout, state } = useSocial()
+  const { lang } = useTranslation()
+  const {
+    AuthModal: AuthModalComponent,
+    LocationGuidePage: LocationGuidePageComponent,
+    MessagesPage: MessagesPageComponent,
+    P2PTradingPage: P2PTradingPageComponent,
+    ProfilePage: ProfilePageComponent,
+    ShopPage: ShopPageComponent,
+    SocialHub: SocialHubComponent,
+    UserProfilePage: UserProfilePageComponent,
+  } = routeComponents
+  const seoMetadata = useMemo(
+    () => createSeoMetadata({ route, state, currentProfile }),
+    [currentProfile, route, state],
+  )
 
   useEffect(() => {
     const handlePopState = () => {
@@ -136,12 +192,15 @@ function AppContent() {
   if (route === '/community') {
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <SocialHub onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          <LazyRoute>
+            <SocialHubComponent onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -150,12 +209,15 @@ function AppContent() {
     const userId = route.slice('/profile/'.length)
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <UserProfilePage userId={userId} onNavigate={navigateTo} onOpenAuth={() => setAuthOpen(true)} />
+          <LazyRoute>
+            <UserProfilePageComponent userId={userId} onNavigate={navigateTo} onOpenAuth={() => setAuthOpen(true)} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -164,12 +226,15 @@ function AppContent() {
     const locationSlug = route.slice('/locations/'.length)
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <LocationGuidePage locationSlug={locationSlug} onNavigate={navigateTo} />
+          <LazyRoute>
+            <LocationGuidePageComponent locationSlug={locationSlug} onNavigate={navigateTo} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -177,17 +242,20 @@ function AppContent() {
   if (route === '/shop') {
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <ShopPage
-            cartItems={cartItems}
-            cartTotal={cartTotal}
-            onAddCartItem={addCartItem}
-            onRemoveCartItem={removeCartItem}
-          />
+          <LazyRoute>
+            <ShopPageComponent
+              cartItems={cartItems}
+              cartTotal={cartTotal}
+              onAddCartItem={addCartItem}
+              onRemoveCartItem={removeCartItem}
+            />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -195,12 +263,15 @@ function AppContent() {
   if (route === '/p2p') {
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <P2PTradingPage onOpenAuth={() => setAuthOpen(true)} />
+          <LazyRoute>
+            <P2PTradingPageComponent onOpenAuth={() => setAuthOpen(true)} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -208,12 +279,15 @@ function AppContent() {
   if (route === '/messages') {
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <MessagesPage onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          <LazyRoute>
+            <MessagesPageComponent onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
@@ -221,44 +295,43 @@ function AppContent() {
   if (route === '/profile') {
     return (
       <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <ProfilePage onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          <LazyRoute>
+            <ProfilePageComponent onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          </LazyRoute>
         </main>
         <Footer />
-        {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
       </div>
     )
   }
 
   return (
     <div className="app">
-      <Hero
-        currentUser={currentProfile}
-        onOpenAuth={() => setAuthOpen(true)}
-        onLogout={logout}
-        onNavigate={navigateTo}
-        cartItems={cartItems}
-        cartTotal={cartTotal}
-        onRemoveCartItem={removeCartItem}
-      />
-      <GameInfo />
-      <Characters />
-      <IgnGuideSections />
-      <MediaGallery />
-      <LeonidaLocations onNavigate={navigateTo} />
-      <NewsSection />
+      <SeoHead metadata={seoMetadata} lang={lang} />
+      <Header {...sharedHeaderProps} />
+      <main>
+        <Hero onNavigate={navigateTo} showHeader={false} />
+        <GameInfo />
+        <Characters />
+        <IgnGuideSections />
+        <MediaGallery />
+        <LeonidaLocations onNavigate={navigateTo} />
+        <NewsSection />
+      </main>
       <Footer />
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+      <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
     </div>
   )
 }
 
-function App() {
+function App({ initialRoute = '/', initialLang = 'en', routeComponents }) {
   return (
-    <LanguageProvider>
+    <LanguageProvider initialLang={initialLang}>
       <SocialProvider>
-        <AppContent />
+        <AppContent initialRoute={initialRoute} routeComponents={routeComponents} />
       </SocialProvider>
     </LanguageProvider>
   )

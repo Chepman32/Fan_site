@@ -7,6 +7,16 @@
   padding-top: 70px;
 }
 
+.route-loading {
+  min-height: 40vh;
+  display: grid;
+  place-items: center;
+  color: var(--text-secondary);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 @media (max-width: 1120px) {
   .app {
     padding-bottom: calc(86px + env(safe-area-inset-bottom));

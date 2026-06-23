@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import {
   Car,
   Crosshair,
@@ -17,11 +17,11 @@ import {
   UserRoundSearch,
   UsersRound,
 } from 'lucide-react'
-import favIcon from '../assets/fav.png'
-import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { LANGUAGE_NAMES } from '../i18n/translations'
 import './Header.css'
+
+const CryptoCheckoutPanel = lazy(() => import('./CryptoCheckoutPanel'))
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
@@ -160,9 +160,9 @@ function Header({
 
   return (
     <>
-      <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`}>
+      <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`} aria-label="Primary navigation">
         <a className="nav-brand" href="/" onClick={(event) => navigate(event, '/')}>
-          <img className="nav-favicon" src={favIcon} alt="" aria-hidden="true" />
+          <img className="nav-favicon" src="/favicon.svg" alt="" aria-hidden="true" width="32" height="32" />
           <span>GTA VI <span className="highlight">HUB</span></span>
         </a>
 
@@ -259,13 +259,15 @@ function Header({
                 <span>{cartItems.length}</span>
               </button>
               <div className="nav-cart-popover">
-                <CryptoCheckoutPanel
-                  key={checkoutKey}
-                  cartItems={cartItems}
-                  cartTotal={cartTotal}
-                  onRemoveItem={onRemoveCartItem}
-                  compact
-                />
+                <Suspense fallback={<div className="nav-cart-loading">Loading checkout...</div>}>
+                  <CryptoCheckoutPanel
+                    key={checkoutKey}
+                    cartItems={cartItems}
+                    cartTotal={cartTotal}
+                    onRemoveItem={onRemoveCartItem}
+                    compact
+                  />
+                </Suspense>
               </div>
             </div>
           )}
@@ -333,7 +335,7 @@ function Header({
         </div>
       </nav>
 
-      <nav className="bottom-tabs-navbar" aria-label="Primary navigation">
+      <nav className="bottom-tabs-navbar" aria-label="Mobile primary navigation">
         {bottomTabs.map(({ key, href, label, icon: Icon }) => (
           <a
             key={key}

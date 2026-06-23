@@ -354,6 +354,60 @@ When adding a new route:
 3. Confirm Hosting catch-all rewrite still supports it.
 4. Confirm direct page refresh works after build/preview or on Hosting.
 
+## SEO And Public Crawling
+
+The production public origin used for SEO metadata is:
+
+```txt
+https://leonidaloot.com
+```
+
+Technical SEO is handled in a few places:
+
+- `index.html`
+  - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, SVG favicon, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
+- `src/seo/seoConfig.js`
+  - Defines route-specific SEO metadata for `/`, `/community`, `/shop`, `/p2p`, `/profile`, `/profile/:id`, `/messages`, and `/locations/:slug`.
+  - Defines canonical URLs, robots behavior, Open Graph/Twitter PNG image defaults, breadcrumbs, sitemap routes, prerender routes, noindex prerender routes, and JSON-LD graph data.
+  - Keep new route metadata here when adding routes.
+- `src/seo/SeoHead.jsx`
+  - Updates `document.title`, description, robots, canonical, Open Graph/Twitter tags, JSON-LD, and the `<html lang>` value on route/language changes.
+- `src/entry-server.jsx`
+  - Server-side/prerender entry used by `vite build --ssr`.
+  - Renders `<App initialRoute="...">` with static route components so generated HTML includes the route content, one H1 on public pages, and route-specific SEO before JavaScript runs.
+- `scripts/prerender.mjs`
+  - Runs after the client and SSR builds.
+  - Generates raw route HTML for `/`, `/community`, `/shop`, `/p2p`, known `/locations/:slug` pages, and noindex HTML for `/profile` and `/messages`.
+  - Writes both `route/index.html` files and matching `route.html` aliases so Firebase clean URLs and local Vite preview can serve slashless route HTML.
+  - Regenerates `dist/sitemap.xml` and `dist/robots.txt` from the shared SEO config.
+- `scripts/seo-validate.mjs`
+  - Validates generated raw HTML, canonical format, PNG OG/Twitter image usage, JSON-LD parseability, sitemap membership, robots sitemap reference, noindex pages, and exactly one H1 on public prerendered pages.
+- `public/robots.txt`
+  - Allows public crawling, blocks API/reserved Firebase paths, and points crawlers to the sitemap.
+- `public/sitemap.xml`
+  - Lists indexable static routes and known Leonida location guides.
+  - It intentionally omits auth-only pages, private messages, and dynamic user profile pages.
+- `public/og-image.png`
+  - Default crawler-compatible `1200x630` social preview image used by Open Graph, Twitter card tags, and JSON-LD image references.
+- `public/og-image.svg`
+  - Optional source/design asset only. Do not use SVG as the primary Open Graph image because some social platforms do not reliably render SVG previews.
+
+Build and validation commands:
+
+```sh
+npm run build
+npm run seo:validate
+```
+
+`npm run build` runs the Vite client build, Vite SSR build, static prerender, and SEO validation. Firebase Hosting should serve generated route HTML from `dist` before the SPA catch-all; `firebase.json` sets `cleanUrls: true` and `trailingSlash: false` so canonical public URLs stay slashless except `/`.
+
+SEO limitations:
+
+- Static public routes now have route-specific raw HTML metadata from build-time prerendering, so social unfurlers and lightweight crawlers can see title, description, canonical, Open Graph/Twitter tags, and JSON-LD before JavaScript runs.
+- Dynamic Firestore-backed content such as user profiles, community posts, messages, and P2P listings is not statically represented in the sitemap.
+- `/profile` and `/messages` get generated noindex HTML and remain out of the sitemap; public `/profile/:id` pages get client-side profile metadata when user data is available, but are still not prerendered or listed in the sitemap.
+- True route-specific raw SEO for Firestore/user-generated pages requires SSR with data fetching, SSG from a trusted content source, or edge/server metadata rendering.
+
 ## Top-Level React Composition
 
 `src/main.jsx` mounts the app.

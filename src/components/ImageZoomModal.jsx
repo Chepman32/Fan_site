@@ -27,7 +27,7 @@ function ImageZoomModal({ src, alt, onClose }) {
         <X size={22} />
       </button>
       <div className="zoom-modal" onClick={(e) => e.stopPropagation()}>
-        <img src={src} alt={alt} className="zoom-image" />
+        <img src={src} alt={alt} className="zoom-image" decoding="async" />
         <div className="zoom-footer">
           <span>{alt}</span>
         </div>

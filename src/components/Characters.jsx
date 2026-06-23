@@ -281,7 +281,7 @@ function CharacterCard({ character, featured = false, index = 0, onZoom }) {
     >
       <div className="ign-character-image">
         {character.imageUrl ? (
-          <img src={character.imageUrl} alt={character.imageTitle || `${character.name} profile`} loading="lazy" />
+          <img src={character.imageUrl} alt={character.imageTitle || `${character.name} profile`} loading="lazy" decoding="async" />
         ) : (
           <span>
             <ImageIcon size={24} />

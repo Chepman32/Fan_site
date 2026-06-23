@@ -37,10 +37,11 @@ function MediaGallery() {
           <div className="video-player">
             <iframe
               src={`https://www.youtube.com/embed/${activeVideo}?rel=0`}
-              title="GTA VI Trailer"
+              title={videos.find((video) => video.id === activeVideo)?.title || 'GTA VI trailer'}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
+              loading="lazy"
             ></iframe>
           </div>
 
@@ -56,6 +57,8 @@ function MediaGallery() {
                   <img 
                     src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`} 
                     alt={video.title}
+                    loading="lazy"
+                    decoding="async"
                   />
                   <div className="play-overlay">
                     <Play size={20} />

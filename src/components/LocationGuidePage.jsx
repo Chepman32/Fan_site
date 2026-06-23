@@ -26,7 +26,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
   const [remoteState, setRemoteState] = useState({ guideId: '', page: null, failed: false })
   const hasRemotePage = Boolean(guide && remoteState.guideId === guide.id)
   const page = hasRemotePage ? remoteState.page : fallbackPage
-  const loading = Boolean(guide && !hasRemotePage)
+  const loading = Boolean(guide && !page)
   const failed = Boolean(hasRemotePage && remoteState.failed)
 
   useEffect(() => {
@@ -65,17 +65,6 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
     source: translationSource,
     translate: translateLocationPageData,
   })
-
-  useEffect(() => {
-    if (!displayPage?.title) return undefined
-
-    const previousTitle = document.title
-    document.title = `${displayPage.title} | GTA VI Hub`
-
-    return () => {
-      document.title = previousTitle
-    }
-  }, [displayPage?.title])
 
   const navigate = (event, href) => {
     if (!onNavigate || !isPlainLeftClick(event)) return
@@ -143,7 +132,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
 
               {heroImage && (
                 <figure className="location-hero-image">
-                  <img src={heroImage.url} alt={heroImage.title} />
+                  <img src={heroImage.url} alt={heroImage.title} decoding="async" />
                   <figcaption>
                     <ImageIcon size={14} />
                     {heroImage.title}
@@ -168,7 +157,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
               <div className="location-detail-gallery" aria-label={`${displayPage.title} images`}>
                 {galleryImages.map((image) => (
                   <figure key={image.id}>
-                    <img src={image.url} alt={image.title} loading="lazy" />
+                    <img src={image.url} alt={image.title} loading="lazy" decoding="async" />
                     <figcaption>
                       <ImageIcon size={14} />
                       {image.title}

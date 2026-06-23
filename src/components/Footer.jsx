@@ -22,12 +22,12 @@ function Footer() {
           <div className="footer-links">
             <div className="footer-column">
               <h4>{t.footer.game}</h4>
-              <a href="#game-info">{t.footer.about}</a>
-              <a href="#characters">{t.footer.characters}</a>
-              <a href="#weapons">{t.nav.weapons || 'Weapons'}</a>
-              <a href="#vehicles">{t.nav.vehicles || 'Vehicles'}</a>
-              <a href="#social-media-guide">{t.nav.socialMedia || 'Social Media'}</a>
-              <a href="#media">{t.footer.media}</a>
+              <a href="/#game-info">{t.footer.about}</a>
+              <a href="/#characters">{t.footer.characters}</a>
+              <a href="/#weapons">{t.nav.weapons || 'Weapons'}</a>
+              <a href="/#vehicles">{t.nav.vehicles || 'Vehicles'}</a>
+              <a href="/#social-media-guide">{t.nav.socialMedia || 'Social Media'}</a>
+              <a href="/#media">{t.footer.media}</a>
             </div>
             <div className="footer-column">
               <h4>{t.footer.official}</h4>
