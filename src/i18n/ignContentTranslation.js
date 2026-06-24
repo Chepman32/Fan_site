@@ -266,8 +266,9 @@ export async function translateGuideData(data, lang) {
   }
 }
 
-export function vehiclesTranslationSource(data) {
+export function vehiclesTranslationSource(data, { translateNames = true } = {}) {
   return {
+    translateNames,
     intro: data.intro,
     categories: data.categories.map((category) => ({
       id: category.id,
@@ -275,11 +276,19 @@ export function vehiclesTranslationSource(data) {
       collections: category.collections.map((collection) => ({
         id: collection.id,
         title: collection.title,
-        items: collection.items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-        })),
+        items: collection.items.map((item) => {
+          const source = {
+            id: item.id,
+            description: item.description,
+          }
+
+          if (translateNames) {
+            source.name = item.name
+            source.imageTitle = item.imageTitle
+          }
+
+          return source
+        }),
       })),
       extraImages: category.extraImages.map((image) => ({
         id: image.id,
@@ -293,20 +302,27 @@ export function vehiclesTranslationSource(data) {
   }
 }
 
-export async function translateVehiclesData(data, lang) {
+export async function translateVehiclesData(data, lang, { translateNames = true } = {}) {
+  const vehicleNameTexts = translateNames
+    ? data.categories.flatMap((category) => (
+      category.collections.flatMap((collection) => collection.items.map((item) => item.name))
+    ))
+    : []
+  const vehicleImageTitleTexts = translateNames
+    ? data.categories.flatMap((category) => (
+      category.collections.flatMap((collection) => collection.items.map((item) => item.imageTitle))
+    ))
+    : []
+
   const map = await translateTextMap([
     ...data.intro,
     ...data.categories.flatMap((category) => category.intro),
     ...data.categories.flatMap((category) => category.collections.map((collection) => collection.title)),
-    ...data.categories.flatMap((category) => (
-      category.collections.flatMap((collection) => collection.items.map((item) => item.name))
-    )),
+    ...vehicleNameTexts,
     ...data.categories.flatMap((category) => (
       category.collections.flatMap((collection) => collection.items.map((item) => item.description))
     )),
-    ...data.categories.flatMap((category) => (
-      category.collections.flatMap((collection) => collection.items.map((item) => item.imageTitle))
-    )),
+    ...vehicleImageTitleTexts,
     ...data.images.map((image) => image.title),
     ...data.categories.flatMap((category) => category.extraImages.map((image) => image.title)),
   ], lang)
@@ -322,9 +338,9 @@ export async function translateVehiclesData(data, lang) {
         title: translated(map, collection.title),
         items: collection.items.map((item) => ({
           ...item,
-          name: translated(map, item.name),
+          name: translateNames ? translated(map, item.name) : item.name,
           description: translated(map, item.description),
-          imageTitle: translated(map, item.imageTitle),
+          imageTitle: translateNames ? translated(map, item.imageTitle) : item.imageTitle,
         })),
       })),
       extraImages: category.extraImages.map((image) => ({

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Bike,
   Car,
@@ -19,6 +19,7 @@ import {
   vehiclesTranslationSource,
 } from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import ImageZoomModal from './ImageZoomModal'
 import './IgnGuide.css'
 
@@ -1114,6 +1115,7 @@ function SimpleGuideSection({ config }) {
 
 function VehiclesGuide() {
   const { t, lang } = useTranslation()
+  const { translateVehicleNames } = usePreferences()
   const copy = guideCopy(t, 'vehicles')
   const [data, setData] = useState(VEHICLES_FALLBACK)
   const [activeCategoryId, setActiveCategoryId] = useState('cars')
@@ -1169,13 +1171,23 @@ function VehiclesGuide() {
     }
   }, [])
 
-  const translationSource = useMemo(() => vehiclesTranslationSource(data), [data])
+  const shouldTranslateVehicleNames = lang !== 'en' && translateVehicleNames
+  const translationSource = useMemo(
+    () => vehiclesTranslationSource(data, { translateNames: shouldTranslateVehicleNames }),
+    [data, shouldTranslateVehicleNames],
+  )
+  const translateVehicleContent = useCallback(
+    (nextData, nextLang) => translateVehiclesData(nextData, nextLang, {
+      translateNames: shouldTranslateVehicleNames,
+    }),
+    [shouldTranslateVehicleNames],
+  )
   const { data: displayData } = useTranslatedIgnContent(data, {
     enabled: !loading,
     lang,
-    scope: 'vehicles',
+    scope: shouldTranslateVehicleNames ? 'vehicles-with-names' : 'vehicles-source-names',
     source: translationSource,
-    translate: translateVehiclesData,
+    translate: translateVehicleContent,
   })
 
   const activeCategory = displayData.categories.find((category) => category.id === activeCategoryId) || displayData.categories[0]

@@ -8,6 +8,7 @@ import MessagesPage from './components/MessagesPage'
 import NewsArticlePage from './components/NewsArticlePage'
 import P2PTradingPage from './components/P2PTradingPage'
 import ProfilePage from './components/ProfilePage'
+import SettingsPage from './components/SettingsPage'
 import ShopPage from './components/ShopPage'
 import SocialHub from './components/SocialHub'
 import UserProfilePage from './components/UserProfilePage'
@@ -28,6 +29,7 @@ const routeComponents = {
   NewsArticlePage,
   P2PTradingPage,
   ProfilePage,
+  SettingsPage,
   ShopPage,
   SocialHub,
   UserProfilePage,

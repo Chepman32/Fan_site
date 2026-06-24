@@ -11,6 +11,7 @@ import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
 import { SocialProvider, useSocial } from './social/SocialContext'
 import { LanguageProvider, useTranslation } from './i18n/useTranslation.jsx'
+import { PreferencesProvider } from './preferences/AppPreferences.jsx'
 import { shopCentsToPrice, shopPriceToCents } from './shop/paymentConfig'
 import SeoHead from './seo/SeoHead'
 import { createSeoMetadata } from './seo/seoConfig'
@@ -22,11 +23,12 @@ const MessagesPage = lazy(() => import('./components/MessagesPage'))
 const NewsArticlePage = lazy(() => import('./components/NewsArticlePage'))
 const P2PTradingPage = lazy(() => import('./components/P2PTradingPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
+const SettingsPage = lazy(() => import('./components/SettingsPage'))
 const ShopPage = lazy(() => import('./components/ShopPage'))
 const SocialHub = lazy(() => import('./components/SocialHub'))
 const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
-const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p', '/messages', '/news'])
+const APP_ROUTES = new Set(['/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 const DEFAULT_ROUTE_COMPONENTS = {
   AuthModal,
@@ -35,6 +37,7 @@ const DEFAULT_ROUTE_COMPONENTS = {
   NewsArticlePage,
   P2PTradingPage,
   ProfilePage,
+  SettingsPage,
   ShopPage,
   SocialHub,
   UserProfilePage,
@@ -131,6 +134,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     NewsArticlePage: NewsArticlePageComponent,
     P2PTradingPage: P2PTradingPageComponent,
     ProfilePage: ProfilePageComponent,
+    SettingsPage: SettingsPageComponent,
     ShopPage: ShopPageComponent,
     SocialHub: SocialHubComponent,
     UserProfilePage: UserProfilePageComponent,
@@ -344,6 +348,22 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
+  if (route === '/settings') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <SettingsPageComponent />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
   return (
     <div className="app">
       <SeoHead metadata={seoMetadata} lang={lang} />
@@ -365,9 +385,11 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
 function App({ initialRoute = '/', initialLang = 'en', routeComponents }) {
   return (
     <LanguageProvider initialLang={initialLang}>
-      <SocialProvider>
-        <AppContent initialRoute={initialRoute} routeComponents={routeComponents} />
-      </SocialProvider>
+      <PreferencesProvider>
+        <SocialProvider>
+          <AppContent initialRoute={initialRoute} routeComponents={routeComponents} />
+        </SocialProvider>
+      </PreferencesProvider>
     </LanguageProvider>
   )
 }

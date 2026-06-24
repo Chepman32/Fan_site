@@ -13,6 +13,7 @@ import {
   Radio,
   ShoppingCart,
   Store,
+  Settings as SettingsIcon,
   User,
   UserRoundSearch,
   UsersRound,
@@ -137,9 +138,24 @@ function Header({
     if (target === 'p2p') return currentPath === '/p2p'
     if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
-    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
+    if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
+    if (target === 'settings') return currentPath === '/settings'
+    if (target === 'about') return currentPath === '/' && currentHash === '#game-info'
+    if (target === 'characters') return currentPath === '/' && currentHash === '#characters'
+    if (target === 'leonida') return (currentPath === '/' && currentHash === '#leonida') || currentPath.startsWith('/locations/')
+    if (target === 'vehicles') return currentPath === '/' && currentHash === '#vehicles'
+    if (target === 'weapons') return currentPath === '/' && currentHash === '#weapons'
+    if (target === 'social-media') return currentPath === '/' && currentHash === '#social-media-guide'
+    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath === '/settings' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
     return false
   }
+
+  const navLinkClass = (target, extraClass = '') => [
+    extraClass,
+    isActive(target) ? 'active' : '',
+  ].filter(Boolean).join(' ')
+
+  const ariaCurrent = (target) => (isActive(target) ? 'page' : undefined)
 
   const bottomTabs = [
     { key: 'main', href: '/', label: t.nav.main || 'Main', icon: Home },
@@ -149,13 +165,14 @@ function Header({
   ]
 
   const moreLinks = [
-    { href: '/#game-info', label: t.nav.about, icon: Info },
-    { href: '/#characters', label: t.nav.characters, icon: UserRoundSearch },
-    { href: '/#leonida', label: t.nav.locations || 'Locations', icon: MapPinned },
-    { href: '/#vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
-    { href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
-    { href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
-    { href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
+    { key: 'about', href: '/#game-info', label: t.nav.about, icon: Info },
+    { key: 'characters', href: '/#characters', label: t.nav.characters, icon: UserRoundSearch },
+    { key: 'leonida', href: '/#leonida', label: t.nav.locations || 'Locations', icon: MapPinned },
+    { key: 'vehicles', href: '/#vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
+    { key: 'weapons', href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
+    { key: 'community', href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
+    { key: 'social-media', href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
+    { key: 'settings', href: '/settings', label: t.nav.settings || 'Settings', icon: SettingsIcon },
   ]
 
   return (
@@ -167,14 +184,19 @@ function Header({
         </a>
 
         <div className="nav-links">
-          <a className="nav-shop-link" href="/shop" onClick={(event) => navigate(event, '/shop')}>
+          <a
+            className={navLinkClass('shop', 'nav-shop-link')}
+            href="/shop"
+            onClick={(event) => navigate(event, '/shop')}
+            aria-current={ariaCurrent('shop')}
+          >
             {t.nav.shop || 'Shop'}
           </a>
-          <a href="/p2p" onClick={(event) => navigate(event, '/p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
-          <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
-          <a href="/news" onClick={(event) => navigate(event, '/news')}>{t.nav.news}</a>
-          <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
-          <a href="/community" onClick={(event) => navigate(event, '/community')}>
+          <a className={navLinkClass('p2p')} href="/p2p" onClick={(event) => navigate(event, '/p2p')} aria-current={ariaCurrent('p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
+          <a className={navLinkClass('leonida')} href="/#leonida" onClick={(event) => navigate(event, '/#leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
+          <a className={navLinkClass('news')} href="/news" onClick={(event) => navigate(event, '/news')} aria-current={ariaCurrent('news')}>{t.nav.news}</a>
+          <a className={navLinkClass('about')} href="/#game-info" onClick={(event) => navigate(event, '/#game-info')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
+          <a className={navLinkClass('community')} href="/community" onClick={(event) => navigate(event, '/community')} aria-current={ariaCurrent('community')}>
             {t.nav.community || t.nav.social || 'Community'}
           </a>
           <div
@@ -204,6 +226,7 @@ function Header({
             </button>
             <div className="nav-more-menu" role="menu">
               <a
+                className={navLinkClass('characters')}
                 href="/#characters"
                 role="menuitem"
                 onClick={(event) => navigate(event, '/#characters', {
@@ -215,6 +238,7 @@ function Header({
                 {t.nav.characters || 'Characters'}
               </a>
               <a
+                className={navLinkClass('weapons')}
                 href="/#weapons"
                 role="menuitem"
                 onClick={(event) => navigate(event, '/#weapons', {
@@ -226,6 +250,7 @@ function Header({
                 {t.nav.weapons || 'Weapons'}
               </a>
               <a
+                className={navLinkClass('vehicles')}
                 href="/#vehicles"
                 role="menuitem"
                 onClick={(event) => navigate(event, '/#vehicles', {
@@ -237,6 +262,7 @@ function Header({
                 {t.nav.vehicles || 'Vehicles'}
               </a>
               <a
+                className={navLinkClass('social-media')}
                 href="/#social-media-guide"
                 role="menuitem"
                 onClick={(event) => navigate(event, '/#social-media-guide', {
@@ -246,6 +272,14 @@ function Header({
                 })}
               >
                 {t.nav.socialMedia || 'Social Media'}
+              </a>
+              <a
+                className={navLinkClass('settings')}
+                href="/settings"
+                role="menuitem"
+                onClick={(event) => navigate(event, '/settings', { stopPropagation: true })}
+              >
+                {t.nav.settings || 'Settings'}
               </a>
             </div>
           </div>
@@ -305,10 +339,11 @@ function Header({
           {currentUser ? (
             <>
               <a
-                className="nav-profile"
+                className={navLinkClass('profile', 'nav-profile')}
                 href="/profile"
                 onClick={(event) => navigate(event, '/profile')}
                 aria-label="Open profile"
+                aria-current={ariaCurrent('profile')}
               >
                 <span
                   className="nav-profile-avatar"
@@ -363,8 +398,15 @@ function Header({
           </button>
 
           <div className={`bottom-more-menu ${bottomMoreOpen ? 'open' : ''}`} role="menu">
-            {moreLinks.map(({ href, label, icon: Icon }) => (
-              <a key={href} href={href} role="menuitem" onClick={(event) => navigate(event, href)}>
+            {moreLinks.map(({ key, href, label, icon: Icon }) => (
+              <a
+                key={href}
+                className={navLinkClass(key)}
+                href={href}
+                role="menuitem"
+                onClick={(event) => navigate(event, href)}
+                aria-current={ariaCurrent(key)}
+              >
                 <Icon size={16} aria-hidden="true" />
                 <span>{label}</span>
               </a>

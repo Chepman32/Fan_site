@@ -7,6 +7,7 @@ import {
   FileText,
   MessageSquare,
   Save,
+  Settings,
   ShoppingBag,
   Trash2,
   Upload,
@@ -256,10 +257,22 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
   return (
     <section className="profile-page section-padding">
       <div className="container profile-page-layout">
-        <div className="profile-page-heading">
-          <span>{t.social.tabs.profile}</span>
-          <h1>{currentProfile.username}</h1>
-          <p>{s.joinedOn} {formatDate(currentProfile.joinedAt, lang)} · {s.level} {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
+        <div className="profile-page-topbar">
+          <div className="profile-page-heading">
+            <span>{t.social.tabs.profile}</span>
+            <h1>{currentProfile.username}</h1>
+            <p>{s.joinedOn} {formatDate(currentProfile.joinedAt, lang)} · {s.level} {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
+          </div>
+
+          <button
+            className="profile-settings-button"
+            type="button"
+            onClick={() => onNavigate?.('/settings')}
+            aria-label={t.nav.settings || 'Settings'}
+          >
+            <Settings size={18} aria-hidden="true" />
+            <span>{t.nav.settings || 'Settings'}</span>
+          </button>
         </div>
 
         <div className="profile-page-grid">

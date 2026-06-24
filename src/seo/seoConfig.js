@@ -265,6 +265,16 @@ function messagesMetadata() {
   })
 }
 
+function settingsMetadata() {
+  return pageMetadata({
+    route: '/settings',
+    title: 'Settings',
+    description: 'Manage Leonida Loot display preferences, theme, and translation behavior for this browser.',
+    robots: 'noindex,follow',
+    breadcrumbs: [{ name: 'Settings', url: absoluteUrl('/settings') }],
+  })
+}
+
 function locationMetadata(route) {
   const slug = route.slice('/locations/'.length)
   const guide = getLocationGuideBySlug(slug)
@@ -315,6 +325,7 @@ export function createSeoMetadata({ route, state = { users: [] }, currentProfile
   if (cleanRoute === '/p2p') return p2pMetadata()
   if (cleanRoute === '/news') return newsMetadata()
   if (cleanRoute === '/messages') return messagesMetadata()
+  if (cleanRoute === '/settings') return settingsMetadata()
   if (cleanRoute === '/profile') return ownProfileMetadata(currentProfile)
   if (cleanRoute.startsWith('/profile/')) return publicProfileMetadata(cleanRoute, state)
   if (cleanRoute.startsWith('/locations/')) return locationMetadata(cleanRoute)
@@ -393,6 +404,7 @@ export const SITEMAP_ROUTES = [
 export const NOINDEX_PRERENDER_ROUTES = [
   '/profile',
   '/messages',
+  '/settings',
 ]
 
 export const PRERENDER_ROUTES = [
