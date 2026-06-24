@@ -40,6 +40,13 @@
         }
       },
       {
+        "source": "/api/news/article",
+        "function": {
+          "functionId": "ignNewsArticle",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }

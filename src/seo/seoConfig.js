@@ -12,7 +12,7 @@ const HOME_SECTIONS = [
   { name: 'Weapons guide', url: `${SITE_ORIGIN}/#weapons` },
   { name: 'Vehicles guide', url: `${SITE_ORIGIN}/#vehicles` },
   { name: 'Leonida locations', url: `${SITE_ORIGIN}/#leonida` },
-  { name: 'News', url: `${SITE_ORIGIN}/#news` },
+  { name: 'News', url: `${SITE_ORIGIN}/news` },
 ]
 const SHOP_CATEGORIES = [
   'GTA VI stream overlays',
@@ -154,6 +154,68 @@ function p2pMetadata() {
   })
 }
 
+function newsMetadata() {
+  return pageMetadata({
+    route: '/news',
+    title: 'GTA VI News',
+    description: 'Read the latest Grand Theft Auto VI news, trailers, previews, and IGN-sourced coverage on Leonida Loot.',
+    schemaType: 'CollectionPage',
+    breadcrumbs: [{ name: 'News', url: absoluteUrl('/news') }],
+    extraJsonLd: [
+      {
+        '@type': 'ItemList',
+        '@id': `${SITE_ORIGIN}/news#latest-updates`,
+        name: 'Latest GTA VI news',
+        description: 'IGN-sourced Grand Theft Auto VI news and video updates parsed into Leonida Loot article pages.',
+      },
+    ],
+  })
+}
+
+function titleFromSlug(slug = '') {
+  const acronyms = new Set(['gta', 'ign', 'p2p', 'pc', 'ps4', 'ps5', 'rdr', 'usdt', 'vi'])
+  const lowercaseWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'is', 'of', 'on', 'or', 'the', 'to', 'with'])
+
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((part, index) => {
+      if (/^\d+s$/.test(part)) return `${part.slice(0, -1)}'s`
+      if (acronyms.has(part)) return part.toUpperCase()
+      if (index > 0 && lowercaseWords.has(part)) return part
+      return `${part.charAt(0).toUpperCase()}${part.slice(1)}`
+    })
+    .join(' ')
+}
+
+function newsArticleMetadata(route) {
+  const slug = route.slice('/news/'.length)
+  const title = titleFromSlug(slug) || 'GTA VI News Article'
+
+  return pageMetadata({
+    route,
+    title,
+    description: `${title} - a GTA VI news article mirrored from IGN coverage with source attribution and media links.`,
+    schemaType: 'Article',
+    type: 'article',
+    breadcrumbs: [
+      { name: 'News', url: absoluteUrl('/news') },
+      { name: title, url: absoluteUrl(route) },
+    ],
+    extraJsonLd: [
+      {
+        '@type': 'Article',
+        '@id': `${absoluteUrl(route)}#article`,
+        headline: title,
+        description: cleanDescription(`${title} - GTA VI news coverage on Leonida Loot.`),
+        mainEntityOfPage: { '@id': `${absoluteUrl(route)}#webpage` },
+        author: { '@id': `${SITE_ORIGIN}/#organization` },
+        publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+      },
+    ],
+  })
+}
+
 function ownProfileMetadata(currentProfile) {
   const profileName = currentProfile?.username ? `${currentProfile.username}'s profile` : 'Your profile'
 
@@ -251,10 +313,12 @@ export function createSeoMetadata({ route, state = { users: [] }, currentProfile
   if (cleanRoute === '/community') return communityMetadata()
   if (cleanRoute === '/shop') return shopMetadata()
   if (cleanRoute === '/p2p') return p2pMetadata()
+  if (cleanRoute === '/news') return newsMetadata()
   if (cleanRoute === '/messages') return messagesMetadata()
   if (cleanRoute === '/profile') return ownProfileMetadata(currentProfile)
   if (cleanRoute.startsWith('/profile/')) return publicProfileMetadata(cleanRoute, state)
   if (cleanRoute.startsWith('/locations/')) return locationMetadata(cleanRoute)
+  if (cleanRoute.startsWith('/news/')) return newsArticleMetadata(cleanRoute)
   return homeMetadata()
 }
 
@@ -321,6 +385,7 @@ export const SITEMAP_ROUTES = [
   '/',
   '/community',
   '/shop',
+  '/news',
   '/p2p',
   ...LOCATION_GUIDES.map((guide) => guide.path),
 ]

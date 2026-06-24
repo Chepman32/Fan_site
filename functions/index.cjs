@@ -8,6 +8,9 @@ admin.initializeApp()
 
 const DEFAULT_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 const DEFAULT_PLATFORM_USDT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
+const IGN_ORIGIN = 'https://www.ign.com'
+const IGN_NEWS_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{2,180}$/
+const IGN_FETCH_TIMEOUT_MS = 12_000
 const TRONGRID_FULL_HOST = process.env.TRONGRID_FULL_HOST || 'https://api.trongrid.io'
 const USDT_CONTRACT_ADDRESS = process.env.USDT_CONTRACT_ADDRESS || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 const USDT_DECIMALS = 6
@@ -16,14 +19,14 @@ const USDT_TRANSFER_FEE_LIMIT = Number(process.env.USDT_TRANSFER_FEE_LIMIT || 10
 const RECENT_TRANSFER_LIMIT = 200
 const TRON_ADDRESS_PATTERN = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
 
-function setCorsHeaders(req, res) {
+function setCorsHeaders(req, res, methods = 'POST, OPTIONS') {
   const origin = req.get('origin')
   if (origin) {
     res.set('Access-Control-Allow-Origin', origin)
     res.set('Vary', 'Origin')
   }
   res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type')
-  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.set('Access-Control-Allow-Methods', methods)
 }
 
 function maxUploadBytes() {
@@ -69,6 +72,271 @@ function safeText(value, maxLength) {
 function safeFileName(value) {
   const fileName = safeText(value, 160).replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
   return fileName || 'listing-file'
+}
+
+function decodeHtml(value = '') {
+  const namedEntities = {
+    amp: '&',
+    gt: '>',
+    lt: '<',
+    nbsp: ' ',
+    quot: '"',
+  }
+
+  return String(value || '')
+    .replace(/&#(x?[0-9a-f]+);/gi, (_, rawCode) => {
+      const code = rawCode.toLowerCase().startsWith('x')
+        ? Number.parseInt(rawCode.slice(1), 16)
+        : Number.parseInt(rawCode, 10)
+      return Number.isFinite(code) ? String.fromCodePoint(code) : ''
+    })
+    .replace(/&([a-z]+);/gi, (_, name) => namedEntities[name.toLowerCase()] || `&${name};`)
+}
+
+function normalizeWhitespace(value = '') {
+  return decodeHtml(value).replace(/\s+/g, ' ').trim()
+}
+
+function stripHtml(value = '') {
+  return normalizeWhitespace(String(value || '').replace(/<[^>]+>/g, ' '))
+}
+
+function tagAttribute(tag = '', name) {
+  const match = String(tag || '').match(new RegExp(`${name}=(?:"([^"]*)"|'([^']*)')`, 'i'))
+  return decodeHtml(match?.[1] || match?.[2] || '')
+}
+
+function absoluteIgnContentUrl(url) {
+  if (!url) return ''
+
+  try {
+    return new URL(decodeHtml(url), IGN_ORIGIN).toString()
+  } catch {
+    return ''
+  }
+}
+
+function cleanIgnTitle(value = '') {
+  return normalizeWhitespace(value)
+    .replace(/\s+-\s+IGN$/i, '')
+    .trim()
+}
+
+function cleanIgnDescription(value = '') {
+  return normalizeWhitespace(value)
+    .replace(/^(?:\d+[mhdw]\s+ago|just now)\s*(?:-\s*)?/i, '')
+    .trim()
+}
+
+function titleFromSlug(slug = '') {
+  const acronyms = new Set(['gta', 'ign', 'p2p', 'pc', 'ps4', 'ps5', 'rdr', 'usdt', 'vi'])
+  const lowercaseWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'is', 'of', 'on', 'or', 'the', 'to', 'with'])
+
+  return normalizeWhitespace(slug)
+    .split('-')
+    .filter(Boolean)
+    .map((part, index) => {
+      if (/^\d+s$/.test(part)) return `${part.slice(0, -1)}'s`
+      if (acronyms.has(part)) return part.toUpperCase()
+      if (index > 0 && lowercaseWords.has(part)) return part
+      return `${part.charAt(0).toUpperCase()}${part.slice(1)}`
+    })
+    .join(' ')
+}
+
+function articleIdFromSource(sourceUrl, title) {
+  return `${sourceUrl || title}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
+function normalizeIgnDate(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString()
+}
+
+function inlineSegmentsFromHtml(innerHtml = '') {
+  const segments = []
+  const linkPattern = /<a\b([^>]*)>([\s\S]*?)<\/a>/gi
+  let lastIndex = 0
+  let match
+
+  const pushText = (html) => {
+    const text = stripHtml(html)
+    if (text) segments.push({ type: 'text', text })
+  }
+
+  while ((match = linkPattern.exec(innerHtml))) {
+    pushText(innerHtml.slice(lastIndex, match.index))
+    const text = stripHtml(match[2])
+    const url = absoluteIgnContentUrl(tagAttribute(match[1], 'href'))
+    if (text && url) {
+      segments.push({ type: 'link', text, url })
+    } else if (text) {
+      segments.push({ type: 'text', text })
+    }
+    lastIndex = linkPattern.lastIndex
+  }
+
+  pushText(innerHtml.slice(lastIndex))
+  return segments
+}
+
+function parseIgnContentBlocks(processedHtml = '') {
+  const blocks = []
+  const blockPattern = /<p(?:\s[^>]*)?>([\s\S]*?)<\/p>|<section\b([^>]*)>(?:<\/section>)?/gi
+  let match
+
+  while ((match = blockPattern.exec(processedHtml))) {
+    if (match[1] !== undefined) {
+      const segments = inlineSegmentsFromHtml(match[1])
+      const text = segments.map((segment) => segment.text).join(' ').replace(/\s+/g, ' ').trim()
+      if (text) blocks.push({ type: 'paragraph', text, segments })
+      continue
+    }
+
+    const attrs = match[2] || ''
+    const transform = tagAttribute(attrs, 'data-transform')
+    const slug = tagAttribute(attrs, 'data-slug') || tagAttribute(attrs, 'data-value')
+    const caption = tagAttribute(attrs, 'data-caption')
+
+    if (transform === 'slideshow' && slug) {
+      blocks.push({
+        type: 'gallery',
+        title: caption || titleFromSlug(slug),
+        sourceUrl: `${IGN_ORIGIN}/slideshows/${slug}`,
+      })
+    }
+
+    if (transform === 'ignvideo' && slug) {
+      blocks.push({
+        type: 'video',
+        title: titleFromSlug(slug),
+        sourceUrl: `${IGN_ORIGIN}/videos/${slug}`,
+      })
+    }
+  }
+
+  return blocks
+}
+
+function parseIgnNextPage(html) {
+  const match = String(html || '').match(/<script\b[^>]*id=["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script>/i)
+  if (!match) return null
+
+  try {
+    const parsed = JSON.parse(match[1])
+    return parsed?.props?.pageProps?.page || null
+  } catch {
+    return null
+  }
+}
+
+function findIgnArticleSchema(page) {
+  if (!Array.isArray(page?.schema)) return null
+
+  return page.schema.find((entry) => {
+    const type = Array.isArray(entry?.['@type']) ? entry['@type'] : [entry?.['@type']]
+    return type.some((item) => ['Article', 'NewsArticle', 'VideoObject'].includes(item))
+  }) || null
+}
+
+function normalizeIgnArticlePage(page, sourceUrl) {
+  if (!page) return null
+
+  const schema = findIgnArticleSchema(page)
+  const author = Array.isArray(page.contributors) && page.contributors.length
+    ? page.contributors.map((contributor) => contributor.name).filter(Boolean).join(', ')
+    : schema?.author?.name
+  const image = page.image || page.feedImage?.url || (Array.isArray(schema?.image) ? schema.image[0] : schema?.image) || ''
+  const blocks = parseIgnContentBlocks(page.processedHtml || '')
+
+  return {
+    id: page.id || page.articleId || articleIdFromSource(sourceUrl, page.pageTitle || page.feedTitle || page.title),
+    slug: page.slug || '',
+    title: cleanIgnTitle(page.pageTitle || page.feedTitle || schema?.headline || page.title || ''),
+    description: cleanIgnDescription(page.description || page.excerpt || schema?.description || ''),
+    author: normalizeWhitespace(author || 'IGN'),
+    source: 'IGN',
+    sourceUrl,
+    publishedAt: normalizeIgnDate(page.publishDate || schema?.datePublished),
+    updatedAt: normalizeIgnDate(page.updatedAt || schema?.dateModified),
+    image: absoluteIgnContentUrl(image),
+    blocks,
+  }
+}
+
+function fallbackIgnArticleFromHtml(html, sourceUrl) {
+  const title = cleanIgnTitle(
+    html.match(/<h1\b[^>]*data-cy=["']article-headline["'][^>]*>([\s\S]*?)<\/h1>/i)?.[1] ||
+    html.match(/<meta\b[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] ||
+    html.match(/<title>([\s\S]*?)<\/title>/i)?.[1],
+  )
+  const description = cleanIgnDescription(
+    html.match(/<meta\b[^>]*name=["']description["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] ||
+    html.match(/<meta\b[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1],
+  )
+  const image = html.match(/<meta\b[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] || ''
+  const blocks = []
+  const paragraphPattern = /<p\b[^>]*data-cy=["']paragraph["'][^>]*>([\s\S]*?)<\/p>/gi
+  let match
+
+  while ((match = paragraphPattern.exec(html))) {
+    const segments = inlineSegmentsFromHtml(match[1])
+    const text = segments.map((segment) => segment.text).join(' ').replace(/\s+/g, ' ').trim()
+    if (text) blocks.push({ type: 'paragraph', text, segments })
+  }
+
+  return {
+    id: articleIdFromSource(sourceUrl, title),
+    slug: '',
+    title,
+    description,
+    author: normalizeWhitespace(
+      html.match(/<a\b[^>]*data-cy=["']article-author["'][^>]*>([\s\S]*?)<\/a>/i)?.[1] ||
+      html.match(/<meta\b[^>]*property=["']article:author["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1] ||
+      'IGN',
+    ),
+    source: 'IGN',
+    sourceUrl,
+    publishedAt: normalizeIgnDate(html.match(/<meta\b[^>]*property=["']article:published_time["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1]),
+    updatedAt: normalizeIgnDate(html.match(/<meta\b[^>]*property=["']article:modified_time["'][^>]*content=["']([^"']+)["'][^>]*>/i)?.[1]),
+    image: absoluteIgnContentUrl(image),
+    blocks,
+  }
+}
+
+function parseIgnArticleHtml(html, sourceUrl) {
+  const fromNext = normalizeIgnArticlePage(parseIgnNextPage(html), sourceUrl)
+  if (fromNext?.title && fromNext.blocks?.length) return fromNext
+  return fallbackIgnArticleFromHtml(html, sourceUrl)
+}
+
+function ignNewsSourceUrl(slug, type = 'article') {
+  const collection = type === 'video' ? 'videos' : 'articles'
+  return `${IGN_ORIGIN}/${collection}/${slug}`
+}
+
+async function fetchIgnHtml(url) {
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), IGN_FETCH_TIMEOUT_MS)
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'text/html,application/xhtml+xml',
+        'User-Agent': 'LeonidaLootBot/1.0 (+https://leonidaloot.com)',
+      },
+    })
+
+    if (!response.ok) {
+      throw httpError(response.status === 404 ? 404 : 502, `IGN returned HTTP ${response.status}.`)
+    }
+
+    return response.text()
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 async function requireFirebaseUser(req) {
@@ -313,6 +581,50 @@ function telegramApiUrl(method) {
   const apiBaseUrl = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/+$/, '')
   return `${apiBaseUrl}/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`
 }
+
+exports.ignNewsArticle = onRequest({
+  region: 'us-central1',
+  timeoutSeconds: 30,
+  memory: '256MiB',
+}, async (req, res) => {
+  setCorsHeaders(req, res, 'GET, OPTIONS')
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('')
+    return
+  }
+
+  if (req.method !== 'GET') {
+    res.status(405).json({ error: 'Use GET to fetch news articles.' })
+    return
+  }
+
+  try {
+    const slug = safeText(req.query.slug, 190).toLowerCase()
+    const type = safeText(req.query.type, 20).toLowerCase() === 'video' ? 'video' : 'article'
+
+    if (!IGN_NEWS_SLUG_PATTERN.test(slug)) {
+      throw httpError(400, 'News slug must contain only lowercase letters, numbers, and hyphens.')
+    }
+
+    const sourceUrl = ignNewsSourceUrl(slug, type)
+    const html = await fetchIgnHtml(sourceUrl)
+    const article = parseIgnArticleHtml(html, sourceUrl)
+
+    if (!article?.title || !article.blocks?.length) {
+      throw httpError(502, 'IGN article could not be parsed.')
+    }
+
+    res.set('Cache-Control', 'public, max-age=600, s-maxage=1800')
+    res.status(200).json({ article })
+  } catch (error) {
+    logger.warn('IGN news article fetch error', {
+      status: error.status || 500,
+      message: error.message,
+    })
+    res.status(error.status || 500).json({ error: error.message || 'News article fetch failed.' })
+  }
+})
 
 exports.telegramUpload = onRequest({
   region: 'us-central1',

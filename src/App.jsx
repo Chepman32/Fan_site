@@ -19,18 +19,20 @@ import './App.css'
 const AuthModal = lazy(() => import('./components/AuthModal'))
 const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
 const MessagesPage = lazy(() => import('./components/MessagesPage'))
+const NewsArticlePage = lazy(() => import('./components/NewsArticlePage'))
 const P2PTradingPage = lazy(() => import('./components/P2PTradingPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
 const ShopPage = lazy(() => import('./components/ShopPage'))
 const SocialHub = lazy(() => import('./components/SocialHub'))
 const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
-const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p', '/messages'])
+const APP_ROUTES = new Set(['/community', '/profile', '/shop', '/p2p', '/messages', '/news'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 const DEFAULT_ROUTE_COMPONENTS = {
   AuthModal,
   LocationGuidePage,
   MessagesPage,
+  NewsArticlePage,
   P2PTradingPage,
   ProfilePage,
   ShopPage,
@@ -112,6 +114,7 @@ function currentRoute(fallbackRoute = '/') {
   if (APP_ROUTES.has(pathname)) return pathname
   if (pathname.startsWith('/profile/')) return pathname
   if (pathname.startsWith('/locations/')) return pathname
+  if (pathname.startsWith('/news/')) return pathname
   return '/'
 }
 
@@ -125,6 +128,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     AuthModal: AuthModalComponent,
     LocationGuidePage: LocationGuidePageComponent,
     MessagesPage: MessagesPageComponent,
+    NewsArticlePage: NewsArticlePageComponent,
     P2PTradingPage: P2PTradingPageComponent,
     ProfilePage: ProfilePageComponent,
     ShopPage: ShopPageComponent,
@@ -156,6 +160,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const isKnown = APP_ROUTES.has(nextUrl.pathname)
       || nextUrl.pathname.startsWith('/profile/')
       || nextUrl.pathname.startsWith('/locations/')
+      || nextUrl.pathname.startsWith('/news/')
     const nextRoute = isKnown ? nextUrl.pathname : '/'
 
     window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.hash}`)
@@ -231,6 +236,37 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <LocationGuidePageComponent locationSlug={locationSlug} onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route === '/news') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <NewsSection onNavigate={navigateTo} />
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route.startsWith('/news/')) {
+    const newsSlug = route.slice('/news/'.length)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <NewsArticlePageComponent slug={newsSlug} onNavigate={navigateTo} />
           </LazyRoute>
         </main>
         <Footer />
@@ -319,7 +355,6 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <IgnGuideSections />
         <MediaGallery />
         <LeonidaLocations onNavigate={navigateTo} />
-        <NewsSection />
       </main>
       <Footer />
       <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />

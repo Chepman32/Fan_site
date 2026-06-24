@@ -19,6 +19,12 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://leonidaloot.com/news</loc>
+    <lastmod>2026-06-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://leonidaloot.com/p2p</loc>
     <lastmod>2026-06-23</lastmod>
     <changefreq>daily</changefreq>

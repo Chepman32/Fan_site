@@ -5,6 +5,7 @@ import App from './App.jsx'
 import AuthModal from './components/AuthModal'
 import LocationGuidePage from './components/LocationGuidePage'
 import MessagesPage from './components/MessagesPage'
+import NewsArticlePage from './components/NewsArticlePage'
 import P2PTradingPage from './components/P2PTradingPage'
 import ProfilePage from './components/ProfilePage'
 import ShopPage from './components/ShopPage'
@@ -24,6 +25,7 @@ const routeComponents = {
   AuthModal,
   LocationGuidePage,
   MessagesPage,
+  NewsArticlePage,
   P2PTradingPage,
   ProfilePage,
   ShopPage,

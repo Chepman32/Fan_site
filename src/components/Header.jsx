@@ -135,7 +135,7 @@ function Header({
     if (target === 'main') return currentPath === '/' && !currentHash
     if (target === 'shop') return currentPath === '/shop'
     if (target === 'p2p') return currentPath === '/p2p'
-    if (target === 'news') return currentPath === '/' && currentHash === '#news'
+    if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
     if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
     return false
@@ -144,7 +144,7 @@ function Header({
   const bottomTabs = [
     { key: 'main', href: '/', label: t.nav.main || 'Main', icon: Home },
     { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
-    { key: 'news', href: '/#news', label: t.nav.news || 'News', icon: Newspaper },
+    { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
     { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
   ]
 
@@ -172,7 +172,7 @@ function Header({
           </a>
           <a href="/p2p" onClick={(event) => navigate(event, '/p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
           <a href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>{t.nav.leonida}</a>
-          <a href="/#news" onClick={(event) => navigate(event, '/#news')}>{t.nav.news}</a>
+          <a href="/news" onClick={(event) => navigate(event, '/news')}>{t.nav.news}</a>
           <a href="/#game-info" onClick={(event) => navigate(event, '/#game-info')}>{t.nav.about}</a>
           <a href="/community" onClick={(event) => navigate(event, '/community')}>
             {t.nav.community || t.nav.social || 'Community'}

@@ -49,11 +49,13 @@ function sitemapXml() {
     ['/', '1.0'],
     ['/community', '0.8'],
     ['/shop', '0.8'],
+    ['/news', '0.8'],
     ['/p2p', '0.7'],
     ['/locations/vice-city', '0.8'],
   ])
   const frequencies = new Map([
     ['/community', 'daily'],
+    ['/news', 'daily'],
     ['/p2p', 'daily'],
     ['/shop', 'weekly'],
   ])
