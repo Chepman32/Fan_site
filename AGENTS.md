@@ -365,7 +365,7 @@ https://leonidaloot.com
 Technical SEO is handled in a few places:
 
 - `index.html`
-  - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, SVG favicon, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
+  - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, Google-compatible favicon links, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
 - `src/seo/seoConfig.js`
   - Defines route-specific SEO metadata for `/`, `/community`, `/shop`, `/p2p`, `/profile`, `/profile/:id`, `/messages`, and `/locations/:slug`.
   - Defines canonical URLs, robots behavior, Open Graph/Twitter PNG image defaults, breadcrumbs, sitemap routes, prerender routes, noindex prerender routes, and JSON-LD graph data.
@@ -381,7 +381,7 @@ Technical SEO is handled in a few places:
   - Writes both `route/index.html` files and matching `route.html` aliases so Firebase clean URLs and local Vite preview can serve slashless route HTML.
   - Regenerates `dist/sitemap.xml` and `dist/robots.txt` from the shared SEO config.
 - `scripts/seo-validate.mjs`
-  - Validates generated raw HTML, canonical format, PNG OG/Twitter image usage, JSON-LD parseability, sitemap membership, robots sitemap reference, noindex pages, and exactly one H1 on public prerendered pages.
+  - Validates generated raw HTML, canonical format, PNG OG/Twitter image usage, JSON-LD parseability, sitemap membership, robots sitemap reference, noindex pages, Google-compatible favicon assets, and exactly one H1 on public prerendered pages.
 - `public/robots.txt`
   - Allows public crawling, blocks API/reserved Firebase paths, and points crawlers to the sitemap.
 - `public/sitemap.xml`
@@ -391,6 +391,12 @@ Technical SEO is handled in a few places:
   - Default crawler-compatible `1200x630` social preview image used by Open Graph, Twitter card tags, and JSON-LD image references.
 - `public/og-image.svg`
   - Optional source/design asset only. Do not use SVG as the primary Open Graph image because some social platforms do not reliably render SVG previews.
+- `public/favicon.ico`, `public/favicon-48x48.png`, `public/favicon-96x96.png`, `public/favicon.png`
+  - Google/Search-compatible favicon assets generated from the legacy brand icon. Keep these square, crawlable, and stable; Google recommends favicon sizes that are multiples of 48px.
+- `public/favicon.svg`
+  - Optional scalable favicon fallback/source asset. Do not rely on SVG alone for Google Search favicons.
+- `public/apple-touch-icon.png`
+  - 180x180 touch icon for Apple and mobile surfaces.
 
 Build and validation commands:
 

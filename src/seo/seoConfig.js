@@ -276,7 +276,7 @@ export function createJsonLd(metadata) {
         '@id': `${SITE_ORIGIN}/#organization`,
         name: SITE_NAME,
         url: SITE_ORIGIN,
-        logo: `${SITE_ORIGIN}/favicon.svg`,
+        logo: `${SITE_ORIGIN}/favicon-96x96.png`,
       },
       {
         '@type': 'WebSite',

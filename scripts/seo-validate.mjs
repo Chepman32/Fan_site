@@ -129,6 +129,51 @@ try {
   fail('dist/og-image.png is missing')
 }
 
+try {
+  const rootHtml = await readFile(path.join(distDir, 'index.html'), 'utf8')
+  const requiredFaviconLinks = [
+    'href="/favicon.ico"',
+    'href="/favicon-48x48.png"',
+    'href="/favicon-96x96.png"',
+    'href="/favicon.png"',
+    'href="/apple-touch-icon.png"',
+  ]
+
+  for (const link of requiredFaviconLinks) {
+    if (!rootHtml.includes(link)) fail(`index.html is missing favicon link ${link}`)
+  }
+} catch {
+  fail('Unable to validate favicon links in index.html')
+}
+
+async function validatePngSize(fileName, expectedSize) {
+  try {
+    const image = await readFile(path.join(distDir, fileName))
+    const width = image.readUInt32BE(16)
+    const height = image.readUInt32BE(20)
+
+    if (width !== expectedSize || height !== expectedSize) {
+      fail(`${fileName} must be ${expectedSize}x${expectedSize}, found ${width}x${height}`)
+    }
+  } catch {
+    fail(`${fileName} is missing or invalid`)
+  }
+}
+
+await validatePngSize('favicon-48x48.png', 48)
+await validatePngSize('favicon-96x96.png', 96)
+await validatePngSize('favicon.png', 256)
+await validatePngSize('apple-touch-icon.png', 180)
+
+try {
+  const icon = await readFile(path.join(distDir, 'favicon.ico'))
+  if (icon.readUInt16LE(0) !== 0 || icon.readUInt16LE(2) !== 1 || icon.readUInt16LE(4) < 1) {
+    fail('favicon.ico is not a valid ICO file')
+  }
+} catch {
+  fail('favicon.ico is missing or invalid')
+}
+
 if (failures.length) {
   console.error(failures.map((message) => `- ${message}`).join('\n'))
   process.exit(1)
