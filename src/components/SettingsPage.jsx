@@ -53,32 +53,37 @@ function SettingsPage() {
   } = usePreferences()
   const isNonEnglish = lang !== 'en'
   const languageName = LANGUAGE_NAMES[lang] || lang.toUpperCase()
+  const settingsCopy = t.settings || {}
+  const settingsTitle = settingsCopy.title || t.nav.settings || 'Settings'
+  const vehicleNameDescription = translateVehicleNames
+    ? settingsCopy.vehicleNamesOn?.(languageName) || `Vehicle model names will be translated while ${languageName} is active.`
+    : settingsCopy.vehicleNamesOff?.(languageName) || `Vehicle model names stay in English while ${languageName} is active.`
 
   return (
     <section className="settings-page section-padding">
       <div className="container settings-layout">
         <div className="settings-heading">
-          <span>{t.nav.settings || 'Settings'}</span>
-          <h1>{t.nav.settings || 'Settings'}</h1>
-          <p>Personalize Leonida Loot for this browser.</p>
+          <span>{settingsCopy.kicker || settingsTitle}</span>
+          <h1>{settingsTitle}</h1>
+          <p>{settingsCopy.description || 'Personalize Leonida Loot for this browser.'}</p>
         </div>
 
         <div className="settings-panel">
           <div className="settings-panel-heading">
             <Settings size={20} aria-hidden="true" />
-            <h2>Appearance</h2>
+            <h2>{settingsCopy.appearance || 'Appearance'}</h2>
           </div>
-          <div className="settings-theme-grid" aria-label="Theme">
+          <div className="settings-theme-grid" aria-label={settingsCopy.themeLabel || 'Theme'}>
             <ThemeOption
               active={theme === 'dark'}
               icon={Moon}
-              label="Dark"
+              label={settingsCopy.darkTheme || 'Dark'}
               onClick={() => setTheme('dark')}
             />
             <ThemeOption
               active={theme === 'light'}
               icon={Sun}
-              label="Light"
+              label={settingsCopy.lightTheme || 'Light'}
               onClick={() => setTheme('light')}
             />
           </div>
@@ -88,15 +93,13 @@ function SettingsPage() {
           <div className="settings-panel">
             <div className="settings-panel-heading">
               <Languages size={20} aria-hidden="true" />
-              <h2>Translation</h2>
+              <h2>{settingsCopy.translation || 'Translation'}</h2>
             </div>
             <PreferenceSwitch
               checked={translateVehicleNames}
-              description={translateVehicleNames
-                ? `Vehicle model names will be translated while ${languageName} is active.`
-                : `Vehicle model names stay in English while ${languageName} is active.`}
+              description={vehicleNameDescription}
               icon={Car}
-              label="Translate vehicle names"
+              label={settingsCopy.translateVehicleNames || 'Translate vehicle names'}
               onChange={setTranslateVehicleNames}
             />
           </div>

@@ -146,7 +146,7 @@ function Header({
     if (target === 'vehicles') return currentPath === '/' && currentHash === '#vehicles'
     if (target === 'weapons') return currentPath === '/' && currentHash === '#weapons'
     if (target === 'social-media') return currentPath === '/' && currentHash === '#social-media-guide'
-    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath === '/settings' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
+    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
     return false
   }
 
@@ -159,9 +159,9 @@ function Header({
 
   const bottomTabs = [
     { key: 'main', href: '/', label: t.nav.main || 'Main', icon: Home },
-    { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
-    { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
     { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
+    { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
+    { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
   ]
 
   const moreLinks = [
@@ -172,7 +172,6 @@ function Header({
     { key: 'weapons', href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
     { key: 'community', href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
     { key: 'social-media', href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
-    { key: 'settings', href: '/settings', label: t.nav.settings || 'Settings', icon: SettingsIcon },
   ]
 
   return (
@@ -185,14 +184,14 @@ function Header({
 
         <div className="nav-links">
           <a
-            className={navLinkClass('shop', 'nav-shop-link')}
-            href="/shop"
-            onClick={(event) => navigate(event, '/shop')}
-            aria-current={ariaCurrent('shop')}
+            className={navLinkClass('p2p', 'nav-p2p-link')}
+            href="/p2p"
+            onClick={(event) => navigate(event, '/p2p')}
+            aria-current={ariaCurrent('p2p')}
           >
-            {t.nav.shop || 'Shop'}
+            {t.nav.p2pTrading || 'P2P Trading'}
           </a>
-          <a className={navLinkClass('p2p')} href="/p2p" onClick={(event) => navigate(event, '/p2p')} aria-current={ariaCurrent('p2p')}>{t.nav.p2pTrading || 'P2P Trading'}</a>
+          <a className={navLinkClass('shop')} href="/shop" onClick={(event) => navigate(event, '/shop')} aria-current={ariaCurrent('shop')}>{t.nav.shop || 'Shop'}</a>
           <a className={navLinkClass('leonida')} href="/#leonida" onClick={(event) => navigate(event, '/#leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
           <a className={navLinkClass('news')} href="/news" onClick={(event) => navigate(event, '/news')} aria-current={ariaCurrent('news')}>{t.nav.news}</a>
           <a className={navLinkClass('about')} href="/#game-info" onClick={(event) => navigate(event, '/#game-info')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
@@ -273,14 +272,6 @@ function Header({
               >
                 {t.nav.socialMedia || 'Social Media'}
               </a>
-              <a
-                className={navLinkClass('settings')}
-                href="/settings"
-                role="menuitem"
-                onClick={(event) => navigate(event, '/settings', { stopPropagation: true })}
-              >
-                {t.nav.settings || 'Settings'}
-              </a>
             </div>
           </div>
         </div>
@@ -335,6 +326,16 @@ function Header({
               </ul>
             )}
           </div>
+
+          <a
+            className={navLinkClass('settings', 'nav-settings-link')}
+            href="/settings"
+            onClick={(event) => navigate(event, '/settings')}
+            aria-label={t.nav.settings || 'Settings'}
+            aria-current={ariaCurrent('settings')}
+          >
+            <SettingsIcon size={16} aria-hidden="true" />
+          </a>
 
           {currentUser ? (
             <>
