@@ -35,6 +35,8 @@ service cloud.firestore {
           'provider',
           'fileId',
           'fileUniqueId',
+          'thumbnailFileId',
+          'thumbnailFileUniqueId',
           'messageId',
           'kind',
           'storageStatus'
@@ -63,6 +65,11 @@ service cloud.firestore {
         && attachment.fileId.size() <= 512
         && (!('fileUniqueId' in attachment)
           || (attachment.fileUniqueId is string && attachment.fileUniqueId.size() <= 256))
+        && (!('thumbnailFileId' in attachment)
+          || (attachment.thumbnailFileId is string && attachment.thumbnailFileId.size() <= 512))
+        && (!('thumbnailFileUniqueId' in attachment)
+          || (attachment.thumbnailFileUniqueId is string
+            && attachment.thumbnailFileUniqueId.size() <= 256))
         && (!('messageId' in attachment)
           || (attachment.messageId is string && attachment.messageId.size() <= 64))
         && attachment.kind == 'ugc-post-media'

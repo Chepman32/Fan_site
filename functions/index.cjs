@@ -613,7 +613,7 @@ async function findPublicPostMedia(postId, fileId) {
 
   const attachments = postSnapshot.data()?.attachments
   const attachment = Array.isArray(attachments)
-    ? attachments.find((item) => item?.fileId === fileId)
+    ? attachments.find((item) => item?.fileId === fileId || item?.thumbnailFileId === fileId)
     : null
 
   if (
@@ -625,7 +625,9 @@ async function findPublicPostMedia(postId, fileId) {
     throw httpError(404, 'Post media was not found.')
   }
 
-  return attachment
+  return attachment.thumbnailFileId === fileId
+    ? { ...attachment, type: 'image/jpeg' }
+    : attachment
 }
 
 exports.ignNewsArticle = onRequest({
@@ -732,6 +734,7 @@ exports.telegramUpload = onRequest({
 
     const message = telegramPayload.result || {}
     const storedFile = message.document || message.video || message.animation || message.audio || {}
+    const thumbnail = storedFile.thumbnail || storedFile.thumb || {}
 
     res.status(200).json({
       name: storedFile.file_name || upload.filename,
@@ -740,6 +743,8 @@ exports.telegramUpload = onRequest({
       provider: 'telegram_bot',
       fileId: storedFile.file_id || '',
       fileUniqueId: storedFile.file_unique_id || '',
+      thumbnailFileId: thumbnail.file_id || '',
+      thumbnailFileUniqueId: thumbnail.file_unique_id || '',
       messageId: message.message_id ? String(message.message_id) : '',
       kind: fields.kind || 'attachment',
       storageStatus: 'stored',

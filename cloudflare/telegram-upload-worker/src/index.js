@@ -153,6 +153,7 @@ async function sendTelegramDocument(upload, decodedToken, env) {
 
   const message = payload.result || {}
   const storedFile = message.document || message.video || message.animation || message.audio || {}
+  const thumbnail = storedFile.thumbnail || storedFile.thumb || {}
 
   return {
     name: storedFile.file_name || upload.file.name,
@@ -161,6 +162,8 @@ async function sendTelegramDocument(upload, decodedToken, env) {
     provider: 'telegram_bot',
     fileId: storedFile.file_id || '',
     fileUniqueId: storedFile.file_unique_id || '',
+    thumbnailFileId: thumbnail.file_id || '',
+    thumbnailFileUniqueId: thumbnail.file_unique_id || '',
     messageId: message.message_id ? String(message.message_id) : '',
     kind: upload.kind,
     storageStatus: 'stored',
@@ -259,7 +262,7 @@ async function findPublicPostMedia(postId, fileId, env) {
   const document = await response.json()
   const post = firestoreValue({ mapValue: { fields: document.fields || {} } })
   const attachment = Array.isArray(post.attachments)
-    ? post.attachments.find((item) => item?.fileId === fileId)
+    ? post.attachments.find((item) => item?.fileId === fileId || item?.thumbnailFileId === fileId)
     : null
 
   if (
@@ -271,7 +274,9 @@ async function findPublicPostMedia(postId, fileId, env) {
     throw httpError('Post media was not found.', 404)
   }
 
-  return attachment
+  return attachment.thumbnailFileId === fileId
+    ? { ...attachment, type: 'image/jpeg' }
+    : attachment
 }
 
 function firestoreValue(value = {}) {

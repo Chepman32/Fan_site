@@ -12,12 +12,22 @@ function PostMediaAttachments({ post }) {
     >
       {attachments.map((attachment, index) => {
         const source = telegramPostMediaUrl(post.id, attachment)
+        const poster = attachment.thumbnailFileId
+          ? telegramPostMediaUrl(post.id, { fileId: attachment.thumbnailFileId })
+          : ''
         const key = attachment.fileUniqueId || attachment.fileId || `${attachment.name}-${index}`
 
         return (
           <div className="post-media-item" key={key}>
             {attachment.type?.startsWith('video/') ? (
-              <video controls preload="metadata" src={source} aria-label={attachment.name || `Video ${index + 1}`} />
+              <video
+                controls
+                playsInline
+                preload={poster ? 'metadata' : 'auto'}
+                poster={poster || undefined}
+                src={source}
+                aria-label={attachment.name || `Video ${index + 1}`}
+              />
             ) : (
               <img
                 src={source}

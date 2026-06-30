@@ -1208,6 +1208,7 @@ Post media read behavior:
 - Verifies that the file id belongs to an `ugc-post-media` attachment on that public Firestore post.
 - Resolves the temporary Telegram file path server-side and streams the media without exposing the bot token.
 - Supports HTTP range requests for video playback.
+- Preserves Telegram-generated video thumbnail ids so new videos can render poster frames; older videos fall back to automatic frame preload.
 - Does not expose P2P listing files through the public media endpoint.
 
 When changing upload behavior:

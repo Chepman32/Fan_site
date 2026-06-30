@@ -83,6 +83,8 @@ function normalizePostAttachments(attachments = []) {
       provider: 'telegram_bot',
       fileId: String(attachment.fileId || '').slice(0, 512),
       fileUniqueId: String(attachment.fileUniqueId || '').slice(0, 256),
+      thumbnailFileId: String(attachment.thumbnailFileId || '').slice(0, 512),
+      thumbnailFileUniqueId: String(attachment.thumbnailFileUniqueId || '').slice(0, 256),
       messageId: String(attachment.messageId || '').slice(0, 64),
       kind: 'ugc-post-media',
       storageStatus: 'stored',

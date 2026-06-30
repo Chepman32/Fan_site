@@ -6,6 +6,8 @@ import {
   HelpCircle,
   MoreVertical,
   Share2,
+  Star,
+  StarOff,
   ThumbsUp,
   Trash2,
 } from 'lucide-react'
@@ -59,7 +61,14 @@ function Avatar({ user, size = 'md', onClick }) {
   )
 }
 
-function PostMenu({ postId, onDelete }) {
+function PostMenu({
+  postId,
+  bookmarked,
+  isSignedIn,
+  onDelete,
+  onOpenAuth,
+  onToggleBookmark,
+}) {
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -93,6 +102,15 @@ function PostMenu({ postId, onDelete }) {
     await onDelete(postId)
   }
 
+  const handleToggleFavorite = async () => {
+    setOpen(false)
+    if (!isSignedIn) {
+      onOpenAuth?.()
+      return
+    }
+    await onToggleBookmark?.(postId)
+  }
+
   return (
     <div ref={menuRef} className="post-menu">
       <button
@@ -110,6 +128,10 @@ function PostMenu({ postId, onDelete }) {
           <button type="button" role="menuitem" onClick={handleShare}>
             <Share2 size={14} />
             Share
+          </button>
+          <button type="button" role="menuitem" onClick={handleToggleFavorite}>
+            {bookmarked ? <StarOff size={14} /> : <Star size={14} />}
+            {bookmarked ? 'Remove from favorites' : 'Add to favorites'}
           </button>
           <button type="button" role="menuitem" onClick={handleDelete}>
             <Trash2 size={14} />
@@ -165,7 +187,16 @@ function CommunityPostCard({
               {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
             </button>
           )}
-          {canDelete && <PostMenu postId={post.id} onDelete={onDeletePost} />}
+          {canDelete && (
+            <PostMenu
+              postId={post.id}
+              bookmarked={bookmarked}
+              isSignedIn={isSignedIn}
+              onDelete={onDeletePost}
+              onOpenAuth={onOpenAuth}
+              onToggleBookmark={onToggleBookmark}
+            />
+          )}
         </div>
       </header>
 
