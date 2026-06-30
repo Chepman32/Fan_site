@@ -26,6 +26,63 @@ service cloud.firestore {
       ]);
     }
 
+    function validPostAttachment(attachment) {
+      return attachment is map
+        && attachment.keys().hasOnly([
+          'name',
+          'size',
+          'type',
+          'provider',
+          'fileId',
+          'fileUniqueId',
+          'messageId',
+          'kind',
+          'storageStatus'
+        ])
+        && attachment.keys().hasAll([
+          'name',
+          'size',
+          'type',
+          'provider',
+          'fileId',
+          'kind',
+          'storageStatus'
+        ])
+        && attachment.name is string
+        && attachment.name.size() > 0
+        && attachment.name.size() <= 160
+        && attachment.size is number
+        && attachment.size > 0
+        && attachment.size <= 20971520
+        && attachment.type is string
+        && attachment.type.size() <= 120
+        && attachment.type.matches('^(image|video)/[A-Za-z0-9.+_-]+$')
+        && attachment.provider == 'telegram_bot'
+        && attachment.fileId is string
+        && attachment.fileId.size() > 0
+        && attachment.fileId.size() <= 512
+        && (!('fileUniqueId' in attachment)
+          || (attachment.fileUniqueId is string && attachment.fileUniqueId.size() <= 256))
+        && (!('messageId' in attachment)
+          || (attachment.messageId is string && attachment.messageId.size() <= 64))
+        && attachment.kind == 'ugc-post-media'
+        && attachment.storageStatus == 'stored';
+    }
+
+    function validPostAttachments() {
+      return !('attachments' in request.resource.data)
+        || (request.resource.data.attachments is list
+          && request.resource.data.attachments.size() > 0
+          && request.resource.data.attachments.size() <= 4
+          && validPostAttachment(request.resource.data.attachments[0])
+          && (request.resource.data.attachments.size() < 2
+            || validPostAttachment(request.resource.data.attachments[1]))
+          && (request.resource.data.attachments.size() < 3
+            || validPostAttachment(request.resource.data.attachments[2]))
+          && (request.resource.data.attachments.size() < 4
+            || validPostAttachment(request.resource.data.attachments[3])));
+    }
+
     function validRumorVoteMap() {
       return request.resource.data.votes.keys().hasOnly([
         'looks_real',
@@ -145,8 +202,19 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn()
         && request.resource.data.authorId == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'authorId',
+          'body',
+          'tags',
+          'linkUrl',
+          'attachments',
+          'createdAt',
+          'reactions'
+        ])
         && request.resource.data.body is string
         && request.resource.data.tags is list
+        && (!('linkUrl' in request.resource.data) || request.resource.data.linkUrl is string)
+        && validPostAttachments()
         && validReactionMap();
       allow update: if signedIn()
         && changedOnly(['reactions'])

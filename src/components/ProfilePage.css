@@ -536,7 +536,8 @@
 }
 
 .profile-bookmark-card .post-attachment,
-.profile-bookmark-card .post-link-card {
+.profile-bookmark-card .post-link-card,
+.profile-bookmark-card .post-media-grid {
   margin-bottom: 12px;
 }
 

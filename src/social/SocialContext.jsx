@@ -15,6 +15,7 @@ const FIREBASE_REQUEST_TIMEOUT_MS = 20000
 const P2P_MAX_FILES = 8
 const P2P_MAX_PROPERTIES = 12
 const P2P_PAYMENT_METHOD_IDS = P2P_PAYMENT_METHODS.map((method) => method.id)
+const POST_MAX_ATTACHMENTS = 4
 
 function withFirebaseTimeout(promise) {
   let timeoutId
@@ -70,6 +71,24 @@ function normalizeUsername(username) {
 
 function normalizeDisplayName(username) {
   return username.trim().replace(/\s+/g, ' ')
+}
+
+function normalizePostAttachments(attachments = []) {
+  return attachments
+    .filter((attachment) => /^(image|video)\//.test(attachment?.type || attachment?.mimeType || ''))
+    .map((attachment) => ({
+      name: String(attachment.name || attachment.fileName || 'post-media').slice(0, 160),
+      size: Number(attachment.size || attachment.fileSize || 0),
+      type: String(attachment.type || attachment.mimeType).slice(0, 120),
+      provider: 'telegram_bot',
+      fileId: String(attachment.fileId || '').slice(0, 512),
+      fileUniqueId: String(attachment.fileUniqueId || '').slice(0, 256),
+      messageId: String(attachment.messageId || '').slice(0, 64),
+      kind: 'ugc-post-media',
+      storageStatus: 'stored',
+    }))
+    .filter((attachment) => attachment.fileId && attachment.size > 0)
+    .slice(0, POST_MAX_ATTACHMENTS)
 }
 
 function getInitials(username) {
@@ -621,11 +640,12 @@ export function SocialProvider({ children }) {
     setAuthError('')
   }
 
-  const createPost = async ({ body, tags, linkUrl = '' }) => {
+  const createPost = async ({ body, tags, linkUrl = '', attachments = [] }) => {
     if (!requireUser()) return false
     const cleanBody = body.trim()
     const cleanLinkUrl = normalizePostUrl(linkUrl)
-    if (!cleanBody && !cleanLinkUrl) return false
+    const cleanAttachments = normalizePostAttachments(attachments)
+    if (!cleanBody && !cleanLinkUrl && !cleanAttachments.length) return false
     if (linkUrl.trim() && !cleanLinkUrl) {
       setBackendError('Enter a valid http or https link.')
       return false
@@ -641,6 +661,10 @@ export function SocialProvider({ children }) {
 
     if (cleanLinkUrl) {
       payload.linkUrl = cleanLinkUrl
+    }
+
+    if (cleanAttachments.length) {
+      payload.attachments = cleanAttachments
     }
 
     try {

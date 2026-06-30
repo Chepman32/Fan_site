@@ -12,6 +12,7 @@ import {
 import { REACTION_OPTIONS } from '../social/socialData'
 import { getPostAttachment, removeFirstPostUrl } from '../social/postLinks'
 import PostAttachment from './PostAttachment.jsx'
+import PostMediaAttachments from './PostMediaAttachments.jsx'
 import './SocialHub.css'
 
 const REACTION_ICONS = {
@@ -169,6 +170,7 @@ function CommunityPostCard({
       </header>
 
       {displayBody && <p className="post-body">{displayBody}</p>}
+      <PostMediaAttachments post={post} />
       <PostAttachment post={post} />
 
       <div className="post-tags">

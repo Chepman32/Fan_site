@@ -11,6 +11,8 @@ For local development, either run through Firebase Hosting's reserved config end
 
 IGN wiki sections can translate parsed English content in the browser through Google Cloud Translation Basic. Set `VITE_GOOGLE_TRANSLATE_API_KEY` in `.env.local`; translated payloads are cached in `localStorage` by language and parsed content hash, so unchanged IGN text is not translated again on the same browser.
 
+Community posts can attach up to four images/videos (20 MiB each). Media is uploaded through the authenticated Telegram storage bridge and streamed through `VITE_TELEGRAM_FILE_ENDPOINT`; the bot token remains server-side. Deploy the matching `telegramUpload`/`telegramFile` Firebase Functions or the Cloudflare Worker plus the updated Firestore rules before enabling this in production.
+
 Before sign-up, posting, voting, source submissions, comments, and messages can work against the live project:
 
 - Enable Firebase Authentication with the Email/Password provider.

@@ -5,7 +5,9 @@ import {
   ClipboardPaste,
   Clock,
   Hash,
+  ImagePlus,
   Link,
+  Loader2,
   LogIn,
   MessageSquare,
   Plus,
@@ -27,10 +29,13 @@ import {
   SOURCE_CATEGORIES,
 } from '../social/socialData'
 import { getFirstPostUrl, removeFirstPostUrl } from '../social/postLinks'
+import { uploadTelegramFile } from '../storage/telegramStorage'
 import './SocialHub.css'
 
 const TAB_IDS = ['feed', 'rumors', 'sources', 'polls']
 const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote }
+const MAX_POST_MEDIA = 4
+const MAX_POST_MEDIA_BYTES = 20 * 1024 * 1024
 const createDefaultQueryOptions = () => [
   { id: 'option-1', name: 'Option 1' },
   { id: 'option-2', name: 'Option 2' },
@@ -79,6 +84,13 @@ function formatAttachedQuery(query) {
   return [`Query: ${query.title}`, options ? `Options:\n${options}` : '']
     .filter(Boolean)
     .join('\n')
+}
+
+function mediaSelectionId(file) {
+  const randomId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(16).slice(2)}`
+  return `${file.name}-${file.lastModified}-${randomId}`
 }
 
 function userFallback(userId) {
@@ -232,8 +244,14 @@ function PostComposer({ onOpenAuth }) {
   const [queryOptionsDraft, setQueryOptionsDraft] = useState(createDefaultQueryOptions)
   const [attachedLink, setAttachedLink] = useState('')
   const [attachedQuery, setAttachedQuery] = useState(null)
+  const [attachedMedia, setAttachedMedia] = useState([])
+  const [composerError, setComposerError] = useState('')
+  const [uploadProgress, setUploadProgress] = useState('')
+  const [isPublishing, setIsPublishing] = useState(false)
   const attachMenuRef = useRef(null)
   const linkInputRef = useRef(null)
+  const mediaInputRef = useRef(null)
+  const attachedMediaRef = useRef([])
   const nextQueryOptionIdRef = useRef(3)
   const typedBodyUrl = getFirstPostUrl(body)
   const bodyUrl = attachedLink || typedBodyUrl
@@ -255,6 +273,14 @@ function PostComposer({ onOpenAuth }) {
     return () => window.removeEventListener('click', close)
   }, [attachMenuOpen])
 
+  useEffect(() => {
+    attachedMediaRef.current = attachedMedia
+  }, [attachedMedia])
+
+  useEffect(() => () => {
+    attachedMediaRef.current.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+  }, [])
+
   const toggleTag = (topic) => {
     setSelectedTags((tags) => {
       if (tags.includes(topic)) return tags.filter((tag) => tag !== topic)
@@ -265,18 +291,125 @@ function PostComposer({ onOpenAuth }) {
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!isSignedIn) { onOpenAuth(); return }
+    if (isPublishing) return
+
     const cleanTextBody = typedBodyUrl ? removeFirstPostUrl(body) : body.trim()
     const cleanQuery = formatAttachedQuery(attachedQuery)
     const cleanBody = cleanQuery
       ? [cleanTextBody, cleanQuery].filter(Boolean).join('\n\n')
       : cleanTextBody
-    const didCreate = await createPost({ body: cleanBody, tags: selectedTags, linkUrl: bodyUrl })
-    if (didCreate) {
-      setBody('')
-      setAttachedLink('')
-      setAttachedQuery(null)
-      setSelectedTags(['Trailers'])
+
+    if (!cleanBody && !bodyUrl && attachedMedia.length === 0) return
+
+    setComposerError('')
+    setUploadProgress('')
+    setIsPublishing(true)
+
+    try {
+      let preparedMedia = [...attachedMedia]
+      const pendingMedia = preparedMedia.filter((item) => !item.storedFile)
+
+      for (let index = 0; index < pendingMedia.length; index += 1) {
+        const pendingItem = pendingMedia[index]
+        setUploadProgress(`Uploading ${index + 1} of ${pendingMedia.length}: ${pendingItem.file.name}`)
+        const storedFile = await uploadTelegramFile(pendingItem.file, {
+          kind: 'ugc-post-media',
+          title: cleanBody.slice(0, 160) || 'Community post',
+        })
+        preparedMedia = preparedMedia.map((item) => (
+          item.id === pendingItem.id ? { ...item, storedFile } : item
+        ))
+        setAttachedMedia(preparedMedia)
+      }
+
+      setUploadProgress('Publishing post...')
+      const didCreate = await createPost({
+        body: cleanBody,
+        tags: selectedTags,
+        linkUrl: bodyUrl,
+        attachments: preparedMedia.map((item) => item.storedFile).filter(Boolean),
+      })
+
+      if (didCreate) {
+        preparedMedia.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+        setBody('')
+        setAttachedLink('')
+        setAttachedQuery(null)
+        setAttachedMedia([])
+        setSelectedTags(['Trailers'])
+      }
+    } catch (error) {
+      setComposerError(error.message || 'Could not upload the attached media.')
+    } finally {
+      setIsPublishing(false)
+      setUploadProgress('')
     }
+  }
+
+  const openMediaPicker = () => {
+    setAttachMenuOpen(false)
+    setComposerError('')
+    if (!isSignedIn) {
+      onOpenAuth()
+      return
+    }
+    mediaInputRef.current?.click()
+  }
+
+  const handleMediaSelection = (event) => {
+    const selectedFiles = Array.from(event.target.files || [])
+    event.target.value = ''
+    if (!selectedFiles.length) return
+
+    const invalidType = selectedFiles.find((file) => !/^(image|video)\//.test(file.type))
+    if (invalidType) {
+      setComposerError(`${invalidType.name} is not an image or video.`)
+      return
+    }
+
+    const oversizedFile = selectedFiles.find((file) => file.size > MAX_POST_MEDIA_BYTES)
+    if (oversizedFile) {
+      setComposerError(`${oversizedFile.name} is larger than 20 MB.`)
+      return
+    }
+
+    const existingKeys = new Set(attachedMedia.map((item) => (
+      `${item.file.name}-${item.file.size}-${item.file.lastModified}`
+    )))
+    const availableSlots = MAX_POST_MEDIA - attachedMedia.length
+    const uniqueFiles = selectedFiles.filter((file) => (
+      !existingKeys.has(`${file.name}-${file.size}-${file.lastModified}`)
+    ))
+    const acceptedFiles = uniqueFiles.slice(0, Math.max(availableSlots, 0))
+
+    if (acceptedFiles.length === 0) {
+      setComposerError(`Attach up to ${MAX_POST_MEDIA} unique images or videos.`)
+      return
+    }
+
+    setAttachedMedia((items) => [
+      ...items,
+      ...acceptedFiles.map((file) => ({
+        id: mediaSelectionId(file),
+        file,
+        previewUrl: URL.createObjectURL(file),
+        storedFile: null,
+      })),
+    ])
+    setComposerError(
+      acceptedFiles.length < uniqueFiles.length
+        ? `Only the first ${MAX_POST_MEDIA} media files were attached.`
+        : '',
+    )
+  }
+
+  const removeAttachedMedia = (id) => {
+    setAttachedMedia((items) => {
+      const removedItem = items.find((item) => item.id === id)
+      if (removedItem) URL.revokeObjectURL(removedItem.previewUrl)
+      return items.filter((item) => item.id !== id)
+    })
+    setComposerError('')
   }
 
   const openAttachmentModal = (type) => {
@@ -390,6 +523,10 @@ function PostComposer({ onOpenAuth }) {
                 <Link size={15} />
                 Link
               </button>
+              <button type="button" role="menuitem" onClick={openMediaPicker}>
+                <ImagePlus size={15} />
+                Image/Video
+              </button>
               <button type="button" role="menuitem" onClick={() => openAttachmentModal('query')}>
                 <MessageSquare size={15} />
                 Query
@@ -397,6 +534,14 @@ function PostComposer({ onOpenAuth }) {
             </div>
           )}
         </div>
+        <input
+          ref={mediaInputRef}
+          type="file"
+          accept="image/*,video/*"
+          multiple
+          hidden
+          onChange={handleMediaSelection}
+        />
       </div>
       {previewPost && (
         <div className="composer-preview" aria-label="Post attachment preview">
@@ -423,6 +568,29 @@ function PostComposer({ onOpenAuth }) {
           </button>
         </div>
       )}
+      {attachedMedia.length > 0 && (
+        <div className={`composer-media-grid media-count-${attachedMedia.length}`} aria-label="Attached images and videos">
+          {attachedMedia.map((item) => (
+            <div className="composer-media-item" key={item.id}>
+              {item.file.type.startsWith('video/') ? (
+                <video src={item.previewUrl} preload="metadata" muted />
+              ) : (
+                <img src={item.previewUrl} alt={item.file.name} />
+              )}
+              <span title={item.file.name}>{item.file.name}</span>
+              <button
+                type="button"
+                aria-label={`Remove ${item.file.name}`}
+                disabled={isPublishing}
+                onClick={() => removeAttachedMedia(item.id)}
+              >
+                <XCircle size={17} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {composerError && <div className="composer-error" role="alert">{composerError}</div>}
       <div className="composer-bottom">
         <div className="composer-tags" aria-label="Post topics">
           {SOCIAL_TOPICS.slice(0, 6).map((topic) => (
@@ -436,9 +604,9 @@ function PostComposer({ onOpenAuth }) {
             </button>
           ))}
         </div>
-        <button className="compose-button" type="submit">
-          <Plus size={16} />
-          {t.social.post}
+        <button className="compose-button" type="submit" disabled={isPublishing}>
+          {isPublishing ? <Loader2 size={16} className="composer-spin" /> : <Plus size={16} />}
+          {isPublishing ? (uploadProgress || 'Publishing...') : t.social.post}
         </button>
       </div>
       {attachmentModal && (

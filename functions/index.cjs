@@ -7,6 +7,7 @@ const { TronWeb } = require('tronweb')
 admin.initializeApp()
 
 const DEFAULT_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+const DEFAULT_MAX_POST_MEDIA_BYTES = 20 * 1024 * 1024
 const DEFAULT_PLATFORM_USDT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
 const IGN_ORIGIN = 'https://www.ign.com'
 const IGN_NEWS_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{2,180}$/
@@ -25,8 +26,9 @@ function setCorsHeaders(req, res, methods = 'POST, OPTIONS') {
     res.set('Access-Control-Allow-Origin', origin)
     res.set('Vary', 'Origin')
   }
-  res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+  res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type, Range')
   res.set('Access-Control-Allow-Methods', methods)
+  res.set('Access-Control-Expose-Headers', 'Accept-Ranges, Content-Length, Content-Range, Content-Type')
 }
 
 function maxUploadBytes() {
@@ -570,8 +572,8 @@ function parseMultipartUpload(req) {
 
 function telegramCaption(fields, decodedToken) {
   return [
-    'GTA VI Hub P2P upload',
-    fields.title ? `Listing: ${safeText(fields.title, 160)}` : '',
+    'GTA VI Hub upload',
+    fields.title ? `Title: ${safeText(fields.title, 160)}` : '',
     fields.kind ? `Kind: ${safeText(fields.kind, 60)}` : '',
     `Uploader: ${decodedToken.uid}`,
   ].filter(Boolean).join('\n').slice(0, 1024)
@@ -580,6 +582,50 @@ function telegramCaption(fields, decodedToken) {
 function telegramApiUrl(method) {
   const apiBaseUrl = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/+$/, '')
   return `${apiBaseUrl}/bot${process.env.TELEGRAM_BOT_TOKEN}/${method}`
+}
+
+function telegramDownloadUrl(filePath) {
+  const apiBaseUrl = (process.env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/+$/, '')
+  return `${apiBaseUrl}/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${String(filePath).replace(/^\/+/, '')}`
+}
+
+async function getTelegramFilePath(fileId) {
+  const response = await fetch(`${telegramApiUrl('getFile')}?file_id=${encodeURIComponent(fileId)}`)
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok || !payload.ok || !payload.result?.file_path) {
+    throw httpError(502, payload.description || 'Telegram could not resolve the media file.')
+  }
+
+  return payload.result.file_path
+}
+
+async function findPublicPostMedia(postId, fileId) {
+  if (!postId || postId.length > 128 || postId.includes('/')) {
+    throw httpError(400, 'Invalid post id.')
+  }
+  if (!fileId || fileId.length > 512) {
+    throw httpError(400, 'Invalid Telegram file id.')
+  }
+
+  const postSnapshot = await admin.firestore().collection('posts').doc(postId).get()
+  if (!postSnapshot.exists) throw httpError(404, 'Post media was not found.')
+
+  const attachments = postSnapshot.data()?.attachments
+  const attachment = Array.isArray(attachments)
+    ? attachments.find((item) => item?.fileId === fileId)
+    : null
+
+  if (
+    !attachment
+    || attachment.kind !== 'ugc-post-media'
+    || attachment.provider !== 'telegram_bot'
+    || !/^(image|video)\//.test(attachment.type || '')
+  ) {
+    throw httpError(404, 'Post media was not found.')
+  }
+
+  return attachment
 }
 
 exports.ignNewsArticle = onRequest({
@@ -656,6 +702,14 @@ exports.telegramUpload = onRequest({
   try {
     const decodedToken = await requireFirebaseUser(req)
     const { fields, upload } = await parseMultipartUpload(req)
+    if (fields.kind === 'ugc-post-media') {
+      if (!/^(image|video)\//.test(upload.mimeType)) {
+        throw httpError(415, 'Post attachments must be images or videos.')
+      }
+      if (upload.size > DEFAULT_MAX_POST_MEDIA_BYTES) {
+        throw httpError(413, 'Post images and videos must be 20 MB or smaller.')
+      }
+    }
     const telegramForm = new FormData()
     telegramForm.append('chat_id', process.env.TELEGRAM_STORAGE_CHAT_ID)
     telegramForm.append('caption', telegramCaption(fields, decodedToken))
@@ -691,8 +745,74 @@ exports.telegramUpload = onRequest({
       storageStatus: 'stored',
     })
   } catch (error) {
-    logger.error('P2P Telegram upload error', error)
+    logger.error('Telegram upload error', error)
     res.status(error.status || 500).json({ error: error.message || 'Telegram upload failed.' })
+  }
+})
+
+exports.telegramFile = onRequest({
+  region: 'us-central1',
+  timeoutSeconds: 120,
+  memory: '1GiB',
+}, async (req, res) => {
+  setCorsHeaders(req, res, 'GET, HEAD, OPTIONS')
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('')
+    return
+  }
+
+  if (!['GET', 'HEAD'].includes(req.method)) {
+    res.status(405).json({ error: 'Use GET to load post media.' })
+    return
+  }
+
+  if (!process.env.TELEGRAM_BOT_TOKEN) {
+    res.status(500).json({ error: 'Telegram storage is not configured.' })
+    return
+  }
+
+  try {
+    const postId = safeText(req.query.postId, 128)
+    const fileId = String(req.query.fileId || '').trim()
+    const attachment = await findPublicPostMedia(postId, fileId)
+    const filePath = await getTelegramFilePath(fileId)
+    const upstreamHeaders = {}
+    const range = req.get('range')
+    if (range) upstreamHeaders.Range = range
+
+    const fileResponse = await fetch(telegramDownloadUrl(filePath), {
+      method: req.method,
+      headers: upstreamHeaders,
+    })
+
+    if (!fileResponse.ok && fileResponse.status !== 206) {
+      throw httpError(502, 'Telegram could not stream the media file.')
+    }
+
+    const forwardedHeaders = ['accept-ranges', 'content-length', 'content-range', 'etag', 'last-modified']
+    forwardedHeaders.forEach((header) => {
+      const value = fileResponse.headers.get(header)
+      if (value) res.set(header, value)
+    })
+    res.set('Content-Type', attachment.type)
+    res.set('Cache-Control', 'public, max-age=3600, s-maxage=86400')
+    res.set('X-Content-Type-Options', 'nosniff')
+    res.status(fileResponse.status)
+
+    if (req.method === 'HEAD') {
+      res.end()
+      return
+    }
+
+    const fileBuffer = Buffer.from(await fileResponse.arrayBuffer())
+    res.send(fileBuffer)
+  } catch (error) {
+    logger.warn('Telegram post media fetch error', {
+      status: error.status || 500,
+      message: error.message,
+    })
+    res.status(error.status || 500).json({ error: error.message || 'Post media could not be loaded.' })
   }
 })
 

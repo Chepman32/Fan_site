@@ -20,6 +20,7 @@ import { SHOP_PRODUCT_BY_ID } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import CommunityPostCard from './CommunityPostCard.jsx'
 import PostAttachment from './PostAttachment.jsx'
+import PostMediaAttachments from './PostMediaAttachments.jsx'
 import './ProfilePage.css'
 
 function formatDate(date, lang = 'en') {
@@ -466,6 +467,7 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
                           </button>
                         </div>
                         <p>{post.body}</p>
+                        <PostMediaAttachments post={post} />
                         <PostAttachment post={post} />
                         <div className="profile-bookmark-tags">
                           {post.tags.map((tag) => (

@@ -14,7 +14,7 @@ This repository is a Vite + React application for a GTA VI fan/community site. T
 - A P2P marketplace where users can list digital goods/services, upload files, message each other, and settle crypto purchases.
 - Firebase Hosting, Firestore, Firebase Auth, Firebase Analytics, and Firebase Functions.
 - A Firebase Function that verifies buyer USDT payments and automatically pays sellers minus a platform commission.
-- A Telegram upload bridge for storing listing files without exposing the bot token in the browser.
+- A Telegram storage bridge for P2P listing files and public community post media without exposing the bot token in the browser.
 
 The production Firebase project currently used by the repository is:
 
@@ -93,7 +93,11 @@ Frontend source:
 - `src/p2p/p2pPayouts.js`
   - Authenticated browser client for the automatic payout function.
 - `src/p2p/telegramStorage.js`
-  - Authenticated browser client for Telegram upload endpoint.
+  - Compatibility re-export for the shared Telegram storage client.
+- `src/storage/telegramStorage.js`
+  - Authenticated Telegram upload client and public post-media URL builder.
+- `src/components/PostMediaAttachments.jsx`
+  - Renders Telegram-backed image/video attachments for public community posts.
 - `src/components/CryptoCheckoutPanel.jsx`
   - Standard shop checkout panel.
 - `src/components/P2PTradingPage.jsx`
@@ -228,6 +232,7 @@ Important rewrites:
 
 ```txt
 /api/telegram/upload -> telegramUpload function in us-central1
+/api/telegram/file   -> telegramFile function in us-central1
 /api/p2p/payout     -> p2pUsdtPayout function in us-central1
 /**                 -> /index.html
 ```
@@ -262,6 +267,7 @@ VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 VITE_GOOGLE_TRANSLATE_API_KEY=
 VITE_TELEGRAM_UPLOAD_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/upload
+VITE_TELEGRAM_FILE_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/file
 VITE_P2P_PAYOUT_ENDPOINT=/api/p2p/payout
 VITE_P2P_PLATFORM_USDT_ADDRESS=TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei
 VITE_P2P_COMMISSION_RATE=0.02
@@ -534,6 +540,8 @@ Security model:
 ### `posts`
 
 Stores community posts.
+
+Posts can contain up to four Telegram-backed image/video attachments. Each attachment is limited to 20 MiB so the hosted Telegram Bot API can stream it back through `getFile`.
 
 Security model:
 
@@ -1156,6 +1164,8 @@ There are two possible Telegram upload backends in this repo:
 1. Firebase Function:
    - Function name: `telegramUpload`
    - Hosting path: `/api/telegram/upload`
+   - Public post media function: `telegramFile`
+   - Public post media path: `/api/telegram/file`
    - Source: `functions/index.cjs`
 
 2. Cloudflare Worker:
@@ -1164,12 +1174,13 @@ There are two possible Telegram upload backends in this repo:
 
 ```txt
 https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/upload
+https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/file
 ```
 
 Frontend upload client:
 
 ```txt
-src/p2p/telegramStorage.js
+src/storage/telegramStorage.js
 ```
 
 Upload request behavior:
@@ -1190,6 +1201,14 @@ Function upload behavior:
 - Enforces `TELEGRAM_MAX_UPLOAD_BYTES`, default 50 MiB.
 - Uploads to Telegram Bot API `sendDocument`.
 - Returns metadata including Telegram file id and message id.
+
+Post media read behavior:
+
+- Accepts only GET/HEAD requests containing a post id and Telegram file id.
+- Verifies that the file id belongs to an `ugc-post-media` attachment on that public Firestore post.
+- Resolves the temporary Telegram file path server-side and streams the media without exposing the bot token.
+- Supports HTTP range requests for video playback.
+- Does not expose P2P listing files through the public media endpoint.
 
 When changing upload behavior:
 
@@ -1689,7 +1708,9 @@ Risk:
 When debugging uploads, first check:
 
 - `VITE_TELEGRAM_UPLOAD_ENDPOINT`
+- `VITE_TELEGRAM_FILE_ENDPOINT`
 - Firebase Hosting rewrite for `/api/telegram/upload`
+- Firebase Hosting rewrite for `/api/telegram/file`
 - Worker deployment state
 - Firebase Function logs
 
@@ -1918,7 +1939,7 @@ Change social data behavior:
 
 Change Telegram upload frontend:
 
-- `src/p2p/telegramStorage.js`
+- `src/storage/telegramStorage.js`
 
 Change Telegram upload Firebase backend:
 

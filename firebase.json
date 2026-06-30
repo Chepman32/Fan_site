@@ -33,6 +33,13 @@
         }
       },
       {
+        "source": "/api/telegram/file",
+        "function": {
+          "functionId": "telegramFile",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/api/p2p/payout",
         "function": {
           "functionId": "p2pUsdtPayout",

@@ -1,4 +1,5 @@
 const DEFAULT_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
+const DEFAULT_MAX_POST_MEDIA_BYTES = 20 * 1024 * 1024
 const FIREBASE_JWKS_URL = 'https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com'
 const JWKS_CACHE_MS = 60 * 60 * 1000
 
@@ -8,22 +9,26 @@ let cachedJwksAt = 0
 export default {
   async fetch(request, env, context) {
     const cors = corsHeaders(request, env)
+    const url = new URL(request.url)
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: cors })
     }
 
-    const url = new URL(request.url)
+    if (!isOriginAllowed(request, env)) {
+      return json({ error: 'Origin is not allowed.' }, 403, cors)
+    }
+
+    if (url.pathname === '/api/telegram/file') {
+      return servePostMedia(request, url, env, cors)
+    }
+
     if (url.pathname !== '/api/telegram/upload') {
       return json({ error: 'Not found.' }, 404, cors)
     }
 
     if (request.method !== 'POST') {
       return json({ error: 'Use POST to upload files.' }, 405, cors)
-    }
-
-    if (!isOriginAllowed(request, env)) {
-      return json({ error: 'Origin is not allowed.' }, 403, cors)
     }
 
     if (!env.TELEGRAM_BOT_TOKEN || !env.TELEGRAM_STORAGE_CHAT_ID) {
@@ -37,6 +42,14 @@ export default {
     try {
       const decodedToken = await requireFirebaseUser(request, env, context)
       const upload = await multipartUpload(request, env)
+      if (upload.kind === 'ugc-post-media') {
+        if (!/^(image|video)\//.test(upload.file.type)) {
+          throw httpError('Post attachments must be images or videos.', 415)
+        }
+        if (upload.file.size > DEFAULT_MAX_POST_MEDIA_BYTES) {
+          throw httpError('Post images and videos must be 20 MB or smaller.', 413)
+        }
+      }
       const telegramResponse = await sendTelegramDocument(upload, decodedToken, env)
 
       return json(telegramResponse, 200, cors)
@@ -55,8 +68,9 @@ function corsHeaders(request, env) {
 
   return {
     'Access-Control-Allow-Origin': allowedOrigin,
-    'Access-Control-Allow-Headers': 'Authorization, Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Authorization, Content-Type, Range',
+    'Access-Control-Allow-Methods': 'GET, HEAD, POST, OPTIONS',
+    'Access-Control-Expose-Headers': 'Accept-Ranges, Content-Length, Content-Range, Content-Type',
     'Access-Control-Max-Age': '86400',
   }
 }
@@ -155,8 +169,8 @@ async function sendTelegramDocument(upload, decodedToken, env) {
 
 function telegramCaption(upload, decodedToken) {
   return [
-    'GTA VI Hub P2P upload',
-    upload.title ? `Listing: ${upload.title}` : '',
+    'GTA VI Hub upload',
+    upload.title ? `Title: ${upload.title}` : '',
     upload.kind ? `Kind: ${upload.kind}` : '',
     `Uploader: ${decodedToken.user_id || decodedToken.sub}`,
   ].filter(Boolean).join('\n').slice(0, 1024)
@@ -165,6 +179,114 @@ function telegramCaption(upload, decodedToken) {
 function telegramApiUrl(method, env) {
   const apiBaseUrl = (env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/+$/, '')
   return `${apiBaseUrl}/bot${env.TELEGRAM_BOT_TOKEN}/${method}`
+}
+
+function telegramDownloadUrl(filePath, env) {
+  const apiBaseUrl = (env.TELEGRAM_API_BASE_URL || 'https://api.telegram.org').replace(/\/+$/, '')
+  return `${apiBaseUrl}/file/bot${env.TELEGRAM_BOT_TOKEN}/${String(filePath).replace(/^\/+/, '')}`
+}
+
+async function servePostMedia(request, url, env, cors) {
+  if (!['GET', 'HEAD'].includes(request.method)) {
+    return json({ error: 'Use GET to load post media.' }, 405, cors)
+  }
+  if (!env.TELEGRAM_BOT_TOKEN || !env.FIREBASE_PROJECT_ID) {
+    return json({ error: 'Telegram storage is not configured.' }, 500, cors)
+  }
+
+  try {
+    const postId = safeText(url.searchParams.get('postId'), 128)
+    const fileId = String(url.searchParams.get('fileId') || '').trim()
+    const attachment = await findPublicPostMedia(postId, fileId, env)
+    const filePath = await getTelegramFilePath(fileId, env)
+    const upstreamHeaders = new Headers()
+    const range = request.headers.get('range')
+    if (range) upstreamHeaders.set('Range', range)
+
+    const fileResponse = await fetch(telegramDownloadUrl(filePath, env), {
+      method: request.method,
+      headers: upstreamHeaders,
+    })
+
+    if (!fileResponse.ok && fileResponse.status !== 206) {
+      throw httpError('Telegram could not stream the media file.', 502)
+    }
+
+    const headers = new Headers(cors)
+    for (const header of ['accept-ranges', 'content-length', 'content-range', 'etag', 'last-modified']) {
+      const value = fileResponse.headers.get(header)
+      if (value) headers.set(header, value)
+    }
+    headers.set('Content-Type', attachment.type)
+    headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400')
+    headers.set('X-Content-Type-Options', 'nosniff')
+
+    return new Response(request.method === 'HEAD' ? null : fileResponse.body, {
+      status: fileResponse.status,
+      headers,
+    })
+  } catch (error) {
+    return json({ error: error.message || 'Post media could not be loaded.' }, error.status || 500, cors)
+  }
+}
+
+async function getTelegramFilePath(fileId, env) {
+  const response = await fetch(`${telegramApiUrl('getFile', env)}?file_id=${encodeURIComponent(fileId)}`)
+  const payload = await response.json().catch(() => ({}))
+
+  if (!response.ok || !payload.ok || !payload.result?.file_path) {
+    throw httpError(payload.description || 'Telegram could not resolve the media file.', 502)
+  }
+
+  return payload.result.file_path
+}
+
+async function findPublicPostMedia(postId, fileId, env) {
+  if (!postId || postId.length > 128 || postId.includes('/')) {
+    throw httpError('Invalid post id.', 400)
+  }
+  if (!fileId || fileId.length > 512) {
+    throw httpError('Invalid Telegram file id.', 400)
+  }
+
+  const documentUrl = new URL(
+    `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(env.FIREBASE_PROJECT_ID)}/databases/(default)/documents/posts/${encodeURIComponent(postId)}`,
+  )
+  const response = await fetch(documentUrl)
+  if (response.status === 404) throw httpError('Post media was not found.', 404)
+  if (!response.ok) throw httpError('Post media could not be verified.', 502)
+
+  const document = await response.json()
+  const post = firestoreValue({ mapValue: { fields: document.fields || {} } })
+  const attachment = Array.isArray(post.attachments)
+    ? post.attachments.find((item) => item?.fileId === fileId)
+    : null
+
+  if (
+    !attachment
+    || attachment.kind !== 'ugc-post-media'
+    || attachment.provider !== 'telegram_bot'
+    || !/^(image|video)\//.test(attachment.type || '')
+  ) {
+    throw httpError('Post media was not found.', 404)
+  }
+
+  return attachment
+}
+
+function firestoreValue(value = {}) {
+  if ('stringValue' in value) return value.stringValue
+  if ('integerValue' in value) return Number(value.integerValue)
+  if ('doubleValue' in value) return Number(value.doubleValue)
+  if ('booleanValue' in value) return value.booleanValue
+  if ('nullValue' in value) return null
+  if ('arrayValue' in value) return (value.arrayValue.values || []).map(firestoreValue)
+  if ('mapValue' in value) {
+    return Object.fromEntries(
+      Object.entries(value.mapValue.fields || {}).map(([key, fieldValue]) => [key, firestoreValue(fieldValue)]),
+    )
+  }
+  return undefined
 }
 
 async function requireFirebaseUser(request, env, context) {
