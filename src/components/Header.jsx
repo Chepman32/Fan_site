@@ -1,11 +1,10 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import {
   Car,
   Crosshair,
   Ellipsis,
   Globe,
   Handshake,
-  Home,
   Info,
   LogOut,
   MapPinned,
@@ -46,10 +45,8 @@ function Header({
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
-  const [desktopMoreOpen, setDesktopMoreOpen] = useState(false)
   const [bottomMoreOpen, setBottomMoreOpen] = useState(false)
   const [locationKey, setLocationKey] = useState(getLocationKey)
-  const desktopMoreRef = useRef(null)
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
@@ -70,48 +67,17 @@ function Header({
   }, [])
 
   useEffect(() => {
-    if (!langOpen && !desktopMoreOpen && !bottomMoreOpen) return undefined
+    if (!langOpen && !bottomMoreOpen) return undefined
     const close = () => {
       setLangOpen(false)
-      setDesktopMoreOpen(false)
       setBottomMoreOpen(false)
     }
     window.addEventListener('click', close)
     return () => window.removeEventListener('click', close)
-  }, [langOpen, desktopMoreOpen, bottomMoreOpen])
-
-  useEffect(() => {
-    if (!desktopMoreOpen) return undefined
-
-    const closeWhenPointerLeaves = (event) => {
-      const wrapper = desktopMoreRef.current
-      const menu = wrapper?.querySelector('.nav-more-menu')
-      if (!wrapper || !menu) return
-
-      const wrapperRect = wrapper.getBoundingClientRect()
-      const menuRect = menu.getBoundingClientRect()
-      const hoverArea = {
-        top: Math.min(wrapperRect.top, menuRect.top) - 10,
-        right: Math.max(wrapperRect.right, menuRect.right) + 10,
-        bottom: Math.max(wrapperRect.bottom, menuRect.bottom) + 10,
-        left: Math.min(wrapperRect.left, menuRect.left) - 10,
-      }
-
-      const isInsideHoverArea = event.clientX >= hoverArea.left
-        && event.clientX <= hoverArea.right
-        && event.clientY >= hoverArea.top
-        && event.clientY <= hoverArea.bottom
-
-      if (!isInsideHoverArea) setDesktopMoreOpen(false)
-    }
-
-    window.addEventListener('mousemove', closeWhenPointerLeaves)
-    return () => window.removeEventListener('mousemove', closeWhenPointerLeaves)
-  }, [desktopMoreOpen])
+  }, [langOpen, bottomMoreOpen])
 
   const closeHeaderMenus = () => {
     setLangOpen(false)
-    setDesktopMoreOpen(false)
     setBottomMoreOpen(false)
   }
 
@@ -130,23 +96,25 @@ function Header({
 
   const currentPath = locationKey.split('#')[0] || '/'
   const currentHash = locationKey.includes('#') ? `#${locationKey.split('#')[1]}` : ''
-  const moreHashes = new Set(['#game-info', '#characters', '#weapons', '#vehicles', '#social-media-guide', '#media', '#leonida'])
-
   const isActive = (target) => {
-    if (target === 'main') return currentPath === '/' && !currentHash
     if (target === 'shop') return currentPath === '/shop'
-    if (target === 'p2p') return currentPath === '/p2p'
+    if (target === 'p2p') return currentPath === '/' || currentPath === '/p2p'
     if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
     if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
     if (target === 'settings') return currentPath === '/settings'
-    if (target === 'about') return currentPath === '/' && currentHash === '#game-info'
-    if (target === 'characters') return currentPath === '/' && currentHash === '#characters'
-    if (target === 'leonida') return (currentPath === '/' && currentHash === '#leonida') || currentPath.startsWith('/locations/')
-    if (target === 'vehicles') return currentPath === '/' && currentHash === '#vehicles'
-    if (target === 'weapons') return currentPath === '/' && currentHash === '#weapons'
-    if (target === 'social-media') return currentPath === '/' && currentHash === '#social-media-guide'
-    if (target === 'more') return bottomMoreOpen || currentPath === '/community' || currentPath.startsWith('/locations/') || moreHashes.has(currentHash)
+    if (target === 'about') return currentPath === '/leonida' && currentHash === '#about'
+    if (target === 'characters') return currentPath === '/leonida/characters'
+    if (target === 'locations') return currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
+    if (target === 'leonida') {
+      return (currentPath === '/leonida' && currentHash !== '#about')
+        || currentPath.startsWith('/leonida/')
+        || currentPath.startsWith('/locations/')
+    }
+    if (target === 'vehicles') return currentPath === '/leonida/vehicles'
+    if (target === 'weapons') return currentPath === '/leonida/weapons'
+    if (target === 'social-media') return currentPath === '/leonida/social-media'
+    if (target === 'more') return bottomMoreOpen || currentPath === '/community'
     return false
   }
 
@@ -158,20 +126,20 @@ function Header({
   const ariaCurrent = (target) => (isActive(target) ? 'page' : undefined)
 
   const bottomTabs = [
-    { key: 'main', href: '/', label: t.nav.main || 'Main', icon: Home },
-    { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
+    { key: 'p2p', href: '/', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
+    { key: 'leonida', href: '/leonida', label: t.nav.leonida || 'Leonida', icon: MapPinned },
     { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
     { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
   ]
 
   const moreLinks = [
-    { key: 'about', href: '/#game-info', label: t.nav.about, icon: Info },
-    { key: 'characters', href: '/#characters', label: t.nav.characters, icon: UserRoundSearch },
-    { key: 'leonida', href: '/#leonida', label: t.nav.locations || 'Locations', icon: MapPinned },
-    { key: 'vehicles', href: '/#vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
-    { key: 'weapons', href: '/#weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
+    { key: 'about', href: '/leonida#about', label: t.nav.about, icon: Info },
+    { key: 'characters', href: '/leonida/characters', label: t.nav.characters, icon: UserRoundSearch },
+    { key: 'locations', href: '/leonida/locations', label: t.nav.locations || 'Locations', icon: MapPinned },
+    { key: 'vehicles', href: '/leonida/vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
+    { key: 'weapons', href: '/leonida/weapons', label: t.nav.weapons || 'Weapons', icon: Crosshair },
     { key: 'community', href: '/community', label: t.nav.community || t.nav.social || 'Community', icon: UsersRound },
-    { key: 'social-media', href: '/#social-media-guide', label: t.nav.socialMedia || 'Social Media', icon: Radio },
+    { key: 'social-media', href: '/leonida/social-media', label: t.nav.socialMedia || 'Social Media', icon: Radio },
   ]
 
   return (
@@ -185,95 +153,19 @@ function Header({
         <div className="nav-links">
           <a
             className={navLinkClass('p2p', 'nav-p2p-link')}
-            href="/p2p"
-            onClick={(event) => navigate(event, '/p2p')}
+            href="/"
+            onClick={(event) => navigate(event, '/')}
             aria-current={ariaCurrent('p2p')}
           >
             {t.nav.p2pTrading || 'P2P Trading'}
           </a>
           <a className={navLinkClass('shop')} href="/shop" onClick={(event) => navigate(event, '/shop')} aria-current={ariaCurrent('shop')}>{t.nav.shop || 'Shop'}</a>
-          <a className={navLinkClass('leonida')} href="/#leonida" onClick={(event) => navigate(event, '/#leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
+          <a className={navLinkClass('leonida')} href="/leonida" onClick={(event) => navigate(event, '/leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
           <a className={navLinkClass('news')} href="/news" onClick={(event) => navigate(event, '/news')} aria-current={ariaCurrent('news')}>{t.nav.news}</a>
-          <a className={navLinkClass('about')} href="/#game-info" onClick={(event) => navigate(event, '/#game-info')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
+          <a className={navLinkClass('about')} href="/leonida#about" onClick={(event) => navigate(event, '/leonida#about')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
           <a className={navLinkClass('community')} href="/community" onClick={(event) => navigate(event, '/community')} aria-current={ariaCurrent('community')}>
             {t.nav.community || t.nav.social || 'Community'}
           </a>
-          <div
-            ref={desktopMoreRef}
-            className={`nav-more ${desktopMoreOpen ? 'open' : ''}`}
-            onMouseEnter={() => setDesktopMoreOpen(true)}
-            onMouseLeave={() => setDesktopMoreOpen(false)}
-            onFocusCapture={() => setDesktopMoreOpen(true)}
-            onBlurCapture={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) {
-                setDesktopMoreOpen(false)
-              }
-            }}
-          >
-            <button
-              type="button"
-              className="nav-more-toggle"
-              aria-label="Show more guide links"
-              aria-haspopup="true"
-              aria-expanded={desktopMoreOpen}
-              onClick={(event) => {
-                event.stopPropagation()
-                setDesktopMoreOpen(true)
-              }}
-            >
-              <Ellipsis size={20} />
-            </button>
-            <div className="nav-more-menu" role="menu">
-              <a
-                className={navLinkClass('characters')}
-                href="/#characters"
-                role="menuitem"
-                onClick={(event) => navigate(event, '/#characters', {
-                  closeMenus: false,
-                  blurTarget: false,
-                  stopPropagation: true,
-                })}
-              >
-                {t.nav.characters || 'Characters'}
-              </a>
-              <a
-                className={navLinkClass('weapons')}
-                href="/#weapons"
-                role="menuitem"
-                onClick={(event) => navigate(event, '/#weapons', {
-                  closeMenus: false,
-                  blurTarget: false,
-                  stopPropagation: true,
-                })}
-              >
-                {t.nav.weapons || 'Weapons'}
-              </a>
-              <a
-                className={navLinkClass('vehicles')}
-                href="/#vehicles"
-                role="menuitem"
-                onClick={(event) => navigate(event, '/#vehicles', {
-                  closeMenus: false,
-                  blurTarget: false,
-                  stopPropagation: true,
-                })}
-              >
-                {t.nav.vehicles || 'Vehicles'}
-              </a>
-              <a
-                className={navLinkClass('social-media')}
-                href="/#social-media-guide"
-                role="menuitem"
-                onClick={(event) => navigate(event, '/#social-media-guide', {
-                  closeMenus: false,
-                  blurTarget: false,
-                  stopPropagation: true,
-                })}
-              >
-                {t.nav.socialMedia || 'Social Media'}
-              </a>
-            </div>
-          </div>
         </div>
 
         <div className="nav-auth">

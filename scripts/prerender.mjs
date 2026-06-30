@@ -47,16 +47,17 @@ function sitemapXml() {
   const today = new Date().toISOString().slice(0, 10)
   const priorities = new Map([
     ['/', '1.0'],
+    ['/leonida', '0.9'],
+    ['/leonida/locations', '0.8'],
     ['/community', '0.8'],
     ['/shop', '0.8'],
     ['/news', '0.8'],
-    ['/p2p', '0.7'],
-    ['/locations/vice-city', '0.8'],
+    ['/leonida/locations/vice-city', '0.8'],
   ])
   const frequencies = new Map([
     ['/community', 'daily'],
     ['/news', 'daily'],
-    ['/p2p', 'daily'],
+    ['/', 'daily'],
     ['/shop', 'weekly'],
   ])
 

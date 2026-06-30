@@ -2,67 +2,97 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://leonidaloot.com/</loc>
-    <lastmod>2026-06-23</lastmod>
-    <changefreq>weekly</changefreq>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://leonidaloot.com/leonida</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://leonidaloot.com/leonida/characters</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://leonidaloot.com/leonida/locations</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://leonidaloot.com/leonida/vehicles</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://leonidaloot.com/leonida/weapons</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://leonidaloot.com/leonida/social-media</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://leonidaloot.com/community</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://leonidaloot.com/shop</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://leonidaloot.com/news</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/p2p</loc>
-    <lastmod>2026-06-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://leonidaloot.com/locations/ambrosia</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/ambrosia</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/locations/grassrivers</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/grassrivers</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/locations/leonida-keys</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/leonida-keys</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/locations/mount-kalaga-national-park</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/mount-kalaga-national-park</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/locations/port-gellhorn</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/port-gellhorn</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://leonidaloot.com/locations/vice-city</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://leonidaloot.com/leonida/locations/vice-city</loc>
+    <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

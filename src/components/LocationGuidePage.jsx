@@ -76,7 +76,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
     return (
       <section className="section-padding location-detail-section">
         <div className="container location-detail-container">
-          <a className="location-back-link" href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>
+          <a className="location-back-link" href="/leonida/locations" onClick={(event) => navigate(event, '/leonida/locations')}>
             <ArrowLeft size={16} />
             Leonida locations
           </a>
@@ -96,7 +96,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
   return (
     <section className="section-padding location-detail-section">
       <div className="container location-detail-container">
-        <a className="location-back-link" href="/#leonida" onClick={(event) => navigate(event, '/#leonida')}>
+        <a className="location-back-link" href="/leonida/locations" onClick={(event) => navigate(event, '/leonida/locations')}>
           <ArrowLeft size={16} />
           Leonida locations
         </a>

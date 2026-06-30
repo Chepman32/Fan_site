@@ -163,7 +163,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                   <Inbox size={22} />
                   <strong>No dialogs yet</strong>
                   <span>Open a P2P product and message the seller to start a conversation.</span>
-                  <button type="button" onClick={() => onNavigate?.('/p2p')}>Browse P2P</button>
+                  <button type="button" onClick={() => onNavigate?.('/')}>Browse P2P</button>
                 </div>
               )}
             </div>

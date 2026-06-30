@@ -1113,7 +1113,7 @@ function SimpleGuideSection({ config }) {
   )
 }
 
-function VehiclesGuide() {
+export function VehiclesGuide() {
   const { t, lang } = useTranslation()
   const { translateVehicleNames } = usePreferences()
   const copy = guideCopy(t, 'vehicles')
@@ -1323,12 +1323,19 @@ function VehiclesGuide() {
 function IgnGuideSections() {
   return (
     <>
-      {SIMPLE_GUIDES.map((config) => (
-        <SimpleGuideSection key={config.id} config={config} />
-      ))}
+      <WeaponsGuide />
+      <SocialMediaGuide />
       <VehiclesGuide />
     </>
   )
+}
+
+export function WeaponsGuide() {
+  return <SimpleGuideSection config={SIMPLE_GUIDES[0]} />
+}
+
+export function SocialMediaGuide() {
+  return <SimpleGuideSection config={SIMPLE_GUIDES[1]} />
 }
 
 export default IgnGuideSections

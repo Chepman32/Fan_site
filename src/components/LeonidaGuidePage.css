@@ -1,0 +1,191 @@
+.leonida-guide-page {
+  --guide-accent: var(--accent-pink);
+  background: var(--bg-primary);
+}
+
+.leonida-guide-page.guide-cyan { --guide-accent: var(--accent-cyan); }
+.leonida-guide-page.guide-purple { --guide-accent: #a66dff; }
+.leonida-guide-page.guide-orange { --guide-accent: var(--accent-orange); }
+.leonida-guide-page.guide-blue { --guide-accent: #5aa7ff; }
+
+.leonida-guide-hero {
+  position: relative;
+  min-height: 540px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.leonida-guide-hero > img,
+.leonida-guide-hero-scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.leonida-guide-hero > img {
+  z-index: -2;
+  object-fit: cover;
+}
+
+.leonida-guide-hero-scrim {
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(5, 6, 12, 0.94) 0%, rgba(5, 6, 12, 0.58) 48%, rgba(5, 6, 12, 0.08) 82%),
+    linear-gradient(180deg, rgba(5, 6, 12, 0.22), rgba(5, 6, 12, 0.12) 45%, var(--bg-primary) 100%);
+}
+
+.leonida-guide-hero-content {
+  padding-top: 120px;
+  padding-bottom: 72px;
+}
+
+.leonida-guide-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 48px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.leonida-guide-back:hover {
+  color: #fff;
+}
+
+.leonida-guide-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.leonida-guide-title-icon {
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin-top: 7px;
+  background: color-mix(in srgb, var(--guide-accent) 16%, rgba(5, 6, 12, 0.72));
+  border: 1px solid color-mix(in srgb, var(--guide-accent) 58%, transparent);
+  border-radius: 8px;
+  color: var(--guide-accent);
+  backdrop-filter: blur(12px);
+}
+
+.leonida-guide-title-row p {
+  color: var(--guide-accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.leonida-guide-title-row h1 {
+  max-width: 860px;
+  color: #fff;
+  font-size: clamp(58px, 8vw, 118px);
+  font-weight: 400;
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.leonida-guide-description {
+  max-width: 680px;
+  margin: 24px 0 0 70px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.leonida-guide-tabs {
+  position: sticky;
+  top: 70px;
+  z-index: 45;
+  background: color-mix(in srgb, var(--bg-primary) 90%, transparent);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(18px);
+}
+
+.leonida-guide-tabs .container {
+  display: flex;
+  gap: 5px;
+  overflow-x: auto;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  scrollbar-width: none;
+}
+
+.leonida-guide-tabs .container::-webkit-scrollbar {
+  display: none;
+}
+
+.leonida-guide-tabs a {
+  display: inline-flex;
+  min-height: 40px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 0 14px;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.leonida-guide-tabs a:hover,
+.leonida-guide-tabs a.active {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--guide-accent) 11%, transparent);
+  border-color: color-mix(in srgb, var(--guide-accent) 30%, transparent);
+}
+
+.leonida-guide-page > .characters,
+.leonida-guide-page > .leonida-section,
+.leonida-guide-page > .ign-guide-section {
+  padding-top: 84px;
+}
+
+@media (max-width: 720px) {
+  .leonida-guide-hero {
+    min-height: 490px;
+  }
+
+  .leonida-guide-hero-scrim {
+    background:
+      linear-gradient(90deg, rgba(5, 6, 12, 0.82), rgba(5, 6, 12, 0.28)),
+      linear-gradient(180deg, rgba(5, 6, 12, 0.15), var(--bg-primary) 100%);
+  }
+
+  .leonida-guide-hero-content {
+    padding-bottom: 54px;
+  }
+
+  .leonida-guide-back {
+    margin-bottom: 36px;
+  }
+
+  .leonida-guide-title-row h1 {
+    font-size: clamp(47px, 15vw, 72px);
+  }
+
+  .leonida-guide-description {
+    margin-left: 0;
+  }
+
+  .leonida-guide-tabs {
+    top: 62px;
+  }
+}

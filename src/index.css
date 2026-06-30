@@ -220,7 +220,6 @@ html.js:not(.app-ready) .hero .animate-fade-in-up {
   border-color: var(--nav-border);
 }
 
-[data-theme='light'] .nav-more-toggle,
 [data-theme='light'] .nav-auth button,
 [data-theme='light'] .nav-profile,
 [data-theme='light'] .nav-cart-toggle,
@@ -230,7 +229,6 @@ html.js:not(.app-ready) .hero .animate-fade-in-up {
   color: var(--text-primary);
 }
 
-[data-theme='light'] .nav-more-menu,
 [data-theme='light'] .bottom-more-menu,
 [data-theme='light'] .lang-dropdown,
 [data-theme='light'] .post-menu-dropdown {
@@ -239,7 +237,6 @@ html.js:not(.app-ready) .hero .animate-fade-in-up {
   box-shadow: var(--shadow-soft);
 }
 
-[data-theme='light'] .nav-more-menu a,
 [data-theme='light'] .bottom-more-menu a,
 [data-theme='light'] .lang-dropdown li button {
   background: var(--control-bg);

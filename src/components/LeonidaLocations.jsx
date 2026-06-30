@@ -129,7 +129,7 @@ function LeonidaLocations({ onNavigate }) {
 
             <div className="major-locations-grid">
               {displayData.majorLocations.map((location) => {
-                const href = location.path || locationPathFromIgnUrl(location.url) || (location.id ? `/locations/${location.id}` : LEONIDA_URL)
+                const href = location.path || locationPathFromIgnUrl(location.url) || (location.id ? `/leonida/locations/${location.id}` : LEONIDA_URL)
 
                 return (
                   <a

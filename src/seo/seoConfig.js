@@ -1,4 +1,5 @@
 import { LOCATION_GUIDES, getLocationGuideBySlug } from '../data/ignWiki'
+import { LEONIDA_SECTIONS, getLeonidaSection } from '../data/leonidaSections'
 
 export const SITE_ORIGIN = 'https://leonidaloot.com'
 export const SITE_NAME = 'Leonida Loot'
@@ -6,14 +7,6 @@ export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`
 export const DEFAULT_IMAGE_ALT = 'Leonida Loot GTA VI fan hub preview'
 
 const DEFAULT_DESCRIPTION = 'Leonida Loot is a GTA VI fan hub with Vice City and Leonida guides, news, media, community posts, creator shop assets, and a P2P digital marketplace.'
-const HOME_SECTIONS = [
-  { name: 'GTA VI game info', url: `${SITE_ORIGIN}/#game-info` },
-  { name: 'Characters', url: `${SITE_ORIGIN}/#characters` },
-  { name: 'Weapons guide', url: `${SITE_ORIGIN}/#weapons` },
-  { name: 'Vehicles guide', url: `${SITE_ORIGIN}/#vehicles` },
-  { name: 'Leonida locations', url: `${SITE_ORIGIN}/#leonida` },
-  { name: 'News', url: `${SITE_ORIGIN}/news` },
-]
 const SHOP_CATEGORIES = [
   'GTA VI stream overlays',
   'Leonida profile banners',
@@ -73,25 +66,7 @@ function pageMetadata({
 }
 
 function homeMetadata() {
-  return pageMetadata({
-    route: '/',
-    title: 'Leonida Loot | GTA VI Fan Hub, Guides, News & Creator Assets',
-    description: DEFAULT_DESCRIPTION,
-    schemaType: 'WebPage',
-    extraJsonLd: [
-      {
-        '@type': 'ItemList',
-        '@id': `${SITE_ORIGIN}/#home-sections`,
-        name: 'Leonida Loot GTA VI guide sections',
-        itemListElement: HOME_SECTIONS.map((section, index) => ({
-          '@type': 'ListItem',
-          position: index + 1,
-          name: section.name,
-          url: section.url,
-        })),
-      },
-    ],
-  })
+  return p2pMetadata('/')
 }
 
 function communityMetadata() {
@@ -134,22 +109,71 @@ function shopMetadata() {
   })
 }
 
-function p2pMetadata() {
+function p2pMetadata(route = '/') {
   return pageMetadata({
-    route: '/p2p',
-    title: 'P2P Digital Marketplace',
+    route,
+    title: 'P2P Digital Marketplace | Leonida Loot',
     description: 'Trade GTA VI fan assets, stream kits, guides, services, and digital goods through the Leonida Loot P2P marketplace.',
     schemaType: 'CollectionPage',
-    breadcrumbs: [{ name: 'P2P Marketplace', url: absoluteUrl('/p2p') }],
+    breadcrumbs: route === '/' ? [] : [{ name: 'P2P Marketplace', url: absoluteUrl(route) }],
     extraJsonLd: [
       {
         '@type': 'Service',
-        '@id': `${SITE_ORIGIN}/p2p#marketplace-service`,
+        '@id': `${SITE_ORIGIN}/#marketplace-service`,
         name: 'Leonida Loot P2P digital marketplace',
         serviceType: 'Digital goods marketplace',
         provider: { '@id': `${SITE_ORIGIN}/#organization` },
         areaServed: 'Worldwide',
       },
+    ],
+  })
+}
+
+function leonidaMetadata() {
+  return pageMetadata({
+    route: '/leonida',
+    title: 'Leonida GTA VI World Guide',
+    description: 'Explore Leonida characters, locations, vehicles, weapons, and in-game social media through focused GTA VI guide collections.',
+    schemaType: 'CollectionPage',
+    breadcrumbs: [{ name: 'Leonida', url: absoluteUrl('/leonida') }],
+    extraJsonLd: [
+      {
+        '@type': 'ItemList',
+        '@id': `${SITE_ORIGIN}/leonida#field-guide`,
+        name: 'Leonida GTA VI field guide',
+        itemListElement: LEONIDA_SECTIONS.map((section, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: section.title,
+          url: absoluteUrl(section.href),
+        })),
+      },
+    ],
+  })
+}
+
+function leonidaSectionMetadata(route) {
+  const sectionId = route.slice('/leonida/'.length)
+  const section = getLeonidaSection(sectionId)
+
+  if (!section) {
+    return pageMetadata({
+      route,
+      title: 'Leonida Guide Not Found',
+      description: 'This Leonida guide was not found. Browse the available GTA VI world guide collections on Leonida Loot.',
+      robots: 'noindex,follow',
+      breadcrumbs: [{ name: 'Leonida', url: absoluteUrl('/leonida') }],
+    })
+  }
+
+  return pageMetadata({
+    route,
+    title: `GTA VI ${section.title} Guide`,
+    description: section.description,
+    schemaType: 'CollectionPage',
+    breadcrumbs: [
+      { name: 'Leonida', url: absoluteUrl('/leonida') },
+      { name: section.title, url: absoluteUrl(route) },
     ],
   })
 }
@@ -276,7 +300,9 @@ function settingsMetadata() {
 }
 
 function locationMetadata(route) {
-  const slug = route.slice('/locations/'.length)
+  const slug = route.startsWith('/leonida/locations/')
+    ? route.slice('/leonida/locations/'.length)
+    : route.slice('/locations/'.length)
   const guide = getLocationGuideBySlug(slug)
 
   if (!guide) {
@@ -286,7 +312,7 @@ function locationMetadata(route) {
       description: 'This Leonida location guide was not found. Browse the available GTA VI Leonida location pages on Leonida Loot.',
       robots: 'noindex,follow',
       breadcrumbs: [
-        { name: 'Leonida Locations', url: `${SITE_ORIGIN}/#leonida` },
+        { name: 'Leonida Locations', url: absoluteUrl('/leonida/locations') },
         { name: 'Location not found', url: absoluteUrl(route) },
       ],
     })
@@ -299,7 +325,7 @@ function locationMetadata(route) {
     schemaType: 'Article',
     type: 'article',
     breadcrumbs: [
-      { name: 'Leonida Locations', url: `${SITE_ORIGIN}/#leonida` },
+      { name: 'Leonida Locations', url: absoluteUrl('/leonida/locations') },
       { name: guide.name, url: absoluteUrl(route) },
     ],
     extraJsonLd: [
@@ -322,13 +348,16 @@ export function createSeoMetadata({ route, state = { users: [] }, currentProfile
 
   if (cleanRoute === '/community') return communityMetadata()
   if (cleanRoute === '/shop') return shopMetadata()
-  if (cleanRoute === '/p2p') return p2pMetadata()
+  if (cleanRoute === '/p2p') return p2pMetadata('/')
+  if (cleanRoute === '/leonida') return leonidaMetadata()
   if (cleanRoute === '/news') return newsMetadata()
   if (cleanRoute === '/messages') return messagesMetadata()
   if (cleanRoute === '/settings') return settingsMetadata()
   if (cleanRoute === '/profile') return ownProfileMetadata(currentProfile)
   if (cleanRoute.startsWith('/profile/')) return publicProfileMetadata(cleanRoute, state)
+  if (cleanRoute.startsWith('/leonida/locations/')) return locationMetadata(cleanRoute)
   if (cleanRoute.startsWith('/locations/')) return locationMetadata(cleanRoute)
+  if (cleanRoute.startsWith('/leonida/')) return leonidaSectionMetadata(cleanRoute)
   if (cleanRoute.startsWith('/news/')) return newsArticleMetadata(cleanRoute)
   return homeMetadata()
 }
@@ -394,10 +423,11 @@ export function createJsonLd(metadata) {
 
 export const SITEMAP_ROUTES = [
   '/',
+  '/leonida',
+  ...LEONIDA_SECTIONS.map((section) => section.href),
   '/community',
   '/shop',
   '/news',
-  '/p2p',
   ...LOCATION_GUIDES.map((guide) => guide.path),
 ]
 

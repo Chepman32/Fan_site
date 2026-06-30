@@ -43,7 +43,7 @@ export const LOCATION_GUIDES = [
 ].map((guide) => ({
   ...guide,
   url: `${IGN_ORIGIN}${guide.ignPath}`,
-  path: `/locations/${guide.id}`,
+  path: `/leonida/locations/${guide.id}`,
 }))
 
 export const FALLBACK_LEONIDA_DATA = {

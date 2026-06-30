@@ -1,10 +1,4 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
-import Hero from './components/Hero'
-import GameInfo from './components/GameInfo'
-import Characters from './components/Characters'
-import IgnGuideSections from './components/IgnGuide'
-import MediaGallery from './components/MediaGallery'
-import LeonidaLocations from './components/LeonidaLocations'
 import NewsSection from './components/NewsSection'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -18,6 +12,8 @@ import { createSeoMetadata } from './seo/seoConfig'
 import './App.css'
 
 const AuthModal = lazy(() => import('./components/AuthModal'))
+const LeonidaGuidePage = lazy(() => import('./components/LeonidaGuidePage'))
+const LeonidaHub = lazy(() => import('./components/LeonidaHub'))
 const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
 const MessagesPage = lazy(() => import('./components/MessagesPage'))
 const NewsArticlePage = lazy(() => import('./components/NewsArticlePage'))
@@ -28,10 +24,12 @@ const ShopPage = lazy(() => import('./components/ShopPage'))
 const SocialHub = lazy(() => import('./components/SocialHub'))
 const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
-const APP_ROUTES = new Set(['/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news'])
+const APP_ROUTES = new Set(['/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news', '/leonida'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 const DEFAULT_ROUTE_COMPONENTS = {
   AuthModal,
+  LeonidaGuidePage,
+  LeonidaHub,
   LocationGuidePage,
   MessagesPage,
   NewsArticlePage,
@@ -115,6 +113,7 @@ function currentRoute(fallbackRoute = '/') {
 
   const { pathname } = window.location
   if (APP_ROUTES.has(pathname)) return pathname
+  if (pathname.startsWith('/leonida/')) return pathname
   if (pathname.startsWith('/profile/')) return pathname
   if (pathname.startsWith('/locations/')) return pathname
   if (pathname.startsWith('/news/')) return pathname
@@ -129,6 +128,8 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   const { lang } = useTranslation()
   const {
     AuthModal: AuthModalComponent,
+    LeonidaGuidePage: LeonidaGuidePageComponent,
+    LeonidaHub: LeonidaHubComponent,
     LocationGuidePage: LocationGuidePageComponent,
     MessagesPage: MessagesPageComponent,
     NewsArticlePage: NewsArticlePageComponent,
@@ -149,19 +150,20 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
       const nextRoute = currentRoute()
       setRoute(nextRoute)
       logAnalyticsPageView()
-      if (nextRoute === '/') scrollToHash(window.location.hash)
+      if (window.location.hash) scrollToHash(window.location.hash)
     }
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   useEffect(() => {
-    if (route === '/' && window.location.hash) scrollToHash(window.location.hash)
+    if (window.location.hash) scrollToHash(window.location.hash)
   }, [route])
 
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
     const isKnown = APP_ROUTES.has(nextUrl.pathname)
+      || nextUrl.pathname.startsWith('/leonida/')
       || nextUrl.pathname.startsWith('/profile/')
       || nextUrl.pathname.startsWith('/locations/')
       || nextUrl.pathname.startsWith('/news/')
@@ -223,6 +225,56 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <UserProfilePageComponent userId={userId} onNavigate={navigateTo} onOpenAuth={() => setAuthOpen(true)} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route === '/leonida') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <LeonidaHubComponent onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route.startsWith('/leonida/locations/')) {
+    const locationSlug = route.slice('/leonida/locations/'.length)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <LocationGuidePageComponent locationSlug={locationSlug} onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route.startsWith('/leonida/')) {
+    const sectionId = route.slice('/leonida/'.length)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <LeonidaGuidePageComponent sectionId={sectionId} onNavigate={navigateTo} />
           </LazyRoute>
         </main>
         <Footer />
@@ -300,7 +352,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
-  if (route === '/p2p') {
+  if (route === '/' || route === '/p2p') {
     return (
       <div className="app">
         <SeoHead metadata={seoMetadata} lang={lang} />
@@ -367,14 +419,11 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   return (
     <div className="app">
       <SeoHead metadata={seoMetadata} lang={lang} />
-      <Header {...sharedHeaderProps} />
-      <main>
-        <Hero onNavigate={navigateTo} showHeader={false} />
-        <GameInfo />
-        <Characters />
-        <IgnGuideSections />
-        <MediaGallery />
-        <LeonidaLocations onNavigate={navigateTo} />
+      <Header {...sharedHeaderProps} solid />
+      <main className="page-main">
+        <LazyRoute>
+          <P2PTradingPageComponent onOpenAuth={() => setAuthOpen(true)} />
+        </LazyRoute>
       </main>
       <Footer />
       <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
