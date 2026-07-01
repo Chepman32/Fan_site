@@ -12,6 +12,7 @@ import { createSeoMetadata } from './seo/seoConfig'
 import './App.css'
 
 const AuthModal = lazy(() => import('./components/AuthModal'))
+const AboutPage = lazy(() => import('./components/AboutPage'))
 const LeonidaGuidePage = lazy(() => import('./components/LeonidaGuidePage'))
 const LeonidaHub = lazy(() => import('./components/LeonidaHub'))
 const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
@@ -24,10 +25,11 @@ const ShopPage = lazy(() => import('./components/ShopPage'))
 const SocialHub = lazy(() => import('./components/SocialHub'))
 const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
-const APP_ROUTES = new Set(['/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news', '/leonida'])
+const APP_ROUTES = new Set(['/about', '/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news', '/leonida'])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 const DEFAULT_ROUTE_COMPONENTS = {
   AuthModal,
+  AboutPage,
   LeonidaGuidePage,
   LeonidaHub,
   LocationGuidePage,
@@ -128,6 +130,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   const { lang } = useTranslation()
   const {
     AuthModal: AuthModalComponent,
+    AboutPage: AboutPageComponent,
     LeonidaGuidePage: LeonidaGuidePageComponent,
     LeonidaHub: LeonidaHubComponent,
     LocationGuidePage: LocationGuidePageComponent,
@@ -191,6 +194,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   )
 
   const sharedHeaderProps = {
+    routePath: route,
     currentUser: currentProfile,
     onOpenAuth: () => setAuthOpen(true),
     onLogout: logout,
@@ -225,6 +229,22 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <UserProfilePageComponent userId={userId} onNavigate={navigateTo} onOpenAuth={() => setAuthOpen(true)} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      </div>
+    )
+  }
+
+  if (route === '/about') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <AboutPageComponent />
           </LazyRoute>
         </main>
         <Footer />

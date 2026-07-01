@@ -27,11 +27,6 @@ function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
-function getLocationKey() {
-  if (typeof window === 'undefined') return '/'
-  return `${window.location.pathname}${window.location.hash}`
-}
-
 function Header({
   currentUser,
   onOpenAuth,
@@ -41,12 +36,12 @@ function Header({
   cartTotal = 0,
   onRemoveCartItem,
   solid = false,
+  routePath = '/',
 }) {
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [bottomMoreOpen, setBottomMoreOpen] = useState(false)
-  const [locationKey, setLocationKey] = useState(getLocationKey)
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
@@ -54,16 +49,6 @@ function Header({
     handleScroll()
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    const updateLocation = () => setLocationKey(getLocationKey())
-    window.addEventListener('popstate', updateLocation)
-    window.addEventListener('hashchange', updateLocation)
-    return () => {
-      window.removeEventListener('popstate', updateLocation)
-      window.removeEventListener('hashchange', updateLocation)
-    }
   }, [])
 
   useEffect(() => {
@@ -88,14 +73,11 @@ function Header({
     event.preventDefault()
     if (stopPropagation) event.stopPropagation()
     onNavigate(href)
-    const nextUrl = new URL(href, window.location.origin)
-    setLocationKey(`${nextUrl.pathname}${nextUrl.hash}`)
     if (closeMenus) closeHeaderMenus()
     if (blurTarget) event.currentTarget.blur()
   }
 
-  const currentPath = locationKey.split('#')[0] || '/'
-  const currentHash = locationKey.includes('#') ? `#${locationKey.split('#')[1]}` : ''
+  const currentPath = routePath || '/'
   const isActive = (target) => {
     if (target === 'shop') return currentPath === '/shop'
     if (target === 'p2p') return currentPath === '/' || currentPath === '/p2p'
@@ -103,18 +85,18 @@ function Header({
     if (target === 'community') return currentPath === '/community'
     if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
     if (target === 'settings') return currentPath === '/settings'
-    if (target === 'about') return currentPath === '/leonida' && currentHash === '#about'
+    if (target === 'about') return currentPath === '/about'
     if (target === 'characters') return currentPath === '/leonida/characters'
     if (target === 'locations') return currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
     if (target === 'leonida') {
-      return (currentPath === '/leonida' && currentHash !== '#about')
+      return currentPath === '/leonida'
         || currentPath.startsWith('/leonida/')
         || currentPath.startsWith('/locations/')
     }
     if (target === 'vehicles') return currentPath === '/leonida/vehicles'
     if (target === 'weapons') return currentPath === '/leonida/weapons'
     if (target === 'social-media') return currentPath === '/leonida/social-media'
-    if (target === 'more') return bottomMoreOpen || currentPath === '/community'
+    if (target === 'more') return bottomMoreOpen || currentPath === '/about' || currentPath === '/community'
     return false
   }
 
@@ -133,7 +115,7 @@ function Header({
   ]
 
   const moreLinks = [
-    { key: 'about', href: '/leonida#about', label: t.nav.about, icon: Info },
+    { key: 'about', href: '/about', label: t.nav.about, icon: Info },
     { key: 'characters', href: '/leonida/characters', label: t.nav.characters, icon: UserRoundSearch },
     { key: 'locations', href: '/leonida/locations', label: t.nav.locations || 'Locations', icon: MapPinned },
     { key: 'vehicles', href: '/leonida/vehicles', label: t.nav.vehicles || 'Vehicles', icon: Car },
@@ -162,7 +144,7 @@ function Header({
           <a className={navLinkClass('shop')} href="/shop" onClick={(event) => navigate(event, '/shop')} aria-current={ariaCurrent('shop')}>{t.nav.shop || 'Shop'}</a>
           <a className={navLinkClass('leonida')} href="/leonida" onClick={(event) => navigate(event, '/leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
           <a className={navLinkClass('news')} href="/news" onClick={(event) => navigate(event, '/news')} aria-current={ariaCurrent('news')}>{t.nav.news}</a>
-          <a className={navLinkClass('about')} href="/leonida#about" onClick={(event) => navigate(event, '/leonida#about')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
+          <a className={navLinkClass('about')} href="/about" onClick={(event) => navigate(event, '/about')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>
           <a className={navLinkClass('community')} href="/community" onClick={(event) => navigate(event, '/community')} aria-current={ariaCurrent('community')}>
             {t.nav.community || t.nav.social || 'Community'}
           </a>

@@ -20,7 +20,7 @@ function Hero({
 
   const scrollToInfo = () => {
     if (onNavigate) {
-      onNavigate('/#game-info')
+      onNavigate('/about#game-info')
       return
     }
 

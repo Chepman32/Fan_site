@@ -1,6 +1,8 @@
 import { shopTranslations } from './shopTranslations'
 import { p2pTranslations } from './p2pTranslations'
 import { settingsTranslations } from './settingsTranslations'
+import { leonidaTranslations } from './leonidaTranslations'
+import { aboutTranslations } from './aboutTranslations'
 
 // GTA VI Fan Site — i18n translations
 // Languages: en, zh, ru, it, id, pl, hi, ms
@@ -348,6 +350,8 @@ const en = {
   shop: shopTranslations.en,
   p2p: p2pTranslations.en,
   settings: settingsTranslations.en,
+  leonidaHub: leonidaTranslations.en,
+  aboutPage: aboutTranslations.en,
   // Hero
   hero: {
     badge: 'LEONIDA / VICE CITY',
@@ -597,6 +601,8 @@ const zh = {
   shop: shopTranslations.zh,
   p2p: p2pTranslations.zh,
   settings: settingsTranslations.zh,
+  leonidaHub: leonidaTranslations.zh,
+  aboutPage: aboutTranslations.zh,
   hero: {
     badge: '莱昂尼达 / 罪恶都市',
     subtitle: '十年来最令人期待的游戏。重返罪恶都市，体验一段关于爱、犯罪与背叛的故事。',
@@ -806,6 +812,8 @@ const ru = {
   shop: shopTranslations.ru,
   p2p: p2pTranslations.ru,
   settings: settingsTranslations.ru,
+  leonidaHub: leonidaTranslations.ru,
+  aboutPage: aboutTranslations.ru,
   hero: {
     badge: 'ЛЕОНИДА / ВАЙС-СИТИ',
     subtitle: 'Самая ожидаемая игра десятилетия. Возвращение в Вайс-Сити — история любви, преступлений и предательства.',
@@ -1015,6 +1023,8 @@ const it = {
   shop: shopTranslations.it,
   p2p: p2pTranslations.it,
   settings: settingsTranslations.it,
+  leonidaHub: leonidaTranslations.it,
+  aboutPage: aboutTranslations.it,
   hero: {
     badge: 'LEONIDA / VICE CITY',
     subtitle: 'Il gioco più atteso del decennio. Torna a Vice City in una storia di amore, crimini e tradimenti.',
@@ -1223,6 +1233,8 @@ const id = {
   shop: shopTranslations.id,
   p2p: p2pTranslations.id,
   settings: settingsTranslations.id,
+  leonidaHub: leonidaTranslations.id,
+  aboutPage: aboutTranslations.id,
   hero: {
     badge: 'LEONIDA / VICE CITY',
     subtitle: 'Game paling ditunggu-tunggu dekade ini. Kembali ke Vice City dalam kisah cinta, kejahatan, dan pengkhianatan.',
@@ -1431,6 +1443,8 @@ const pl = {
   shop: shopTranslations.pl,
   p2p: p2pTranslations.pl,
   settings: settingsTranslations.pl,
+  leonidaHub: leonidaTranslations.pl,
+  aboutPage: aboutTranslations.pl,
   hero: {
     badge: 'LEONIDA / VICE CITY',
     subtitle: 'Najbardziej wyczekiwana gra dekady. Powrót do Vice City — historia miłości, przestępstw i zdrady.',
@@ -1639,6 +1653,8 @@ const hi = {
   shop: shopTranslations.hi,
   p2p: p2pTranslations.hi,
   settings: settingsTranslations.hi,
+  leonidaHub: leonidaTranslations.hi,
+  aboutPage: aboutTranslations.hi,
   hero: {
     badge: 'लियोनिडा / वाइस सिटी',
     subtitle: 'दशक का सबसे प्रतीक्षित गेम। वाइस सिटी में वापसी — प्यार, अपराध और धोखे की कहानी।',
@@ -1847,6 +1863,8 @@ const ms = {
   shop: shopTranslations.ms,
   p2p: p2pTranslations.ms,
   settings: settingsTranslations.ms,
+  leonidaHub: leonidaTranslations.ms,
+  aboutPage: aboutTranslations.ms,
   hero: {
     badge: 'LEONIDA / VICE CITY',
     subtitle: 'Permainan paling ditunggu-tunggu dekad ini. Kembali ke Vice City dalam kisah cinta, jenayah, dan pengkhianatan.',

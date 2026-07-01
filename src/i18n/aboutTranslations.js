@@ -1,0 +1,194 @@
+const en = {
+  hero: {
+    kicker: 'Game intelligence',
+    title: 'Inside',
+    titleHighlight: 'GTA VI',
+    description: 'The confirmed launch facts, the scale behind Rockstar’s next open world, and a live encyclopedia overview in one place.',
+    launchCard: 'Official launch countdown',
+  },
+  stats: {
+    eyebrow: 'The numbers',
+    title: 'Scale at a glance',
+    description: 'Official values are marked separately from reporting, community reconstructions, and unverified production estimates.',
+    official: 'Official',
+    estimate: 'Estimate',
+    items: {
+      release: { label: 'Release date', note: 'Worldwide console launch' },
+      price: { label: 'Pre-order price', note: 'Standard Edition in the US' },
+      budget: { label: 'Reported budget', note: 'Rumored development and marketing range' },
+      team: { label: 'Team size', note: 'Reported contributors across Rockstar studios' },
+      map: { label: 'Estimated map', note: 'Fan reconstruction; Rockstar has not published an area' },
+      regions: { label: 'Major regions', note: 'Named by Rockstar so far' },
+    },
+  },
+  notice: 'Rockstar has not confirmed the project budget, contributor count, or map area. Those cards are estimates and may change.',
+  sources: {
+    label: 'Sources and context',
+    official: 'Official preorder announcement',
+    wikipedia: 'Wikipedia overview',
+    map: 'Community map estimate',
+  },
+}
+
+const zh = {
+  hero: {
+    kicker: '游戏情报', title: '深入了解', titleHighlight: 'GTA VI',
+    description: '在一个页面查看已确认的发售信息、Rockstar 新开放世界的制作规模和实时百科概览。',
+    launchCard: '官方发售倒计时',
+  },
+  stats: {
+    eyebrow: '关键数字', title: '规模一览',
+    description: '官方数据与媒体报道、社区重建及未经证实的制作估算会分别标注。',
+    official: '官方', estimate: '估算',
+    items: {
+      release: { label: '发售日期', note: '全球主机版发售' },
+      price: { label: '预购价格', note: '美国标准版' },
+      budget: { label: '传闻预算', note: '据传开发与营销费用区间' },
+      team: { label: '团队规模', note: 'Rockstar 多个工作室的据报参与人数' },
+      map: { label: '地图估算', note: '粉丝重建；Rockstar 尚未公布面积' },
+      regions: { label: '主要地区', note: 'Rockstar 目前公布的地区' },
+    },
+  },
+  notice: 'Rockstar 尚未确认项目预算、参与人数或地图面积。相关卡片均为估算，可能会变化。',
+  sources: { label: '来源与背景', official: '官方预购公告', wikipedia: '维基百科概览', map: '社区地图估算' },
+}
+
+const ru = {
+  hero: {
+    kicker: 'Досье на игру', title: 'Внутри', titleHighlight: 'GTA VI',
+    description: 'Подтверждённые данные о релизе, масштаб нового открытого мира Rockstar и живая энциклопедическая справка на одной странице.',
+    launchCard: 'Официальный отсчёт до релиза',
+  },
+  stats: {
+    eyebrow: 'Ключевые цифры', title: 'Масштаб в цифрах',
+    description: 'Официальные значения отделены от публикаций, реконструкций сообщества и неподтверждённых производственных оценок.',
+    official: 'Официально', estimate: 'Оценка',
+    items: {
+      release: { label: 'Дата релиза', note: 'Мировой запуск на консолях' },
+      price: { label: 'Цена предзаказа', note: 'Стандартное издание в США' },
+      budget: { label: 'Предполагаемый бюджет', note: 'Слухи о затратах на разработку и маркетинг' },
+      team: { label: 'Размер команды', note: 'Оценка числа участников из студий Rockstar' },
+      map: { label: 'Размер карты', note: 'Фанатская реконструкция; официальной площади нет' },
+      regions: { label: 'Крупные регионы', note: 'Названы Rockstar на данный момент' },
+    },
+  },
+  notice: 'Rockstar не подтверждала бюджет проекта, число участников или площадь карты. Эти карточки содержат оценки и могут измениться.',
+  sources: { label: 'Источники и контекст', official: 'Официальный анонс предзаказа', wikipedia: 'Обзор в Википедии', map: 'Оценка карты сообществом' },
+}
+
+const it = {
+  hero: {
+    kicker: 'Dossier sul gioco', title: 'Dentro', titleHighlight: 'GTA VI',
+    description: 'I dati confermati sul lancio, la scala del prossimo mondo aperto di Rockstar e una panoramica enciclopedica aggiornata.',
+    launchCard: 'Conto alla rovescia ufficiale',
+  },
+  stats: {
+    eyebrow: 'I numeri', title: "La scala in un'occhiata",
+    description: 'I valori ufficiali sono distinti da notizie, ricostruzioni della community e stime di produzione non verificate.',
+    official: 'Ufficiale', estimate: 'Stima',
+    items: {
+      release: { label: 'Data di uscita', note: 'Lancio mondiale su console' },
+      price: { label: 'Prezzo preordine', note: 'Edizione Standard negli USA' },
+      budget: { label: 'Budget riportato', note: 'Intervallo ipotizzato per sviluppo e marketing' },
+      team: { label: 'Dimensione del team', note: 'Contributori stimati negli studi Rockstar' },
+      map: { label: 'Mappa stimata', note: "Ricostruzione dei fan; l'area non è ufficiale" },
+      regions: { label: 'Regioni principali', note: 'Finora nominate da Rockstar' },
+    },
+  },
+  notice: 'Rockstar non ha confermato budget, numero di collaboratori o area della mappa. Queste schede sono stime soggette a variazioni.',
+  sources: { label: 'Fonti e contesto', official: 'Annuncio ufficiale dei preordini', wikipedia: 'Panoramica Wikipedia', map: 'Stima della mappa della community' },
+}
+
+const id = {
+  hero: {
+    kicker: 'Intel game', title: 'Mengenal', titleHighlight: 'GTA VI',
+    description: 'Fakta peluncuran terkonfirmasi, skala dunia terbuka terbaru Rockstar, dan ringkasan ensiklopedia langsung dalam satu halaman.',
+    launchCard: 'Hitung mundur peluncuran resmi',
+  },
+  stats: {
+    eyebrow: 'Angka penting', title: 'Skala sekilas',
+    description: 'Nilai resmi dipisahkan dari laporan, rekonstruksi komunitas, dan perkiraan produksi yang belum diverifikasi.',
+    official: 'Resmi', estimate: 'Perkiraan',
+    items: {
+      release: { label: 'Tanggal rilis', note: 'Peluncuran konsol global' },
+      price: { label: 'Harga pre-order', note: 'Edisi Standar di AS' },
+      budget: { label: 'Anggaran dilaporkan', note: 'Rumor rentang biaya pengembangan dan pemasaran' },
+      team: { label: 'Ukuran tim', note: 'Perkiraan kontributor di berbagai studio Rockstar' },
+      map: { label: 'Perkiraan peta', note: 'Rekonstruksi penggemar; luas belum diumumkan' },
+      regions: { label: 'Wilayah utama', note: 'Dinamai Rockstar sejauh ini' },
+    },
+  },
+  notice: 'Rockstar belum mengonfirmasi anggaran, jumlah kontributor, atau luas peta. Kartu tersebut adalah perkiraan dan dapat berubah.',
+  sources: { label: 'Sumber dan konteks', official: 'Pengumuman pre-order resmi', wikipedia: 'Ringkasan Wikipedia', map: 'Perkiraan peta komunitas' },
+}
+
+const pl = {
+  hero: {
+    kicker: 'Informacje o grze', title: 'Wewnątrz', titleHighlight: 'GTA VI',
+    description: 'Potwierdzone dane o premierze, skala kolejnego otwartego świata Rockstar i aktualny opis encyklopedyczny w jednym miejscu.',
+    launchCard: 'Oficjalne odliczanie do premiery',
+  },
+  stats: {
+    eyebrow: 'Najważniejsze liczby', title: 'Skala w skrócie',
+    description: 'Wartości oficjalne są oddzielone od doniesień, rekonstrukcji społeczności i niepotwierdzonych szacunków produkcji.',
+    official: 'Oficjalne', estimate: 'Szacunek',
+    items: {
+      release: { label: 'Data premiery', note: 'Światowa premiera konsolowa' },
+      price: { label: 'Cena przedsprzedaży', note: 'Edycja Standard w USA' },
+      budget: { label: 'Podawany budżet', note: 'Plotki o kosztach produkcji i marketingu' },
+      team: { label: 'Wielkość zespołu', note: 'Szacowani współtwórcy w studiach Rockstar' },
+      map: { label: 'Szacowana mapa', note: 'Rekonstrukcja fanów; brak oficjalnej powierzchni' },
+      regions: { label: 'Główne regiony', note: 'Dotąd nazwane przez Rockstar' },
+    },
+  },
+  notice: 'Rockstar nie potwierdziło budżetu, liczby współtwórców ani powierzchni mapy. Te karty są szacunkami i mogą się zmienić.',
+  sources: { label: 'Źródła i kontekst', official: 'Oficjalna zapowiedź przedsprzedaży', wikipedia: 'Opis w Wikipedii', map: 'Szacunek mapy społeczności' },
+}
+
+const hi = {
+  hero: {
+    kicker: 'गेम इंटेलिजेंस', title: 'अंदर की कहानी', titleHighlight: 'GTA VI',
+    description: 'पुष्ट लॉन्च जानकारी, Rockstar की अगली खुली दुनिया का पैमाना और लाइव विश्वकोश परिचय—सब एक जगह।',
+    launchCard: 'आधिकारिक लॉन्च काउंटडाउन',
+  },
+  stats: {
+    eyebrow: 'मुख्य आँकड़े', title: 'एक नज़र में पैमाना',
+    description: 'आधिकारिक आँकड़ों को रिपोर्ट, समुदाय की पुनर्रचनाओं और अपुष्ट उत्पादन अनुमानों से अलग दिखाया गया है।',
+    official: 'आधिकारिक', estimate: 'अनुमान',
+    items: {
+      release: { label: 'रिलीज़ तिथि', note: 'दुनिया भर में कंसोल लॉन्च' },
+      price: { label: 'प्री-ऑर्डर कीमत', note: 'अमेरिका में स्टैंडर्ड एडिशन' },
+      budget: { label: 'रिपोर्टेड बजट', note: 'विकास और मार्केटिंग लागत की अफ़वाह' },
+      team: { label: 'टीम का आकार', note: 'Rockstar स्टूडियो में अनुमानित योगदानकर्ता' },
+      map: { label: 'अनुमानित नक्शा', note: 'फ़ैन पुनर्रचना; आधिकारिक क्षेत्रफल उपलब्ध नहीं' },
+      regions: { label: 'प्रमुख क्षेत्र', note: 'Rockstar द्वारा अब तक बताए गए' },
+    },
+  },
+  notice: 'Rockstar ने बजट, योगदानकर्ताओं की संख्या या नक्शे का क्षेत्रफल पुष्ट नहीं किया है। ये अनुमान बदल सकते हैं।',
+  sources: { label: 'स्रोत और संदर्भ', official: 'आधिकारिक प्री-ऑर्डर घोषणा', wikipedia: 'Wikipedia परिचय', map: 'समुदाय का नक्शा अनुमान' },
+}
+
+const ms = {
+  hero: {
+    kicker: 'Maklumat permainan', title: 'Di sebalik', titleHighlight: 'GTA VI',
+    description: 'Fakta pelancaran yang disahkan, skala dunia terbuka baharu Rockstar dan ringkasan ensiklopedia langsung dalam satu halaman.',
+    launchCard: 'Kiraan detik pelancaran rasmi',
+  },
+  stats: {
+    eyebrow: 'Angka utama', title: 'Skala sepintas lalu',
+    description: 'Nilai rasmi diasingkan daripada laporan, binaan semula komuniti dan anggaran produksi yang belum disahkan.',
+    official: 'Rasmi', estimate: 'Anggaran',
+    items: {
+      release: { label: 'Tarikh keluaran', note: 'Pelancaran konsol sedunia' },
+      price: { label: 'Harga prapesan', note: 'Edisi Standard di AS' },
+      budget: { label: 'Bajet dilaporkan', note: 'Julat khabar angin pembangunan dan pemasaran' },
+      team: { label: 'Saiz pasukan', note: 'Anggaran penyumbang merentas studio Rockstar' },
+      map: { label: 'Anggaran peta', note: 'Binaan semula peminat; keluasan belum rasmi' },
+      regions: { label: 'Wilayah utama', note: 'Dinamakan Rockstar setakat ini' },
+    },
+  },
+  notice: 'Rockstar belum mengesahkan bajet, jumlah penyumbang atau keluasan peta. Kad ini ialah anggaran dan boleh berubah.',
+  sources: { label: 'Sumber dan konteks', official: 'Pengumuman prapesan rasmi', wikipedia: 'Ringkasan Wikipedia', map: 'Anggaran peta komuniti' },
+}
+
+export const aboutTranslations = { en, zh, ru, it, id, pl, hi, ms }

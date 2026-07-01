@@ -22,7 +22,7 @@ function Footer() {
           <div className="footer-links">
             <div className="footer-column">
               <h4>{t.footer.game}</h4>
-              <a href="/leonida#about">{t.footer.about}</a>
+              <a href="/about">{t.footer.about}</a>
               <a href="/leonida/characters">{t.footer.characters}</a>
               <a href="/leonida/weapons">{t.nav.weapons || 'Weapons'}</a>
               <a href="/leonida/vehicles">{t.nav.vehicles || 'Vehicles'}</a>

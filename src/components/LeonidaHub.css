@@ -270,6 +270,12 @@
     linear-gradient(90deg, rgba(8, 8, 14, 0.34), transparent 70%);
 }
 
+.leonida-directory-card.tone-day .leonida-directory-scrim {
+  background:
+    linear-gradient(180deg, rgba(8, 8, 14, 0.02) 16%, rgba(8, 8, 14, 0.08) 50%, rgba(8, 8, 14, 0.82) 100%),
+    linear-gradient(90deg, rgba(8, 8, 14, 0.12), transparent 72%);
+}
+
 .leonida-directory-card-copy {
   height: 100%;
   display: grid;
@@ -302,6 +308,14 @@
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.leonida-directory-card.tone-day .leonida-directory-count {
+  padding: 6px 8px;
+  background: rgba(8, 8, 14, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
 }
 
 .leonida-directory-card-copy > div {

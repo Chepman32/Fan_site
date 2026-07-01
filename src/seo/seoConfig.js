@@ -152,6 +152,30 @@ function leonidaMetadata() {
   })
 }
 
+function aboutMetadata() {
+  return pageMetadata({
+    route: '/about',
+    title: 'GTA VI Release Countdown, Price & Development Stats',
+    description: 'Track the GTA VI release countdown and compare official launch details with clearly labeled budget, team-size, and map estimates.',
+    schemaType: 'AboutPage',
+    breadcrumbs: [{ name: 'About GTA VI', url: absoluteUrl('/about') }],
+    extraJsonLd: [
+      {
+        '@type': 'VideoGame',
+        '@id': `${SITE_ORIGIN}/about#game`,
+        name: 'Grand Theft Auto VI',
+        alternateName: 'GTA VI',
+        datePublished: '2026-11-19',
+        gamePlatform: ['PlayStation 5', 'Xbox Series X/S'],
+        publisher: {
+          '@type': 'Organization',
+          name: 'Rockstar Games',
+        },
+      },
+    ],
+  })
+}
+
 function leonidaSectionMetadata(route) {
   const sectionId = route.slice('/leonida/'.length)
   const section = getLeonidaSection(sectionId)
@@ -349,6 +373,7 @@ export function createSeoMetadata({ route, state = { users: [] }, currentProfile
   if (cleanRoute === '/community') return communityMetadata()
   if (cleanRoute === '/shop') return shopMetadata()
   if (cleanRoute === '/p2p') return p2pMetadata('/')
+  if (cleanRoute === '/about') return aboutMetadata()
   if (cleanRoute === '/leonida') return leonidaMetadata()
   if (cleanRoute === '/news') return newsMetadata()
   if (cleanRoute === '/messages') return messagesMetadata()
@@ -423,6 +448,7 @@ export function createJsonLd(metadata) {
 
 export const SITEMAP_ROUTES = [
   '/',
+  '/about',
   '/leonida',
   ...LEONIDA_SECTIONS.map((section) => section.href),
   '/community',

@@ -47,6 +47,7 @@ function sitemapXml() {
   const today = new Date().toISOString().slice(0, 10)
   const priorities = new Map([
     ['/', '1.0'],
+    ['/about', '0.8'],
     ['/leonida', '0.9'],
     ['/leonida/locations', '0.8'],
     ['/community', '0.8'],

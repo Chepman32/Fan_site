@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { renderToString } from 'react-dom/server'
 import App from './App.jsx'
 import AuthModal from './components/AuthModal'
+import AboutPage from './components/AboutPage'
 import LeonidaGuidePage from './components/LeonidaGuidePage'
 import LeonidaHub from './components/LeonidaHub'
 import LocationGuidePage from './components/LocationGuidePage'
@@ -26,6 +27,7 @@ import {
 
 const routeComponents = {
   AuthModal,
+  AboutPage,
   LeonidaGuidePage,
   LeonidaHub,
   LocationGuidePage,

@@ -101,7 +101,9 @@
 }
 
 .wiki-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   margin-top: 24px;
   color: var(--accent-purple);
   text-decoration: none;

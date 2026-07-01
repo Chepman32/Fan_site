@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader, AlertCircle, Monitor, Users, Globe, Sparkles } from 'lucide-react'
+import { Loader, AlertCircle, ExternalLink, Monitor, Users, Globe, Sparkles } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './GameInfo.css'
 
@@ -181,6 +181,11 @@ function GameInfo() {
                     )
                   })}
                 </div>
+                {activeWikiData.wikiUrl && (
+                  <a className="wiki-link" href={activeWikiData.wikiUrl} target="_blank" rel="noopener noreferrer">
+                    {t.aboutPage?.sources?.wikipedia || 'Wikipedia'} <ExternalLink size={13} />
+                  </a>
+                )}
               </div>
             </div>
 

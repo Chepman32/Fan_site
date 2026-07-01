@@ -23,10 +23,11 @@ export const LEONIDA_SECTIONS = [
     title: 'Locations',
     shortTitle: 'Explore the state',
     description: 'Travel from Vice City neon to the Keys, wetlands, faded port towns, and mountain wilderness.',
-    image: '/images/leonida/locations.webp',
+    image: '/images/leonida/locations-day.webp',
     href: '/leonida/locations',
     icon: MapPinned,
     accent: 'cyan',
+    tone: 'day',
     count: '6 major regions',
   },
   {
@@ -34,10 +35,11 @@ export const LEONIDA_SECTIONS = [
     title: 'Vehicles',
     shortTitle: 'Road, air & water',
     description: 'Browse the cars, motorcycles, aircraft, and watercraft spotted across trailers and screenshots.',
-    image: '/images/leonida/vehicles.webp',
+    image: '/images/leonida/vehicles-day.webp',
     href: '/leonida/vehicles',
     icon: Car,
     accent: 'purple',
+    tone: 'day',
     count: '4 collections',
   },
   {
@@ -56,14 +58,22 @@ export const LEONIDA_SECTIONS = [
     title: 'In-game social media',
     shortTitle: 'Leonida goes live',
     description: 'Follow the fictional accounts, viral clips, and chaotic local personalities shaping the feed.',
-    image: '/images/leonida/social-media.webp',
+    image: '/images/leonida/social-media-day.webp',
     href: '/leonida/social-media',
     icon: Radio,
     accent: 'blue',
+    tone: 'day',
     count: '5 known accounts',
   },
 ]
 
 export function getLeonidaSection(sectionId) {
   return LEONIDA_SECTIONS.find((section) => section.id === sectionId) || null
+}
+
+export function localizeLeonidaSections(copy) {
+  return LEONIDA_SECTIONS.map((section) => ({
+    ...section,
+    ...(copy?.sections?.[section.id] || {}),
+  }))
 }

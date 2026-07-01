@@ -1,5 +1,6 @@
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { getLeonidaSection, LEONIDA_SECTIONS } from '../data/leonidaSections'
+import { localizeLeonidaSections } from '../data/leonidaSections'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import Characters from './Characters'
 import { SocialMediaGuide, VehiclesGuide, WeaponsGuide } from './IgnGuide'
 import LeonidaLocations from './LeonidaLocations'
@@ -10,7 +11,10 @@ function isPlainLeftClick(event) {
 }
 
 function LeonidaGuidePage({ sectionId, onNavigate }) {
-  const section = getLeonidaSection(sectionId) || LEONIDA_SECTIONS[0]
+  const { t } = useTranslation()
+  const copy = t.leonidaHub
+  const sections = localizeLeonidaSections(copy)
+  const section = sections.find((item) => item.id === sectionId) || sections[0]
   const SectionIcon = section.icon
 
   const navigate = (event, href) => {
@@ -34,7 +38,7 @@ function LeonidaGuidePage({ sectionId, onNavigate }) {
         <span className="leonida-guide-hero-scrim" aria-hidden="true" />
         <div className="container leonida-guide-hero-content">
           <a className="leonida-guide-back" href="/leonida" onClick={(event) => navigate(event, '/leonida')}>
-            <ArrowLeft size={16} /> All Leonida guides
+            <ArrowLeft size={16} /> {copy.guide.back}
           </a>
           <div className="leonida-guide-title-row">
             <span className="leonida-guide-title-icon"><SectionIcon size={24} /></span>
@@ -47,9 +51,9 @@ function LeonidaGuidePage({ sectionId, onNavigate }) {
         </div>
       </header>
 
-      <nav className="leonida-guide-tabs" aria-label="Leonida guide sections">
+      <nav className="leonida-guide-tabs" aria-label={copy.guide.tabsLabel}>
         <div className="container">
-          {LEONIDA_SECTIONS.map((item) => (
+          {sections.map((item) => (
             <a
               key={item.id}
               className={item.id === section.id ? 'active' : ''}
