@@ -22,6 +22,7 @@ function MessageConversationModal({
   recipient,
   contextLabel = '',
   initialBody = '',
+  hiddenBodies = [],
   onClose,
 }) {
   const { backendError, currentProfile, sendMessage, state } = useSocial()
@@ -34,8 +35,10 @@ function MessageConversationModal({
 
   const threadMessages = useMemo(() => {
     if (!currentUserId || !recipientId) return []
+    const hiddenBodySet = new Set(hiddenBodies)
     return messagesBetween(state.messages, currentUserId, recipientId)
-  }, [currentUserId, recipientId, state.messages])
+      .filter((message) => !hiddenBodySet.has(message.body))
+  }, [currentUserId, hiddenBodies, recipientId, state.messages])
 
   useEffect(() => {
     messageListRef.current?.scrollTo({ top: messageListRef.current.scrollHeight, behavior: 'smooth' })

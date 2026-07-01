@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import QRCode from 'qrcode'
 import {
   AlertCircle,
   BadgeDollarSign,
   Check,
   Copy,
-  CreditCard,
   Edit3,
   FileArchive,
   Handshake,
@@ -15,15 +15,16 @@ import {
   Loader2,
   MessageCircle,
   PackagePlus,
+  PlugZap,
   Plus,
   RefreshCw,
   Search,
+  Send,
   ShieldCheck,
   Store,
   Tag,
   Trash2,
   UploadCloud,
-  Wallet,
   X,
 } from 'lucide-react'
 import { useSocial } from '../social/SocialContext'
@@ -36,26 +37,24 @@ import {
   formatShopPrice,
   formatUsdtAmount,
 } from '../shop/shopData'
-import { normalizeTxId } from '../shop/tronPayments'
+import { connectTronLinkWallet, normalizeTxId, sendUsdtTransfer } from '../shop/tronPayments'
 import {
   P2P_CATEGORIES,
-  P2P_PAYMENT_METHODS,
   formatFileSize,
   formatP2PPrice,
   p2pCategoryLabel,
-  p2pPaymentMethodDetail,
   p2pPaymentMethodLabel,
 } from '../p2p/p2pData'
 import { settleP2PUsdtPayment } from '../p2p/p2pPayouts'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
 import { useTranslation } from '../i18n/useTranslation.jsx'
+import { p2pTranslations } from '../i18n/p2pTranslations.js'
 import MessageConversationModal from './MessageConversationModal.jsx'
 import './P2PTradingPage.css'
 
 const MAX_LISTING_FILES = 8
 const EMPTY_LISTINGS = []
 const POLL_INTERVAL_MS = 3000
-const USDT_CHECKOUT_CURRENCIES = new Set(['USD', 'USDT'])
 const TRON_ADDRESS_PATTERN = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
 const FORM_SPRING = {
   type: 'spring',
@@ -92,10 +91,8 @@ function initialListingForm(lang = 'en') {
     title: '',
     category: 'digital-assets',
     price: '',
-    currency: 'USDT',
     cryptoWalletAddress: '',
     deliveryMethod: formSeed(lang).deliveryMethod,
-    paymentMethods: ['crypto'],
     description: '',
   }
 }
@@ -167,15 +164,6 @@ function cleanProperties(properties) {
     .slice(0, 12)
 }
 
-function listingPaymentMethods(listing) {
-  const methods = (listing.paymentMethods || []).filter((method) => {
-    return P2P_PAYMENT_METHODS.some((paymentMethod) => paymentMethod.id === method)
-  })
-
-  if (methods.length) return methods
-  return ['USDT', 'TRX'].includes(listing.currency) ? ['crypto'] : ['card']
-}
-
 function p2pUsdtPaymentAmount(listing) {
   return formatShopPrice(Number(listing.price) || 0)
 }
@@ -194,21 +182,13 @@ function p2pPaymentAddress() {
   return P2P_PLATFORM_USDT_ADDRESS
 }
 
-function canUseUsdtCheckout(listing) {
-  const price = Number(listing.price)
-  const sellerPayoutAddress = String(listing.cryptoWalletAddress || '').trim()
-
-  return (
-    listingPaymentMethods(listing).includes('crypto') &&
-    USDT_CHECKOUT_CURRENCIES.has(listing.currency || 'USD') &&
-    TRON_ADDRESS_PATTERN.test(sellerPayoutAddress) &&
-    Number.isFinite(price) &&
-    price > 0
-  )
+function legacyP2PMessageBodies(listing) {
+  return Object.values(p2pTranslations).map((translation) => translation.messages.default(listing.title))
 }
 
-function defaultP2PMessage(listing, copy) {
-  return copy.messages.default(listing.title)
+function shortenAddress(value = '') {
+  if (value.length <= 12) return value
+  return `${value.slice(0, 6)}...${value.slice(-6)}`
 }
 
 function P2PListingCard({
@@ -221,6 +201,7 @@ function P2PListingCard({
   management = false,
   onEdit,
   onDelete,
+  onBuy,
   onViewDetails,
   onMarkSold,
   onToggleStatus,
@@ -364,7 +345,7 @@ function P2PListingCard({
               type="button"
               className="p2p-primary-action"
               disabled={isSold || busy}
-              onClick={(event) => handleActionClick(event, onViewDetails)}
+              onClick={(event) => handleActionClick(event, onBuy)}
             >
               {busy ? <Loader2 size={15} className="p2p-spin" /> : <BadgeDollarSign size={15} />}
               {copy.actions.buy}
@@ -376,18 +357,46 @@ function P2PListingCard({
   )
 }
 
-function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessageSeller, panelRef }) {
+function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessageSeller }) {
+  const { t } = useTranslation()
+  const shopCheckoutCopy = t.shop.checkout
   const [copiedField, setCopiedField] = useState('')
   const [txHash, setTxHash] = useState('')
   const [txIdToVerify, setTxIdToVerify] = useState('')
   const [paymentStatus, setPaymentStatus] = useState('idle')
   const [paymentMessage, setPaymentMessage] = useState('')
   const [payoutTxId, setPayoutTxId] = useState('')
+  const [walletAccount, setWalletAccount] = useState('')
+  const [walletTronWeb, setWalletTronWeb] = useState(null)
+  const [walletStatus, setWalletStatus] = useState('idle')
+  const [walletMessage, setWalletMessage] = useState('')
+  const [qrSrc, setQrSrc] = useState('')
   const paymentAmount = p2pUsdtPaymentAmount(listing)
   const receivingAddress = p2pPaymentAddress()
   const commissionAmount = formatUsdtAmount(p2pCommissionAmount(listing))
   const sellerPayoutAmount = formatUsdtAmount(p2pSellerPayoutAmount(listing))
   const isChecking = paymentStatus === 'pending'
+  const walletBusy = walletStatus === 'connecting' || walletStatus === 'sending'
+
+  useEffect(() => {
+    let canceled = false
+
+    QRCode.toDataURL(receivingAddress, {
+      width: 164,
+      margin: 1,
+      color: { dark: '#0a0a0f', light: '#ffffff' },
+    })
+      .then((dataUrl) => {
+        if (!canceled) setQrSrc(dataUrl)
+      })
+      .catch((error) => {
+        console.log('Could not generate P2P checkout QR:', error)
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [receivingAddress])
 
   useEffect(() => {
     if (!txIdToVerify) return undefined
@@ -437,6 +446,49 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessag
     }
   }
 
+  const connectWallet = async () => {
+    setWalletStatus('connecting')
+    setWalletMessage('')
+
+    try {
+      const connection = await connectTronLinkWallet()
+      setWalletAccount(connection.account)
+      setWalletTronWeb(connection.tronWeb)
+      setWalletStatus('connected')
+      return connection
+    } catch (error) {
+      setWalletStatus('failed')
+      setWalletMessage(error.message || shopCheckoutCopy.messages.walletFailed)
+      throw error
+    }
+  }
+
+  const sendPaymentWithTronLink = async () => {
+    if (!isSignedIn) {
+      onRequireAuth()
+      return
+    }
+
+    setPaymentStatus('pending')
+    setPaymentMessage(shopCheckoutCopy.messages.confirmWallet)
+
+    try {
+      const connection = walletTronWeb && walletAccount
+        ? { tronWeb: walletTronWeb, account: walletAccount }
+        : await connectWallet()
+      setWalletStatus('sending')
+      const sentTxId = await sendUsdtTransfer(connection.tronWeb, paymentAmount, receivingAddress)
+      setWalletStatus('connected')
+      setTxHash(sentTxId)
+      setTxIdToVerify(sentTxId)
+      setPaymentMessage(shopCheckoutCopy.messages.transferSubmitted)
+    } catch (error) {
+      setWalletStatus('failed')
+      setPaymentStatus('failed')
+      setPaymentMessage(error.message || shopCheckoutCopy.messages.transferNotSubmitted)
+    }
+  }
+
   const submitPaymentProof = () => {
     if (!isSignedIn) {
       setPaymentStatus('failed')
@@ -456,96 +508,178 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessag
   }
 
   return (
-    <div className="p2p-checkout-panel" ref={panelRef}>
+    <div className="p2p-checkout-panel">
       <div className="p2p-checkout-head">
-        <ShieldCheck size={16} />
+        <ShieldCheck size={18} />
         <div>
           <h3>{copy.checkout.title}</h3>
           <span>{copy.checkout.subtitle(PAYMENT_NETWORK)}</span>
         </div>
       </div>
 
-      <div className="p2p-checkout-values">
-        <span>
-          <b>{copy.checkout.sendExactly}</b>
-          <strong>{paymentAmount} USDT {PAYMENT_NETWORK_SUFFIX}</strong>
-          <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
-            <Copy size={13} />
-            {copiedField === 'amount' ? copy.actions.copied : copy.actions.copy}
-          </button>
-        </span>
-        <span>
-          <b>{copy.checkout.platformAddress}</b>
-          <code>{receivingAddress}</code>
-          <button type="button" onClick={() => copyPaymentValue(receivingAddress, 'address')}>
-            <Copy size={13} />
-            {copiedField === 'address' ? copy.actions.copied : copy.actions.copy}
-          </button>
-        </span>
-        <span>
-          <b>{copy.checkout.commission}</b>
-          <strong>{commissionAmount} USDT ({P2P_COMMISSION_PERCENT_LABEL})</strong>
-        </span>
-        <span>
-          <b>{copy.checkout.sellerPayout}</b>
-          <strong>{sellerPayoutAmount} USDT</strong>
-        </span>
-      </div>
-
-      <label className="p2p-checkout-field">
-        <span>{copy.checkout.txHash}</span>
-        <input
-          type="text"
-          value={txHash}
-          onChange={(event) => {
-            setTxHash(event.target.value)
-            setTxIdToVerify('')
-            setPayoutTxId('')
-            setPaymentStatus('idle')
-            setPaymentMessage('')
-          }}
-          placeholder={copy.checkout.txPlaceholder}
-        />
-      </label>
-
-      <button
-        type="button"
-        className="p2p-primary-action p2p-checkout-submit"
-        disabled={!txHash.trim() || isChecking || paymentStatus === 'success'}
-        onClick={submitPaymentProof}
-      >
-        {isChecking ? <Loader2 size={15} className="p2p-spin" /> : <ShieldCheck size={15} />}
-        {copy.checkout.verifyHash}
-      </button>
-
-      {paymentStatus !== 'idle' && (
-        <div className={`p2p-checkout-status ${paymentStatus}`}>
-          {paymentStatus === 'success' && <Check size={16} />}
-          {paymentStatus === 'failed' && <AlertCircle size={16} />}
-          {paymentStatus === 'pending' && <Loader2 size={16} className="p2p-spin" />}
+      <div className="p2p-checkout-summary">
+        <div className="p2p-checkout-item">
+          {listing.previewDataUrl ? (
+            <img src={listing.previewDataUrl} alt="" aria-hidden="true" />
+          ) : (
+            <span aria-hidden="true"><FileArchive size={24} /></span>
+          )}
           <div>
-            <strong>
-              {paymentStatus === 'success' && copy.checkout.statuses.success}
-              {paymentStatus === 'failed' && copy.checkout.statuses.failed}
-              {paymentStatus === 'pending' && copy.checkout.statuses.pending}
-            </strong>
-            <span>{paymentMessage}</span>
-            {txIdToVerify && <code>{txIdToVerify}</code>}
-            {payoutTxId && <code>{payoutTxId}</code>}
+            <strong>{listing.title}</strong>
+            <small>{paymentAmount} USDT</small>
           </div>
         </div>
-      )}
 
-      {paymentStatus === 'success' && (
+        <div className="p2p-checkout-total">
+          <span>{t.shop.total}</span>
+          <strong>{paymentAmount} USDT</strong>
+        </div>
+
+        <div className="p2p-checkout-qr-row">
+          <div className="p2p-checkout-qr">
+            {qrSrc ? <img src={qrSrc} alt={shopCheckoutCopy.qrAlt(PAYMENT_NETWORK)} decoding="async" /> : <span>QR</span>}
+          </div>
+          <p>{shopCheckoutCopy.qrNote}</p>
+        </div>
+
+        <div className="p2p-checkout-breakdown">
+          <span><b>{copy.checkout.commission}</b><strong>{commissionAmount} USDT ({P2P_COMMISSION_PERCENT_LABEL})</strong></span>
+          <span><b>{copy.checkout.sellerPayout}</b><strong>{sellerPayoutAmount} USDT</strong></span>
+        </div>
+      </div>
+
+      <div className="p2p-checkout-payment">
+        <div className="p2p-checkout-values">
+          <span>
+            <b>{copy.checkout.sendExactly}</b>
+            <strong>{paymentAmount} USDT {PAYMENT_NETWORK_SUFFIX}</strong>
+            <button type="button" onClick={() => copyPaymentValue(paymentAmount, 'amount')}>
+              <Copy size={13} />
+              {copiedField === 'amount' ? copy.actions.copied : copy.actions.copy}
+            </button>
+          </span>
+          <span>
+            <b>{copy.checkout.platformAddress}</b>
+            <code>{receivingAddress}</code>
+            <button type="button" onClick={() => copyPaymentValue(receivingAddress, 'address')}>
+              <Copy size={13} />
+              {copiedField === 'address' ? copy.actions.copied : copy.actions.copy}
+            </button>
+          </span>
+        </div>
+
+        <div className="p2p-checkout-wallet">
+          <div>
+            <PlugZap size={16} />
+            <span>
+              <small>{shopCheckoutCopy.tronLinkAutomation}</small>
+              <strong>{walletAccount ? shortenAddress(walletAccount) : shopCheckoutCopy.walletNotConnected}</strong>
+            </span>
+          </div>
+          <div>
+            <button type="button" onClick={() => connectWallet().catch(() => {})} disabled={walletBusy || isChecking}>
+              {walletStatus === 'connecting' ? shopCheckoutCopy.connecting : walletAccount ? shopCheckoutCopy.reconnect : shopCheckoutCopy.connectTronLink}
+            </button>
+            <button
+              type="button"
+              className="primary"
+              onClick={sendPaymentWithTronLink}
+              disabled={walletBusy || isChecking || paymentStatus === 'success'}
+            >
+              <Send size={14} />
+              {walletStatus === 'sending' ? shopCheckoutCopy.openTronLink : shopCheckoutCopy.sendUsdt}
+            </button>
+          </div>
+          {walletMessage && <p>{walletMessage}</p>}
+        </div>
+
+        <p className="p2p-checkout-warning">{shopCheckoutCopy.warning}</p>
+
+        <label className="p2p-checkout-field">
+          <span>{copy.checkout.txHash}</span>
+          <input
+            type="text"
+            value={txHash}
+            onChange={(event) => {
+              setTxHash(event.target.value)
+              setTxIdToVerify('')
+              setPayoutTxId('')
+              setPaymentStatus('idle')
+              setPaymentMessage('')
+            }}
+            placeholder={copy.checkout.txPlaceholder}
+          />
+        </label>
+
         <button
           type="button"
-          className="p2p-secondary-action p2p-checkout-message"
-          onClick={() => onMessageSeller(listing, txIdToVerify, payoutTxId)}
+          className="p2p-primary-action p2p-checkout-submit"
+          disabled={!txHash.trim() || isChecking || paymentStatus === 'success'}
+          onClick={submitPaymentProof}
         >
-          <MessageCircle size={15} />
-          {copy.checkout.messageProof}
+          {isChecking ? <Loader2 size={15} className="p2p-spin" /> : <ShieldCheck size={15} />}
+          {copy.checkout.verifyHash}
         </button>
-      )}
+
+        {paymentStatus !== 'idle' && (
+          <div className={`p2p-checkout-status ${paymentStatus}`}>
+            {paymentStatus === 'success' && <Check size={16} />}
+            {paymentStatus === 'failed' && <AlertCircle size={16} />}
+            {paymentStatus === 'pending' && <Loader2 size={16} className="p2p-spin" />}
+            <div>
+              <strong>
+                {paymentStatus === 'success' && copy.checkout.statuses.success}
+                {paymentStatus === 'failed' && copy.checkout.statuses.failed}
+                {paymentStatus === 'pending' && copy.checkout.statuses.pending}
+              </strong>
+              <span>{paymentMessage}</span>
+              {txIdToVerify && <code>{txIdToVerify}</code>}
+              {payoutTxId && <code>{payoutTxId}</code>}
+            </div>
+          </div>
+        )}
+
+        {paymentStatus === 'success' && (
+          <button
+            type="button"
+            className="p2p-secondary-action p2p-checkout-message"
+            onClick={() => onMessageSeller(listing, txIdToVerify, payoutTxId)}
+          >
+            <MessageCircle size={15} />
+            {copy.checkout.messageProof}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function P2PCheckoutModal({ listing, isSignedIn, copy, onClose, onRequireAuth, onMessageSeller }) {
+  return (
+    <div className="p2p-checkout-overlay" role="presentation" onMouseDown={onClose}>
+      <section
+        className="p2p-checkout-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={copy.checkout.title}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="p2p-checkout-close"
+          aria-label={copy.modal.closeProductDetails}
+          onClick={onClose}
+        >
+          <X size={18} />
+        </button>
+        <P2PUsdtCheckoutBox
+          listing={listing}
+          isSignedIn={isSignedIn}
+          copy={copy}
+          onRequireAuth={onRequireAuth}
+          onMessageSeller={onMessageSeller}
+        />
+      </section>
     </div>
   )
 }
@@ -554,32 +688,16 @@ function P2PProductDetailsModal({
   listing,
   seller,
   currentUserId,
-  isSignedIn,
   copy,
   lang,
   busy,
   onClose,
-  onRequireAuth,
+  onBuy,
   onMessageSeller,
 }) {
   const fileCount = listing.files?.length || 0
   const isSold = listing.status === 'sold'
   const isSeller = currentUserId && currentUserId === listing.sellerId
-  const paymentMethods = listingPaymentMethods(listing)
-  const showUsdtCheckout = !isSeller && !isSold && canUseUsdtCheckout(listing)
-  const checkoutPanelRef = useRef(null)
-
-  const handleBuyClick = () => {
-    if (showUsdtCheckout && checkoutPanelRef.current) {
-      checkoutPanelRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      window.setTimeout(() => {
-        checkoutPanelRef.current?.querySelector('input')?.focus({ preventScroll: true })
-      }, 280)
-      return
-    }
-
-    onMessageSeller(listing)
-  }
 
   return (
     <div className="p2p-modal-backdrop" onClick={onClose}>
@@ -640,30 +758,6 @@ function P2PProductDetailsModal({
               </div>
             </div>
 
-            <div className="p2p-modal-payment-block">
-              <h3>{copy.modal.paymentOptions}</h3>
-              <div className="p2p-modal-payment-list">
-                {paymentMethods.map((methodId) => (
-                  <span key={methodId}>
-                    {methodId === 'card' ? <CreditCard size={15} /> : <Wallet size={15} />}
-                    <b>{p2pPaymentMethodLabel(methodId, copy)}</b>
-                    <small>{p2pPaymentMethodDetail(methodId, copy)}</small>
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {showUsdtCheckout && (
-              <P2PUsdtCheckoutBox
-                listing={listing}
-                isSignedIn={isSignedIn}
-                copy={copy}
-                onRequireAuth={onRequireAuth}
-                onMessageSeller={onMessageSeller}
-                panelRef={checkoutPanelRef}
-              />
-            )}
-
             {isSeller ? (
               <div className="p2p-modal-note">{copy.modal.ownListingNote}</div>
             ) : (
@@ -672,7 +766,7 @@ function P2PProductDetailsModal({
                   type="button"
                   className="p2p-primary-action"
                   disabled={isSold || busy}
-                  onClick={handleBuyClick}
+                  onClick={() => onBuy(listing)}
                 >
                   {busy ? <Loader2 size={16} className="p2p-spin" /> : <BadgeDollarSign size={16} />}
                   {copy.actions.buy}
@@ -774,6 +868,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const [submitting, setSubmitting] = useState(false)
   const [busyListingId, setBusyListingId] = useState('')
   const [selectedListingId, setSelectedListingId] = useState('')
+  const [checkoutListingId, setCheckoutListingId] = useState('')
   const [conversationListingId, setConversationListingId] = useState('')
   const [conversationDraft, setConversationDraft] = useState('')
   const [formResetKey, setFormResetKey] = useState(0)
@@ -783,15 +878,20 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }, [clearBackendError])
 
   useEffect(() => {
-    if (!selectedListingId) return undefined
+    if (!selectedListingId && !checkoutListingId) return undefined
 
     const handleEscape = (event) => {
-      if (event.key === 'Escape') setSelectedListingId('')
+      if (event.key !== 'Escape') return
+      if (checkoutListingId) {
+        setCheckoutListingId('')
+      } else {
+        setSelectedListingId('')
+      }
     }
 
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [selectedListingId])
+  }, [checkoutListingId, selectedListingId])
 
   const listings = state.p2pListings || EMPTY_LISTINGS
   const isEditing = Boolean(editingListingId)
@@ -810,6 +910,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     return listings.find((listing) => listing.id === selectedListingId) || null
   }, [listings, selectedListingId])
 
+  const checkoutListing = useMemo(() => {
+    return listings.find((listing) => listing.id === checkoutListingId) || null
+  }, [checkoutListingId, listings])
+
   const conversationListing = useMemo(() => {
     return listings.find((listing) => listing.id === conversationListingId) || null
   }, [conversationListingId, listings])
@@ -827,7 +931,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           listing.description,
           listing.cryptoWalletAddress,
           p2pCategoryLabel(listing.category, copy),
-          ...listingPaymentMethods(listing).map((methodId) => p2pPaymentMethodLabel(methodId, copy)),
+          p2pPaymentMethodLabel('crypto', copy),
           seller?.username,
           ...(listing.properties || []).flatMap((property) => [property.key, property.value]),
         ].join(' ').toLowerCase()
@@ -843,17 +947,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
   const updateFormField = (field, value) => {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
-  }
-
-  const togglePaymentMethod = (methodId) => {
-    setForm((currentForm) => {
-      const currentMethods = currentForm.paymentMethods || []
-      const paymentMethods = currentMethods.includes(methodId)
-        ? currentMethods.filter((currentMethodId) => currentMethodId !== methodId)
-        : [...currentMethods, methodId]
-
-      return { ...currentForm, paymentMethods }
-    })
   }
 
   const resetForm = () => {
@@ -993,10 +1086,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       title: listing.title || '',
       category: listing.category || 'other',
       price: listing.price === undefined || listing.price === null ? '' : String(listing.price),
-      currency: listing.currency || 'USDT',
       cryptoWalletAddress: listing.cryptoWalletAddress || '',
       deliveryMethod: listing.deliveryMethod || '',
-      paymentMethods: listingPaymentMethods(listing),
       description: listing.description || '',
     })
     setProperties(listing.properties?.length ? listing.properties : initialProperties(lang))
@@ -1024,7 +1115,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     const price = Number(form.price)
     const nextProperties = cleanProperties(properties)
     const totalFileCount = existingFiles.length + listingFiles.length
-    const paymentMethods = form.paymentMethods || []
     const cryptoWalletAddress = form.cryptoWalletAddress.trim()
 
     if (title.length < 3) {
@@ -1042,12 +1132,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
       return
     }
 
-    if (!paymentMethods.length) {
-      setFormError(copy.errors.onePayment)
-      return
-    }
-
-    if (paymentMethods.includes('crypto') && !TRON_ADDRESS_PATTERN.test(cryptoWalletAddress)) {
+    if (!TRON_ADDRESS_PATTERN.test(cryptoWalletAddress)) {
       setFormError(copy.errors.validWallet)
       return
     }
@@ -1077,10 +1162,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         description: form.description,
         category: form.category,
         price,
-        currency: form.currency || 'USDT',
+        currency: 'USDT',
         cryptoWalletAddress,
         deliveryMethod: form.deliveryMethod,
-        paymentMethods,
+        paymentMethods: ['crypto'],
         properties: nextProperties,
         previewDataUrl,
         files: [...existingFiles, ...uploadedFiles],
@@ -1117,6 +1202,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     setConversationDraft(paymentTxId ? copy.messages.proof({ title: listing.title, paymentTxId, payoutTxId }) : '')
     setSelectedListingId('')
+    setCheckoutListingId('')
     setConversationListingId(listing.id)
   }
 
@@ -1155,6 +1241,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const handleViewListingDetails = (listing) => {
     if (activeTab !== 'market') return
     setSelectedListingId(listing.id)
+  }
+
+  const handleBuyListing = (listing) => {
+    if (activeTab !== 'market' || listing.status === 'sold') return
+    setSelectedListingId('')
+    setCheckoutListingId(listing.id)
   }
 
   return (
@@ -1321,26 +1413,6 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
                 />
               </label>
 
-              <div className="p2p-payment-field p2p-form-wide">
-                <span>{copy.form.paymentOptions}</span>
-                <div className="p2p-payment-selector">
-                  {P2P_PAYMENT_METHODS.map((method) => (
-                    <label key={method.id}>
-                      <input
-                        type="checkbox"
-                        checked={(form.paymentMethods || []).includes(method.id)}
-                        onChange={() => togglePaymentMethod(method.id)}
-                      />
-                      {method.id === 'card' ? <CreditCard size={16} /> : <Wallet size={16} />}
-                      <span>
-                        <b>{p2pPaymentMethodLabel(method.id, copy)}</b>
-                        <small>{p2pPaymentMethodDetail(method.id, copy)}</small>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
               <label className="p2p-form-wide">
                 <span>{copy.form.delivery}</span>
                 <input
@@ -1487,6 +1559,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               management={activeTab === 'mine'}
               onEdit={handleEditListing}
               onDelete={handleDeleteListing}
+              onBuy={handleBuyListing}
               onViewDetails={handleViewListingDetails}
               onMarkSold={handleMarkSold}
               onToggleStatus={handleToggleListingStatus}
@@ -1511,11 +1584,22 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             listing={selectedListing}
             seller={usersById[selectedListing.sellerId]}
             currentUserId={currentProfileId}
-            isSignedIn={isSignedIn}
             copy={copy}
             lang={lang}
             busy={busyListingId === selectedListing.id}
             onClose={() => setSelectedListingId('')}
+            onBuy={handleBuyListing}
+            onMessageSeller={handleMessageSeller}
+          />
+        )}
+
+        {checkoutListing && (
+          <P2PCheckoutModal
+            key={checkoutListing.id}
+            listing={checkoutListing}
+            isSignedIn={isSignedIn}
+            copy={copy}
+            onClose={() => setCheckoutListingId('')}
             onRequireAuth={onOpenAuth}
             onMessageSeller={handleMessageSeller}
           />
@@ -1526,7 +1610,8 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             key={`${conversationListing.id}:${conversationDraft}`}
             recipient={usersById[conversationListing.sellerId]}
             contextLabel={conversationListing.title}
-            initialBody={conversationDraft || defaultP2PMessage(conversationListing, copy)}
+            initialBody={conversationDraft}
+            hiddenBodies={legacyP2PMessageBodies(conversationListing)}
             onClose={() => {
               setConversationListingId('')
               setConversationDraft('')

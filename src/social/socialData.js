@@ -244,21 +244,5 @@ export function createSeedSocialState() {
         createdAt: '2026-05-07T10:31:00.000Z',
       },
     ],
-    messages: [
-      {
-        id: 'message-seed-1',
-        fromId: 'user-vice-archivist',
-        toId: 'user-trailerwatch',
-        body: 'Can you check whether the new trailer shot lines up with the south beach billboard map?',
-        createdAt: '2026-05-06T19:04:00.000Z',
-      },
-      {
-        id: 'message-seed-2',
-        fromId: 'user-trailerwatch',
-        toId: 'user-vice-archivist',
-        body: 'Yes. I added it to the Trailer 2 thread for comparison.',
-        createdAt: '2026-05-06T19:18:00.000Z',
-      },
-    ],
   }
 }

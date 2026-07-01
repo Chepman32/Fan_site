@@ -11,11 +11,10 @@ export const P2P_CATEGORIES = [
   { id: 'other', label: 'Other' },
 ]
 
-export const P2P_CURRENCIES = ['USD', 'USDT', 'TRX']
+export const P2P_CURRENCIES = ['USDT']
 
 export const P2P_PAYMENT_METHODS = [
-  { id: 'crypto', label: 'Crypto', detail: 'USDT, TRX, or seller-confirmed wallet' },
-  { id: 'card', label: 'Card', detail: 'Card transfer or seller-confirmed checkout' },
+  { id: 'crypto', label: 'Crypto', detail: 'USDT on TRON/TRC20' },
 ]
 
 export const P2P_SEED_LISTINGS = [
@@ -26,9 +25,9 @@ export const P2P_SEED_LISTINGS = [
     description: 'Animated scene panels, webcam frames, alerts, and editable source files for GTA VI streams.',
     category: 'streaming',
     price: 18,
-    currency: 'USD',
+    currency: 'USDT',
     deliveryMethod: 'Instant file handoff',
-    paymentMethods: ['card', 'crypto'],
+    paymentMethods: ['crypto'],
     previewDataUrl: overlayPreview,
     properties: [
       { key: 'Format', value: 'PNG, MOV, PSD' },
@@ -55,9 +54,9 @@ export const P2P_SEED_LISTINGS = [
     description: 'A ready-to-use reaction set for Discord servers, Twitch panels, and fan community posts.',
     category: 'digital-assets',
     price: 12,
-    currency: 'USD',
+    currency: 'USDT',
     deliveryMethod: 'Seller delivery after payment',
-    paymentMethods: ['card'],
+    paymentMethods: ['crypto'],
     previewDataUrl: emotePackPreview,
     properties: [
       { key: 'Files', value: '10 transparent WebP' },
@@ -128,7 +127,7 @@ export function formatP2PPrice(listing, lang = 'en') {
     maximumFractionDigits: 2,
   }).format(safeAmount)
 
-  return `${formattedAmount} ${listing.currency || 'USD'}`
+  return `${formattedAmount} USDT`
 }
 
 export function formatFileSize(bytes = 0, lang = 'en') {
