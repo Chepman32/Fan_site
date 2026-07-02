@@ -165,6 +165,11 @@ export async function getFirebaseServices() {
         updateProfile,
         where,
       }
+    }).catch((error) => {
+      // A temporary config or chunk-loading failure should not poison every
+      // future auth attempt for the lifetime of the page.
+      firebaseServicesPromise = null
+      throw error
     })
   }
 

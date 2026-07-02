@@ -539,15 +539,26 @@ export function SocialProvider({ children }) {
 
   const requireUser = () => Boolean(services && authUser)
 
+  const getReadyServices = async () => {
+    if (services) return services
+
+    try {
+      const loadedServices = await withFirebaseTimeout(getFirebaseServices())
+      setServices(loadedServices)
+      return loadedServices
+    } catch (error) {
+      const message = firebaseErrorMessage(error)
+      setAuthError(message)
+      setBackendError(message)
+      setAuthLoading(false)
+      return null
+    }
+  }
+
   const signup = async ({ username, email, password }) => {
     setAuthError('')
     const cleanUsername = normalizeUsername(username)
     const cleanEmail = normalizeEmail(email)
-
-    if (!services) {
-      setAuthError('Firebase is still connecting.')
-      return false
-    }
 
     if (cleanUsername.length < 3) {
       setAuthError('Choose a username with at least 3 characters.')
@@ -573,10 +584,13 @@ export function SocialProvider({ children }) {
       return false
     }
 
+    const readyServices = await getReadyServices()
+    if (!readyServices) return false
+
     try {
       const colors = ['#ff2d95', '#00d9ff', '#ffb000', '#3ddc97', '#9d4edd']
       const result = await withFirebaseTimeout(
-        services.createUserWithEmailAndPassword(services.auth, cleanEmail, password),
+        readyServices.createUserWithEmailAndPassword(readyServices.auth, cleanEmail, password),
       )
       const profile = {
         id: result.user.uid,
@@ -598,11 +612,11 @@ export function SocialProvider({ children }) {
       }))
 
       void Promise.allSettled([
-        withFirebaseTimeout(services.updateProfile(result.user, { displayName: cleanUsername })),
+        withFirebaseTimeout(readyServices.updateProfile(result.user, { displayName: cleanUsername })),
         withFirebaseTimeout(
-          services.setDoc(
-            services.doc(services.db, 'users', result.user.uid),
-            publicUserDocument(profile, services.serverTimestamp()),
+          readyServices.setDoc(
+            readyServices.doc(readyServices.db, 'users', result.user.uid),
+            publicUserDocument(profile, readyServices.serverTimestamp()),
           ),
         ),
       ]).then((results) => {
@@ -622,13 +636,13 @@ export function SocialProvider({ children }) {
   const login = async ({ email, password }) => {
     setAuthError('')
 
-    if (!services) {
-      setAuthError('Firebase is still connecting.')
-      return false
-    }
+    const readyServices = await getReadyServices()
+    if (!readyServices) return false
 
     try {
-      await withFirebaseTimeout(services.signInWithEmailAndPassword(services.auth, normalizeEmail(email), password))
+      await withFirebaseTimeout(
+        readyServices.signInWithEmailAndPassword(readyServices.auth, normalizeEmail(email), password),
+      )
       return true
     } catch (error) {
       setAuthError(firebaseErrorMessage(error))

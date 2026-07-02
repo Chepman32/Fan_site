@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Loader, AlertCircle, ExternalLink, Monitor, Users, Globe, Sparkles } from 'lucide-react'
+import { Loader, AlertCircle, ChevronDown, Monitor, Users, Globe, Sparkles } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './GameInfo.css'
 
@@ -7,6 +8,10 @@ import './GameInfo.css'
 // 'hi' is intentionally absent — falls back to English automatically.
 const WIKI_LANGS = { en: 'en', zh: 'zh', ru: 'ru', it: 'it', id: 'id', pl: 'pl', ms: 'ms' }
 const WIKI_TITLE = 'Grand_Theft_Auto_VI'
+const ACCORDION_LAYOUT_SPRING = { type: 'spring', stiffness: 460, damping: 38, mass: 0.78 }
+const ACCORDION_OPEN_SPRING = { type: 'spring', stiffness: 430, damping: 34, mass: 0.78, velocity: 6 }
+const ACCORDION_CLOSE_SPRING = { type: 'spring', stiffness: 520, damping: 40, mass: 0.72, velocity: -6 }
+const ACCORDION_CONTENT_SPRING = { type: 'spring', stiffness: 650, damping: 36, mass: 0.6, velocity: 8 }
 
 function normalizeWikiText(value = '') {
   return String(value ?? '')
@@ -56,8 +61,10 @@ function formatExtract(text) {
 
 function GameInfo() {
   const { t, lang } = useTranslation()
+  const reduceMotion = useReducedMotion()
   const [wikiData, setWikiData] = useState(null)
   const [wikiError, setWikiError] = useState(null)
+  const [openSection, setOpenSection] = useState(0)
 
   const activeWikiData = wikiData?.requestLang === lang ? wikiData : null
   const activeError = wikiError?.requestLang === lang ? wikiError.message : null
@@ -87,13 +94,13 @@ function GameInfo() {
           const fullExtract = page.extract || summary.extract
 
           if (cancelled) return
+          setOpenSection(0)
           setWikiData({
             requestLang: lang,
             title: summary.title,
             description: summary.description,
             extract: fullExtract,
             thumbnail: summary.thumbnail?.source,
-            wikiUrl: summary.content_urls?.desktop?.page,
           })
           setWikiError(null)
           return
@@ -137,6 +144,10 @@ function GameInfo() {
   ]
 
   const sections = activeWikiData ? formatExtract(activeWikiData.extract) : []
+  const accordionSections = sections.slice(0, 4).map((section) => ({
+    ...section,
+    title: section.title || activeWikiData?.description || t.gameInfo.title,
+  }))
 
   return (
     <section id="game-info" className="section-padding game-info">
@@ -170,22 +181,80 @@ function GameInfo() {
               )}
 
               <div className="info-text">
-                <p className="info-description">{activeWikiData.description}</p>
-                <div className="info-extract">
-                  {sections.slice(0, 4).map((section, index) => {
+                <div className="game-info-accordion">
+                  {accordionSections.map((section, index) => {
+                    const isOpen = openSection === index
+                    const buttonId = `game-info-trigger-${index}`
+                    const panelId = `game-info-panel-${index}`
+
                     return (
-                      <div key={index} className="extract-section">
-                        {section.title && <h4>{section.title}</h4>}
-                        {section.content && <p>{section.content}</p>}
-                      </div>
+                      <motion.article
+                        key={`${section.title}-${index}`}
+                        className={`game-info-accordion-item${isOpen ? ' is-open' : ''}`}
+                        layout={!reduceMotion}
+                        transition={reduceMotion ? { duration: 0 } : { layout: ACCORDION_LAYOUT_SPRING }}
+                      >
+                        <h3>
+                          <motion.button
+                            id={buttonId}
+                            type="button"
+                            aria-expanded={isOpen}
+                            aria-controls={panelId}
+                            onClick={() => setOpenSection(isOpen ? null : index)}
+                            whileTap={reduceMotion ? undefined : { scale: 0.985 }}
+                            transition={reduceMotion ? { duration: 0 } : ACCORDION_CONTENT_SPRING}
+                          >
+                            <span className="game-info-accordion-index">{String(index + 1).padStart(2, '0')}</span>
+                            <span>{section.title}</span>
+                            <motion.span
+                              className="game-info-accordion-chevron"
+                              aria-hidden="true"
+                              animate={{ rotate: isOpen ? 180 : 0, scale: isOpen ? 1.08 : 1 }}
+                              transition={reduceMotion ? { duration: 0 } : ACCORDION_CONTENT_SPRING}
+                            >
+                              <ChevronDown size={20} />
+                            </motion.span>
+                          </motion.button>
+                        </h3>
+                        <AnimatePresence initial={false}>
+                          {isOpen && section.content && (
+                            <motion.div
+                              id={panelId}
+                              className="game-info-accordion-panel"
+                              role="region"
+                              aria-labelledby={buttonId}
+                              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
+                              animate={{
+                                height: 'auto',
+                                opacity: 1,
+                                transition: reduceMotion
+                                  ? { duration: 0 }
+                                  : { height: ACCORDION_OPEN_SPRING, opacity: { duration: 0.18, delay: 0.04 } },
+                              }}
+                              exit={{
+                                height: 0,
+                                opacity: 0,
+                                transition: reduceMotion
+                                  ? { duration: 0 }
+                                  : { height: ACCORDION_CLOSE_SPRING, opacity: { duration: 0.12 } },
+                              }}
+                            >
+                              <motion.div
+                                className="game-info-accordion-panel-inner"
+                                initial={reduceMotion ? false : { y: -10, scale: 0.985 }}
+                                animate={{ y: 0, scale: 1 }}
+                                exit={reduceMotion ? undefined : { y: -7, scale: 0.99 }}
+                                transition={reduceMotion ? { duration: 0 } : ACCORDION_CONTENT_SPRING}
+                              >
+                                <p>{section.content}</p>
+                              </motion.div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </motion.article>
                     )
                   })}
                 </div>
-                {activeWikiData.wikiUrl && (
-                  <a className="wiki-link" href={activeWikiData.wikiUrl} target="_blank" rel="noopener noreferrer">
-                    {t.aboutPage?.sources?.wikipedia || 'Wikipedia'} <ExternalLink size={13} />
-                  </a>
-                )}
               </div>
             </div>
 
