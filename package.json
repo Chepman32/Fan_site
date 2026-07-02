@@ -9,6 +9,7 @@
     "build:client": "vite build",
     "build:ssr": "vite build --ssr src/entry-server.jsx --outDir dist-ssr",
     "lint": "eslint .",
+    "media:sync": "node scripts/sync-rockstar-promo-media.mjs",
     "prerender": "node scripts/prerender.mjs",
     "seo:validate": "node scripts/seo-validate.mjs",
     "preview": "vite preview"

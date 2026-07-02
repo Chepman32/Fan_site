@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import Countdown from './Countdown'
 import GameInfo from './GameInfo'
+import PromoGallery from './PromoGallery'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './AboutPage.css'
 
@@ -131,6 +132,8 @@ function AboutPage() {
       </section>
 
       <GameInfo />
+
+      <PromoGallery copy={copy.media} />
 
       <section className="about-sources-section">
         <div className="container about-sources-inner">
