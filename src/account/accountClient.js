@@ -32,8 +32,19 @@ async function authorizedRequest(action, options = {}) {
     },
     body: JSON.stringify({ action, ...body }),
   })
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload.error || 'The account action could not be completed.')
+  const contentType = response.headers.get('content-type') || ''
+  const isJson = contentType.toLowerCase().includes('application/json')
+  const payload = isJson ? await response.json().catch(() => ({})) : {}
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error('Account services are not available yet. Deploy the accountManagement function and Hosting rewrite.')
+    }
+    throw new Error(payload.error || 'The account action could not be completed.')
+  }
+  if (!isJson) {
+    throw new Error('The account service returned an invalid response. Check the /api/account Hosting rewrite.')
+  }
   return payload
 }
 
@@ -75,18 +86,24 @@ export async function changePassword(currentPassword, newPassword) {
 
 export async function signOutEverywhere() {
   const { services } = await currentAccount()
-  await authorizedRequest('revokeSessions')
+  const result = await authorizedRequest('revokeSessions')
+  if (result.status !== 'success') throw new Error('The account service did not confirm session revocation.')
   await services.signOut(services.auth)
 }
 
 export async function downloadAccountData() {
-  return authorizedRequest('export')
+  const result = await authorizedRequest('export')
+  if (!result.exportedAt || !result.account || !result.data) {
+    throw new Error('The account service returned an incomplete export.')
+  }
+  return result
 }
 
 export async function deleteAccount(currentPassword) {
   try {
     const { services } = await reauthenticate(currentPassword)
-    await authorizedRequest('delete', { forceRefresh: true })
+    const result = await authorizedRequest('delete', { forceRefresh: true })
+    if (result.status !== 'deleted') throw new Error('The account service did not confirm account deletion.')
     await services.signOut(services.auth).catch(() => {})
   } catch (error) {
     throw accountError(error)

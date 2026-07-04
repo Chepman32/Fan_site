@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import NewsSection from './components/NewsSection'
 import Header from './components/Header'
 import Footer from './components/Footer'
@@ -126,6 +126,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   const [authOpen, setAuthOpen] = useState(false)
   const [route, setRoute] = useState(() => currentRoute(initialRoute))
   const [cartItems, setCartItems] = useState([])
+  const appliedPreferencesUserIdRef = useRef('')
   const {
     accountSettings,
     accountSettingsLoading,
@@ -172,12 +173,19 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   }, [route])
 
   useEffect(() => {
-    if (!isSignedIn || accountSettingsLoading) return
+    const userId = currentProfile?.id || ''
+    if (!isSignedIn) {
+      appliedPreferencesUserIdRef.current = ''
+      return
+    }
+    if (accountSettingsLoading || !userId || appliedPreferencesUserIdRef.current === userId) return
+
+    appliedPreferencesUserIdRef.current = userId
     applyAccountPreferences(accountSettings)
     if (accountSettings.preferredLanguage && accountSettings.preferredLanguage !== lang) {
       setLang(accountSettings.preferredLanguage)
     }
-  }, [accountSettings, accountSettingsLoading, applyAccountPreferences, isSignedIn, lang, setLang])
+  }, [accountSettings, accountSettingsLoading, applyAccountPreferences, currentProfile?.id, isSignedIn, lang, setLang])
 
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)

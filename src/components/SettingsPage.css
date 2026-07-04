@@ -1,4 +1,6 @@
 .settings-page {
+  --settings-hover: #97e3d4;
+  --settings-active: #2e83a6;
   min-height: 100vh;
   background:
     radial-gradient(circle at 8% 12%, rgba(255, 45, 149, 0.08), transparent 28%),
@@ -67,17 +69,18 @@
   transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.settings-jump-nav a:hover,
-.settings-jump-nav a:focus-visible {
-  color: var(--text-primary);
-  background: var(--accent-soft-cyan);
+.settings-jump-nav a:hover:not(.active),
+.settings-jump-nav a:focus-visible:not(.active) {
+  color: #071c18;
+  background: var(--settings-hover);
+  border-color: var(--settings-hover);
 }
 
 .settings-jump-nav a.active {
-  color: var(--text-primary);
-  background: linear-gradient(135deg, var(--accent-soft-cyan), var(--accent-soft-pink));
-  border-color: color-mix(in srgb, var(--accent-cyan) 42%, transparent);
-  box-shadow: inset 0 -3px 0 var(--accent-cyan), 0 5px 16px rgba(0, 217, 255, 0.1);
+  color: #fff;
+  background: var(--settings-active);
+  border-color: var(--settings-active);
+  box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.5), 0 5px 16px rgba(46, 131, 166, 0.22);
 }
 
 .settings-jump-nav a.active::before {
@@ -86,7 +89,7 @@
   left: 10px;
   width: 6px;
   height: 6px;
-  background: var(--accent-cyan);
+  background: #fff;
   border-radius: 50%;
   box-shadow: 0 0 10px var(--accent-cyan);
   content: '';
@@ -206,13 +209,18 @@
 }
 
 .settings-switch.on {
-  background: rgba(0, 217, 255, 0.16);
-  border-color: rgba(0, 217, 255, 0.42);
+  background: var(--settings-active);
+  border-color: var(--settings-active);
 }
 
 .settings-switch.on span {
-  background: var(--accent-cyan);
+  background: #fff;
   transform: translateX(23px);
+}
+
+.settings-switch:hover:not(.on) {
+  background: var(--settings-hover);
+  border-color: var(--settings-hover);
 }
 
 .settings-choice-field {
@@ -257,11 +265,22 @@
   font-weight: 500;
 }
 
-.settings-choice-grid button:hover,
+.settings-choice-grid button:hover:not(.active),
+.settings-choice-grid button:focus-visible:not(.active) {
+  color: #071c18;
+  background: var(--settings-hover);
+  border-color: var(--settings-hover);
+}
+
 .settings-choice-grid button.active {
-  color: var(--text-primary);
-  background: var(--accent-soft-pink);
-  border-color: rgba(255, 45, 149, 0.38);
+  color: #fff;
+  background: var(--settings-active);
+  border-color: var(--settings-active);
+  box-shadow: 0 5px 16px rgba(46, 131, 166, 0.18);
+}
+
+.settings-choice-grid button.active small {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .settings-account-email {
@@ -331,6 +350,17 @@
   color: #09090d;
   background: var(--accent-cyan);
   border-color: var(--accent-cyan);
+}
+
+.settings-inline-actions button:hover:not(:disabled),
+.settings-user-add > button:hover:not(:disabled),
+.settings-wallet-field > button:hover:not(:disabled),
+.settings-password-form button:hover:not(:disabled),
+.settings-guest > button:hover:not(:disabled),
+.settings-account-actions > button:hover:not(:disabled) {
+  color: #071c18;
+  background: var(--settings-hover);
+  border-color: var(--settings-hover);
 }
 
 .settings-password-form {
@@ -484,7 +514,8 @@
 }
 
 .settings-topic-grid button { cursor: pointer; }
-.settings-topic-grid button.active { color: var(--accent-cyan); border-color: var(--accent-cyan); }
+.settings-topic-grid button:hover:not(.active) { color: #071c18; background: var(--settings-hover); border-color: var(--settings-hover); }
+.settings-topic-grid button.active { color: #fff; background: var(--settings-active); border-color: var(--settings-active); }
 
 .settings-report-history > div {
   display: flex;
@@ -523,18 +554,63 @@
 
 .settings-select-grid select { grid-column: 1 / -1; }
 
+.settings-format-preview {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+html[data-density='compact'] .settings-layout {
+  gap: 12px;
+}
+
+html[data-density='compact'] .settings-panel {
+  gap: 12px;
+  padding: 16px;
+}
+
+html[data-density='compact'] .settings-switch-row {
+  padding: 9px 0;
+}
+
+html[data-density='compact'] .settings-choice-grid button {
+  min-height: 48px;
+  padding: 7px 10px;
+}
+
+html[data-density='compact'] :is(.settings-password-form, .settings-user-list, .settings-muted-topics, .settings-report-history) {
+  padding: 11px;
+}
+
 .settings-notice {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 420;
   display: flex;
+  width: min(420px, calc(100vw - 32px));
   align-items: center;
   gap: 9px;
   padding: 12px 14px;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 800;
+  box-shadow: var(--shadow-soft);
 }
 
 .settings-notice.success { color: #3ddc97; background: rgba(61, 220, 151, 0.1); border: 1px solid rgba(61, 220, 151, 0.25); }
 .settings-notice.error { color: #ff8994; background: rgba(255, 74, 92, 0.1); border: 1px solid rgba(255, 74, 92, 0.25); }
+.settings-notice.pending { color: var(--accent-cyan); background: var(--surface-raised); border: 1px solid rgba(0, 217, 255, 0.28); }
+
+.settings-spinner {
+  flex: 0 0 auto;
+  animation: settings-spin 0.9s linear infinite;
+}
+
+@keyframes settings-spin {
+  to { transform: rotate(360deg); }
+}
 
 .settings-data-note {
   display: flex;
@@ -569,4 +645,5 @@
   .settings-wallet-field label { width: calc(100% - 50px); }
   .settings-switch-row { align-items: flex-start; }
   .settings-jump-nav { top: 66px; }
+  .settings-notice { right: 16px; bottom: 16px; }
 }

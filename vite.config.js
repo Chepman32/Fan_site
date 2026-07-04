@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/__/firebase': 'https://gta-vi-fan-site.web.app',
+      '/api/account': 'https://gta-vi-fan-site.web.app',
     },
   },
 })

@@ -13,6 +13,7 @@ import {
   Gauge,
   KeyRound,
   Languages,
+  Loader2,
   LockKeyhole,
   LogOut,
   Mail,
@@ -194,6 +195,13 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     () => [...reportHistory].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)),
     [reportHistory],
   )
+  const dateTimePreview = useMemo(() => {
+    const locale = dateTimeFormat === 'mdy' ? 'en-US' : dateTimeFormat === 'dmy' ? 'en-GB' : lang
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(2026, 10, 19, 18, 30))
+  }, [dateTimeFormat, lang])
 
   useEffect(() => {
     let frameId = 0
@@ -232,7 +240,8 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     setError('')
     setNotice('')
     try {
-      await action()
+      const result = await action()
+      if (result === false) throw new Error('The action could not be completed.')
       if (successMessage) setNotice(successMessage)
       return true
     } catch (actionError) {
@@ -244,9 +253,19 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
   }
 
   const updateSetting = async (key, value, applyLocal) => {
+    setError('')
+    setNotice('')
     applyLocal?.(value)
     const saved = await saveAccountSettings({ [key]: value })
-    setError(saved ? '' : 'The setting could not be saved.')
+    if (saved) {
+      setError('')
+      setNotice('Setting saved.')
+    } else if (applyLocal) {
+      setError('')
+      setNotice('Saved on this device. Account sync is currently unavailable.')
+    } else {
+      setError('The setting could not be saved.')
+    }
     return saved
   }
 
@@ -275,8 +294,10 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     const link = document.createElement('a')
     link.href = url
     link.download = `leonida-loot-account-${new Date().toISOString().slice(0, 10)}.json`
+    document.body.appendChild(link)
     link.click()
-    URL.revokeObjectURL(url)
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000)
   }, 'Account data downloaded.')
 
   const handleDelete = async (event) => {
@@ -341,10 +362,10 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
           {accountSettingsLoading && <small>Loading synced settings…</small>}
         </header>
 
-        {(notice || error) && (
-          <div className={`settings-notice ${error ? 'error' : 'success'}`} role={error ? 'alert' : 'status'}>
-            {error ? <AlertTriangle size={17} /> : <Check size={17} />}
-            <span>{error || notice}</span>
+        {(busyAction || notice || error) && (
+          <div className={`settings-notice ${error ? 'error' : busyAction ? 'pending' : 'success'}`} role={error ? 'alert' : 'status'} aria-live="polite">
+            {error ? <AlertTriangle size={17} /> : busyAction ? <Loader2 className="settings-spinner" size={17} /> : <Check size={17} />}
+            <span>{error || (busyAction ? 'Working on your account request…' : notice)}</span>
           </div>
         )}
 
@@ -397,8 +418,14 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
           </form>
 
           <div className="settings-account-actions">
-            <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('sessions', signOutEverywhere, '')}><LogOut size={17} /><span><b>Sign out from all devices</b><small>Revokes refresh tokens and signs out this browser.</small></span></button>
-            <button type="button" disabled={Boolean(busyAction)} onClick={handleDownload}><Download size={17} /><span><b>Download account data</b><small>Exports your profile, content, messages, settings, reports, and P2P records as JSON.</small></span></button>
+            <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('sessions', signOutEverywhere, '')}>
+              {busyAction === 'sessions' ? <Loader2 className="settings-spinner" size={17} /> : <LogOut size={17} />}
+              <span><b>{busyAction === 'sessions' ? 'Signing out…' : 'Sign out from all devices'}</b><small>Revokes refresh tokens and signs out this browser.</small></span>
+            </button>
+            <button type="button" disabled={Boolean(busyAction)} onClick={handleDownload}>
+              {busyAction === 'download' ? <Loader2 className="settings-spinner" size={17} /> : <Download size={17} />}
+              <span><b>{busyAction === 'download' ? 'Preparing export…' : 'Download account data'}</b><small>Exports your profile, content, messages, settings, reports, and P2P records as JSON.</small></span>
+            </button>
           </div>
 
           <details className="settings-danger-zone">
@@ -439,7 +466,7 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
             </div>
             <div className="settings-user-add">
               <input value={mutedTopicDraft} onChange={(event) => setMutedTopicDraft(event.target.value)} placeholder="Custom tag" maxLength="60" />
-              <button type="button" onClick={addMutedTopic}>Add</button>
+              <button type="button" onClick={addMutedTopic} disabled={!mutedTopicDraft.trim() || accountSettings.mutedTopics.includes(mutedTopicDraft.trim())}>Add</button>
             </div>
           </div>
 
@@ -487,7 +514,16 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
 
           <div className="settings-select-grid">
             <label><Languages size={17} /><span>Preferred language</span><select value={lang} onChange={(event) => { setLang(event.target.value); updateSetting('preferredLanguage', event.target.value) }}>{Object.entries(LANGUAGE_NAMES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>
-            <label><Clock3 size={17} /><span>Date and time format</span><select value={dateTimeFormat} onChange={(event) => updateSetting('dateTimeFormat', event.target.value, setDateTimeFormat)}><option value="locale">Use language default</option><option value="mdy">Month / day / year</option><option value="dmy">Day / month / year</option></select></label>
+            <label>
+              <Clock3 size={17} />
+              <span>Date and time format</span>
+              <select value={dateTimeFormat} onChange={(event) => updateSetting('dateTimeFormat', event.target.value, setDateTimeFormat)}>
+                <option value="locale">Use language default</option>
+                <option value="mdy">Month / day / year</option>
+                <option value="dmy">Day / month / year</option>
+              </select>
+              <small className="settings-format-preview">Preview: {dateTimePreview}</small>
+            </label>
           </div>
           <PreferenceSwitch checked={translateVehicleNames} icon={Car} label="Translate vehicle names" description="Translate vehicle model names when a non-English language is active." onChange={(value) => updateSetting('translateVehicleNames', value, setTranslateVehicleNames)} />
           <ChoiceGroup label="Default community feed" value={defaultCommunityFeed} onChange={(value) => updateSetting('defaultCommunityFeed', value, setDefaultCommunityFeed)} options={[
