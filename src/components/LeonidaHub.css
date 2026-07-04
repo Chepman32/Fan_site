@@ -39,6 +39,7 @@
 .leonida-hub-hero-copy {
   position: relative;
   z-index: 2;
+  min-width: 0;
 }
 
 .leonida-hub-kicker {
@@ -54,12 +55,14 @@
 }
 
 .leonida-hub-hero h1 {
-  max-width: 650px;
+  width: 100%;
+  max-width: 100%;
   color: var(--text-primary);
-  font-size: clamp(64px, 7.8vw, 126px);
+  font-size: clamp(64px, 6.6vw, 106px);
   font-weight: 400;
   letter-spacing: -0.045em;
   line-height: 0.86;
+  overflow-wrap: break-word;
   text-transform: uppercase;
 }
 
