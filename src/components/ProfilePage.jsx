@@ -110,7 +110,7 @@ function resizePhoto(file, errors) {
   })
 }
 
-function ProfilePage({ onOpenAuth, onNavigate }) {
+function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
   const {
     backendError,
     currentUser,
@@ -268,7 +268,7 @@ function ProfilePage({ onOpenAuth, onNavigate }) {
           <button
             className="profile-settings-button"
             type="button"
-            onClick={() => onNavigate?.('/settings')}
+            onClick={onOpenSettings}
             aria-label={t.nav.settings || 'Settings'}
           >
             <Settings size={18} aria-hidden="true" />

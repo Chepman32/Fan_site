@@ -69,6 +69,16 @@ function LazyAuthModal({ open, onClose, Component = AuthModal }) {
   )
 }
 
+function LazySettingsModal({ open, onClose, Component = SettingsPage }) {
+  if (!open) return null
+
+  return (
+    <Suspense fallback={null}>
+      <Component onClose={onClose} />
+    </Suspense>
+  )
+}
+
 function getFixedHeaderOffset() {
   const headerHeight = document.querySelector('.navbar')?.getBoundingClientRect().height || 0
   return Math.ceil(headerHeight + 16)
@@ -124,6 +134,10 @@ function currentRoute(fallbackRoute = '/') {
 
 function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPONENTS }) {
   const [authOpen, setAuthOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(() => {
+    if (typeof window === 'undefined') return initialRoute === '/settings'
+    return window.location.pathname === '/settings'
+  })
   const [route, setRoute] = useState(() => currentRoute(initialRoute))
   const [cartItems, setCartItems] = useState([])
   const { currentProfile, logout, state } = useSocial()
@@ -152,6 +166,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const handlePopState = () => {
       const nextRoute = currentRoute()
       setRoute(nextRoute)
+      setSettingsOpen(nextRoute === '/settings')
       logAnalyticsPageView()
       if (window.location.hash) scrollToHash(window.location.hash)
     }
@@ -165,6 +180,11 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
 
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
+    if (nextUrl.pathname === '/settings') {
+      setSettingsOpen(true)
+      return
+    }
+
     const isKnown = APP_ROUTES.has(nextUrl.pathname)
       || nextUrl.pathname.startsWith('/leonida/')
       || nextUrl.pathname.startsWith('/profile/')
@@ -176,6 +196,16 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     setRoute(nextRoute)
     logAnalyticsPageView(`${nextUrl.pathname}${nextUrl.hash}`)
     scrollToHash(nextUrl.hash)
+  }
+
+  const closeSettings = () => {
+    setSettingsOpen(false)
+
+    if (window.location.pathname === '/settings') {
+      window.history.replaceState(null, '', '/')
+      setRoute('/')
+      logAnalyticsPageView('/')
+    }
   }
 
   const addCartItem = (product) => {
@@ -197,12 +227,20 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     routePath: route,
     currentUser: currentProfile,
     onOpenAuth: () => setAuthOpen(true),
+    onOpenSettings: () => setSettingsOpen(true),
     onLogout: logout,
     onNavigate: navigateTo,
     cartItems,
     cartTotal,
     onRemoveCartItem: removeCartItem,
+    settingsOpen,
   }
+  const overlays = (
+    <>
+      <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      <LazySettingsModal open={settingsOpen} onClose={closeSettings} Component={SettingsPageComponent} />
+    </>
+  )
 
   if (route === '/community') {
     return (
@@ -215,7 +253,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -232,7 +270,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -248,7 +286,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -264,7 +302,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -281,7 +319,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -298,7 +336,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -315,7 +353,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -329,7 +367,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           <NewsSection onNavigate={navigateTo} />
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -346,7 +384,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -367,12 +405,12 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
 
-  if (route === '/' || route === '/p2p') {
+  if (route === '/' || route === '/p2p' || route === '/settings') {
     return (
       <div className="app">
         <SeoHead metadata={seoMetadata} lang={lang} />
@@ -383,7 +421,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -399,7 +437,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -411,27 +449,15 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
-            <ProfilePageComponent onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+            <ProfilePageComponent
+              onOpenAuth={() => setAuthOpen(true)}
+              onOpenSettings={() => setSettingsOpen(true)}
+              onNavigate={navigateTo}
+            />
           </LazyRoute>
         </main>
         <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
-      </div>
-    )
-  }
-
-  if (route === '/settings') {
-    return (
-      <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
-        <Header {...sharedHeaderProps} solid />
-        <main className="page-main">
-          <LazyRoute>
-            <SettingsPageComponent />
-          </LazyRoute>
-        </main>
-        <Footer />
-        <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+        {overlays}
       </div>
     )
   }
@@ -446,7 +472,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         </LazyRoute>
       </main>
       <Footer />
-      <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
+      {overlays}
     </div>
   )
 }

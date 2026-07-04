@@ -793,7 +793,7 @@ const zh = {
 const ru = {
   nav: {
     main: 'Главная',
-    about: 'О игре',
+    about: 'Об игре',
     characters: 'Персонажи',
     weapons: 'Оружие',
     vehicles: 'Транспорт',
@@ -991,7 +991,7 @@ const ru = {
     game: 'Игра',
     official: 'Официальное',
     coverage: 'Материалы',
-    about: 'О игре',
+    about: 'Об игре',
     characters: 'Персонажи',
     media: 'Медиа',
     madeByFans: 'Сделано с',

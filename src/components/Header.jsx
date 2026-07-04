@@ -30,6 +30,7 @@ function isPlainLeftClick(event) {
 function Header({
   currentUser,
   onOpenAuth,
+  onOpenSettings,
   onLogout,
   onNavigate,
   cartItems = [],
@@ -37,6 +38,7 @@ function Header({
   onRemoveCartItem,
   solid = false,
   routePath = '/',
+  settingsOpen = false,
 }) {
   const { t, lang, setLang } = useTranslation()
   const [scrolled, setScrolled] = useState(false)
@@ -84,7 +86,7 @@ function Header({
     if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
     if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
-    if (target === 'settings') return currentPath === '/settings'
+    if (target === 'settings') return settingsOpen || currentPath === '/settings'
     if (target === 'about') return currentPath === '/about'
     if (target === 'characters') return currentPath === '/leonida/characters'
     if (target === 'locations') return currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
@@ -201,15 +203,20 @@ function Header({
             )}
           </div>
 
-          <a
+          <button
+            type="button"
             className={navLinkClass('settings', 'nav-settings-link')}
-            href="/settings"
-            onClick={(event) => navigate(event, '/settings')}
+            onClick={(event) => {
+              closeHeaderMenus()
+              onOpenSettings?.()
+              event.currentTarget.blur()
+            }}
             aria-label={t.nav.settings || 'Settings'}
-            aria-current={ariaCurrent('settings')}
+            aria-haspopup="dialog"
+            aria-expanded={settingsOpen}
           >
             <SettingsIcon size={16} aria-hidden="true" />
-          </a>
+          </button>
 
           {currentUser ? (
             <>

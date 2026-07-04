@@ -1,5 +1,6 @@
 const en = {
   title: 'Settings',
+  close: 'Close settings',
   kicker: 'Settings',
   description: 'Personalize Leonida Loot for this browser.',
   appearance: 'Appearance',
@@ -14,6 +15,7 @@ const en = {
 
 const zh = {
   title: '设置',
+  close: '关闭设置',
   kicker: '设置',
   description: '为此浏览器个性化 Leonida Loot。',
   appearance: '外观',
@@ -28,6 +30,7 @@ const zh = {
 
 const ru = {
   title: 'Настройки',
+  close: 'Закрыть настройки',
   kicker: 'Настройки',
   description: 'Настройте Leonida Loot для этого браузера.',
   appearance: 'Оформление',
@@ -42,6 +45,7 @@ const ru = {
 
 const it = {
   title: 'Impostazioni',
+  close: 'Chiudi impostazioni',
   kicker: 'Impostazioni',
   description: 'Personalizza Leonida Loot per questo browser.',
   appearance: 'Aspetto',
@@ -56,6 +60,7 @@ const it = {
 
 const id = {
   title: 'Pengaturan',
+  close: 'Tutup pengaturan',
   kicker: 'Pengaturan',
   description: 'Personalisasikan Leonida Loot untuk browser ini.',
   appearance: 'Tampilan',
@@ -70,6 +75,7 @@ const id = {
 
 const pl = {
   title: 'Ustawienia',
+  close: 'Zamknij ustawienia',
   kicker: 'Ustawienia',
   description: 'Spersonalizuj Leonida Loot w tej przeglądarce.',
   appearance: 'Wygląd',
@@ -84,6 +90,7 @@ const pl = {
 
 const hi = {
   title: 'सेटिंग्स',
+  close: 'सेटिंग्स बंद करें',
   kicker: 'सेटिंग्स',
   description: 'इस ब्राउज़र के लिए Leonida Loot को वैयक्तिकृत करें।',
   appearance: 'दिखावट',
@@ -98,6 +105,7 @@ const hi = {
 
 const ms = {
   title: 'Tetapan',
+  close: 'Tutup tetapan',
   kicker: 'Tetapan',
   description: 'Peribadikan Leonida Loot untuk pelayar ini.',
   appearance: 'Penampilan',

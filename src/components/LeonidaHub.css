@@ -65,6 +65,8 @@
 
 .leonida-hub-hero h1 span {
   display: block;
+  width: max-content;
+  padding-right: 0.08em;
   background: linear-gradient(105deg, #ff2d95, #b05cff 48%, #00d9ff);
   background-clip: text;
   color: transparent;
