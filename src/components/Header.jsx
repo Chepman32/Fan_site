@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { LANGUAGE_NAMES } from '../i18n/translations'
+import QuickSettingsModal from './QuickSettingsModal'
 import './Header.css'
 
 const CryptoCheckoutPanel = lazy(() => import('./CryptoCheckoutPanel'))
@@ -30,7 +31,6 @@ function isPlainLeftClick(event) {
 function Header({
   currentUser,
   onOpenAuth,
-  onOpenSettings,
   onLogout,
   onNavigate,
   cartItems = [],
@@ -44,6 +44,7 @@ function Header({
   const [scrolled, setScrolled] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
   const [bottomMoreOpen, setBottomMoreOpen] = useState(false)
+  const [quickSettingsOpen, setQuickSettingsOpen] = useState(false)
   const checkoutKey = `${cartItems.map((item) => item.id).join(',')}:${cartTotal}`
 
   useEffect(() => {
@@ -66,6 +67,7 @@ function Header({
   const closeHeaderMenus = () => {
     setLangOpen(false)
     setBottomMoreOpen(false)
+    setQuickSettingsOpen(false)
   }
 
   const navigate = (event, href, options = {}) => {
@@ -86,7 +88,7 @@ function Header({
     if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
     if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
-    if (target === 'settings') return settingsOpen || currentPath === '/settings'
+    if (target === 'settings') return quickSettingsOpen || settingsOpen || currentPath === '/settings'
     if (target === 'about') return currentPath === '/about'
     if (target === 'characters') return currentPath === '/leonida/characters'
     if (target === 'locations') return currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
@@ -207,12 +209,14 @@ function Header({
             type="button"
             className={navLinkClass('settings', 'nav-settings-link')}
             onClick={(event) => {
-              closeHeaderMenus()
-              onOpenSettings?.()
+              setLangOpen(false)
+              setBottomMoreOpen(false)
+              setQuickSettingsOpen((open) => !open)
               event.currentTarget.blur()
             }}
             aria-label={t.nav.settings || 'Settings'}
-            aria-current={ariaCurrent('settings')}
+            aria-haspopup="dialog"
+            aria-expanded={quickSettingsOpen}
           >
             <SettingsIcon size={16} aria-hidden="true" />
           </button>
@@ -295,6 +299,10 @@ function Header({
           </div>
         </div>
       </nav>
+
+      {quickSettingsOpen && (
+        <QuickSettingsModal onClose={() => setQuickSettingsOpen(false)} />
+      )}
     </>
   )
 }

@@ -36,7 +36,7 @@ function writeStoredValue(key, value) {
 
 function initialTheme() {
   const storedTheme = readStoredValue(THEME_STORAGE_KEY)
-  return THEMES.has(storedTheme) ? storedTheme : 'system'
+  return THEMES.has(storedTheme) ? storedTheme : 'dark'
 }
 
 function initialBoolean(key, fallback = false) {

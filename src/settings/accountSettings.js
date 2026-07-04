@@ -16,7 +16,7 @@ export const DEFAULT_ACCOUNT_SETTINGS = Object.freeze({
   defaultTronPayoutAddress: '',
   salePayoutAlerts: true,
   confirmWalletBeforeListing: true,
-  theme: 'system',
+  theme: 'dark',
   reducedMotion: false,
   contentDensity: 'comfortable',
   preferredLanguage: '',

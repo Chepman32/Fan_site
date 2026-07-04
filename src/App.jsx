@@ -221,7 +221,6 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     routePath: route,
     currentUser: currentProfile,
     onOpenAuth: () => setAuthOpen(true),
-    onOpenSettings: () => navigateTo('/settings'),
     onLogout: logout,
     onNavigate: navigateTo,
     cartItems,
