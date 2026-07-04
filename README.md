@@ -13,6 +13,12 @@ IGN wiki sections can translate parsed English content in the browser through Go
 
 Community posts can attach up to four images/videos (20 MiB each). Media is uploaded through the authenticated Telegram storage bridge and streamed through `VITE_TELEGRAM_FILE_ENDPOINT`; the bot token remains server-side. Deploy the matching `telegramUpload`/`telegramFile` Firebase Functions or the Cloudflare Worker plus the updated Firestore rules before enabling this in production.
 
+Authenticated account settings use the `accountManagement` Firebase Function through `/api/account`. Deploy that function together with the updated Firestore rules before enabling session revocation, account export, or account deletion in production:
+
+```sh
+firebase deploy --only functions:accountManagement,firestore:rules,hosting --project gta-vi-fan-site
+```
+
 Before sign-up, posting, voting, source submissions, comments, and messages can work against the live project:
 
 - Enable Firebase Authentication with the Email/Password provider.

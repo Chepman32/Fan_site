@@ -5,7 +5,7 @@ import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
 import { SocialProvider, useSocial } from './social/SocialContext'
 import { LanguageProvider, useTranslation } from './i18n/useTranslation.jsx'
-import { PreferencesProvider } from './preferences/AppPreferences.jsx'
+import { PreferencesProvider, usePreferences } from './preferences/AppPreferences.jsx'
 import { shopCentsToPrice, shopPriceToCents } from './shop/paymentConfig'
 import SeoHead from './seo/SeoHead'
 import { createSeoMetadata } from './seo/seoConfig'
@@ -60,16 +60,6 @@ function LazyRoute({ children }) {
 }
 
 function LazyAuthModal({ open, onClose, Component = AuthModal }) {
-  if (!open) return null
-
-  return (
-    <Suspense fallback={null}>
-      <Component onClose={onClose} />
-    </Suspense>
-  )
-}
-
-function LazySettingsModal({ open, onClose, Component = SettingsPage }) {
   if (!open) return null
 
   return (
@@ -134,14 +124,18 @@ function currentRoute(fallbackRoute = '/') {
 
 function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPONENTS }) {
   const [authOpen, setAuthOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(() => {
-    if (typeof window === 'undefined') return initialRoute === '/settings'
-    return window.location.pathname === '/settings'
-  })
   const [route, setRoute] = useState(() => currentRoute(initialRoute))
   const [cartItems, setCartItems] = useState([])
-  const { currentProfile, logout, state } = useSocial()
-  const { lang } = useTranslation()
+  const {
+    accountSettings,
+    accountSettingsLoading,
+    currentProfile,
+    isSignedIn,
+    logout,
+    state,
+  } = useSocial()
+  const { lang, setLang } = useTranslation()
+  const { applyAccountPreferences } = usePreferences()
   const {
     AuthModal: AuthModalComponent,
     AboutPage: AboutPageComponent,
@@ -166,7 +160,6 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const handlePopState = () => {
       const nextRoute = currentRoute()
       setRoute(nextRoute)
-      setSettingsOpen(nextRoute === '/settings')
       logAnalyticsPageView()
       if (window.location.hash) scrollToHash(window.location.hash)
     }
@@ -178,13 +171,16 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     if (window.location.hash) scrollToHash(window.location.hash)
   }, [route])
 
+  useEffect(() => {
+    if (!isSignedIn || accountSettingsLoading) return
+    applyAccountPreferences(accountSettings)
+    if (accountSettings.preferredLanguage && accountSettings.preferredLanguage !== lang) {
+      setLang(accountSettings.preferredLanguage)
+    }
+  }, [accountSettings, accountSettingsLoading, applyAccountPreferences, isSignedIn, lang, setLang])
+
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
-    if (nextUrl.pathname === '/settings') {
-      setSettingsOpen(true)
-      return
-    }
-
     const isKnown = APP_ROUTES.has(nextUrl.pathname)
       || nextUrl.pathname.startsWith('/leonida/')
       || nextUrl.pathname.startsWith('/profile/')
@@ -196,16 +192,6 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     setRoute(nextRoute)
     logAnalyticsPageView(`${nextUrl.pathname}${nextUrl.hash}`)
     scrollToHash(nextUrl.hash)
-  }
-
-  const closeSettings = () => {
-    setSettingsOpen(false)
-
-    if (window.location.pathname === '/settings') {
-      window.history.replaceState(null, '', '/')
-      setRoute('/')
-      logAnalyticsPageView('/')
-    }
   }
 
   const addCartItem = (product) => {
@@ -227,19 +213,16 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     routePath: route,
     currentUser: currentProfile,
     onOpenAuth: () => setAuthOpen(true),
-    onOpenSettings: () => setSettingsOpen(true),
+    onOpenSettings: () => navigateTo('/settings'),
     onLogout: logout,
     onNavigate: navigateTo,
     cartItems,
     cartTotal,
     onRemoveCartItem: removeCartItem,
-    settingsOpen,
+    settingsOpen: route === '/settings',
   }
   const overlays = (
-    <>
-      <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
-      <LazySettingsModal open={settingsOpen} onClose={closeSettings} Component={SettingsPageComponent} />
-    </>
+    <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
   )
 
   if (route === '/community') {
@@ -410,7 +393,23 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
-  if (route === '/' || route === '/p2p' || route === '/settings') {
+  if (route === '/settings') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <SettingsPageComponent onOpenAuth={() => setAuthOpen(true)} onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
+  if (route === '/' || route === '/p2p') {
     return (
       <div className="app">
         <SeoHead metadata={seoMetadata} lang={lang} />
@@ -451,7 +450,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
           <LazyRoute>
             <ProfilePageComponent
               onOpenAuth={() => setAuthOpen(true)}
-              onOpenSettings={() => setSettingsOpen(true)}
+              onOpenSettings={() => navigateTo('/settings')}
               onNavigate={navigateTo}
             />
           </LazyRoute>

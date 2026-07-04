@@ -3,6 +3,7 @@ import { Inbox, Loader2, MessageCircle, Search, Send, User } from 'lucide-react'
 import { buildMessageDialogs, messageTimeLabel, messagesBetween } from '../messages/messageHelpers'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { useSocial } from '../social/SocialContext'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import './MessagesPage.css'
 
 function userFallback(userId) {
@@ -37,7 +38,8 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
     state,
     usersById,
   } = useSocial()
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
+  const { dateTimeFormat } = usePreferences()
   const [selectedUserId, setSelectedUserId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [draft, setDraft] = useState('')
@@ -153,7 +155,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                       <b>{user.username}</b>
                       <small>{mine ? 'You: ' : ''}{dialog.lastMessage?.body || 'No messages yet'}</small>
                     </span>
-                    <time>{messageTimeLabel(dialog.lastMessage?.createdAt)}</time>
+                    <time>{messageTimeLabel(dialog.lastMessage?.createdAt, lang, dateTimeFormat)}</time>
                   </button>
                 )
               })}
@@ -187,7 +189,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                     return (
                       <article key={message.id} className={`messages-bubble ${mine ? 'mine' : ''}`}>
                         <p>{message.body}</p>
-                        <time>{messageTimeLabel(message.createdAt)}</time>
+                        <time>{messageTimeLabel(message.createdAt, lang, dateTimeFormat)}</time>
                       </article>
                     )
                   })}

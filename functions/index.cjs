@@ -367,6 +367,79 @@ function readJsonBody(req) {
   }
 }
 
+function jsonSafeValue(value) {
+  if (value === null || value === undefined) return value ?? null
+  if (value instanceof admin.firestore.Timestamp) return value.toDate().toISOString()
+  if (Array.isArray(value)) return value.map(jsonSafeValue)
+  if (typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, jsonSafeValue(item)]))
+  }
+  return value
+}
+
+function exportedDocuments(snapshot) {
+  return snapshot.docs.map((document) => ({ id: document.id, ...jsonSafeValue(document.data()) }))
+}
+
+async function accountCollections(uid) {
+  const db = admin.firestore()
+  const [
+    profile,
+    settings,
+    posts,
+    comments,
+    sources,
+    messages,
+    listings,
+    buyerDeals,
+    sellerDeals,
+    reports,
+  ] = await Promise.all([
+    db.collection('users').doc(uid).get(),
+    db.collection('userSettings').doc(uid).get(),
+    db.collection('posts').where('authorId', '==', uid).get(),
+    db.collection('comments').where('authorId', '==', uid).get(),
+    db.collection('sources').where('authorId', '==', uid).get(),
+    db.collection('messages').where('participantIds', 'array-contains', uid).get(),
+    db.collection('p2pListings').where('sellerId', '==', uid).get(),
+    db.collection('p2pDeals').where('buyerId', '==', uid).get(),
+    db.collection('p2pDeals').where('sellerId', '==', uid).get(),
+    db.collection('reports').where('reporterId', '==', uid).get(),
+  ])
+
+  const dealDocuments = new Map()
+  ;[...buyerDeals.docs, ...sellerDeals.docs].forEach((document) => dealDocuments.set(document.id, document))
+
+  return {
+    refs: {
+      profile: profile.ref,
+      settings: settings.ref,
+      deletable: [
+        ...posts.docs,
+        ...comments.docs,
+        ...sources.docs,
+        ...messages.docs,
+        ...listings.docs,
+        ...reports.docs,
+      ].map((document) => document.ref),
+    },
+    data: {
+      profile: profile.exists ? jsonSafeValue(profile.data()) : null,
+      settings: settings.exists ? jsonSafeValue(settings.data()) : null,
+      posts: exportedDocuments(posts),
+      comments: exportedDocuments(comments),
+      sources: exportedDocuments(sources),
+      messages: exportedDocuments(messages),
+      p2pListings: exportedDocuments(listings),
+      p2pDeals: Array.from(dealDocuments.values()).map((document) => ({
+        id: document.id,
+        ...jsonSafeValue(document.data()),
+      })),
+      reports: exportedDocuments(reports),
+    },
+  }
+}
+
 function normalizeTxId(value) {
   return String(value || '').trim().toLowerCase()
 }
@@ -818,6 +891,90 @@ exports.telegramFile = onRequest({
       message: error.message,
     })
     res.status(error.status || 500).json({ error: error.message || 'Post media could not be loaded.' })
+  }
+})
+
+exports.accountManagement = onRequest({
+  region: 'us-central1',
+  timeoutSeconds: 120,
+  memory: '512MiB',
+}, async (req, res) => {
+  setCorsHeaders(req, res)
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('')
+    return
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Use POST to manage an account.' })
+    return
+  }
+
+  try {
+    const decodedToken = await requireFirebaseUser(req)
+    const body = readJsonBody(req)
+    const action = safeText(body.action, 40)
+    const uid = decodedToken.uid
+
+    if (action === 'revokeSessions') {
+      await admin.auth().revokeRefreshTokens(uid)
+      res.status(200).json({ status: 'success' })
+      return
+    }
+
+    const account = await accountCollections(uid)
+
+    if (action === 'export') {
+      const authRecord = await admin.auth().getUser(uid)
+      res.status(200).json({
+        exportedAt: new Date().toISOString(),
+        account: {
+          uid,
+          email: authRecord.email || '',
+          emailVerified: authRecord.emailVerified,
+          displayName: authRecord.displayName || '',
+          disabled: authRecord.disabled,
+          createdAt: authRecord.metadata.creationTime,
+          lastSignInAt: authRecord.metadata.lastSignInTime,
+          providers: authRecord.providerData.map((provider) => provider.providerId),
+        },
+        data: account.data,
+      })
+      return
+    }
+
+    if (action === 'delete') {
+      const authenticatedAt = Number(decodedToken.auth_time || 0)
+      const authAgeSeconds = Math.floor(Date.now() / 1000) - authenticatedAt
+      if (!authenticatedAt || authAgeSeconds > 300) {
+        throw httpError(401, 'Confirm your password again before deleting the account.')
+      }
+
+      const processingDeal = account.data.p2pDeals.find((deal) => deal.status === 'processing')
+      if (processingDeal) {
+        throw httpError(409, 'Account deletion is unavailable while a P2P payout is processing.')
+      }
+
+      const writer = admin.firestore().bulkWriter()
+      account.refs.deletable.forEach((ref) => writer.delete(ref))
+      writer.delete(account.refs.settings)
+      writer.delete(account.refs.profile)
+      await writer.close()
+      await admin.auth().deleteUser(uid)
+
+      logger.info('User account deleted', { uid })
+      res.status(200).json({ status: 'deleted' })
+      return
+    }
+
+    throw httpError(400, 'Unknown account action.')
+  } catch (error) {
+    logger.warn('Account management error', {
+      status: error.status || 500,
+      message: error.message,
+    })
+    res.status(error.status || 500).json({ error: error.message || 'Account action failed.' })
   }
 })
 

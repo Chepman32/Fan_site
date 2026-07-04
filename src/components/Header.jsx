@@ -212,8 +212,7 @@ function Header({
               event.currentTarget.blur()
             }}
             aria-label={t.nav.settings || 'Settings'}
-            aria-haspopup="dialog"
-            aria-expanded={settingsOpen}
+            aria-current={ariaCurrent('settings')}
           >
             <SettingsIcon size={16} aria-hidden="true" />
           </button>

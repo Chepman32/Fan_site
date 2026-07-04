@@ -1055,6 +1055,39 @@
   line-height: 1.65;
 }
 
+.post-spoiler-cover {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 22px;
+  color: var(--text-secondary);
+  background: linear-gradient(135deg, rgba(157, 78, 221, 0.12), rgba(255, 45, 149, 0.08));
+  border: 1px dashed rgba(157, 78, 221, 0.42);
+  border-radius: 9px;
+  flex-direction: column;
+  text-align: center;
+}
+
+.post-spoiler-cover svg { color: var(--accent-purple); }
+.post-spoiler-cover strong { color: var(--text-primary); }
+.post-spoiler-cover span { font-size: 12px; }
+
+.post-spoiler-cover button {
+  margin-top: 7px;
+  padding: 7px 11px;
+  color: var(--text-primary);
+  background: var(--control-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
 .post-tags,
 .source-meta {
   display: flex;

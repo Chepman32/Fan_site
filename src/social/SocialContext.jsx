@@ -8,6 +8,11 @@ import {
 } from './socialData'
 import { normalizePostUrl } from './postLinks'
 import { P2P_PAYMENT_METHODS, P2P_SEED_LISTINGS } from '../p2p/p2pData'
+import {
+  DEFAULT_ACCOUNT_SETTINGS,
+  normalizeAccountSettings,
+  normalizeAccountSettingsPatch,
+} from '../settings/accountSettings'
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
@@ -332,6 +337,17 @@ async function ensureUserDocument(services, authUser) {
   })
 }
 
+async function ensureUserSettingsDocument(services, authUser) {
+  const settingsRef = services.doc(services.db, 'userSettings', authUser.uid)
+  const snapshot = await services.getDoc(settingsRef)
+  if (snapshot.exists()) return
+
+  await services.setDoc(settingsRef, {
+    ...DEFAULT_ACCOUNT_SETTINGS,
+    updatedAt: services.serverTimestamp(),
+  })
+}
+
 async function updateReactionTransaction(services, postId, userId, reactionId) {
   const ref = services.doc(services.db, 'posts', postId)
   const seedPost = seedState.posts.find((post) => post.id === postId)
@@ -403,7 +419,12 @@ export function SocialProvider({ children }) {
   const [services, setServices] = useState(null)
   const [state, setState] = useState(initialState)
   const [authUser, setAuthUser] = useState(null)
+  const [authRevision, setAuthRevision] = useState(0)
   const [authLoading, setAuthLoading] = useState(true)
+  const [accountSettings, setAccountSettings] = useState(DEFAULT_ACCOUNT_SETTINGS)
+  const [accountSettingsLoading, setAccountSettingsLoading] = useState(false)
+  const [reportHistory, setReportHistory] = useState([])
+  const [activityByUserId, setActivityByUserId] = useState({})
   const [authError, setAuthError] = useState('')
   const [backendError, setBackendError] = useState('')
   const clearBackendError = useCallback(() => setBackendError(''), [])
@@ -435,14 +456,46 @@ export function SocialProvider({ children }) {
       setAuthLoading(false)
 
       if (nextAuthUser) {
-        withFirebaseTimeout(ensureUserDocument(services, nextAuthUser)).catch((error) => {
+        setAccountSettingsLoading(true)
+        Promise.all([
+          withFirebaseTimeout(ensureUserDocument(services, nextAuthUser)),
+          withFirebaseTimeout(ensureUserSettingsDocument(services, nextAuthUser)),
+        ]).catch((error) => {
           console.warn('Profile sync failed:', error)
         })
       } else {
+        setAccountSettings(DEFAULT_ACCOUNT_SETTINGS)
+        setAccountSettingsLoading(false)
+        setReportHistory([])
         setState((currentState) => ({ ...currentState, messages: [] }))
       }
     })
   }, [services])
+
+  useEffect(() => {
+    if (!services || !authUser) return undefined
+
+    const settingsRef = services.doc(services.db, 'userSettings', authUser.uid)
+    return services.onSnapshot(settingsRef, (snapshot) => {
+      setAccountSettings(normalizeAccountSettings(snapshot.exists() ? snapshot.data() : {}))
+      setAccountSettingsLoading(false)
+    }, (error) => {
+      setBackendError(firebaseErrorMessage(error))
+      setAccountSettingsLoading(false)
+    })
+  }, [authUser, services])
+
+  useEffect(() => {
+    if (!services || !authUser) return undefined
+
+    const reportsQuery = services.query(
+      services.collection(services.db, 'reports'),
+      services.where('reporterId', '==', authUser.uid),
+    )
+    return services.onSnapshot(reportsQuery, (snapshot) => {
+      setReportHistory(sortNewest(snapshot.docs.map(docData)))
+    }, (error) => setBackendError(firebaseErrorMessage(error)))
+  }, [authUser, services])
 
   useEffect(() => {
     if (!services) return undefined
@@ -497,10 +550,42 @@ export function SocialProvider({ children }) {
           p2pListings: sortNewest(mergeById(P2P_SEED_LISTINGS, p2pListings)),
         }))
       }, (error) => setBackendError(firebaseErrorMessage(error))),
+      services.onSnapshot(services.collection(services.db, 'userActivity'), (snapshot) => {
+        const activity = snapshot.docs.reduce((result, activityDocument) => {
+          result[activityDocument.id] = docData(activityDocument)
+          return result
+        }, {})
+        setActivityByUserId(activity)
+      }, (error) => setBackendError(firebaseErrorMessage(error))),
     ]
 
     return () => subscriptions.forEach((unsubscribe) => unsubscribe())
   }, [services])
+
+  useEffect(() => {
+    if (!services || !authUser || accountSettingsLoading) return undefined
+
+    const activityRef = services.doc(services.db, 'userActivity', authUser.uid)
+    if (!accountSettings.showActivityStatus) {
+      services.deleteDoc(activityRef).catch(() => {})
+      return undefined
+    }
+
+    const publishActivity = (active) => services.setDoc(activityRef, {
+      active,
+      lastActiveAt: services.serverTimestamp(),
+    }, { merge: true }).catch(() => {})
+    const handleVisibility = () => publishActivity(document.visibilityState === 'visible')
+    publishActivity(document.visibilityState === 'visible')
+    const intervalId = window.setInterval(() => publishActivity(document.visibilityState === 'visible'), 5 * 60 * 1000)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      publishActivity(false)
+    }
+  }, [accountSettings.showActivityStatus, accountSettingsLoading, authUser, services])
 
   useEffect(() => {
     if (!services || !authUser) {
@@ -525,6 +610,28 @@ export function SocialProvider({ children }) {
     return getUserById(state, authUser?.uid) ?? authUserFallback(authUser)
   }, [state, authUser])
   const currentProfile = useMemo(() => getUserProfile(currentUser, state), [currentUser, state])
+
+  const visibleState = useMemo(() => {
+    if (!authUser) return state
+
+    const blockedUserIds = new Set(accountSettings.blockedUserIds)
+    const mutedUserIds = new Set(accountSettings.mutedUserIds)
+    const hiddenAuthorIds = new Set([...blockedUserIds, ...mutedUserIds])
+    const mutedTopics = new Set(accountSettings.mutedTopics.map((topic) => topic.toLowerCase()))
+    const hasMutedTopic = (values = []) => values.some((value) => mutedTopics.has(String(value).toLowerCase()))
+
+    return {
+      ...state,
+      posts: state.posts.filter((post) => !hiddenAuthorIds.has(post.authorId) && !hasMutedTopic(post.tags)),
+      rumors: state.rumors.filter((rumor) => !hasMutedTopic([rumor.topic])),
+      sources: state.sources.filter((source) => !hiddenAuthorIds.has(source.authorId) && !hasMutedTopic([source.category])),
+      comments: state.comments.filter((comment) => !hiddenAuthorIds.has(comment.authorId)),
+      messages: state.messages.filter((message) => {
+        const otherId = message.participantIds?.find((participantId) => participantId !== authUser.uid)
+        return !blockedUserIds.has(otherId)
+      }),
+    }
+  }, [accountSettings, authUser, state])
 
   const usersById = useMemo(() => {
     return state.users.reduce((users, user) => {
@@ -654,6 +761,39 @@ export function SocialProvider({ children }) {
     if (!services) return
     await services.signOut(services.auth)
     setAuthError('')
+  }
+
+  const refreshAuthAccount = async () => {
+    if (!authUser) return false
+    try {
+      await authUser.reload()
+      setAuthRevision((revision) => revision + 1)
+      return true
+    } catch (error) {
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
+  }
+
+  const saveAccountSettings = async (patch) => {
+    if (!requireUser()) return false
+    const normalizedPatch = normalizeAccountSettingsPatch(patch)
+    if (!Object.keys(normalizedPatch).length) return true
+
+    const previousSettings = accountSettings
+    setAccountSettings((currentSettings) => normalizeAccountSettings({ ...currentSettings, ...normalizedPatch }))
+    try {
+      await services.setDoc(
+        services.doc(services.db, 'userSettings', authUser.uid),
+        { ...normalizedPatch, updatedAt: services.serverTimestamp() },
+        { merge: true },
+      )
+      return true
+    } catch (error) {
+      setAccountSettings(previousSettings)
+      setBackendError(firebaseErrorMessage(error))
+      return false
+    }
   }
 
   const createPost = async ({ body, tags, linkUrl = '', attachments = [] }) => {
@@ -923,7 +1063,7 @@ export function SocialProvider({ children }) {
   const sendMessage = async ({ toId, body }) => {
     if (!requireUser()) return false
     const cleanBody = body.trim()
-    if (!cleanBody || toId === authUser.uid) return false
+    if (!cleanBody || toId === authUser.uid || accountSettings.blockedUserIds.includes(toId)) return false
 
     try {
       await services.addDoc(services.collection(services.db, 'messages'), {
@@ -1061,7 +1201,7 @@ export function SocialProvider({ children }) {
   }
 
   const value = {
-    state,
+    state: visibleState,
     usersById,
     publicUsers,
     currentUser,
@@ -1070,10 +1210,22 @@ export function SocialProvider({ children }) {
     backendError,
     clearBackendError,
     authLoading,
+    authAccount: authUser ? {
+      email: authUser.email || '',
+      emailVerified: authUser.emailVerified,
+      providerIds: authUser.providerData.map((provider) => provider.providerId),
+      revision: authRevision,
+    } : null,
+    accountSettings,
+    accountSettingsLoading,
+    reportHistory,
+    activityByUserId,
     isSignedIn: Boolean(authUser),
     signup,
     login,
     logout,
+    refreshAuthAccount,
+    saveAccountSettings,
     createPost,
     deletePost,
     reactToPost,

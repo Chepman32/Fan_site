@@ -42,14 +42,15 @@ export function buildMessageDialogs(messages, currentUserId) {
   })
 }
 
-export function messageTimeLabel(dateValue) {
+export function messageTimeLabel(dateValue, language = 'en-US', dateTimeFormat = 'locale') {
   const date = new Date(dateValue)
   if (Number.isNaN(date.getTime())) return 'Now'
 
   const today = new Date()
   const isToday = date.toDateString() === today.toDateString()
 
-  return new Intl.DateTimeFormat('en-US', {
+  const locale = dateTimeFormat === 'mdy' ? 'en-US' : dateTimeFormat === 'dmy' ? 'en-GB' : language
+  return new Intl.DateTimeFormat(locale, {
     month: isToday ? undefined : 'short',
     day: isToday ? undefined : 'numeric',
     hour: 'numeric',

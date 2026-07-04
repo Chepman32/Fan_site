@@ -71,6 +71,28 @@ html {
   scroll-behavior: smooth;
 }
 
+html[data-reduced-motion='true'] {
+  scroll-behavior: auto;
+}
+
+html[data-reduced-motion='true'] *,
+html[data-reduced-motion='true'] *::before,
+html[data-reduced-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+  transition-duration: 0.01ms !important;
+}
+
+html[data-density='compact'] .section-padding {
+  padding-top: 56px;
+  padding-bottom: 56px;
+}
+
+html[data-density='compact'] :is(.community-post, .rumor-card, .source-card, .poll-card, .p2p-listing-card) {
+  padding: 16px;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);

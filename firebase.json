@@ -47,6 +47,13 @@
         }
       },
       {
+        "source": "/api/account",
+        "function": {
+          "functionId": "accountManagement",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/api/news/article",
         "function": {
           "functionId": "ignNewsArticle",

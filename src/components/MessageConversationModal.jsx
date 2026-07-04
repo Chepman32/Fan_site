@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, MessageCircle, Send, X } from 'lucide-react'
 import { messagesBetween, messageTimeLabel } from '../messages/messageHelpers'
 import { useSocial } from '../social/SocialContext'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './MessageConversationModal.css'
 
 function ChatAvatar({ user, size = 'md' }) {
@@ -26,6 +28,8 @@ function MessageConversationModal({
   onClose,
 }) {
   const { backendError, currentProfile, sendMessage, state } = useSocial()
+  const { lang } = useTranslation()
+  const { dateTimeFormat } = usePreferences()
   const [body, setBody] = useState(initialBody)
   const [sending, setSending] = useState(false)
   const [status, setStatus] = useState('')
@@ -106,7 +110,7 @@ function MessageConversationModal({
               return (
                 <article key={message.id} className={`chat-bubble ${mine ? 'mine' : ''}`}>
                   <p>{message.body}</p>
-                  <span>{messageTimeLabel(message.createdAt)}</span>
+                  <span>{messageTimeLabel(message.createdAt, lang, dateTimeFormat)}</span>
                 </article>
               )
             })

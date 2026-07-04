@@ -317,7 +317,7 @@ function settingsMetadata() {
   return pageMetadata({
     route: '/settings',
     title: 'Settings',
-    description: 'Manage Leonida Loot display preferences, theme, and translation behavior for this browser.',
+    description: 'Manage Leonida Loot account security, privacy, P2P seller defaults, and synced personalization preferences.',
     robots: 'noindex,follow',
     breadcrumbs: [{ name: 'Settings', url: absoluteUrl('/settings') }],
   })

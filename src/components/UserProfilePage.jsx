@@ -3,13 +3,15 @@ import { BadgeCheck, FileText, MessageSquare } from 'lucide-react'
 import { getUserProfile, useSocial } from '../social/SocialContext'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import CommunityPostCard from './CommunityPostCard.jsx'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import './ProfilePage.css'
 
-function formatDate(date, lang = 'en') {
-  return new Intl.DateTimeFormat(lang, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date))
+function formatDate(date, lang = 'en', dateTimeFormat = 'locale') {
+  const locale = dateTimeFormat === 'mdy' ? 'en-US' : dateTimeFormat === 'dmy' ? 'en-GB' : lang
+  return new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date))
 }
 
-function formatRelative(date, s) {
+function formatRelative(date, s, lang, dateTimeFormat) {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
   if (minutes < 1) return s.relativeNow
@@ -18,7 +20,7 @@ function formatRelative(date, s) {
   if (hours < 24) return `${hours}${s.relativeHour}`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}${s.relativeDay}`
-  return formatDate(date)
+  return formatDate(date, lang, dateTimeFormat)
 }
 
 function ProfileAvatar({ user, size = 'md' }) {
@@ -36,6 +38,7 @@ function ProfileAvatar({ user, size = 'md' }) {
 
 function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
   const {
+    activityByUserId,
     currentProfile: socialCurrentProfile,
     currentUser,
     deletePost,
@@ -46,10 +49,12 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
     toggleBookmark,
   } = useSocial()
   const { t, lang } = useTranslation()
+  const { dateTimeFormat } = usePreferences()
   const s = t.social
 
   const rawUser = state.users.find((u) => u.id === userId)
   const profile = useMemo(() => getUserProfile(rawUser, state), [rawUser, state])
+  const activity = activityByUserId[userId]
 
   const userPosts = useMemo(
     () => state.posts.filter((p) => p.authorId === userId),
@@ -89,7 +94,8 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
           <span>{s.community ?? 'Community'}</span>
           <h1>{profile.username}</h1>
           <p>
-            {s.joinedOn} {formatDate(profile.joinedAt, lang)} · {s.level} {profile.reputation.level} {profile.reputation.name}
+            {s.joinedOn} {formatDate(profile.joinedAt, lang, dateTimeFormat)} · {s.level} {profile.reputation.level} {profile.reputation.name}
+            {activity?.active ? ' · Online now' : ''}
             {profile.bio && ` · ${profile.bio}`}
           </p>
         </div>
@@ -160,7 +166,7 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
               userSources.map((source) => (
                 <div key={source.id} className="profile-mini-source">
                   <strong>{source.category}</strong>
-                  <span>{source.status} · {formatRelative(source.createdAt, s)}</span>
+                  <span>{source.status} · {formatRelative(source.createdAt, s, lang, dateTimeFormat)}</span>
                   <p>{source.claim}</p>
                 </div>
               ))

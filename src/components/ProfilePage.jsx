@@ -18,20 +18,22 @@ import { useTranslation } from '../i18n/useTranslation.jsx'
 import { buildMessageDialogs } from '../messages/messageHelpers'
 import { SHOP_PRODUCT_BY_ID } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import CommunityPostCard from './CommunityPostCard.jsx'
 import PostAttachment from './PostAttachment.jsx'
 import PostMediaAttachments from './PostMediaAttachments.jsx'
 import './ProfilePage.css'
 
-function formatDate(date, lang = 'en') {
-  return new Intl.DateTimeFormat(lang, {
+function formatDate(date, lang = 'en', dateTimeFormat = 'locale') {
+  const locale = dateTimeFormat === 'mdy' ? 'en-US' : dateTimeFormat === 'dmy' ? 'en-GB' : lang
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(date))
 }
 
-function formatRelative(date, s) {
+function formatRelative(date, s, lang, dateTimeFormat) {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
   if (minutes < 1) return s.relativeNow
@@ -40,7 +42,7 @@ function formatRelative(date, s) {
   if (hours < 24) return `${hours}${s.relativeHour}`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}${s.relativeDay}`
-  return formatDate(date)
+  return formatDate(date, lang, dateTimeFormat)
 }
 
 function shortenTxId(txId = '') {
@@ -125,6 +127,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
     usersById,
   } = useSocial()
   const { t, lang } = useTranslation()
+  const { dateTimeFormat } = usePreferences()
   const s = t.social
   const shopCopy = { ...t.shop, lang }
   const [formDraft, setFormDraft] = useState(null)
@@ -262,7 +265,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
           <div className="profile-page-heading">
             <span>{t.social.tabs.profile}</span>
             <h1>{currentProfile.username}</h1>
-            <p>{s.joinedOn} {formatDate(currentProfile.joinedAt, lang)} · {s.level} {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
+            <p>{s.joinedOn} {formatDate(currentProfile.joinedAt, lang, dateTimeFormat)} · {s.level} {currentProfile.reputation.level} {currentProfile.reputation.name}</p>
           </div>
 
           <button
@@ -416,7 +419,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
                         {product?.image && <img src={product.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />}
                         <div className="profile-purchase-copy">
                           <strong>{title}</strong>
-                          <span>{category} · {formatDate(purchase.purchasedAt || new Date(), lang)}</span>
+                          <span>{category} · {formatDate(purchase.purchasedAt || new Date(), lang, dateTimeFormat)}</span>
                           <code>{shortenTxId(purchase.txId)}</code>
                         </div>
                         {product?.downloadUrl ? (
@@ -456,7 +459,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
                           <ProfileAvatar user={author} size="sm" />
                           <div className="profile-bookmark-meta">
                             <strong>{author.username}</strong>
-                            <span>{formatRelative(post.createdAt, s)}</span>
+                            <span>{formatRelative(post.createdAt, s, lang, dateTimeFormat)}</span>
                           </div>
                           <button
                             type="button"
@@ -494,7 +497,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
                 mySources.map((source) => (
                   <div key={source.id} className="profile-mini-source">
                     <strong>{source.category}</strong>
-                    <span>{source.status} · {formatRelative(source.createdAt, s)}</span>
+                    <span>{source.status} · {formatRelative(source.createdAt, s, lang, dateTimeFormat)}</span>
                     <p>{source.claim}</p>
                   </div>
                 ))

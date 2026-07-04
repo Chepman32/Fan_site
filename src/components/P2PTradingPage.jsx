@@ -837,6 +837,7 @@ function P2PProductDetailsModal({
 
 function P2PTradingPage({ onOpenAuth = () => {} }) {
   const {
+    accountSettings,
     state,
     usersById,
     currentProfile,
@@ -950,7 +951,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }
 
   const resetForm = () => {
-    setForm(initialListingForm(lang))
+    setForm({
+      ...initialListingForm(lang),
+      cryptoWalletAddress: accountSettings.defaultTronPayoutAddress || '',
+    })
     setProperties(initialProperties(lang))
     setPreviewFile(null)
     setPreviewDataUrl('')
@@ -1139,6 +1143,13 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (totalFileCount > MAX_LISTING_FILES) {
       setFormError(copy.errors.maxFiles(MAX_LISTING_FILES))
+      return
+    }
+
+    if (
+      accountSettings.confirmWalletBeforeListing
+      && !window.confirm(`Confirm seller payout address:\n\n${cryptoWalletAddress}\n\nUSDT payouts for this listing will be sent to this address.`)
+    ) {
       return
     }
 

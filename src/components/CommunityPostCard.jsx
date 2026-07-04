@@ -3,6 +3,7 @@ import {
   Bookmark,
   BookmarkCheck,
   Eye,
+  EyeOff,
   HelpCircle,
   MoreVertical,
   Share2,
@@ -15,6 +16,8 @@ import { REACTION_OPTIONS } from '../social/socialData'
 import { getPostAttachment, removeFirstPostUrl } from '../social/postLinks'
 import PostAttachment from './PostAttachment.jsx'
 import PostMediaAttachments from './PostMediaAttachments.jsx'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './SocialHub.css'
 
 const REACTION_ICONS = {
@@ -23,15 +26,15 @@ const REACTION_ICONS = {
   doubtful: HelpCircle,
 }
 
-function formatDate(date) {
-  return new Intl.DateTimeFormat('en', {
+function formatDate(date, locale) {
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(date))
 }
 
-function formatRelative(date) {
+function formatRelative(date, locale) {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
   if (minutes < 1) return 'now'
@@ -40,7 +43,7 @@ function formatRelative(date) {
   if (hours < 24) return `${hours}h ago`
   const days = Math.floor(hours / 24)
   if (days < 7) return `${days}d ago`
-  return formatDate(date)
+  return formatDate(date, locale)
 }
 
 function Avatar({ user, size = 'md', onClick }) {
@@ -155,6 +158,9 @@ function CommunityPostCard({
   onDeletePost,
   onReactToPost,
 }) {
+  const { lang } = useTranslation()
+  const { dateTimeFormat, hideSpoilers } = usePreferences()
+  const [spoilerRevealed, setSpoilerRevealed] = useState(false)
   const currentReaction = REACTION_OPTIONS.find((option) =>
     post.reactions?.[option.id]?.includes(currentUser?.id),
   )
@@ -163,6 +169,9 @@ function CommunityPostCard({
   const canDelete = post.authorId === currentUser?.id && onDeletePost
   const attachment = getPostAttachment(post)
   const displayBody = attachment ? removeFirstPostUrl(post.body) : post.body
+  const locale = dateTimeFormat === 'mdy' ? 'en-US' : dateTimeFormat === 'dmy' ? 'en-GB' : lang
+  const isSpoiler = post.tags?.some((tag) => /spoilers?/i.test(tag))
+  const concealSpoiler = hideSpoilers && isSpoiler && !spoilerRevealed
 
   return (
     <article className="community-post">
@@ -171,7 +180,7 @@ function CommunityPostCard({
           <Avatar user={author} onClick={onViewUser ? () => onViewUser(post.authorId) : undefined} />
           <div>
             <h3>{author.username}</h3>
-            <span>{formatRelative(post.createdAt)}</span>
+            <span>{formatRelative(post.createdAt, locale)}</span>
           </div>
         </div>
         <div className="post-header-actions">
@@ -200,9 +209,20 @@ function CommunityPostCard({
         </div>
       </header>
 
-      {displayBody && <p className="post-body">{displayBody}</p>}
-      <PostMediaAttachments post={post} />
-      <PostAttachment post={post} />
+      {concealSpoiler ? (
+        <div className="post-spoiler-cover">
+          <EyeOff size={22} />
+          <strong>Spoiler hidden</strong>
+          <span>This post is tagged as a spoiler.</span>
+          <button type="button" onClick={() => setSpoilerRevealed(true)}>Reveal post</button>
+        </div>
+      ) : (
+        <>
+          {displayBody && <p className="post-body">{displayBody}</p>}
+          <PostMediaAttachments post={post} />
+          <PostAttachment post={post} />
+        </>
+      )}
 
       <div className="post-tags">
         {post.tags.map((tag) => (

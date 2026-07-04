@@ -1,7 +1,9 @@
 import { telegramPostMediaUrl } from '../storage/telegramStorage'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import './PostAttachment.css'
 
 function PostMediaAttachments({ post }) {
+  const { autoplayVideos } = usePreferences()
   const attachments = Array.isArray(post?.attachments) ? post.attachments : []
   if (!post?.id || attachments.length === 0) return null
 
@@ -21,8 +23,11 @@ function PostMediaAttachments({ post }) {
           <div className="post-media-item" key={key}>
             {attachment.type?.startsWith('video/') ? (
               <video
+                autoPlay={autoplayVideos}
                 controls
                 playsInline
+                loop={autoplayVideos}
+                muted={autoplayVideos}
                 preload={poster ? 'metadata' : 'auto'}
                 poster={poster || undefined}
                 src={source}

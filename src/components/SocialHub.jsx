@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckCircle2,
@@ -30,6 +30,7 @@ import {
 } from '../social/socialData'
 import { getFirstPostUrl, removeFirstPostUrl } from '../social/postLinks'
 import { uploadTelegramFile } from '../storage/telegramStorage'
+import { usePreferences } from '../preferences/AppPreferences.jsx'
 import './SocialHub.css'
 
 const TAB_IDS = ['feed', 'rumors', 'sources', 'polls']
@@ -718,6 +719,18 @@ function PostComposer({ onOpenAuth }) {
 
 function FeedTab({ onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark, deletePost } = useSocial()
+  const { defaultCommunityFeed, reducedMotion } = usePreferences()
+  const posts = useMemo(() => {
+    const feedPosts = defaultCommunityFeed === 'followed'
+      ? state.posts.filter((post) => post.tags?.some((tag) => currentProfile?.followedTopics?.includes(tag)))
+      : [...state.posts]
+
+    if (defaultCommunityFeed === 'trending') {
+      const reactionCount = (post) => Object.values(post.reactions || {}).reduce((total, entries) => total + entries.length, 0)
+      return feedPosts.sort((first, second) => reactionCount(second) - reactionCount(first))
+    }
+    return feedPosts
+  }, [currentProfile?.followedTopics, defaultCommunityFeed, state.posts])
 
   return (
     <div className="social-stack">
@@ -726,16 +739,16 @@ function FeedTab({ onOpenAuth, onViewUser }) {
       {!isSignedIn && <AuthPrompt onOpenAuth={onOpenAuth} compact />}
 
       <AnimatePresence initial={false}>
-      {state.posts.map((post) => {
+      {posts.map((post) => {
         const author = usersById[post.authorId] ?? userFallback(post.authorId)
 
         return (
           <motion.div
             key={post.id}
-            layout
-            initial={{ opacity: 0, scale: 0.96 }}
+            layout={!reducedMotion}
+            initial={reducedMotion ? false : { opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 400, damping: 30 } }}
-            exit={{ opacity: 0, scale: 0.94, height: 0, marginBottom: 0, transition: { type: 'spring', stiffness: 400, damping: 35, opacity: { duration: 0.15 } } }}
+            exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, height: 0, marginBottom: 0, transition: { type: 'spring', stiffness: 400, damping: 35, opacity: { duration: 0.15 } } }}
           >
             <CommunityPostCard
               post={post}
