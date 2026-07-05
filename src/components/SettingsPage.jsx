@@ -45,12 +45,15 @@ import { useSocial } from '../social/SocialContext'
 import './SettingsPage.css'
 
 const TRON_ADDRESS_PATTERN = /^T[1-9A-HJ-NP-Za-km-z]{33}$/
-const SETTINGS_SECTIONS = [
-  { id: 'account-security', label: 'Account & security' },
-  { id: 'privacy-safety', label: 'Privacy & safety' },
-  { id: 'seller-settings', label: 'P2P seller' },
-  { id: 'personalization', label: 'Personalization' },
-]
+
+function getSettingsSections(t) {
+  return [
+    { id: 'account-security', label: t.settings?.sections?.accountSecurity || 'Account & security' },
+    { id: 'privacy-safety', label: t.settings?.sections?.privacySafety || 'Privacy & safety' },
+    { id: 'seller-settings', label: t.settings?.sections?.sellerSettings || 'P2P seller' },
+    { id: 'personalization', label: t.settings?.sections?.personalization || 'Personalization' },
+  ]
+}
 
 function SectionHeading({ icon: Icon, title, description }) {
   return (
@@ -113,7 +116,7 @@ function ChoiceGroup({ label, value, options, onChange }) {
   )
 }
 
-function UserListSetting({ currentUserId, ids, label, onChange, users }) {
+function UserListSetting({ currentUserId, ids, label, onChange, users, t }) {
   const [selectedId, setSelectedId] = useState('')
   const availableUsers = users.filter((user) => user.id !== currentUserId && !ids.includes(user.id))
 
@@ -128,22 +131,23 @@ function UserListSetting({ currentUserId, ids, label, onChange, users }) {
       <h3>{label}</h3>
       <div className="settings-user-add">
         <select value={selectedId} onChange={(event) => setSelectedId(event.target.value)}>
-          <option value="">Select a community member</option>
+          <option value="">{t?.settings?.privacySafety?.selectUser || 'Select a community member'}</option>
           {availableUsers.map((user) => <option key={user.id} value={user.id}>{user.username}</option>)}
         </select>
-        <button type="button" onClick={addUser} disabled={!selectedId}>Add</button>
+        <button type="button" onClick={addUser} disabled={!selectedId}>{t?.settings?.privacySafety?.add || 'Add'}</button>
       </div>
       <div className="settings-user-chips">
         {ids.map((id) => {
           const user = users.find((candidate) => candidate.id === id)
+          const username = user?.username || (t?.settings?.privacySafety?.unknownUser || 'Unknown user')
           return (
             <span key={id}>
-              {user?.username || 'Unknown user'}
-              <button type="button" onClick={() => onChange(ids.filter((userId) => userId !== id))} aria-label={`Remove ${user?.username || 'user'}`}>×</button>
+              {username}
+              <button type="button" onClick={() => onChange(ids.filter((userId) => userId !== id))} aria-label={t?.settings?.privacySafety?.removeUser?.(username) || `Remove ${username}`}>×</button>
             </span>
           )
         })}
-        {!ids.length && <small>No users added.</small>}
+        {!ids.length && <small>{t?.settings?.privacySafety?.noUsers || 'No users added.'}</small>}
       </div>
     </div>
   )
@@ -183,7 +187,7 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
   const [busyAction, setBusyAction] = useState('')
-  const [activeSection, setActiveSection] = useState(SETTINGS_SECTIONS[0].id)
+  const [activeSection, setActiveSection] = useState('account-security')
   const [passwordForm, setPasswordForm] = useState({ current: '', next: '', confirm: '' })
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
@@ -191,6 +195,7 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
   const [mutedTopicDraft, setMutedTopicDraft] = useState('')
 
   const settingsTitle = t.settings?.title || t.nav.settings || 'Settings'
+  const SETTINGS_SECTIONS = useMemo(() => getSettingsSections(t), [t])
   const sortedReports = useMemo(
     () => [...reportHistory].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)),
     [reportHistory],
@@ -233,7 +238,15 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
       window.removeEventListener('scroll', scheduleUpdate)
       window.removeEventListener('resize', scheduleUpdate)
     }
-  }, [])
+  }, [SETTINGS_SECTIONS])
+
+  useEffect(() => {
+    if (!notice || error || busyAction) return undefined
+
+    const removeTimer = window.setTimeout(() => setNotice(''), 1000)
+
+    return () => window.clearTimeout(removeTimer)
+  }, [busyAction, error, notice])
 
   const runAction = async (name, action, successMessage) => {
     setBusyAction(name)
@@ -241,11 +254,11 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     setNotice('')
     try {
       const result = await action()
-      if (result === false) throw new Error('The action could not be completed.')
+      if (result === false) throw new Error(t.settings?.notices?.actionFailed || 'The action could not be completed.')
       if (successMessage) setNotice(successMessage)
       return true
     } catch (actionError) {
-      setError(actionError.message || 'The action could not be completed.')
+      setError(actionError.message || (t.settings?.notices?.actionFailed || 'The action could not be completed.'))
       return false
     } finally {
       setBusyAction('')
@@ -259,12 +272,12 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     const saved = await saveAccountSettings({ [key]: value })
     if (saved) {
       setError('')
-      setNotice('Setting saved.')
+      setNotice(t.settings?.notices?.settingSaved || 'Setting saved.')
     } else if (applyLocal) {
       setError('')
-      setNotice('Saved on this device. Account sync is currently unavailable.')
+      setNotice(t.settings?.notices?.savedLocal || 'Saved on this device. Account sync is currently unavailable.')
     } else {
-      setError('The setting could not be saved.')
+      setError(t.settings?.notices?.saveFailed || 'The setting could not be saved.')
     }
     return saved
   }
@@ -272,17 +285,17 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
   const handleChangePassword = async (event) => {
     event.preventDefault()
     if (passwordForm.next.length < 6) {
-      setError('The new password must contain at least 6 characters.')
+      setError(t.settings?.accountSecurity?.passwordTooShort || 'The new password must contain at least 6 characters.')
       return
     }
     if (passwordForm.next !== passwordForm.confirm) {
-      setError('The new passwords do not match.')
+      setError(t.settings?.accountSecurity?.passwordMismatch || 'The new passwords do not match.')
       return
     }
     const changed = await runAction(
       'password',
       () => changePassword(passwordForm.current, passwordForm.next),
-      'Password changed successfully.',
+      t.settings?.accountSecurity?.passwordChanged || 'Password changed successfully.',
     )
     if (changed) setPasswordForm({ current: '', next: '', confirm: '' })
   }
@@ -298,12 +311,12 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     link.click()
     link.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }, 'Account data downloaded.')
+  }, t.settings?.accountSecurity?.dataDownloaded || 'Account data downloaded.')
 
   const handleDelete = async (event) => {
     event.preventDefault()
     if (deleteConfirmation !== 'DELETE') {
-      setError('Type DELETE to confirm permanent account deletion.')
+      setError(t.settings?.accountSecurity?.deleteConfirmError || 'Type DELETE to confirm permanent account deletion.')
       return
     }
     const deleted = await runAction('delete', () => deleteAccount(deletePassword), '')
@@ -313,13 +326,13 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
   const saveWallet = async () => {
     const cleanWallet = (walletDraft ?? accountSettings.defaultTronPayoutAddress).trim()
     if (cleanWallet && !TRON_ADDRESS_PATTERN.test(cleanWallet)) {
-      setError('Enter a valid TRON address beginning with T, or leave the field empty.')
+      setError(t.settings?.sellerSettings?.invalidAddress || 'Enter a valid TRON address beginning with T, or leave the field empty.')
       return
     }
     const saved = await updateSetting('defaultTronPayoutAddress', cleanWallet)
     if (saved) {
       setWalletDraft(null)
-      setNotice('Default payout address saved.')
+      setNotice(t.settings?.sellerSettings?.addressSaved || 'Default payout address saved.')
     }
   }
 
@@ -344,9 +357,9 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
         <div className="container settings-guest">
           <Shield size={30} />
           <span>{settingsTitle}</span>
-          <h1>Sign in to manage account settings.</h1>
-          <p>Security, privacy, seller defaults, and synced personalization are available to authenticated users.</p>
-          <button type="button" onClick={onOpenAuth}>Sign in</button>
+          <h1>{t.settings?.guestState?.heading || 'Sign in to manage account settings.'}</h1>
+          <p>{t.settings?.guestState?.description || 'Security, privacy, seller defaults, and synced personalization are available to authenticated users.'}</p>
+          <button type="button" onClick={onOpenAuth}>{t.settings?.guestState?.signIn || 'Sign in'}</button>
         </div>
       </section>
     )
@@ -356,16 +369,16 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
     <section className="settings-page section-padding">
       <div className="container settings-layout">
         <header className="settings-heading">
-          <span>Account control center</span>
+          <span>{t.settings?.header?.kicker || 'Account control center'}</span>
           <h1>{settingsTitle}</h1>
-          <p>Manage security, privacy, marketplace defaults, and how Leonida Loot behaves across your devices.</p>
-          {accountSettingsLoading && <small>Loading synced settings…</small>}
+          <p>{t.settings?.header?.description || 'Manage security, privacy, marketplace defaults, and how Leonida Loot behaves across your devices.'}</p>
+          {accountSettingsLoading && <small>{t.settings?.header?.loading || 'Loading synced settings…'}</small>}
         </header>
 
         {(busyAction || notice || error) && (
           <div className={`settings-notice ${error ? 'error' : busyAction ? 'pending' : 'success'}`} role={error ? 'alert' : 'status'} aria-live="polite">
             {error ? <AlertTriangle size={17} /> : busyAction ? <Loader2 className="settings-spinner" size={17} /> : <Check size={17} />}
-            <span>{error || (busyAction ? 'Working on your account request…' : notice)}</span>
+            <span>{error || (busyAction ? (t.settings?.notices?.working || 'Working on your account request…') : notice)}</span>
           </div>
         )}
 
@@ -384,89 +397,89 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
         </nav>
 
         <article className="settings-panel" id="account-security">
-          <SectionHeading icon={LockKeyhole} title="Account & security" description="Manage your sign-in identity, sessions, and account data." />
+          <SectionHeading icon={LockKeyhole} title={t.settings?.accountSecurity?.title || 'Account & security'} description={t.settings?.accountSecurity?.description || 'Manage your sign-in identity, sessions, and account data.'} />
 
           <div className="settings-account-email">
             <span className="settings-row-icon"><Mail size={18} /></span>
             <div>
-              <small>Email address</small>
-              <strong>{authAccount?.email || 'No email address'}</strong>
+              <small>{t.settings?.accountSecurity?.email || 'Email address'}</small>
+              <strong>{authAccount?.email || (t.settings?.accountSecurity?.noEmail || 'No email address')}</strong>
             </div>
             <span className={`settings-status-badge ${authAccount?.emailVerified ? 'verified' : 'pending'}`}>
               {authAccount?.emailVerified ? <ShieldCheck size={14} /> : <AlertTriangle size={14} />}
-              {authAccount?.emailVerified ? 'Verified' : 'Not verified'}
+              {authAccount?.emailVerified ? (t.settings?.accountSecurity?.verified || 'Verified') : (t.settings?.accountSecurity?.notVerified || 'Not verified')}
             </span>
             {!authAccount?.emailVerified && (
               <div className="settings-inline-actions">
-                <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('verify', sendVerificationEmail, 'Verification email sent.')}>Send verification email</button>
-                <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('refresh-account', refreshAuthAccount, 'Verification status refreshed.')}><RefreshCw size={14} /> Refresh status</button>
+                <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('verify', sendVerificationEmail, t.settings?.accountSecurity?.verificationSent || 'Verification email sent.')}>{t.settings?.accountSecurity?.sendVerification || 'Send verification email'}</button>
+                <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('refresh-account', refreshAuthAccount, t.settings?.accountSecurity?.statusRefreshed || 'Verification status refreshed.')}><RefreshCw size={14} /> {t.settings?.accountSecurity?.refreshStatus || 'Refresh status'}</button>
               </div>
             )}
           </div>
 
           <form className="settings-password-form" onSubmit={handleChangePassword}>
-            <h3><KeyRound size={17} /> Change password</h3>
+            <h3><KeyRound size={17} /> {t.settings?.accountSecurity?.changePassword || 'Change password'}</h3>
             <div>
-              <label>Current password<input type="password" autoComplete="current-password" value={passwordForm.current} onChange={(event) => setPasswordForm((form) => ({ ...form, current: event.target.value }))} required /></label>
-              <label>New password<input type="password" autoComplete="new-password" minLength="6" value={passwordForm.next} onChange={(event) => setPasswordForm((form) => ({ ...form, next: event.target.value }))} required /></label>
-              <label>Confirm new password<input type="password" autoComplete="new-password" minLength="6" value={passwordForm.confirm} onChange={(event) => setPasswordForm((form) => ({ ...form, confirm: event.target.value }))} required /></label>
+              <label>{t.settings?.accountSecurity?.currentPassword || 'Current password'}<input type="password" autoComplete="current-password" value={passwordForm.current} onChange={(event) => setPasswordForm((form) => ({ ...form, current: event.target.value }))} required /></label>
+              <label>{t.settings?.accountSecurity?.newPassword || 'New password'}<input type="password" autoComplete="new-password" minLength="6" value={passwordForm.next} onChange={(event) => setPasswordForm((form) => ({ ...form, next: event.target.value }))} required /></label>
+              <label>{t.settings?.accountSecurity?.confirmPassword || 'Confirm new password'}<input type="password" autoComplete="new-password" minLength="6" value={passwordForm.confirm} onChange={(event) => setPasswordForm((form) => ({ ...form, confirm: event.target.value }))} required /></label>
             </div>
             <div className="settings-inline-actions">
-              <button className="primary" type="submit" disabled={Boolean(busyAction)}>Change password</button>
-              <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('reset', sendPasswordReset, 'Password reset email sent.')}>Email me a reset link</button>
+              <button className="primary" type="submit" disabled={Boolean(busyAction)}>{t.settings?.accountSecurity?.changePasswordButton || 'Change password'}</button>
+              <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('reset', sendPasswordReset, t.settings?.accountSecurity?.resetSent || 'Password reset email sent.')}>{t.settings?.accountSecurity?.resetLink || 'Email me a reset link'}</button>
             </div>
           </form>
 
           <div className="settings-account-actions">
             <button type="button" disabled={Boolean(busyAction)} onClick={() => runAction('sessions', signOutEverywhere, '')}>
               {busyAction === 'sessions' ? <Loader2 className="settings-spinner" size={17} /> : <LogOut size={17} />}
-              <span><b>{busyAction === 'sessions' ? 'Signing out…' : 'Sign out from all devices'}</b><small>Revokes refresh tokens and signs out this browser.</small></span>
+              <span><b>{busyAction === 'sessions' ? (t.settings?.accountSecurity?.signingOut || 'Signing out…') : (t.settings?.accountSecurity?.signOutAll || 'Sign out from all devices')}</b><small>{t.settings?.accountSecurity?.signOutDescription || 'Revokes refresh tokens and signs out this browser.'}</small></span>
             </button>
             <button type="button" disabled={Boolean(busyAction)} onClick={handleDownload}>
               {busyAction === 'download' ? <Loader2 className="settings-spinner" size={17} /> : <Download size={17} />}
-              <span><b>{busyAction === 'download' ? 'Preparing export…' : 'Download account data'}</b><small>Exports your profile, content, messages, settings, reports, and P2P records as JSON.</small></span>
+              <span><b>{busyAction === 'download' ? (t.settings?.accountSecurity?.preparingExport || 'Preparing export…') : (t.settings?.accountSecurity?.downloadData || 'Download account data')}</b><small>{t.settings?.accountSecurity?.downloadDescription || 'Exports your profile, content, messages, settings, reports, and P2P records as JSON.'}</small></span>
             </button>
           </div>
 
           <details className="settings-danger-zone">
-            <summary><Trash2 size={17} /> Delete account</summary>
-            <p>This permanently removes your account and user-created content. Financial P2P audit records are retained. A payout in progress blocks deletion.</p>
+            <summary><Trash2 size={17} /> {t.settings?.accountSecurity?.deleteAccount || 'Delete account'}</summary>
+            <p>{t.settings?.accountSecurity?.deleteWarning || 'This permanently removes your account and user-created content. Financial P2P audit records are retained. A payout in progress blocks deletion.'}</p>
             <form onSubmit={handleDelete}>
-              <label>Current password<input type="password" autoComplete="current-password" value={deletePassword} onChange={(event) => setDeletePassword(event.target.value)} required /></label>
-              <label>Type DELETE<input value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} required /></label>
-              <button type="submit" disabled={Boolean(busyAction)}><Trash2 size={16} /> Permanently delete account</button>
+              <label>{t.settings?.accountSecurity?.currentPassword || 'Current password'}<input type="password" autoComplete="current-password" value={deletePassword} onChange={(event) => setDeletePassword(event.target.value)} required /></label>
+              <label>{t.settings?.accountSecurity?.typeDelete || 'Type DELETE'}<input value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} required /></label>
+              <button type="submit" disabled={Boolean(busyAction)}><Trash2 size={16} /> {t.settings?.accountSecurity?.deleteButton || 'Permanently delete account'}</button>
             </form>
           </details>
         </article>
 
         <article className="settings-panel" id="privacy-safety">
-          <SectionHeading icon={Shield} title="Privacy & safety" description="Control who can reach you and which community content appears." />
+          <SectionHeading icon={Shield} title={t.settings?.privacySafety?.title || 'Privacy & safety'} description={t.settings?.privacySafety?.description || 'Control who can reach you and which community content appears.'} />
           <ChoiceGroup
-            label="Who can message me"
+            label={t.settings?.privacySafety?.messagePermission || 'Who can message me'}
             value={accountSettings.messagePermission}
             onChange={(value) => updateSetting('messagePermission', value)}
             options={[
-              { value: 'everyone', label: 'Everyone', description: 'All signed-in community members' },
-              { value: 'registered', label: 'Registered users', description: 'Verified site accounts' },
-              { value: 'nobody', label: 'Nobody', description: 'Stop new direct messages' },
+              { value: 'everyone', label: t.settings?.privacySafety?.everyone || 'Everyone', description: t.settings?.privacySafety?.everyoneDesc || 'All signed-in community members' },
+              { value: 'registered', label: t.settings?.privacySafety?.registered || 'Registered users', description: t.settings?.privacySafety?.registeredDesc || 'Verified site accounts' },
+              { value: 'nobody', label: t.settings?.privacySafety?.nobody || 'Nobody', description: t.settings?.privacySafety?.nobodyDesc || 'Stop new direct messages' },
             ]}
           />
-          <PreferenceSwitch checked={accountSettings.showActivityStatus} icon={Activity} label="Show activity status" description="Allow other members to see when your account is active." onChange={(value) => updateSetting('showActivityStatus', value)} />
+          <PreferenceSwitch checked={accountSettings.showActivityStatus} icon={Activity} label={t.settings?.privacySafety?.showActivityStatus || 'Show activity status'} description={t.settings?.privacySafety?.activityStatusDesc || 'Allow other members to see when your account is active.'} onChange={(value) => updateSetting('showActivityStatus', value)} />
 
           <div className="settings-two-column">
-            <UserListSetting currentUserId={currentProfile?.id} ids={accountSettings.blockedUserIds} label="Blocked users" users={publicUsers} onChange={(value) => updateSetting('blockedUserIds', value)} />
-            <UserListSetting currentUserId={currentProfile?.id} ids={accountSettings.mutedUserIds} label="Muted users" users={publicUsers} onChange={(value) => updateSetting('mutedUserIds', value)} />
+            <UserListSetting currentUserId={currentProfile?.id} ids={accountSettings.blockedUserIds} label={t.settings?.privacySafety?.blockedUsers || 'Blocked users'} users={publicUsers} onChange={(value) => updateSetting('blockedUserIds', value)} t={t} />
+            <UserListSetting currentUserId={currentProfile?.id} ids={accountSettings.mutedUserIds} label={t.settings?.privacySafety?.mutedUsers || 'Muted users'} users={publicUsers} onChange={(value) => updateSetting('mutedUserIds', value)} t={t} />
           </div>
 
           <div className="settings-muted-topics">
-            <h3>Muted topics and tags</h3>
-            <p>Posts and community sections matching these topics are removed from your feed.</p>
+            <h3>{t.settings?.privacySafety?.mutedTopics || 'Muted topics and tags'}</h3>
+            <p>{t.settings?.privacySafety?.mutedTopicsDesc || 'Posts and community sections matching these topics are removed from your feed.'}</p>
             <div className="settings-topic-grid">
               {SOCIAL_TOPICS.map((topic) => <button type="button" key={topic} className={accountSettings.mutedTopics.includes(topic) ? 'active' : ''} onClick={() => toggleMutedTopic(topic)}>{topic}</button>)}
             </div>
             <div className="settings-user-add">
-              <input value={mutedTopicDraft} onChange={(event) => setMutedTopicDraft(event.target.value)} placeholder="Custom tag" maxLength="60" />
-              <button type="button" onClick={addMutedTopic} disabled={!mutedTopicDraft.trim() || accountSettings.mutedTopics.includes(mutedTopicDraft.trim())}>Add</button>
+              <input value={mutedTopicDraft} onChange={(event) => setMutedTopicDraft(event.target.value)} placeholder={t.settings?.privacySafety?.customTag || 'Custom tag'} maxLength="60" />
+              <button type="button" onClick={addMutedTopic} disabled={!mutedTopicDraft.trim() || accountSettings.mutedTopics.includes(mutedTopicDraft.trim())}>{t.settings?.privacySafety?.add || 'Add'}</button>
             </div>
           </div>
 

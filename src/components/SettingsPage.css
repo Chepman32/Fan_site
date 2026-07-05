@@ -599,9 +599,21 @@ html[data-density='compact'] :is(.settings-password-form, .settings-user-list, .
   box-shadow: var(--shadow-soft);
 }
 
-.settings-notice.success { color: #3ddc97; background: rgba(61, 220, 151, 0.1); border: 1px solid rgba(61, 220, 151, 0.25); }
+.settings-notice.success {
+  color: #3ddc97;
+  background: rgba(61, 220, 151, 0.1);
+  border: 1px solid rgba(61, 220, 151, 0.25);
+  animation: settings-notice-dismiss 300ms ease-in 700ms forwards;
+}
 .settings-notice.error { color: #ff8994; background: rgba(255, 74, 92, 0.1); border: 1px solid rgba(255, 74, 92, 0.25); }
 .settings-notice.pending { color: var(--accent-cyan); background: var(--surface-raised); border: 1px solid rgba(0, 217, 255, 0.28); }
+
+@keyframes settings-notice-dismiss {
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
 
 .settings-spinner {
   flex: 0 0 auto;
