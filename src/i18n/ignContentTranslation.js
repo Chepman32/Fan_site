@@ -482,6 +482,57 @@ export async function translateNewsArticles(articles, lang) {
   }))
 }
 
+export function newsArticleTranslationSource(article) {
+  return {
+    id: article.id,
+    title: article.title,
+    description: article.description,
+    blocks: (article.blocks || []).map((block) => ({
+      type: block.type,
+      text: block.text,
+      title: block.title,
+      caption: block.caption,
+      alt: block.alt,
+      segments: (block.segments || []).map((segment) => ({
+        type: segment.type,
+        text: segment.text,
+      })),
+    })),
+  }
+}
+
+export async function translateNewsArticle(article, lang) {
+  const blocks = article.blocks || []
+  const map = await translateTextMap([
+    article.title,
+    article.description,
+    ...blocks.flatMap((block) => [
+      block.text,
+      block.title,
+      block.caption,
+      block.alt,
+      ...(block.segments || []).map((segment) => segment.text),
+    ]),
+  ], lang)
+
+  return {
+    ...article,
+    title: translated(map, article.title),
+    description: translated(map, article.description),
+    blocks: blocks.map((block) => ({
+      ...block,
+      text: translated(map, block.text),
+      title: translated(map, block.title),
+      caption: translated(map, block.caption),
+      alt: translated(map, block.alt),
+      segments: (block.segments || []).map((segment) => ({
+        ...segment,
+        text: translated(map, segment.text),
+      })),
+    })),
+  }
+}
+
 export function useTranslatedIgnContent(data, {
   enabled = true,
   lang,

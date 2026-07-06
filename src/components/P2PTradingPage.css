@@ -1395,6 +1395,146 @@
   border-radius: 8px;
 }
 
+.p2p-confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255, 75, 121, 0.12), transparent 38%),
+    rgba(3, 3, 8, 0.72);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+  backdrop-filter: blur(18px) saturate(125%);
+}
+
+.p2p-confirm-modal {
+  position: relative;
+  display: grid;
+  width: min(430px, 100%);
+  gap: 22px;
+  overflow: hidden;
+  padding: 26px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.035) 42%),
+    rgba(22, 22, 31, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 28px;
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.58),
+    0 2px 0 rgba(255, 255, 255, 0.08) inset;
+}
+
+.p2p-confirm-modal::before {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% -15%, rgba(255, 255, 255, 0.13), transparent 42%);
+  content: '';
+  pointer-events: none;
+}
+
+.p2p-confirm-icon {
+  position: relative;
+  display: inline-flex;
+  width: 58px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  color: #ff718f;
+  background: linear-gradient(145deg, rgba(255, 91, 128, 0.2), rgba(255, 63, 101, 0.08));
+  border: 1px solid rgba(255, 113, 143, 0.26);
+  border-radius: 19px;
+  box-shadow: 0 12px 30px rgba(255, 59, 100, 0.16);
+}
+
+.p2p-confirm-copy {
+  position: relative;
+  display: grid;
+  gap: 9px;
+}
+
+.p2p-confirm-copy h2 {
+  color: var(--text-primary);
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.p2p-confirm-copy p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.p2p-confirm-copy span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.p2p-confirm-actions {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.p2p-confirm-actions button {
+  display: inline-flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 850;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.p2p-confirm-actions button:disabled {
+  opacity: 0.62;
+  cursor: wait;
+}
+
+.p2p-confirm-cancel {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+.p2p-confirm-cancel:hover:not(:disabled),
+.p2p-confirm-cancel:focus-visible {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.p2p-confirm-remove {
+  color: #fff;
+  background: linear-gradient(180deg, #ff557c, #ec315f);
+  border: 1px solid rgba(255, 143, 166, 0.5);
+  box-shadow: 0 10px 24px rgba(235, 42, 89, 0.25);
+}
+
+.p2p-confirm-remove:hover:not(:disabled),
+.p2p-confirm-remove:focus-visible {
+  background: linear-gradient(180deg, #ff6689, #f13a68);
+  box-shadow: 0 12px 28px rgba(235, 42, 89, 0.34);
+}
+
+.p2p-confirm-actions button:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+
 .p2p-included-list,
 .p2p-detail-properties,
 .p2p-modal-file-list {
@@ -1583,5 +1723,24 @@
 
   .p2p-checkout-wallet > div:last-of-type {
     display: grid;
+  }
+
+  .p2p-confirm-backdrop {
+    align-items: end;
+    padding: 12px;
+  }
+
+  .p2p-confirm-modal {
+    width: 100%;
+    gap: 19px;
+    padding: 23px 20px max(20px, env(safe-area-inset-bottom));
+  }
+
+  .p2p-confirm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .p2p-confirm-cancel {
+    order: 2;
   }
 }

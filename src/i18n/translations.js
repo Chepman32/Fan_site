@@ -331,7 +331,7 @@ const en = {
   // Nav
   nav: {
     main: 'Main',
-    about: 'About',
+    about: 'About GTA VI',
     characters: 'Characters',
     weapons: 'Weapons',
     vehicles: 'Vehicles',
@@ -569,7 +569,7 @@ const en = {
     game: 'Game',
     official: 'Official',
     coverage: 'Coverage',
-    about: 'About',
+    about: 'About GTA VI',
     characters: 'Characters',
     media: 'Media',
     madeByFans: 'Made with',
@@ -582,7 +582,7 @@ const en = {
 const zh = {
   nav: {
     main: '主页',
-    about: '关于',
+    about: '关于 GTA VI',
     characters: '角色',
     weapons: '武器',
     vehicles: '载具',
@@ -780,7 +780,7 @@ const zh = {
     game: '游戏',
     official: '官方',
     coverage: '报道',
-    about: '关于',
+    about: '关于 GTA VI',
     characters: '角色',
     media: '媒体',
     madeByFans: '由',
@@ -793,7 +793,7 @@ const zh = {
 const ru = {
   nav: {
     main: 'Главная',
-    about: 'Об игре',
+    about: 'О GTA VI',
     characters: 'Персонажи',
     weapons: 'Оружие',
     vehicles: 'Транспорт',
@@ -991,7 +991,7 @@ const ru = {
     game: 'Игра',
     official: 'Официальное',
     coverage: 'Материалы',
-    about: 'Об игре',
+    about: 'О GTA VI',
     characters: 'Персонажи',
     media: 'Медиа',
     madeByFans: 'Сделано с',
@@ -1004,7 +1004,7 @@ const ru = {
 const it = {
   nav: {
     main: 'Home',
-    about: 'Info',
+    about: 'Info su GTA VI',
     characters: 'Personaggi',
     weapons: 'Armi',
     vehicles: 'Veicoli',
@@ -1202,7 +1202,7 @@ const it = {
     game: 'Gioco',
     official: 'Ufficiale',
     coverage: 'Copertura',
-    about: 'Info',
+    about: 'Info su GTA VI',
     characters: 'Personaggi',
     media: 'Media',
     madeByFans: 'Fatto con',
@@ -1214,7 +1214,7 @@ const it = {
 const id = {
   nav: {
     main: 'Utama',
-    about: 'Tentang',
+    about: 'Tentang GTA VI',
     characters: 'Karakter',
     weapons: 'Senjata',
     vehicles: 'Kendaraan',
@@ -1412,7 +1412,7 @@ const id = {
     game: 'Game',
     official: 'Resmi',
     coverage: 'Liputan',
-    about: 'Tentang',
+    about: 'Tentang GTA VI',
     characters: 'Karakter',
     media: 'Media',
     madeByFans: 'Dibuat dengan',
@@ -1424,7 +1424,7 @@ const id = {
 const pl = {
   nav: {
     main: 'Główna',
-    about: 'O grze',
+    about: 'O GTA VI',
     characters: 'Postacie',
     weapons: 'Broń',
     vehicles: 'Pojazdy',
@@ -1622,7 +1622,7 @@ const pl = {
     game: 'Gra',
     official: 'Oficjalne',
     coverage: 'Relacje',
-    about: 'O grze',
+    about: 'O GTA VI',
     characters: 'Postacie',
     media: 'Media',
     madeByFans: 'Zrobione z',
@@ -1634,7 +1634,7 @@ const pl = {
 const hi = {
   nav: {
     main: 'मुख्य',
-    about: 'परिचय',
+    about: 'GTA VI के बारे में',
     characters: 'किरदार',
     weapons: 'हथियार',
     vehicles: 'वाहन',
@@ -1832,7 +1832,7 @@ const hi = {
     game: 'गेम',
     official: 'आधिकारिक',
     coverage: 'कवरेज',
-    about: 'परिचय',
+    about: 'GTA VI के बारे में',
     characters: 'किरदार',
     media: 'मीडिया',
     madeByFans: 'बनाया गया',
@@ -1844,7 +1844,7 @@ const hi = {
 const ms = {
   nav: {
     main: 'Utama',
-    about: 'Tentang',
+    about: 'Tentang GTA VI',
     characters: 'Watak',
     weapons: 'Senjata',
     vehicles: 'Kenderaan',
@@ -2042,7 +2042,7 @@ const ms = {
     game: 'Permainan',
     official: 'Rasmi',
     coverage: 'Liputan',
-    about: 'Tentang',
+    about: 'Tentang GTA VI',
     characters: 'Watak',
     media: 'Media',
     madeByFans: 'Dibuat dengan',

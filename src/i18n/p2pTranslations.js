@@ -160,7 +160,11 @@ const en = {
     removed: 'Product removed.',
   },
   confirm: {
-    removeListing: (title) => `Remove "${title}" from your products?`,
+    title: 'Remove this listing?',
+    removeListing: (title) => `“${title}” will disappear from My Products.`,
+    warning: 'This cannot be undone, but nothing else in your account will be affected.',
+    cancel: 'Keep listing',
+    confirm: 'Remove',
   },
   messages: {
     default: (title) => `Hi, I am interested in your P2P listing "${title}".`,
@@ -296,7 +300,7 @@ const zh = {
     removeFailed: '无法删除商品。',
   },
   notices: { updated: '商品已更新。', published: '商品已发布到 P2P 市场。', uploading: ({ index, total, name }) => `正在上传 ${index + 1}/${total}: ${name}`, markedSold: '商品已标记为售出。', statusUpdated: (status) => `商品已标记为${status}。`, removed: '商品已删除。' },
-  confirm: { removeListing: (title) => `要从你的商品中删除“${title}”吗？` },
+  confirm: { title: '删除这个商品？', removeListing: (title) => `“${title}”将从“我的商品”中消失。`, warning: '此操作无法撤销，但不会影响你账户中的其他内容。', cancel: '保留商品', confirm: '删除' },
   messages: {
     default: (title) => `你好，我对你的 P2P 商品“${title}”感兴趣。`,
     proof: ({ title, paymentTxId, payoutTxId }) => [`你好，我已用 USDT TRC20 支付你的 P2P 商品“${title}”。`, '', `买家付款哈希：${paymentTxId}`, payoutTxId ? `卖家打款哈希：${payoutTxId}` : ''].filter(Boolean).join('\n'),
@@ -321,7 +325,7 @@ const ru = {
   empty: { noProducts: 'Товаров пока нет', noListings: 'Объявления не найдены', createFirst: 'Создайте первое объявление, чтобы управлять им здесь.', tryAnother: 'Попробуйте другую категорию или поисковый запрос.' },
   errors: { readPreview: 'Не удалось прочитать превью.', renderPreview: 'Не удалось отрисовать превью.', smallerPreview: 'Выберите изображение поменьше.', choosePreview: 'Выберите изображение для превью.', removeExistingFile: 'Удалите существующий файл перед добавлением нового.', duplicateFiles: 'Эти файлы уже прикреплены к объявлению.', attachUpTo: (count) => `Можно прикрепить еще до ${count} файл(ов).`, minTitle: 'Добавьте название минимум из 3 символов.', validPrice: 'Укажите корректную цену.', oneProperty: 'Добавьте хотя бы одно свойство.', onePayment: 'Выберите хотя бы один способ оплаты.', validWallet: 'Добавьте корректный адрес USDT TRC20 кошелька.', maxFiles: (count) => `В объявлении должно быть не больше ${count} файлов.`, updateFailed: 'Не удалось обновить объявление.', publishFailed: 'Не удалось опубликовать объявление.', removeFailed: 'Не удалось удалить товар.' },
   notices: { updated: 'Товар обновлен.', published: 'Объявление опубликовано на P2P маркетплейсе.', uploading: ({ index, total, name }) => `Загрузка ${index + 1}/${total}: ${name}`, markedSold: 'Объявление отмечено как проданное.', statusUpdated: (status) => `Объявление отмечено как ${status}.`, removed: 'Товар удален.' },
-  confirm: { removeListing: (title) => `Удалить "${title}" из ваших товаров?` },
+  confirm: { title: 'Удалить этот товар?', removeListing: (title) => `«${title}» исчезнет из раздела «Мои товары».`, warning: 'Отменить это действие не получится, но остальные данные аккаунта не изменятся.', cancel: 'Оставить', confirm: 'Удалить' },
   messages: { default: (title) => `Здравствуйте, меня заинтересовало ваше P2P объявление "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Здравствуйте, я оплатил ваше P2P объявление "${title}" через USDT TRC20.`, '', `Хэш платежа покупателя: ${paymentTxId}`, payoutTxId ? `Хэш выплаты продавцу: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
@@ -343,7 +347,7 @@ const it = {
   empty: { noProducts: 'Ancora nessun prodotto', noListings: 'Nessun annuncio trovato', createFirst: 'Crea il tuo primo annuncio per gestirlo qui.', tryAnother: 'Prova un’altra categoria o termine di ricerca.' },
   errors: { readPreview: 'Impossibile leggere l’immagine di anteprima.', renderPreview: 'Impossibile renderizzare l’immagine di anteprima.', smallerPreview: 'Scegli un’immagine di anteprima più piccola.', choosePreview: 'Scegli un file immagine per l’anteprima.', removeExistingFile: 'Rimuovi un file esistente prima di allegarne un altro.', duplicateFiles: 'Questi file sono già allegati a questo annuncio.', attachUpTo: (count) => `Allega fino a ${count} nuovi file per questo annuncio.`, minTitle: 'Aggiungi un titolo di almeno 3 caratteri.', validPrice: 'Aggiungi un prezzo valido.', oneProperty: 'Aggiungi almeno una proprietà.', onePayment: 'Scegli almeno un’opzione di pagamento.', validWallet: 'Aggiungi un indirizzo wallet USDT TRC20 valido.', maxFiles: (count) => `Mantieni l’annuncio a ${count} file o meno.`, updateFailed: 'Impossibile aggiornare l’annuncio.', publishFailed: 'Impossibile pubblicare l’annuncio.', removeFailed: 'Impossibile rimuovere il prodotto.' },
   notices: { updated: 'Prodotto aggiornato.', published: 'Annuncio pubblicato nel mercato P2P.', uploading: ({ index, total, name }) => `Caricamento ${index + 1}/${total}: ${name}`, markedSold: 'Annuncio segnato come venduto.', statusUpdated: (status) => `Annuncio segnato come ${status}.`, removed: 'Prodotto rimosso.' },
-  confirm: { removeListing: (title) => `Rimuovere "${title}" dai tuoi prodotti?` },
+  confirm: { title: 'Rimuovere questo annuncio?', removeListing: (title) => `“${title}” scomparirà da I miei prodotti.`, warning: 'Non potrai annullare questa azione, ma il resto del tuo account non verrà modificato.', cancel: 'Mantieni', confirm: 'Rimuovi' },
   messages: { default: (title) => `Ciao, sono interessato al tuo annuncio P2P "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Ciao, ho pagato il tuo annuncio P2P "${title}" con USDT TRC20.`, '', `Hash pagamento acquirente: ${paymentTxId}`, payoutTxId ? `Hash payout venditore: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
@@ -365,7 +369,7 @@ const id = {
   empty: { noProducts: 'Belum ada produk', noListings: 'Listing tidak ditemukan', createFirst: 'Buat listing pertama Anda untuk mengelolanya di sini.', tryAnother: 'Coba kategori atau kata pencarian lain.' },
   errors: { readPreview: 'Tidak dapat membaca gambar pratinjau.', renderPreview: 'Tidak dapat merender gambar pratinjau.', smallerPreview: 'Pilih gambar pratinjau yang lebih kecil.', choosePreview: 'Pilih file gambar untuk pratinjau.', removeExistingFile: 'Hapus file yang ada sebelum melampirkan file lain.', duplicateFiles: 'File tersebut sudah dilampirkan ke listing ini.', attachUpTo: (count) => `Lampirkan hingga ${count} file baru untuk listing ini.`, minTitle: 'Tambahkan judul minimal 3 karakter.', validPrice: 'Tambahkan harga yang valid.', oneProperty: 'Tambahkan setidaknya satu properti.', onePayment: 'Pilih setidaknya satu opsi pembayaran.', validWallet: 'Tambahkan alamat dompet USDT TRC20 yang valid.', maxFiles: (count) => `Batasi listing hingga ${count} file atau kurang.`, updateFailed: 'Tidak dapat memperbarui listing.', publishFailed: 'Tidak dapat menerbitkan listing.', removeFailed: 'Tidak dapat menghapus produk.' },
   notices: { updated: 'Produk diperbarui.', published: 'Listing diterbitkan ke pasar P2P.', uploading: ({ index, total, name }) => `Mengunggah ${index + 1}/${total}: ${name}`, markedSold: 'Listing ditandai terjual.', statusUpdated: (status) => `Listing ditandai ${status}.`, removed: 'Produk dihapus.' },
-  confirm: { removeListing: (title) => `Hapus "${title}" dari produk Anda?` },
+  confirm: { title: 'Hapus listing ini?', removeListing: (title) => `“${title}” akan hilang dari Produk Saya.`, warning: 'Tindakan ini tidak dapat dibatalkan, tetapi isi akun lainnya tidak akan terpengaruh.', cancel: 'Pertahankan', confirm: 'Hapus' },
   messages: { default: (title) => `Hai, saya tertarik dengan listing P2P Anda "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Hai, saya sudah membayar listing P2P Anda "${title}" dengan USDT TRC20.`, '', `Hash pembayaran pembeli: ${paymentTxId}`, payoutTxId ? `Hash payout penjual: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
@@ -387,7 +391,7 @@ const pl = {
   empty: { noProducts: 'Nie masz jeszcze produktów', noListings: 'Nie znaleziono ofert', createFirst: 'Utwórz pierwszą ofertę, aby zarządzać nią tutaj.', tryAnother: 'Spróbuj innej kategorii lub wyszukiwania.' },
   errors: { readPreview: 'Nie udało się odczytać obrazu podglądu.', renderPreview: 'Nie udało się wyrenderować obrazu podglądu.', smallerPreview: 'Wybierz mniejszy obraz podglądu.', choosePreview: 'Wybierz plik obrazu do podglądu.', removeExistingFile: 'Usuń istniejący plik przed dodaniem kolejnego.', duplicateFiles: 'Te pliki są już dołączone do tej oferty.', attachUpTo: (count) => `Dołącz do ${count} nowych plików do tej oferty.`, minTitle: 'Dodaj tytuł z co najmniej 3 znakami.', validPrice: 'Dodaj prawidłową cenę.', oneProperty: 'Dodaj co najmniej jedną właściwość.', onePayment: 'Wybierz co najmniej jedną opcję płatności.', validWallet: 'Dodaj prawidłowy adres portfela USDT TRC20.', maxFiles: (count) => `Oferta może mieć maksymalnie ${count} plików.`, updateFailed: 'Nie udało się zaktualizować oferty.', publishFailed: 'Nie udało się opublikować oferty.', removeFailed: 'Nie udało się usunąć produktu.' },
   notices: { updated: 'Produkt zaktualizowany.', published: 'Oferta opublikowana na rynku P2P.', uploading: ({ index, total, name }) => `Przesyłanie ${index + 1}/${total}: ${name}`, markedSold: 'Oferta oznaczona jako sprzedana.', statusUpdated: (status) => `Oferta oznaczona jako ${status}.`, removed: 'Produkt usunięty.' },
-  confirm: { removeListing: (title) => `Usunąć "${title}" z Twoich produktów?` },
+  confirm: { title: 'Usunąć tę ofertę?', removeListing: (title) => `„${title}” zniknie z sekcji Moje produkty.`, warning: 'Tej czynności nie można cofnąć, ale pozostałe dane konta nie zostaną zmienione.', cancel: 'Zachowaj', confirm: 'Usuń' },
   messages: { default: (title) => `Cześć, interesuje mnie Twoja oferta P2P "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Cześć, zapłaciłem za Twoją ofertę P2P "${title}" przez USDT TRC20.`, '', `Hash płatności kupującego: ${paymentTxId}`, payoutTxId ? `Hash wypłaty sprzedawcy: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
@@ -409,7 +413,7 @@ const hi = {
   empty: { noProducts: 'अभी कोई प्रोडक्ट नहीं', noListings: 'कोई लिस्टिंग नहीं मिली', createFirst: 'इसे यहां मैनेज करने के लिए अपनी पहली लिस्टिंग बनाएं।', tryAnother: 'दूसरी श्रेणी या search term आजमाएं।' },
   errors: { readPreview: 'प्रीव्यू इमेज पढ़ी नहीं जा सकी।', renderPreview: 'प्रीव्यू इमेज render नहीं हो सकी।', smallerPreview: 'छोटी प्रीव्यू इमेज चुनें।', choosePreview: 'प्रीव्यू के लिए image file चुनें।', removeExistingFile: 'नई फाइल जोड़ने से पहले कोई existing file हटाएं।', duplicateFiles: 'ये फाइलें इस लिस्टिंग से पहले ही जुड़ी हैं।', attachUpTo: (count) => `इस लिस्टिंग के लिए ${count} नई फाइल तक जोड़ें।`, minTitle: 'कम से कम 3 अक्षरों का title जोड़ें।', validPrice: 'वैध price जोड़ें।', oneProperty: 'कम से कम एक property जोड़ें।', onePayment: 'कम से कम एक payment option चुनें।', validWallet: 'वैध USDT TRC20 wallet address जोड़ें।', maxFiles: (count) => `लिस्टिंग में ${count} या उससे कम फाइलें रखें।`, updateFailed: 'लिस्टिंग update नहीं हो सकी।', publishFailed: 'लिस्टिंग publish नहीं हो सकी।', removeFailed: 'प्रोडक्ट हटाया नहीं जा सका।' },
   notices: { updated: 'प्रोडक्ट अपडेट हुआ।', published: 'लिस्टिंग P2P market में publish हुई।', uploading: ({ index, total, name }) => `अपलोड ${index + 1}/${total}: ${name}`, markedSold: 'लिस्टिंग sold चिह्नित हुई।', statusUpdated: (status) => `लिस्टिंग ${status} चिह्नित हुई।`, removed: 'प्रोडक्ट हटाया गया।' },
-  confirm: { removeListing: (title) => `"${title}" को अपने products से हटाएं?` },
+  confirm: { title: 'यह लिस्टिंग हटाएं?', removeListing: (title) => `“${title}” मेरे प्रोडक्ट से हट जाएगी।`, warning: 'इसे वापस नहीं किया जा सकता, लेकिन आपके अकाउंट की बाकी चीज़ें प्रभावित नहीं होंगी।', cancel: 'लिस्टिंग रखें', confirm: 'हटाएं' },
   messages: { default: (title) => `नमस्ते, मुझे आपकी P2P लिस्टिंग "${title}" में रुचि है।`, proof: ({ title, paymentTxId, payoutTxId }) => [`नमस्ते, मैंने आपकी P2P लिस्टिंग "${title}" के लिए USDT TRC20 से भुगतान किया है।`, '', `Buyer payment hash: ${paymentTxId}`, payoutTxId ? `Seller payout hash: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
@@ -431,7 +435,7 @@ const ms = {
   empty: { noProducts: 'Belum ada produk', noListings: 'Tiada senarai ditemui', createFirst: 'Cipta senarai pertama anda untuk menguruskannya di sini.', tryAnother: 'Cuba kategori atau istilah carian lain.' },
   errors: { readPreview: 'Tidak dapat membaca imej pratonton.', renderPreview: 'Tidak dapat memaparkan imej pratonton.', smallerPreview: 'Pilih imej pratonton yang lebih kecil.', choosePreview: 'Pilih fail imej untuk pratonton.', removeExistingFile: 'Buang fail sedia ada sebelum melampirkan yang lain.', duplicateFiles: 'Fail tersebut sudah dilampirkan pada senarai ini.', attachUpTo: (count) => `Lampirkan sehingga ${count} fail baharu untuk senarai ini.`, minTitle: 'Tambah tajuk sekurang-kurangnya 3 aksara.', validPrice: 'Tambah harga yang sah.', oneProperty: 'Tambah sekurang-kurangnya satu sifat.', onePayment: 'Pilih sekurang-kurangnya satu pilihan bayaran.', validWallet: 'Tambah alamat dompet USDT TRC20 yang sah.', maxFiles: (count) => `Hadkan senarai kepada ${count} fail atau kurang.`, updateFailed: 'Tidak dapat mengemas kini senarai.', publishFailed: 'Tidak dapat menerbitkan senarai.', removeFailed: 'Tidak dapat membuang produk.' },
   notices: { updated: 'Produk dikemaskini.', published: 'Senarai diterbitkan ke pasaran P2P.', uploading: ({ index, total, name }) => `Memuat naik ${index + 1}/${total}: ${name}`, markedSold: 'Senarai ditanda terjual.', statusUpdated: (status) => `Senarai ditanda ${status}.`, removed: 'Produk dibuang.' },
-  confirm: { removeListing: (title) => `Buang "${title}" daripada produk anda?` },
+  confirm: { title: 'Buang senarai ini?', removeListing: (title) => `“${title}” akan hilang daripada Produk Saya.`, warning: 'Tindakan ini tidak boleh dibuat asal, tetapi kandungan akaun anda yang lain tidak terjejas.', cancel: 'Kekalkan', confirm: 'Buang' },
   messages: { default: (title) => `Hai, saya berminat dengan senarai P2P anda "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Hai, saya telah membayar senarai P2P anda "${title}" dengan USDT TRC20.`, '', `Hash bayaran pembeli: ${paymentTxId}`, payoutTxId ? `Hash payout penjual: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 

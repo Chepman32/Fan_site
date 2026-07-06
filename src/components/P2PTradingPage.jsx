@@ -70,6 +70,20 @@ const FORM_EXIT_SPRING = {
   mass: 0.72,
   velocity: -3,
 }
+const CONFIRM_SPRING = {
+  type: 'spring',
+  stiffness: 520,
+  damping: 30,
+  mass: 0.76,
+  velocity: 3.8,
+}
+const CONFIRM_EXIT_SPRING = {
+  type: 'spring',
+  stiffness: 620,
+  damping: 42,
+  mass: 0.66,
+  velocity: -2.8,
+}
 
 const FORM_SEEDS = {
   en: { deliveryMethod: 'Telegram handoff', properties: ['Format', 'Platform', 'License'] },
@@ -99,6 +113,24 @@ function initialListingForm(lang = 'en') {
 
 function initialProperties(lang = 'en') {
   return formSeed(lang).properties.map((key) => ({ key, value: '' }))
+}
+
+function sanitizePriceInput(value) {
+  const normalized = String(value ?? '').replace(',', '.').replace(/[^\d.]/g, '')
+  const decimalIndex = normalized.indexOf('.')
+  const wholePart = (decimalIndex === -1 ? normalized : normalized.slice(0, decimalIndex))
+    .replace(/^0+(?=\d)/, '')
+
+  if (decimalIndex === -1) return wholePart
+
+  const decimalPart = normalized.slice(decimalIndex + 1).replace(/\./g, '').slice(0, 2)
+  return `${wholePart || '0'}.${decimalPart}`
+}
+
+function fixedPriceInput(value) {
+  if (value === '' || value === null || value === undefined) return ''
+  const price = Number(value)
+  return Number.isFinite(price) && price >= 0 ? price.toFixed(2) : String(value)
 }
 
 function readFileAsDataUrl(file, copy) {
@@ -835,6 +867,74 @@ function P2PProductDetailsModal({
   )
 }
 
+function DeleteListingConfirmModal({ listing, copy, busy, onCancel, onConfirm }) {
+  const closeOnBackdrop = (event) => {
+    if (!busy && event.target === event.currentTarget) onCancel()
+  }
+
+  return (
+    <motion.div
+      className="p2p-confirm-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
+      exit={{ opacity: 0, transition: { duration: 0.18, ease: 'easeIn' } }}
+      onMouseDown={closeOnBackdrop}
+    >
+      <motion.div
+        className="p2p-confirm-modal"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="p2p-remove-title"
+        aria-describedby="p2p-remove-description"
+        initial={{ opacity: 0, y: 34, scale: 0.82, filter: 'blur(14px)' }}
+        animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', transition: CONFIRM_SPRING }}
+        exit={{ opacity: 0, y: 22, scale: 0.91, filter: 'blur(10px)', transition: CONFIRM_EXIT_SPRING }}
+        style={{ transformOrigin: 'center bottom' }}
+      >
+        <motion.div
+          className="p2p-confirm-icon"
+          initial={{ scale: 0.4, rotate: -18 }}
+          animate={{ scale: 1, rotate: 0, transition: { ...CONFIRM_SPRING, delay: 0.06 } }}
+          aria-hidden="true"
+        >
+          <Trash2 size={24} />
+        </motion.div>
+
+        <div className="p2p-confirm-copy">
+          <h2 id="p2p-remove-title">{copy.confirm.title}</h2>
+          <p id="p2p-remove-description">{copy.confirm.removeListing(listing.title)}</p>
+          <span>{copy.confirm.warning}</span>
+        </div>
+
+        <div className="p2p-confirm-actions">
+          <motion.button
+            type="button"
+            className="p2p-confirm-cancel"
+            onClick={onCancel}
+            disabled={busy}
+            autoFocus
+            whileHover={{ y: -1, scale: 1.015 }}
+            whileTap={{ scale: 0.965 }}
+          >
+            {copy.confirm.cancel}
+          </motion.button>
+          <motion.button
+            type="button"
+            className="p2p-confirm-remove"
+            onClick={onConfirm}
+            disabled={busy}
+            whileHover={{ y: -1, scale: 1.015 }}
+            whileTap={{ scale: 0.965 }}
+          >
+            {busy ? <Loader2 size={17} className="p2p-spin" /> : <Trash2 size={17} />}
+            {copy.confirm.confirm}
+          </motion.button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 function P2PTradingPage({ onOpenAuth = () => {} }) {
   const {
     accountSettings,
@@ -872,6 +972,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const [checkoutListingId, setCheckoutListingId] = useState('')
   const [conversationListingId, setConversationListingId] = useState('')
   const [conversationDraft, setConversationDraft] = useState('')
+  const [deleteCandidate, setDeleteCandidate] = useState(null)
   const [formResetKey, setFormResetKey] = useState(0)
 
   useEffect(() => {
@@ -893,6 +994,19 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
   }, [checkoutListingId, selectedListingId])
+
+  useEffect(() => {
+    if (!deleteCandidate) return undefined
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && busyListingId !== deleteCandidate.id) {
+        setDeleteCandidate(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [busyListingId, deleteCandidate])
 
   const listings = state.p2pListings || EMPTY_LISTINGS
   const isEditing = Boolean(editingListingId)
@@ -1089,7 +1203,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     setForm({
       title: listing.title || '',
       category: listing.category || 'other',
-      price: listing.price === undefined || listing.price === null ? '' : String(listing.price),
+      price: fixedPriceInput(listing.price),
       cryptoWalletAddress: listing.cryptoWalletAddress || '',
       deliveryMethod: listing.deliveryMethod || '',
       description: listing.description || '',
@@ -1234,18 +1348,29 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     setActionNotice(updated ? copy.notices.statusUpdated(copy.status[nextStatus]) : copy.errors.updateFailed)
   }
 
-  const handleDeleteListing = async (listing) => {
+  const handleDeleteListing = (listing) => {
     setActionNotice('')
+    setDeleteCandidate(listing)
+  }
 
-    if (!window.confirm(copy.confirm.removeListing(listing.title))) return
+  const handleConfirmDeleteListing = async () => {
+    if (!deleteCandidate) return
 
+    const listing = deleteCandidate
     setBusyListingId(listing.id)
-    const deleted = await deleteP2PListing(listing.id)
-    setBusyListingId('')
-    setActionNotice(deleted ? copy.notices.removed : copy.errors.removeFailed)
 
-    if (deleted && editingListingId === listing.id) {
-      closeForm()
+    try {
+      const deleted = await deleteP2PListing(listing.id)
+      setActionNotice(deleted ? copy.notices.removed : copy.errors.removeFailed)
+
+      if (deleted && editingListingId === listing.id) {
+        closeForm()
+      }
+    } catch {
+      setActionNotice(copy.errors.removeFailed)
+    } finally {
+      setBusyListingId('')
+      setDeleteCandidate(null)
     }
   }
 
@@ -1405,12 +1530,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
               <label>
                 <span>{copy.form.price}</span>
                 <input
-                  type="number"
-                  min="0"
-                  step="0.01"
+                  type="text"
+                  inputMode="decimal"
                   value={form.price}
-                  onChange={(event) => updateFormField('price', event.target.value)}
-                  placeholder="24.99"
+                  onChange={(event) => updateFormField('price', sanitizePriceInput(event.target.value))}
+                  onBlur={() => updateFormField('price', fixedPriceInput(form.price))}
+                  placeholder="0.00"
                 />
               </label>
 
@@ -1629,6 +1754,19 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             }}
           />
         )}
+
+        <AnimatePresence>
+          {deleteCandidate && (
+            <DeleteListingConfirmModal
+              key={deleteCandidate.id}
+              listing={deleteCandidate}
+              copy={copy}
+              busy={busyListingId === deleteCandidate.id}
+              onCancel={() => setDeleteCandidate(null)}
+              onConfirm={handleConfirmDeleteListing}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </section>
   )

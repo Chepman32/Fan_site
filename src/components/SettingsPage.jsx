@@ -382,7 +382,7 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
           </div>
         )}
 
-        <nav className="settings-jump-nav" aria-label="Settings sections">
+        <nav className="settings-jump-nav" aria-label={settingsTitle}>
           {SETTINGS_SECTIONS.map(({ id, label }) => (
             <a
               key={id}
@@ -475,7 +475,7 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
             <h3>{t.settings?.privacySafety?.mutedTopics || 'Muted topics and tags'}</h3>
             <p>{t.settings?.privacySafety?.mutedTopicsDesc || 'Posts and community sections matching these topics are removed from your feed.'}</p>
             <div className="settings-topic-grid">
-              {SOCIAL_TOPICS.map((topic) => <button type="button" key={topic} className={accountSettings.mutedTopics.includes(topic) ? 'active' : ''} onClick={() => toggleMutedTopic(topic)}>{topic}</button>)}
+              {SOCIAL_TOPICS.map((topic) => <button type="button" key={topic} className={accountSettings.mutedTopics.includes(topic) ? 'active' : ''} onClick={() => toggleMutedTopic(topic)}>{t.settings?.privacySafety?.topicLabels?.[topic] || topic}</button>)}
             </div>
             <div className="settings-user-add">
               <input value={mutedTopicDraft} onChange={(event) => setMutedTopicDraft(event.target.value)} placeholder={t.settings?.privacySafety?.customTag || 'Custom tag'} maxLength="60" />
@@ -483,70 +483,70 @@ function SettingsPage({ onNavigate, onOpenAuth }) {
             </div>
           </div>
 
-          <PreferenceSwitch checked={hideSpoilers} icon={EyeOff} label="Hide spoilers by default" description="Cover posts tagged “spoiler” until you choose to reveal them." onChange={(value) => updateSetting('hideSpoilers', value, setHideSpoilers)} />
-          <PreferenceSwitch checked={autoplayVideos} icon={Video} label="Autoplay attached videos" description="Play community video attachments automatically without sound." onChange={(value) => updateSetting('autoplayVideos', value, setAutoplayVideos)} />
+          <PreferenceSwitch checked={hideSpoilers} icon={EyeOff} label={t.settings?.privacySafety?.hideSpoilers || 'Hide spoilers by default'} description={t.settings?.privacySafety?.hideSpoilersDesc || 'Cover posts tagged “spoiler” until you choose to reveal them.'} onChange={(value) => updateSetting('hideSpoilers', value, setHideSpoilers)} />
+          <PreferenceSwitch checked={autoplayVideos} icon={Video} label={t.settings?.privacySafety?.autoplayVideos || 'Autoplay attached videos'} description={t.settings?.privacySafety?.autoplayDesc || 'Play community video attachments automatically without sound.'} onChange={(value) => updateSetting('autoplayVideos', value, setAutoplayVideos)} />
 
           <div className="settings-report-history">
-            <h3><FileWarning size={17} /> Report history and status</h3>
+            <h3><FileWarning size={17} /> {t.settings?.privacySafety?.reportHistory || 'Report history and status'}</h3>
             {sortedReports.length ? sortedReports.map((report) => (
               <div key={report.id}>
-                <span><b>{report.targetType || 'Content'} report</b><small>{report.reason}</small></span>
-                <em>{report.status || 'submitted'}</em>
+                <span><b>{t.settings?.privacySafety?.contentReport || 'Content report'}</b><small>{report.reason}</small></span>
+                <em>{report.status === 'submitted' || !report.status ? (t.settings?.privacySafety?.submitted || 'submitted') : report.status}</em>
               </div>
-            )) : <p>No reports submitted from this account.</p>}
+            )) : <p>{t.settings?.privacySafety?.noReports || 'No reports submitted from this account.'}</p>}
           </div>
         </article>
 
         <article className="settings-panel" id="seller-settings">
-          <SectionHeading icon={Store} title="P2P seller settings" description="Set safe defaults for new marketplace listings." />
+          <SectionHeading icon={Store} title={t.settings?.sellerSettings?.title || 'P2P seller settings'} description={t.settings?.sellerSettings?.description || 'Set safe defaults for new marketplace listings.'} />
           <div className="settings-wallet-field">
             <span className="settings-row-icon"><WalletCards size={18} /></span>
             <label>
-              <b>Default TRON payout address</b>
-              <small>Public wallet address only. Never enter a private key or seed phrase.</small>
+              <b>{t.settings?.sellerSettings?.payoutAddress || 'Default TRON payout address'}</b>
+              <small>{t.settings?.sellerSettings?.payoutWarning || 'Public wallet address only. Never enter a private key or seed phrase.'}</small>
               <input value={walletDraft ?? accountSettings.defaultTronPayoutAddress} onChange={(event) => setWalletDraft(event.target.value)} placeholder="T…" maxLength="128" />
             </label>
-            <button type="button" onClick={saveWallet}>Save address</button>
+            <button type="button" onClick={saveWallet}>{t.settings?.sellerSettings?.saveAddress || 'Save address'}</button>
           </div>
-          <PreferenceSwitch checked={accountSettings.salePayoutAlerts} icon={BellRing} label="Sale and payout alerts" description="Receive account alerts when a sale or automatic payout changes status." onChange={(value) => updateSetting('salePayoutAlerts', value)} />
-          <PreferenceSwitch checked={accountSettings.confirmWalletBeforeListing} icon={ShieldCheck} label="Confirm wallet before each listing" description="Require a final payout-address confirmation before publishing a P2P listing." onChange={(value) => updateSetting('confirmWalletBeforeListing', value)} />
+          <PreferenceSwitch checked={accountSettings.salePayoutAlerts} icon={BellRing} label={t.settings?.sellerSettings?.saleAlerts || 'Sale and payout alerts'} description={t.settings?.sellerSettings?.saleAlertsDesc || 'Receive account alerts when a sale or automatic payout changes status.'} onChange={(value) => updateSetting('salePayoutAlerts', value)} />
+          <PreferenceSwitch checked={accountSettings.confirmWalletBeforeListing} icon={ShieldCheck} label={t.settings?.sellerSettings?.confirmWallet || 'Confirm wallet before each listing'} description={t.settings?.sellerSettings?.confirmWalletDesc || 'Require a final payout-address confirmation before publishing a P2P listing.'} onChange={(value) => updateSetting('confirmWalletBeforeListing', value)} />
         </article>
 
         <article className="settings-panel" id="personalization">
-          <SectionHeading icon={Palette} title="Personalization" description="These preferences are synced to your account and applied on sign-in." />
-          <ChoiceGroup label="Theme" value={theme} onChange={(value) => updateSetting('theme', value, setTheme)} options={[
-            { value: 'system', label: 'System', icon: Monitor },
-            { value: 'dark', label: 'Dark', icon: Moon },
-            { value: 'light', label: 'Light', icon: Sun },
+          <SectionHeading icon={Palette} title={t.settings?.personalization?.title || 'Personalization'} description={t.settings?.personalization?.description || 'These preferences are synced to your account and applied on sign-in.'} />
+          <ChoiceGroup label={t.settings?.personalization?.theme || 'Theme'} value={theme} onChange={(value) => updateSetting('theme', value, setTheme)} options={[
+            { value: 'system', label: t.settings?.personalization?.system || 'System', icon: Monitor },
+            { value: 'dark', label: t.settings?.personalization?.dark || 'Dark', icon: Moon },
+            { value: 'light', label: t.settings?.personalization?.light || 'Light', icon: Sun },
           ]} />
-          <PreferenceSwitch checked={reducedMotion} icon={Gauge} label="Reduced motion" description="Minimize transitions, animated movement, and smooth scrolling." onChange={(value) => updateSetting('reducedMotion', value, setReducedMotion)} />
-          <ChoiceGroup label="Content density" value={contentDensity} onChange={(value) => updateSetting('contentDensity', value, setContentDensity)} options={[
-            { value: 'comfortable', label: 'Comfortable', description: 'More space between cards and controls' },
-            { value: 'compact', label: 'Compact', description: 'Fit more content on screen' },
+          <PreferenceSwitch checked={reducedMotion} icon={Gauge} label={t.settings?.personalization?.reducedMotion || 'Reduced motion'} description={t.settings?.personalization?.reducedMotionDesc || 'Minimize transitions, animated movement, and smooth scrolling.'} onChange={(value) => updateSetting('reducedMotion', value, setReducedMotion)} />
+          <ChoiceGroup label={t.settings?.personalization?.contentDensity || 'Content density'} value={contentDensity} onChange={(value) => updateSetting('contentDensity', value, setContentDensity)} options={[
+            { value: 'comfortable', label: t.settings?.personalization?.comfortable || 'Comfortable', description: t.settings?.personalization?.comfortableDesc || 'More space between cards and controls' },
+            { value: 'compact', label: t.settings?.personalization?.compact || 'Compact', description: t.settings?.personalization?.compactDesc || 'Fit more content on screen' },
           ]} />
 
           <div className="settings-select-grid">
-            <label><Languages size={17} /><span>Preferred language</span><select value={lang} onChange={(event) => { setLang(event.target.value); updateSetting('preferredLanguage', event.target.value) }}>{Object.entries(LANGUAGE_NAMES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>
+            <label><Languages size={17} /><span>{t.settings?.personalization?.language || 'Preferred language'}</span><select value={lang} onChange={(event) => { setLang(event.target.value); updateSetting('preferredLanguage', event.target.value) }}>{Object.entries(LANGUAGE_NAMES).map(([code, name]) => <option key={code} value={code}>{name}</option>)}</select></label>
             <label>
               <Clock3 size={17} />
-              <span>Date and time format</span>
+              <span>{t.settings?.personalization?.dateTime || 'Date and time format'}</span>
               <select value={dateTimeFormat} onChange={(event) => updateSetting('dateTimeFormat', event.target.value, setDateTimeFormat)}>
-                <option value="locale">Use language default</option>
-                <option value="mdy">Month / day / year</option>
-                <option value="dmy">Day / month / year</option>
+                <option value="locale">{t.settings?.personalization?.useDefault || 'Use language default'}</option>
+                <option value="mdy">{t.settings?.personalization?.mdy || 'Month / day / year'}</option>
+                <option value="dmy">{t.settings?.personalization?.dmy || 'Day / month / year'}</option>
               </select>
-              <small className="settings-format-preview">Preview: {dateTimePreview}</small>
+              <small className="settings-format-preview">{t.settings?.personalization?.preview?.(dateTimePreview) || `Preview: ${dateTimePreview}`}</small>
             </label>
           </div>
-          <PreferenceSwitch checked={translateVehicleNames} icon={Car} label="Translate vehicle names" description="Translate vehicle model names when a non-English language is active." onChange={(value) => updateSetting('translateVehicleNames', value, setTranslateVehicleNames)} />
-          <ChoiceGroup label="Default community feed" value={defaultCommunityFeed} onChange={(value) => updateSetting('defaultCommunityFeed', value, setDefaultCommunityFeed)} options={[
-            { value: 'latest', label: 'Latest', description: 'Newest posts first' },
-            { value: 'trending', label: 'Trending', description: 'Posts with the most reactions' },
-            { value: 'followed', label: 'Followed topics', description: 'Only topics you follow' },
+          <PreferenceSwitch checked={translateVehicleNames} icon={Car} label={t.settings?.personalization?.translateVehicles || 'Translate vehicle names'} description={t.settings?.personalization?.translateVehiclesDesc || 'Translate vehicle model names when a non-English language is active.'} onChange={(value) => updateSetting('translateVehicleNames', value, setTranslateVehicleNames)} />
+          <ChoiceGroup label={t.settings?.personalization?.defaultFeed || 'Default community feed'} value={defaultCommunityFeed} onChange={(value) => updateSetting('defaultCommunityFeed', value, setDefaultCommunityFeed)} options={[
+            { value: 'latest', label: t.settings?.personalization?.latest || 'Latest', description: t.settings?.personalization?.latestDesc || 'Newest posts first' },
+            { value: 'trending', label: t.settings?.personalization?.trending || 'Trending', description: t.settings?.personalization?.trendingDesc || 'Posts with the most reactions' },
+            { value: 'followed', label: t.settings?.personalization?.followed || 'Followed topics', description: t.settings?.personalization?.followedDesc || 'Only topics you follow' },
           ]} />
         </article>
 
-        <footer className="settings-data-note"><Database size={16} /> Private settings are stored in an owner-only Firestore document.</footer>
+        <footer className="settings-data-note"><Database size={16} /> {t.settings?.footer || 'Private settings are stored in an owner-only Firestore document.'}</footer>
       </div>
     </section>
   )

@@ -5,6 +5,12 @@ import {
   newsRouteFromIgnUrl,
   sourceUrlForNewsSlug,
 } from '../news/ignNews'
+import {
+  newsArticleTranslationSource,
+  translateNewsArticle,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsArticlePage.css'
 
 function isPlainLeftClick(event) {
@@ -100,10 +106,22 @@ function ArticleBlock({ block, onNavigate }) {
 }
 
 function NewsArticlePage({ slug, type = 'article', onNavigate }) {
+  const { lang } = useTranslation()
   const [article, setArticle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const fallbackSourceUrl = useMemo(() => sourceUrlForNewsSlug(slug, type), [slug, type])
+  const translationSource = useMemo(
+    () => (article ? newsArticleTranslationSource(article) : null),
+    [article],
+  )
+  const { data: displayArticle } = useTranslatedIgnContent(article, {
+    enabled: !loading && Boolean(article),
+    lang,
+    scope: `news-article-${slug}`,
+    source: translationSource,
+    translate: translateNewsArticle,
+  })
 
   useEffect(() => {
     let canceled = false
@@ -131,11 +149,11 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
   }, [slug, type])
 
   useEffect(() => {
-    if (!article?.title) return undefined
+    if (!displayArticle?.title) return undefined
 
-    document.title = `${article.title} | Leonida Loot`
+    document.title = `${displayArticle.title} | Leonida Loot`
 
-    const description = article.description || `${article.title} on Leonida Loot.`
+    const description = displayArticle.description || `${displayArticle.title} on Leonida Loot.`
     document.querySelector('meta[name="description"]')?.setAttribute('content', description)
     document.querySelector('meta[property="og:title"]')?.setAttribute('content', document.title)
     document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
@@ -143,7 +161,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
     document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', description)
 
     return undefined
-  }, [article])
+  }, [displayArticle])
 
   if (loading) {
     return (
@@ -158,7 +176,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
     )
   }
 
-  if (error || !article) {
+  if (error || !displayArticle) {
     return (
       <section className="section-padding news-article-page">
         <div className="container news-article-shell">
@@ -189,44 +207,36 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
 
         <header className="news-article-hero">
           <div className="news-article-kicker">IGN coverage</div>
-          <h1>{article.title}</h1>
-          {article.description && <p className="news-article-dek">{article.description}</p>}
+          <h1>{displayArticle.title}</h1>
+          {displayArticle.description && <p className="news-article-dek">{displayArticle.description}</p>}
           <div className="news-article-meta">
             <span>
               <UserRound size={15} aria-hidden="true" />
-              {article.author || 'IGN'}
+              {displayArticle.author || 'IGN'}
             </span>
             <span>
               <Clock size={15} aria-hidden="true" />
-              {formatDate(article.publishedAt || article.updatedAt)}
+              {formatDate(displayArticle.publishedAt || displayArticle.updatedAt)}
             </span>
-            <a href={article.sourceUrl || fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
+            <a href={displayArticle.sourceUrl || fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
               Source
               <ExternalLink size={15} aria-hidden="true" />
             </a>
           </div>
         </header>
 
-        {article.image && (
+        {displayArticle.image && (
           <figure className="news-article-cover">
-            <img src={article.image} alt="" loading="eager" />
+            <img src={displayArticle.image} alt="" loading="eager" />
             <figcaption>Image via IGN</figcaption>
           </figure>
         )}
 
         <div className="news-article-body">
-          {(article.blocks || []).map((block, index) => (
+          {(displayArticle.blocks || []).map((block, index) => (
             <ArticleBlock key={`${block.type}-${index}`} block={block} onNavigate={onNavigate} />
           ))}
         </div>
-
-        <footer className="news-article-source-note">
-          <span>Parsed from IGN with attribution.</span>
-          <a href={article.sourceUrl || fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
-            Read original
-            <ExternalLink size={15} aria-hidden="true" />
-          </a>
-        </footer>
       </article>
     </section>
   )
