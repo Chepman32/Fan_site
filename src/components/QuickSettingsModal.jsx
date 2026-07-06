@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Car, Languages, Moon, Settings, Sun, X } from 'lucide-react'
+import { ArrowRight, Car, Languages, Moon, Settings, Sun, UserPlus, X } from 'lucide-react'
 import { LANGUAGE_NAMES } from '../i18n/translations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { usePreferences } from '../preferences/AppPreferences.jsx'
@@ -45,7 +45,7 @@ function PreferenceSwitch({ checked, description, icon: Icon, label, onChange })
   )
 }
 
-function QuickSettingsModal({ onClose }) {
+function QuickSettingsModal({ onClose, onOpenAuth }) {
   const { t, lang } = useTranslation()
   const {
     setTheme,
@@ -153,6 +153,21 @@ function QuickSettingsModal({ onClose }) {
                 onChange={updateVehicleNamePreference}
               />
             </div>
+          ) : null}
+
+          {!isSignedIn ? (
+            <button
+              type="button"
+              className="quick-settings-sign-up-banner"
+              onClick={() => {
+                onClose?.()
+                onOpenAuth?.()
+              }}
+            >
+              <UserPlus size={18} aria-hidden="true" />
+              <span>{settingsCopy.guestBanner || 'Sign Up to unlock more settings'}</span>
+              <ArrowRight size={17} aria-hidden="true" />
+            </button>
           ) : null}
         </div>
       </section>

@@ -210,6 +210,49 @@
   transform: translateX(23px);
 }
 
+.quick-settings-sign-up-banner {
+  display: flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  background: linear-gradient(105deg, rgba(255, 45, 149, 0.13), rgba(0, 217, 255, 0.1));
+  border: 1px solid rgba(0, 217, 255, 0.26);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.quick-settings-sign-up-banner svg:first-child {
+  flex: 0 0 auto;
+  color: var(--accent-cyan);
+}
+
+.quick-settings-sign-up-banner svg:last-child {
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--accent-pink);
+  transition: transform 0.18s ease;
+}
+
+.quick-settings-sign-up-banner:hover,
+.quick-settings-sign-up-banner:focus-visible {
+  background: linear-gradient(105deg, rgba(255, 45, 149, 0.2), rgba(0, 217, 255, 0.16));
+  border-color: rgba(0, 217, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.quick-settings-sign-up-banner:hover svg:last-child,
+.quick-settings-sign-up-banner:focus-visible svg:last-child {
+  transform: translateX(3px);
+}
+
 @media (max-width: 640px) {
   .quick-settings-backdrop {
     align-items: end;

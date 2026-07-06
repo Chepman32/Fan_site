@@ -301,7 +301,10 @@ function Header({
       </nav>
 
       {quickSettingsOpen && (
-        <QuickSettingsModal onClose={() => setQuickSettingsOpen(false)} />
+        <QuickSettingsModal
+          onClose={() => setQuickSettingsOpen(false)}
+          onOpenAuth={onOpenAuth}
+        />
       )}
     </>
   )
