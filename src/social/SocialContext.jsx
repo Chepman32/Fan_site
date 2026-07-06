@@ -13,6 +13,7 @@ import {
   normalizeAccountSettings,
   normalizeAccountSettingsPatch,
 } from '../settings/accountSettings'
+import { subscribeToNewsletter } from '../newsletter/newsletterClient'
 
 const SocialContext = createContext(null)
 const seedState = createSeedSocialState()
@@ -662,7 +663,7 @@ export function SocialProvider({ children }) {
     }
   }
 
-  const signup = async ({ username, email, password }) => {
+  const signup = async ({ username, email, password, newsletterOptIn = false }) => {
     setAuthError('')
     const cleanUsername = normalizeUsername(username)
     const cleanEmail = normalizeEmail(email)
@@ -732,6 +733,12 @@ export function SocialProvider({ children }) {
           setBackendError(`Account created, but profile sync failed: ${firebaseErrorMessage(failure.reason)}`)
         }
       })
+
+      if (newsletterOptIn) {
+        void withFirebaseTimeout(subscribeToNewsletter()).catch((error) => {
+          setBackendError(`Account created, but newsletter signup failed: ${error.message}`)
+        })
+      }
 
       return true
     } catch (error) {

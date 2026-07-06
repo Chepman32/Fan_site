@@ -271,6 +271,11 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /newsletterSubscriptions/{userId} {
+      allow read: if owns(userId);
+      allow create, update, delete: if false;
+    }
+
     match /userActivity/{userId} {
       allow read: if true;
       allow create, update: if owns(userId)

@@ -8,7 +8,12 @@ function AuthModal({ onClose }) {
   const { login, signup, authError, isSignedIn } = useSocial()
   const { t } = useTranslation()
   const [mode, setMode] = useState('signup')
-  const [form, setForm] = useState({ username: '', email: '', password: '' })
+  const [form, setForm] = useState({
+    username: '',
+    email: '',
+    password: '',
+    newsletterOptIn: false,
+  })
   const [busy, setBusy] = useState(false)
   const [submitError, setSubmitError] = useState('')
 
@@ -81,6 +86,17 @@ function AuthModal({ onClose }) {
               <input type="password" value={form.password} onChange={(e) => updateForm('password', e.target.value)} placeholder={t.auth.passwordPlaceholder} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
             </div>
           </label>
+
+          {mode === 'signup' && (
+            <label className="auth-newsletter">
+              <input
+                type="checkbox"
+                checked={form.newsletterOptIn}
+                onChange={(event) => updateForm('newsletterOptIn', event.target.checked)}
+              />
+              <span>{t.auth.newsletterOptIn}</span>
+            </label>
+          )}
 
           {(authError || submitError) && <p className="auth-error">{authError || submitError}</p>}
 

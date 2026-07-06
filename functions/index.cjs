@@ -12,6 +12,7 @@ const DEFAULT_PLATFORM_USDT_ADDRESS = 'TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei'
 const IGN_ORIGIN = 'https://www.ign.com'
 const IGN_NEWS_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{2,180}$/
 const IGN_FETCH_TIMEOUT_MS = 12_000
+const RESEND_API_BASE_URL = 'https://api.resend.com'
 const TRONGRID_FULL_HOST = process.env.TRONGRID_FULL_HOST || 'https://api.trongrid.io'
 const USDT_CONTRACT_ADDRESS = process.env.USDT_CONTRACT_ADDRESS || 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
 const USDT_DECIMALS = 6
@@ -367,6 +368,77 @@ function readJsonBody(req) {
   }
 }
 
+function resendApiKey() {
+  return String(process.env.RESEND_API_KEY || '').trim()
+}
+
+async function resendContactRequest(path, { method, body } = {}) {
+  const apiKey = resendApiKey()
+  if (!apiKey) throw httpError(500, 'Newsletter service is not configured.')
+
+  const response = await fetch(`${RESEND_API_BASE_URL}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'LeonidaLoot/1.0 (+https://leonidaloot.com)',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const payload = await response.json().catch(() => ({}))
+
+  return {
+    ok: response.ok,
+    status: response.status,
+    payload,
+  }
+}
+
+function throwResendContactError(result) {
+  logger.warn('Resend contact request failed', {
+    status: result.status,
+    message: safeText(result.payload?.message, 240),
+  })
+  throw httpError(502, 'The newsletter provider could not complete this request.')
+}
+
+async function subscribeResendContact(email) {
+  const contactPath = `/contacts/${encodeURIComponent(email)}`
+  const updateResult = await resendContactRequest(contactPath, {
+    method: 'PATCH',
+    body: { unsubscribed: false },
+  })
+
+  if (updateResult.ok) return updateResult.payload
+  if (updateResult.status !== 404) throwResendContactError(updateResult)
+
+  const createResult = await resendContactRequest('/contacts', {
+    method: 'POST',
+    body: {
+      email,
+      unsubscribed: false,
+    },
+  })
+  if (createResult.ok) return createResult.payload
+
+  // A concurrent retry may have created the same contact after the first PATCH.
+  const retryResult = await resendContactRequest(contactPath, {
+    method: 'PATCH',
+    body: { unsubscribed: false },
+  })
+  if (retryResult.ok) return retryResult.payload
+
+  throwResendContactError(createResult)
+}
+
+async function deleteResendContact(email) {
+  const result = await resendContactRequest(`/contacts/${encodeURIComponent(email)}`, {
+    method: 'DELETE',
+  })
+  if (result.ok || result.status === 404) return
+  throwResendContactError(result)
+}
+
 function jsonSafeValue(value) {
   if (value === null || value === undefined) return value ?? null
   if (value instanceof admin.firestore.Timestamp) return value.toDate().toISOString()
@@ -386,6 +458,7 @@ async function accountCollections(uid) {
   const [
     profile,
     settings,
+    newsletterSubscription,
     posts,
     comments,
     sources,
@@ -397,6 +470,7 @@ async function accountCollections(uid) {
   ] = await Promise.all([
     db.collection('users').doc(uid).get(),
     db.collection('userSettings').doc(uid).get(),
+    db.collection('newsletterSubscriptions').doc(uid).get(),
     db.collection('posts').where('authorId', '==', uid).get(),
     db.collection('comments').where('authorId', '==', uid).get(),
     db.collection('sources').where('authorId', '==', uid).get(),
@@ -421,11 +495,15 @@ async function accountCollections(uid) {
         ...messages.docs,
         ...listings.docs,
         ...reports.docs,
+        ...(newsletterSubscription.exists ? [newsletterSubscription] : []),
       ].map((document) => document.ref),
     },
     data: {
       profile: profile.exists ? jsonSafeValue(profile.data()) : null,
       settings: settings.exists ? jsonSafeValue(settings.data()) : null,
+      newsletterSubscription: newsletterSubscription.exists
+        ? jsonSafeValue(newsletterSubscription.data())
+        : null,
       posts: exportedDocuments(posts),
       comments: exportedDocuments(comments),
       sources: exportedDocuments(sources),
@@ -894,10 +972,88 @@ exports.telegramFile = onRequest({
   }
 })
 
+exports.newsletterSubscription = onRequest({
+  region: 'us-central1',
+  timeoutSeconds: 30,
+  memory: '256MiB',
+  secrets: ['RESEND_API_KEY'],
+}, async (req, res) => {
+  setCorsHeaders(req, res)
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('')
+    return
+  }
+
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Use POST to manage a newsletter subscription.' })
+    return
+  }
+
+  let subscriptionRef
+  try {
+    const decodedToken = await requireFirebaseUser(req)
+    const body = readJsonBody(req)
+    if (safeText(body.action, 30) !== 'subscribe') {
+      throw httpError(400, 'Unknown newsletter action.')
+    }
+
+    const authRecord = await admin.auth().getUser(decodedToken.uid)
+    const email = String(authRecord.email || '').trim().toLowerCase()
+    if (!email) throw httpError(400, 'This account does not have an email address.')
+
+    const now = admin.firestore.Timestamp.now()
+    subscriptionRef = admin.firestore().collection('newsletterSubscriptions').doc(decodedToken.uid)
+    const existing = await subscriptionRef.get()
+    const existingData = existing.exists ? existing.data() : {}
+
+    if (existingData.status === 'subscribed' && existingData.email === email) {
+      res.status(200).json({ status: 'subscribed' })
+      return
+    }
+
+    await subscriptionRef.set({
+      userId: decodedToken.uid,
+      email,
+      consentedAt: existingData.consentedAt || now,
+      consentSource: 'signup',
+      consentVersion: '2026-07-06',
+      provider: 'resend',
+      status: 'syncing',
+      updatedAt: now,
+    }, { merge: true })
+
+    const contact = await subscribeResendContact(email)
+    await subscriptionRef.set({
+      providerContactId: safeText(contact?.id, 128),
+      status: 'subscribed',
+      lastError: admin.firestore.FieldValue.delete(),
+      syncedAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true })
+
+    res.status(200).json({ status: 'subscribed' })
+  } catch (error) {
+    if (subscriptionRef) {
+      await subscriptionRef.set({
+        status: 'sync_failed',
+        lastError: safeText(error.message, 300),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true }).catch(() => {})
+    }
+    logger.warn('Newsletter subscription error', {
+      status: error.status || 500,
+      message: error.message,
+    })
+    res.status(error.status || 500).json({ error: error.message || 'Newsletter signup failed.' })
+  }
+})
+
 exports.accountManagement = onRequest({
   region: 'us-central1',
   timeoutSeconds: 120,
   memory: '512MiB',
+  secrets: ['RESEND_API_KEY'],
 }, async (req, res) => {
   setCorsHeaders(req, res)
 
@@ -955,6 +1111,9 @@ exports.accountManagement = onRequest({
       if (processingDeal) {
         throw httpError(409, 'Account deletion is unavailable while a P2P payout is processing.')
       }
+
+      const newsletterEmail = String(account.data.newsletterSubscription?.email || '').trim()
+      if (newsletterEmail) await deleteResendContact(newsletterEmail)
 
       const writer = admin.firestore().bulkWriter()
       account.refs.deletable.forEach((ref) => writer.delete(ref))

@@ -19,6 +19,13 @@ Authenticated account settings use the `accountManagement` Firebase Function thr
 firebase deploy --only functions:accountManagement,firestore:rules,hosting --project gta-vi-fan-site
 ```
 
+Optional newsletter sign-up uses the authenticated `newsletterSubscription` Firebase Function through `/api/newsletter/subscribe`. It stores a private consent record and adds opted-in users to Resend Contacts. Store the Resend key in Firebase Secret Manager, then deploy the newsletter and account functions (account deletion also removes the Resend contact):
+
+```sh
+firebase functions:secrets:set RESEND_API_KEY --project gta-vi-fan-site
+firebase deploy --only functions:newsletterSubscription,functions:accountManagement,firestore:rules,hosting --project gta-vi-fan-site
+```
+
 Before sign-up, posting, voting, source submissions, comments, and messages can work against the live project:
 
 - Enable Firebase Authentication with the Email/Password provider.

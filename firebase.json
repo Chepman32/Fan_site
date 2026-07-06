@@ -26,20 +26,6 @@
     ],
     "rewrites": [
       {
-        "source": "/api/telegram/upload",
-        "function": {
-          "functionId": "telegramUpload",
-          "region": "us-central1"
-        }
-      },
-      {
-        "source": "/api/telegram/file",
-        "function": {
-          "functionId": "telegramFile",
-          "region": "us-central1"
-        }
-      },
-      {
         "source": "/api/p2p/payout",
         "function": {
           "functionId": "p2pUsdtPayout",
@@ -50,6 +36,13 @@
         "source": "/api/account",
         "function": {
           "functionId": "accountManagement",
+          "region": "us-central1"
+        }
+      },
+      {
+        "source": "/api/newsletter/subscribe",
+        "function": {
+          "functionId": "newsletterSubscription",
           "region": "us-central1"
         }
       },

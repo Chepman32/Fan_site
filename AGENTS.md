@@ -10,6 +10,7 @@ This repository is a Vite + React application for a GTA VI fan/community site. T
 
 - A public landing/home experience with game information, media, characters, map/location content, and news.
 - A social layer with profiles, posts, rumors, sources, polls, comments, reactions, and direct messages.
+- An optional sign-up newsletter opt-in synced to Resend Contacts through an authenticated backend function.
 - A shop flow for downloadable products paid in USDT on TRON.
 - A P2P marketplace where users can list digital goods/services, upload files, message each other, and settle crypto purchases.
 - Firebase Hosting, Firestore, Firebase Auth, Firebase Analytics, and Firebase Functions.
@@ -96,6 +97,8 @@ Frontend source:
   - Compatibility re-export for the shared Telegram storage client.
 - `src/storage/telegramStorage.js`
   - Authenticated Telegram upload client and public post-media URL builder.
+- `src/newsletter/newsletterClient.js`
+  - Authenticated browser client for the newsletter subscription function.
 - `src/components/PostMediaAttachments.jsx`
   - Renders Telegram-backed image/video attachments for public community posts.
 - `src/components/CryptoCheckoutPanel.jsx`
@@ -117,8 +120,8 @@ Firebase Functions:
 Cloudflare worker:
 
 - `cloudflare/telegram-upload-worker/`
-  - Optional/legacy Telegram upload worker implementation.
-  - The frontend default example currently points to a Cloudflare Worker endpoint, while Firebase Hosting also rewrites `/api/telegram/upload` to the Firebase Function.
+  - Telegram upload worker implementation used by the current frontend defaults.
+  - Firebase Function implementations remain available in source if the project later switches back.
 
 ## Tech Stack
 
@@ -231,9 +234,8 @@ dist
 Important rewrites:
 
 ```txt
-/api/telegram/upload -> telegramUpload function in us-central1
-/api/telegram/file   -> telegramFile function in us-central1
 /api/p2p/payout     -> p2pUsdtPayout function in us-central1
+/api/newsletter/subscribe -> newsletterSubscription function in us-central1
 /**                 -> /index.html
 ```
 
@@ -269,6 +271,8 @@ VITE_GOOGLE_TRANSLATE_API_KEY=
 VITE_TELEGRAM_UPLOAD_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/upload
 VITE_TELEGRAM_FILE_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/file
 VITE_P2P_PAYOUT_ENDPOINT=/api/p2p/payout
+VITE_ACCOUNT_ENDPOINT=/api/account
+VITE_NEWSLETTER_ENDPOINT=/api/newsletter/subscribe
 VITE_P2P_PLATFORM_USDT_ADDRESS=TZ7XRNtbhznky43JwgBMPFNFm4KMNRLRei
 VITE_P2P_COMMISSION_RATE=0.02
 ```
@@ -296,6 +300,7 @@ P2P_PAYOUT_PRIVATE_KEY=
 P2P_COMMISSION_RATE=0.02
 TRONGRID_API_KEY=
 TRONGRID_FULL_HOST=https://api.trongrid.io
+RESEND_API_KEY=
 ```
 
 Important:
@@ -304,6 +309,7 @@ Important:
 - `P2P_PAYOUT_PRIVATE_KEY` should be a Firebase Secret Manager secret, not a committed env file value.
 - `TRONGRID_API_KEY` is optional but recommended for production reliability/rate limits.
 - `TELEGRAM_BOT_TOKEN` must never be exposed to the browser.
+- `RESEND_API_KEY` must be stored as a Firebase Secret Manager secret and must never be exposed to the browser.
 
 The local `functions/.env` may contain non-secret defaults such as:
 
@@ -651,6 +657,17 @@ Important:
 
 - Do not add client writes to `p2pDeals`.
 - Deal documents are part of payout idempotency and audit trail.
+
+### `newsletterSubscriptions`
+
+Stores backend-created newsletter consent and Resend synchronization status.
+
+Security model:
+
+- A signed-in user can read only their own subscription record.
+- Clients cannot create, update, or delete records.
+- The authenticated newsletter function obtains the address from Firebase Auth and writes the consent record.
+- Account deletion removes both the Resend contact and the Firestore subscription record.
 
 ## Firestore Rules
 
@@ -1161,11 +1178,9 @@ If the wallet is compromised, immediately:
 
 There are two possible Telegram upload backends in this repo:
 
-1. Firebase Function:
+1. Firebase Function source (optional; not currently wired through Hosting):
    - Function name: `telegramUpload`
-   - Hosting path: `/api/telegram/upload`
    - Public post media function: `telegramFile`
-   - Public post media path: `/api/telegram/file`
    - Source: `functions/index.cjs`
 
 2. Cloudflare Worker:
@@ -1176,6 +1191,8 @@ There are two possible Telegram upload backends in this repo:
 https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/upload
 https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/file
 ```
+
+The current production frontend bundle uses the Cloudflare Worker endpoints. If switching back to Firebase Functions, deploy both Telegram functions with their credentials before restoring their Hosting rewrites.
 
 Frontend upload client:
 
@@ -1710,10 +1727,8 @@ When debugging uploads, first check:
 
 - `VITE_TELEGRAM_UPLOAD_ENDPOINT`
 - `VITE_TELEGRAM_FILE_ENDPOINT`
-- Firebase Hosting rewrite for `/api/telegram/upload`
-- Firebase Hosting rewrite for `/api/telegram/file`
 - Worker deployment state
-- Firebase Function logs
+- Firebase Function deployment/logs if that backend is intentionally enabled
 
 ### Seed Listings
 
@@ -1800,16 +1815,16 @@ Do not depend on frontend-calculated commission for settlement. The response sho
 
 ## API Contract: Telegram Upload
 
-Endpoint depends on env:
-
-```txt
-POST /api/telegram/upload
-```
-
-or:
+Endpoint depends on env. Current production uses:
 
 ```txt
 POST <Cloudflare Worker upload endpoint>
+```
+
+If the optional Firebase backend is deployed and its Hosting rewrite is restored:
+
+```txt
+POST /api/telegram/upload
 ```
 
 Headers:
