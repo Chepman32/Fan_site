@@ -106,6 +106,11 @@ const MARKETPLACE_TRUST_SECTIONS = [
     body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
   },
 ]
+const BUYER_PROTECTION_POINTS = [
+  'Exact USDT TRC20 amount and transaction hash are recorded for review.',
+  'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
+  'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
+]
 
 const FORM_SEEDS = {
   en: { deliveryMethod: 'Telegram handoff', properties: ['Format', 'Platform', 'License'] },
@@ -1440,13 +1445,21 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           <div className="p2p-trust-heading">
             <span className="p2p-kicker">
               <ShieldCheck size={16} />
-              Marketplace trust
+              Buyer protection
             </span>
-            <h2 id="p2p-trust-title">Buying, delivery, protection, and content rules</h2>
+            <h2 id="p2p-trust-title">Buyer protection and marketplace trust</h2>
             <p>
               The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official
               Rockstar files, leaks, ripped assets, or impersonation material.
             </p>
+            <ul className="p2p-protection-list" aria-label="Buyer protection checkpoints">
+              {BUYER_PROTECTION_POINTS.map((point) => (
+                <li key={point}>
+                  <ShieldCheck size={15} />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
           </div>
           <div className="p2p-trust-grid">
             {MARKETPLACE_TRUST_SECTIONS.map((section) => (

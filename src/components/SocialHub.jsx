@@ -1065,7 +1065,11 @@ function SocialHub({ onOpenAuth, onNavigate }) {
       <div className="container">
         <div className="section-header social-header">
           <h1 className="section-title">
-            {t.social.title} <span className="gradient-text">{t.social.titleHighlight}</span>
+            {t.social.titleHighlight ? (
+              <>
+                {t.social.title} <span className="gradient-text">{t.social.titleHighlight}</span>
+              </>
+            ) : t.social.title}
           </h1>
         </div>
 

@@ -114,6 +114,34 @@
   line-height: 1.65;
 }
 
+.p2p-protection-list {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.p2p-protection-list li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 9px;
+  align-items: start;
+  padding: 10px;
+  color: var(--text-primary);
+  background: rgba(0, 217, 255, 0.075);
+  border: 1px solid rgba(0, 217, 255, 0.16);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 760;
+  line-height: 1.45;
+}
+
+.p2p-protection-list svg {
+  margin-top: 2px;
+  color: var(--accent-cyan);
+}
+
 .p2p-trust-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

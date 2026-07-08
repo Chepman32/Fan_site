@@ -36,12 +36,19 @@ const forbiddenPhrases = [
   'Loading vehicle guide',
   'Loading weapons guide',
   'Loading social media guide',
+  'Preparing social media guide',
   'Loading game information',
   'Loading news article',
   'Loading...',
   'undefined',
   'NaN',
 ]
+const routeSpecificForbiddenPhrases = {
+  '/leonida/social-media': [
+    'Loading social media guide',
+    'Preparing social media guide',
+  ],
+}
 
 function fail(message) {
   failures.push(message)
@@ -148,6 +155,9 @@ for (const route of PRERENDER_ROUTES) {
 
   for (const phrase of forbiddenPhrases) {
     if (html.includes(phrase)) fail(`${route} contains forbidden placeholder/value: "${phrase}"`)
+  }
+  for (const phrase of routeSpecificForbiddenPhrases[route] || []) {
+    if (html.includes(phrase)) fail(`${route} contains social-media guide loading copy: "${phrase}"`)
   }
   if (html.includes('>null<')) fail(`${route} contains null placeholder text`)
 

@@ -81,6 +81,12 @@ Frontend source:
   - React entry point.
 - `src/App.jsx`
   - Top-level app composition, routing, header/cart state, page rendering.
+- `src/seo/routes.js`
+  - Central SEO route registry for indexable routes, noindex prerender routes, canonical paths, sitemap membership, and route types.
+- `src/seo/jsonLd.js`
+  - Shared JSON-LD helper builders for Organization, WebSite, breadcrumbs, articles, and products.
+- `src/content/`
+  - Static SEO content for news, shop products, marketplace listing pages, Leonida characters, locations, vehicles, weapons, and social media guides.
 - `src/firebase/firebaseClient.js`
   - Lazy Firebase client initialization and exported Firebase SDK helpers.
 - `src/social/SocialContext.jsx`
@@ -103,8 +109,18 @@ Frontend source:
   - Renders Telegram-backed image/video attachments for public community posts.
 - `src/components/CryptoCheckoutPanel.jsx`
   - Standard shop checkout panel.
+- `src/components/ShopPage.jsx`
+  - Shop catalog UI. The visible category grid is intentionally paginated to avoid dumping every product on `/shop`.
+- `src/components/ShopProductPage.jsx`
+  - Static/indexable shop product detail pages with gallery, included files, FAQ, license notes, and related products.
 - `src/components/P2PTradingPage.jsx`
-  - Main P2P marketplace UI, listing form, details modal, and P2P USDT checkout box.
+  - Main P2P marketplace UI, listing form, visible buyer-protection/trust sections, details modal, and P2P USDT checkout box.
+- `src/components/MarketplaceListingPage.jsx`
+  - Static/indexable P2P seed listing detail pages with preview images, file details, FAQ, license notes, and related listings.
+- `src/components/HomePage.jsx`
+  - Static homepage hub for GTA VI news, Leonida guides, creator shop, P2P marketplace, community, and about content.
+- `src/components/NewsSection.jsx`
+  - Static `/news` page. Do not replace with a loading-only remote news feed.
 
 Firebase Functions:
 
@@ -341,21 +357,47 @@ The app uses lightweight client-side routing in `src/App.jsx`, not a full router
 Known routes:
 
 - `/`
-  - Landing/home sections.
+  - Static GTA VI fan hub and creator marketplace homepage.
+- `/news`
+  - Static GTA VI news hub.
+- `/news/:slug`
+  - Static news article page for known local article slugs, with remote article fallback only for unknown slugs.
+- `/about`
+  - About GTA VI information page.
+- `/about-gta-vi`
+  - Legacy/noindex about alias.
+- `/leonida`
+  - Leonida field guide hub.
+- `/leonida/characters`
+  - Static/indexable GTA VI characters guide.
+- `/leonida/locations`
+  - Static/indexable Leonida locations guide.
+- `/leonida/vehicles`
+  - Static/indexable GTA VI vehicles guide.
+- `/leonida/weapons`
+  - Static/indexable GTA VI weapons guide.
+- `/leonida/social-media`
+  - Static/indexable GTA VI social media guide. This route must render real static content, not a loading placeholder.
 - `/community`
-  - Social/community view.
+  - Social/community view. The public H1 must render exactly `GTA VI Community Feed`.
 - `/profile`
   - Current user profile.
 - `/profile/:id`
   - Public profile for a user.
 - `/shop`
-  - Shop products and cart checkout.
+  - Shop catalog and cart checkout. The visible product grid is paginated by category.
+- `/shop/:slug`
+  - Static/indexable shop product detail page.
 - `/p2p`
-  - P2P marketplace.
+  - P2P marketplace with visible buyer-protection/trust sections.
+- `/p2p/:slug`
+  - Static/indexable P2P seed listing detail page.
 - `/messages`
   - Direct messages.
 - `/locations/:slug`
   - Location details.
+- `/buyer-protection`, `/seller-policy`, `/refund-policy`, `/content-policy`, `/dmca`, `/privacy`, `/terms`, `/contact`
+  - Static trust/legal/support pages.
 
 Navigation is handled through browser history and route parsing helpers in `App.jsx`.
 
@@ -378,27 +420,40 @@ Technical SEO is handled in a few places:
 
 - `index.html`
   - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, Google-compatible favicon links, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
+- `src/seo/routes.js`
+  - Central route registry for canonical route definitions, route type, indexability, sitemap membership, prerender membership, priorities, and change frequencies.
+  - Keep route additions here in sync with `App.jsx`, `src/entry-server.jsx`, and `scripts/seo-validate.mjs`.
+- `src/seo/jsonLd.js`
+  - Shared JSON-LD builders used by `seoConfig.js`. Prefer these helpers over one-off JSON-LD object construction.
 - `src/seo/seoConfig.js`
-  - Defines route-specific SEO metadata for `/`, `/community`, `/shop`, `/p2p`, `/profile`, `/profile/:id`, `/messages`, and `/locations/:slug`.
-  - Defines canonical URLs, robots behavior, Open Graph/Twitter PNG image defaults, breadcrumbs, sitemap routes, prerender routes, noindex prerender routes, and JSON-LD graph data.
+  - Defines route-specific SEO metadata for static routes, guide routes, news articles, shop product pages, P2P listing pages, trust pages, profiles, messages, and location pages.
+  - Uses the central route registry for canonical URLs, robots behavior, sitemap routes, prerender routes, and noindex prerender routes.
+  - Defines Open Graph/Twitter PNG image defaults, breadcrumbs, dynamic product/listing metadata, FAQ JSON-LD, and JSON-LD graph data.
   - Keep new route metadata here when adding routes.
 - `src/seo/SeoHead.jsx`
   - Updates `document.title`, description, robots, canonical, Open Graph/Twitter tags, JSON-LD, and the `<html lang>` value on route/language changes.
+- `src/content/*.js`
+  - Static, crawlable copy used by public pages. Important modules include `news.js`, `products.js`, `marketplaceListings.js`, `leonidaCharacters.js`, `leonidaLocations.js`, `leonidaVehicles.js`, `leonidaWeapons.js`, and `leonidaSocialMedia.js`.
+  - Keep `/leonida/social-media` backed by `src/content/leonidaSocialMedia.js`; it must not depend on a remote fetch or show `Loading social media guide`.
 - `src/entry-server.jsx`
   - Server-side/prerender entry used by `vite build --ssr`.
   - Renders `<App initialRoute="...">` with static route components so generated HTML includes the route content, one H1 on public pages, and route-specific SEO before JavaScript runs.
 - `scripts/prerender.mjs`
   - Runs after the client and SSR builds.
-  - Generates raw route HTML for `/`, `/community`, `/shop`, `/p2p`, known `/locations/:slug` pages, and noindex HTML for `/profile` and `/messages`.
+  - Generates raw route HTML for indexable routes such as `/`, `/news`, `/about`, `/leonida`, `/leonida/characters`, `/leonida/locations`, `/leonida/vehicles`, `/leonida/weapons`, `/leonida/social-media`, `/community`, `/shop`, `/shop/:slug`, `/p2p`, `/p2p/:slug`, trust pages, known `/locations/:slug` pages, and noindex HTML for private/legacy pages.
   - Writes both `route/index.html` files and matching `route.html` aliases so Firebase clean URLs and local Vite preview can serve slashless route HTML.
-  - Regenerates `dist/sitemap.xml` and `dist/robots.txt` from the shared SEO config.
+  - Regenerates `dist/robots.txt` and writes prerender output. `scripts/generate-sitemap.mjs` writes the final sitemap from the SSR route registry.
+- `scripts/generate-sitemap.mjs`
+  - Imports `indexableSeoRoutes` from the SSR bundle and writes `dist/sitemap.xml`.
 - `scripts/seo-validate.mjs`
-  - Validates generated raw HTML, canonical format, PNG OG/Twitter image usage, JSON-LD parseability, sitemap membership, robots sitemap reference, noindex pages, Google-compatible favicon assets, and exactly one H1 on public prerendered pages.
+  - Validates generated raw HTML, required prerendered routes, canonical format, PNG OG/Twitter image usage, JSON-LD parseability, sitemap membership, robots sitemap reference, noindex pages, Google-compatible favicon assets, and exactly one H1 on public prerendered pages.
+  - Fails if generated HTML contains forbidden placeholder values such as `Loading latest news`, `Loading character guide`, `Loading Leonida guide`, `Loading vehicle guide`, `Loading weapons guide`, `Loading social media guide`, `Preparing social media guide`, `Loading game information`, `Loading news article`, `Loading...`, `undefined`, or `NaN`.
+  - Has a route-specific guard for `/leonida/social-media` so the social media guide cannot regress to loading copy.
 - `public/robots.txt`
   - Allows public crawling, blocks API/reserved Firebase paths, and points crawlers to the sitemap.
 - `public/sitemap.xml`
-  - Lists indexable static routes and known Leonida location guides.
-  - It intentionally omits auth-only pages, private messages, and dynamic user profile pages.
+  - Static source/fallback sitemap. The final production sitemap is generated into `dist/sitemap.xml` by `scripts/generate-sitemap.mjs` during build.
+  - The generated sitemap intentionally omits auth-only pages, private messages, and dynamic user profile pages.
 - `public/og-image.png`
   - Default crawler-compatible `1200x630` social preview image used by Open Graph, Twitter card tags, and JSON-LD image references.
 - `public/og-image.svg`
@@ -417,12 +472,29 @@ npm run build
 npm run seo:validate
 ```
 
-`npm run build` runs the Vite client build, Vite SSR build, static prerender, and SEO validation. Firebase Hosting should serve generated route HTML from `dist` before the SPA catch-all; `firebase.json` sets `cleanUrls: true` and `trailingSlash: false` so canonical public URLs stay slashless except `/`.
+Generate sitemap directly after an SSR build:
+
+```sh
+npm run sitemap:generate
+```
+
+`npm run build` runs the Vite client build, Vite SSR build, static prerender, sitemap generation, and SEO validation. Firebase Hosting should serve generated route HTML from `dist` before the SPA catch-all; `firebase.json` sets `cleanUrls: true` and `trailingSlash: false` so canonical public URLs stay slashless except `/`.
+
+Current public SEO expectations:
+
+- Homepage title: `Leonida Loot | GTA VI Fan Hub, News, Guides & Creator Marketplace`.
+- Homepage H1: `GTA VI Fan Hub & Creator Marketplace`.
+- `/community` H1: `GTA VI Community Feed`.
+- `/p2p` H1: `GTA VI Fan Asset Marketplace`.
+- `/p2p` must show visible buyer-protection/trust content directly on the page, including buyer protection, buying workflow, seller delivery, dispute window, and prohibited content.
+- `/shop` should avoid a giant visible product wall; keep the category grid paginated and route deeper product detail content to `/shop/:slug`.
+- `/leonida/social-media` must be static/crawlable and must not contain `Loading social media guide` or `Preparing social media guide` in generated HTML.
+- Public `/leonida/characters`, `/leonida/locations`, `/leonida/vehicles`, `/leonida/weapons`, and `/leonida/social-media` are indexable and should not be added to noindex lists.
 
 SEO limitations:
 
-- Static public routes now have route-specific raw HTML metadata from build-time prerendering, so social unfurlers and lightweight crawlers can see title, description, canonical, Open Graph/Twitter tags, and JSON-LD before JavaScript runs.
-- Dynamic Firestore-backed content such as user profiles, community posts, messages, and P2P listings is not statically represented in the sitemap.
+- Static public routes now have route-specific raw HTML metadata and body content from build-time prerendering, so social unfurlers and lightweight crawlers can see title, description, canonical, Open Graph/Twitter tags, JSON-LD, H1, and meaningful content before JavaScript runs.
+- Static seed shop product pages and P2P listing pages are represented in the sitemap. Dynamic Firestore-backed user-generated profiles, community posts, messages, and live user-created P2P listings are not automatically represented in the sitemap.
 - `/profile` and `/messages` get generated noindex HTML and remain out of the sitemap; public `/profile/:id` pages get client-side profile metadata when user data is available, but are still not prerendered or listed in the sitemap.
 - True route-specific raw SEO for Firestore/user-generated pages requires SSR with data fetching, SSG from a trusted content source, or edge/server metadata rendering.
 
@@ -703,7 +775,10 @@ Primary files:
 
 - `src/shop/shopData.js`
 - `src/shop/tronPayments.js`
+- `src/components/ShopPage.jsx`
+- `src/components/ShopProductPage.jsx`
 - `src/components/CryptoCheckoutPanel.jsx`
+- `src/content/products.js`
 
 The standard shop checkout is different from the P2P automatic payout flow.
 
@@ -718,6 +793,15 @@ Standard shop checkout behavior:
 7. On success, app records purchase under the user's profile and shows download links.
 
 There is no seller payout in the normal shop checkout.
+
+Shop catalog SEO and UI behavior:
+
+- `/shop` is the category catalog and checkout entry point.
+- The visible category grid in `ShopPage.jsx` is intentionally paginated. Keep the default visible page small enough that the route does not become a noisy wall of product cards.
+- Current catalog pagination shows 6 products per category page.
+- Deeper product copy belongs on `/shop/:slug` through `ShopProductPage.jsx` and `src/content/products.js`.
+- Product detail pages should include crawlable descriptions, preview/gallery context, included files, FAQ, license/unofficial disclaimers, and related product links.
+- Do not reintroduce weak generated product names such as `Leonida Stream Overlay 28`; product names should be unique and useful in visible UI and generated HTML.
 
 Important constants in `src/shop/shopData.js`:
 
@@ -786,6 +870,17 @@ Primary files:
 - `functions/index.cjs`
 
 The P2P marketplace allows signed-in users to create listings for digital items/services and communicate with buyers.
+
+The public `/p2p` page must include visible marketplace trust content directly on the page, above the listings/search workflow. Keep these sections crawlable and user-visible:
+
+- Buyer protection.
+- How buying works.
+- How sellers deliver files.
+- Dispute window.
+- Prohibited content.
+- No official Rockstar files, GTA VI leaks, ripped assets, stolen art, malware, impersonation, account sales, or misleading affiliation claims.
+
+Do not move this trust content only into a modal, footer, hidden accordion, or separate policy page. Trust/legal pages can expand on it, but `/p2p` itself needs the summary.
 
 Listing categories:
 
@@ -1564,17 +1659,22 @@ Steps:
 
 ### Change Shop Product Data
 
-File:
+Files:
 
 - `src/shop/shopData.js`
+- `src/content/products.js`
+- `src/components/ShopPage.jsx`
+- `src/components/ShopProductPage.jsx`
 
 Steps:
 
 1. Update product data.
-2. Keep price formatting helpers unchanged unless required.
-3. Confirm cart total and checkout amount.
-4. Confirm download URL behavior.
-5. Build.
+2. Update product SEO/detail copy in `src/content/products.js` when titles, categories, included files, FAQs, or related products change.
+3. Keep `/shop` paginated so visible catalog noise stays low.
+4. Keep price formatting helpers unchanged unless required.
+5. Confirm cart total and checkout amount.
+6. Confirm download URL behavior.
+7. Build.
 
 ### Change Telegram Upload Backend
 
@@ -1914,6 +2014,9 @@ Change homepage content:
 Change shop products:
 
 - `src/shop/shopData.js`
+- `src/content/products.js`
+- `src/components/ShopPage.jsx`
+- `src/components/ShopProductPage.jsx`
 
 Change shop checkout behavior:
 
@@ -1924,10 +2027,22 @@ Change shop checkout behavior:
 Change P2P listing UI:
 
 - `src/components/P2PTradingPage.jsx`
+- Keep visible `/p2p` buyer-protection/trust sections intact.
 
 Change P2P listing data/categories:
 
 - `src/p2p/p2pData.js`
+- `src/content/marketplaceListings.js`
+
+Change SEO route metadata, sitemap, or prerender behavior:
+
+- `src/seo/routes.js`
+- `src/seo/seoConfig.js`
+- `src/seo/jsonLd.js`
+- `src/entry-server.jsx`
+- `scripts/prerender.mjs`
+- `scripts/generate-sitemap.mjs`
+- `scripts/seo-validate.mjs`
 
 Change P2P payout API client:
 

@@ -449,8 +449,8 @@ const en = {
   // SocialHub
   social: {
     badge: 'COMMUNITY',
-    title: 'GTA VI',
-    titleHighlight: 'HUB',
+    title: 'GTA VI Community Feed',
+    titleHighlight: '',
     tabs: {
       posts: 'Posts',
       rumors: 'Rumors',

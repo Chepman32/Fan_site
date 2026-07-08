@@ -233,6 +233,14 @@
   transform: scale(1.04);
 }
 
+.static-social-card {
+  cursor: default;
+}
+
+.static-social-card:hover {
+  transform: translateY(-2px);
+}
+
 .ign-guide-card-image span {
   display: flex;
   width: 100%;
@@ -308,6 +316,50 @@
   line-height: 1.2;
   text-transform: uppercase;
   overflow-wrap: anywhere;
+}
+
+.social-static-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.social-static-guide-grid article {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  background: rgba(26, 26, 37, 0.72);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+.social-static-guide-grid h3 {
+  color: var(--text-primary);
+  font-size: 24px;
+  font-weight: 400;
+}
+
+.social-static-guide-grid p {
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.social-static-guide-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.social-static-guide-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  color: var(--text-primary);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
 }
 
 .vehicle-tabs {
@@ -387,6 +439,7 @@
 @media (max-width: 720px) {
   .ign-guide-grid,
   .ign-guide-image-strip,
+  .social-static-guide-grid,
   .vehicle-tabs {
     grid-template-columns: 1fr;
   }
