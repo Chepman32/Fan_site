@@ -47,6 +47,7 @@
 }
 
 .countdown-stage {
+  --countdown-stage-footer: clamp(126px, 15vw, 172px);
   position: relative;
   width: min(96vw, 1320px);
   max-width: 100%;
@@ -95,10 +96,13 @@
 
 .countdown-canvas {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
   z-index: 2;
   width: 100%;
-  height: 100%;
+  height: calc(100% - var(--countdown-stage-footer));
   display: block;
   opacity: 0;
   filter:
@@ -113,7 +117,7 @@
 
 .countdown-hud-lines {
   position: absolute;
-  inset: 14% 5% 12%;
+  inset: 14% 5% calc(12% + var(--countdown-stage-footer)) 5%;
   z-index: 3;
   pointer-events: none;
 }
@@ -163,6 +167,7 @@
 }
 
 .countdown-object-label span,
+.countdown-primary-labels span,
 .countdown-precision-panel small {
   color: rgba(255, 84, 38, 0.84);
   font-size: clamp(10px, 1.1vw, 13px);
@@ -181,12 +186,29 @@
     0 0 18px rgba(255, 84, 38, 0.32);
 }
 
+.countdown-primary-labels {
+  position: absolute;
+  right: clamp(70px, 13vw, 190px);
+  bottom: clamp(86px, 10vw, 118px);
+  left: clamp(70px, 13vw, 190px);
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 4vw, 58px);
+  pointer-events: none;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .countdown-precision-panel {
   right: 8%;
-  bottom: 9%;
-  display: grid;
-  gap: 6px;
-  min-width: min(270px, 36%);
+  bottom: clamp(20px, 3vw, 34px);
+  left: 8%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(12px, 2vw, 24px);
+  min-width: 0;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 84, 38, 0.45);
   text-align: right;
@@ -208,14 +230,14 @@
 
 .countdown-units {
   position: absolute;
-  top: 50%;
+  top: calc((100% - var(--countdown-stage-footer)) / 2);
   left: 50%;
   z-index: 4;
   display: flex;
-  width: 100%;
-  align-items: flex-start;
+  width: min(88%, 900px);
+  align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: clamp(12px, 3vw, 42px);
   margin-top: 0;
   pointer-events: none;
   transform: translate(-50%, -46%);
@@ -228,7 +250,8 @@
 .countdown-unit {
   position: relative;
   display: flex;
-  min-width: clamp(220px, 32vw, 430px);
+  min-width: 0;
+  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   padding: 0 clamp(8px, 1.2vw, 16px);
@@ -240,7 +263,7 @@
   color: transparent;
   filter: drop-shadow(0 18px 14px var(--countdown-shadow));
   font-family: 'Anton', Impact, 'Arial Narrow', sans-serif;
-  font-size: clamp(190px, 31vw, 430px);
+  font-size: clamp(86px, 12vw, 176px);
   font-variant-numeric: tabular-nums;
   font-weight: 400;
   letter-spacing: 0;
@@ -280,32 +303,6 @@
     0 0 22px var(--countdown-orange-soft);
 }
 
-.countdown-unit-strip {
-  display: grid;
-  width: min(82vw, 920px);
-  max-width: 100%;
-  grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr);
-  gap: 14px;
-  margin-top: -4px;
-  color: var(--text-secondary);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0;
-  line-height: 1;
-  text-align: center;
-  text-transform: uppercase;
-}
-
-.countdown-unit-strip span {
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 84, 38, 0.28);
-}
-
-.countdown-unit-strip span:last-child {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
 .countdown.released {
   width: auto;
   flex-direction: row;
@@ -330,6 +327,7 @@
   }
 
   .countdown-stage {
+    --countdown-stage-footer: clamp(104px, 30vw, 132px);
     width: min(100%, 94vw);
     height: clamp(300px, 72vw, 430px);
   }
@@ -339,12 +337,11 @@
   }
 
   .countdown-unit {
-    min-width: clamp(54px, 16vw, 74px);
     padding: 0 5px;
   }
 
   .countdown-value {
-    font-size: clamp(132px, 40vw, 230px);
+    font-size: clamp(52px, 14vw, 86px);
   }
 
   .countdown-unit-label {
@@ -357,21 +354,29 @@
     font-size: clamp(34px, 9vw, 48px);
   }
 
-  .countdown-unit-strip {
-    width: min(92vw, 480px);
-    gap: 8px;
-    font-size: 8px;
-  }
-
   .countdown-object-label {
     top: 7%;
     left: 7%;
   }
 
+  .countdown-primary-labels {
+    right: 8%;
+    bottom: clamp(74px, 21vw, 92px);
+    left: 8%;
+    gap: 8px;
+  }
+
   .countdown-precision-panel {
     right: 7%;
-    bottom: 8%;
-    min-width: 58%;
+    bottom: 16px;
+    left: 7%;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .countdown-precision-panel span {
+    font-size: clamp(30px, 9vw, 48px);
   }
 }
 

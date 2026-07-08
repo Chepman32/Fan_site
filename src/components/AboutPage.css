@@ -77,12 +77,13 @@
   font-size: clamp(72px, 9vw, 142px);
   font-weight: 400;
   letter-spacing: -0.05em;
-  line-height: 0.84;
+  line-height: 0.88;
   text-transform: uppercase;
 }
 
 .about-hero h1 span {
   display: block;
+  padding-bottom: 0.04em;
   background: linear-gradient(105deg, var(--accent-pink), #a866ff 52%, var(--accent-cyan));
   background-clip: text;
   color: transparent;
@@ -122,6 +123,29 @@
   color: var(--accent-pink);
 }
 
+.about-hero-cta {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+  padding: 0 20px;
+  color: #07080d;
+  background: linear-gradient(135deg, #ff78bd, #8eeeff);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.about-hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px rgba(255, 45, 149, 0.25);
+}
+
 .about-countdown-card {
   display: grid;
   gap: 18px;
@@ -156,20 +180,17 @@
   height: clamp(520px, 60vh, 690px);
 }
 
-.about-countdown-card .countdown-unit-strip {
-  width: 100%;
-}
-
 .about-countdown-card .countdown-unit {
   padding: 0 9px;
 }
 
 .about-countdown-card .countdown-value {
-  min-width: clamp(220px, 32vw, 430px);
-  font-size: clamp(190px, 31vw, 430px);
+  min-width: 0;
+  font-size: clamp(74px, 10vw, 160px);
 }
 
 .about-stats-section {
+  scroll-margin-top: 92px;
   padding-top: 96px;
   padding-bottom: 110px;
   background:

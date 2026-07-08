@@ -364,6 +364,8 @@ const en = {
   },
   // Countdown
   countdown: {
+    months: 'MONTHS',
+    weeks: 'WEEKS',
     days: 'DAYS',
     hours: 'HOURS',
     minutes: 'MINUTES',
@@ -603,6 +605,8 @@ const zh = {
     officialSite: '官方网站',
   },
   countdown: {
+    months: '月',
+    weeks: '周',
     days: '天',
     hours: '时',
     minutes: '分',
@@ -804,6 +808,8 @@ const ru = {
     officialSite: 'Официальный сайт',
   },
   countdown: {
+    months: 'МЕСЯЦЕВ',
+    weeks: 'НЕДЕЛЬ',
     days: 'ДНЕЙ',
     hours: 'ЧАСОВ',
     minutes: 'МИНУТ',
@@ -1005,6 +1011,8 @@ const it = {
     officialSite: 'Sito ufficiale',
   },
   countdown: {
+    months: 'MESI',
+    weeks: 'SETTIMANE',
     days: 'GIORNI',
     hours: 'ORE',
     minutes: 'MINUTI',
@@ -1205,6 +1213,8 @@ const id = {
     officialSite: 'Situs Resmi',
   },
   countdown: {
+    months: 'BULAN',
+    weeks: 'MINGGU',
     days: 'HARI',
     hours: 'JAM',
     minutes: 'MENIT',
@@ -1405,6 +1415,8 @@ const pl = {
     officialSite: 'Oficjalna strona',
   },
   countdown: {
+    months: 'MIESIĘCY',
+    weeks: 'TYGODNI',
     days: 'DNI',
     hours: 'GODZIN',
     minutes: 'MINUT',
@@ -1605,6 +1617,8 @@ const hi = {
     officialSite: 'आधिकारिक साइट',
   },
   countdown: {
+    months: 'महीने',
+    weeks: 'सप्ताह',
     days: 'दिन',
     hours: 'घंटे',
     minutes: 'मिनट',
@@ -1805,6 +1819,8 @@ const ms = {
     officialSite: 'Laman Rasmi',
   },
   countdown: {
+    months: 'BULAN',
+    weeks: 'MINGGU',
     days: 'HARI',
     hours: 'JAM',
     minutes: 'MINIT',

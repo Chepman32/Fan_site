@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   CalendarDays,
   DollarSign,
   ExternalLink,
@@ -22,6 +23,11 @@ const MAP_SOURCE = 'https://www.gtavimods.com/gta-6-map-size-official-regions-wh
 function AboutPage() {
   const { t } = useTranslation()
   const copy = t.aboutPage
+
+  const scrollToContent = (event) => {
+    event.preventDefault()
+    document.getElementById('about-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const stats = [
     {
@@ -83,6 +89,10 @@ function AboutPage() {
               <span><CalendarDays size={16} /> {t.hero.releaseDate}</span>
               <span><Gamepad2 size={16} /> {t.hero.platforms}</span>
             </div>
+            <a className="about-hero-cta" href="#about-content" onClick={scrollToContent}>
+              {copy.hero.contentCta}
+              <ArrowRight size={18} />
+            </a>
           </div>
 
           <div className="about-countdown-card">
@@ -92,7 +102,7 @@ function AboutPage() {
         </div>
       </section>
 
-      <section className="section-padding about-stats-section">
+      <section id="about-content" className="section-padding about-stats-section">
         <div className="container">
           <header className="about-section-heading">
             <div>

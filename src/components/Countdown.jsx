@@ -4,23 +4,60 @@ import { useTranslation } from '../i18n/useTranslation.jsx'
 import { createCountdownWebglRenderer } from './countdownWebgl.js'
 import './Countdown.css'
 
+const DAY_MS = 1000 * 60 * 60 * 24
+const HOUR_MS = 1000 * 60 * 60
+const MINUTE_MS = 1000 * 60
+
+function addMonthsClamped(date, months) {
+  const result = new Date(date)
+  const dayOfMonth = result.getDate()
+
+  result.setDate(1)
+  result.setMonth(result.getMonth() + months)
+  result.setDate(Math.min(dayOfMonth, new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate()))
+
+  return result
+}
+
+function getCompleteMonthsBetween(startDate, endDate) {
+  const monthDelta =
+    (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+    endDate.getMonth() -
+    startDate.getMonth()
+  let months = Math.max(0, monthDelta)
+
+  if (addMonthsClamped(startDate, months) > endDate) {
+    months -= 1
+  }
+
+  return Math.max(0, months)
+}
+
 function calculateCountdown(targetDate) {
-  const difference = targetDate - new Date()
+  const now = new Date()
+  const difference = targetDate - now
 
   if (difference <= 0) {
     return {
       isReleased: true,
-      timeLeft: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+      timeLeft: { months: 0, weeks: 0, days: 0, hours: 0, minutes: 0, seconds: 0 },
     }
   }
+
+  const months = getCompleteMonthsBetween(now, targetDate)
+  const monthAnchor = addMonthsClamped(now, months)
+  const differenceAfterMonths = targetDate - monthAnchor
+  const totalDaysAfterMonths = Math.floor(differenceAfterMonths / DAY_MS)
 
   return {
     isReleased: false,
     timeLeft: {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / 1000 / 60) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
+      months,
+      weeks: Math.floor(totalDaysAfterMonths / 7),
+      days: totalDaysAfterMonths % 7,
+      hours: Math.floor((differenceAfterMonths / HOUR_MS) % 24),
+      minutes: Math.floor((differenceAfterMonths / MINUTE_MS) % 60),
+      seconds: Math.floor((differenceAfterMonths / 1000) % 60),
     },
   }
 }
@@ -40,16 +77,24 @@ function Countdown({ targetDate }) {
     return () => clearInterval(timer)
   }, [targetDate])
 
+  const primaryUnits = useMemo(
+    () => [
+      { value: countdown.timeLeft.months, label: t.countdown.months },
+      { value: countdown.timeLeft.weeks, label: t.countdown.weeks },
+      { value: countdown.timeLeft.days, label: t.countdown.days },
+    ],
+    [countdown.timeLeft, t.countdown.days, t.countdown.months, t.countdown.weeks],
+  )
   const timeUnits = useMemo(
     () => [
-      { value: countdown.timeLeft.days, label: t.countdown.days, pad: 2 },
+      ...primaryUnits,
       { value: countdown.timeLeft.hours, label: t.countdown.hours, pad: 2 },
       { value: countdown.timeLeft.minutes, label: t.countdown.minutes, pad: 2 },
       { value: countdown.timeLeft.seconds, label: t.countdown.seconds, pad: 2 },
     ],
-    [countdown.timeLeft, t.countdown.days, t.countdown.hours, t.countdown.minutes, t.countdown.seconds],
+    [countdown.timeLeft, primaryUnits, t.countdown.hours, t.countdown.minutes, t.countdown.seconds],
   )
-  const primaryReadout = String(countdown.timeLeft.days)
+  const primaryReadout = primaryUnits.map((unit) => String(unit.value).padStart(2, '0')).join(':')
   const precisionReadout = [
     countdown.timeLeft.hours,
     countdown.timeLeft.minutes,
@@ -118,23 +163,27 @@ function Countdown({ targetDate }) {
           <span />
         </div>
         <div className="countdown-object-label" aria-hidden="true">
-          <span>{t.countdown.days}</span>
+          <span>{t.countdown.months} / {t.countdown.weeks} / {t.countdown.days}</span>
+        </div>
+        <div className="countdown-primary-labels" aria-hidden="true">
+          {primaryUnits.map((unit) => (
+            <span key={unit.label}>{unit.label}</span>
+          ))}
         </div>
         <div className="countdown-precision-panel" aria-hidden="true">
           <span suppressHydrationWarning>{precisionReadout}</span>
           <small>{t.countdown.hours} / {t.countdown.minutes} / {t.countdown.seconds}</small>
         </div>
         <div className={`countdown-units${webglReady ? ' is-fallback-hidden' : ''}`} aria-hidden={webglReady}>
-          <div className="countdown-unit">
-            <div className="countdown-value" suppressHydrationWarning>
-              {primaryReadout}
+          {primaryUnits.map((unit) => (
+            <div className="countdown-unit" key={unit.label}>
+              <div className="countdown-value" suppressHydrationWarning>
+                {String(unit.value).padStart(2, '0')}
+              </div>
+              <span className="countdown-unit-label">{unit.label}</span>
             </div>
-          </div>
+          ))}
         </div>
-      </div>
-      <div className="countdown-unit-strip" aria-hidden="true">
-        <span>{t.countdown.days}</span>
-        <span suppressHydrationWarning>{precisionReadout}</span>
       </div>
     </div>
   )

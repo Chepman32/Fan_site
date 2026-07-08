@@ -5,6 +5,7 @@ const en = {
     titleHighlight: 'GTA VI',
     description: 'The confirmed launch facts, the scale behind Rockstar’s next open world, and a live encyclopedia overview in one place.',
     launchCard: 'Official launch countdown',
+    contentCta: 'Explore the facts',
   },
   stats: {
     eyebrow: 'The numbers',
@@ -45,6 +46,7 @@ const zh = {
     kicker: '游戏情报', title: '深入了解', titleHighlight: 'GTA VI',
     description: '在一个页面查看已确认的发售信息、Rockstar 新开放世界的制作规模和实时百科概览。',
     launchCard: '官方发售倒计时',
+    contentCta: '查看详情',
   },
   stats: {
     eyebrow: '关键数字', title: '规模一览',
@@ -78,6 +80,7 @@ const ru = {
     kicker: 'Досье на игру', title: 'Внутри', titleHighlight: 'GTA VI',
     description: 'Подтверждённые данные о релизе, масштаб нового открытого мира Rockstar и живая энциклопедическая справка на одной странице.',
     launchCard: 'Официальный отсчёт до релиза',
+    contentCta: 'Смотреть факты',
   },
   stats: {
     eyebrow: 'Ключевые цифры', title: 'Масштаб в цифрах',
@@ -111,6 +114,7 @@ const it = {
     kicker: 'Dossier sul gioco', title: 'Dentro', titleHighlight: 'GTA VI',
     description: 'I dati confermati sul lancio, la scala del prossimo mondo aperto di Rockstar e una panoramica enciclopedica aggiornata.',
     launchCard: 'Conto alla rovescia ufficiale',
+    contentCta: 'Esplora i dati',
   },
   stats: {
     eyebrow: 'I numeri', title: "La scala in un'occhiata",
@@ -144,6 +148,7 @@ const id = {
     kicker: 'Intel game', title: 'Mengenal', titleHighlight: 'GTA VI',
     description: 'Fakta peluncuran terkonfirmasi, skala dunia terbuka terbaru Rockstar, dan ringkasan ensiklopedia langsung dalam satu halaman.',
     launchCard: 'Hitung mundur peluncuran resmi',
+    contentCta: 'Jelajahi fakta',
   },
   stats: {
     eyebrow: 'Angka penting', title: 'Skala sekilas',
@@ -177,6 +182,7 @@ const pl = {
     kicker: 'Informacje o grze', title: 'Wewnątrz', titleHighlight: 'GTA VI',
     description: 'Potwierdzone dane o premierze, skala kolejnego otwartego świata Rockstar i aktualny opis encyklopedyczny w jednym miejscu.',
     launchCard: 'Oficjalne odliczanie do premiery',
+    contentCta: 'Zobacz fakty',
   },
   stats: {
     eyebrow: 'Najważniejsze liczby', title: 'Skala w skrócie',
@@ -210,6 +216,7 @@ const hi = {
     kicker: 'गेम इंटेलिजेंस', title: 'अंदर की कहानी', titleHighlight: 'GTA VI',
     description: 'पुष्ट लॉन्च जानकारी, Rockstar की अगली खुली दुनिया का पैमाना और लाइव विश्वकोश परिचय—सब एक जगह।',
     launchCard: 'आधिकारिक लॉन्च काउंटडाउन',
+    contentCta: 'तथ्य देखें',
   },
   stats: {
     eyebrow: 'मुख्य आँकड़े', title: 'एक नज़र में पैमाना',
@@ -243,6 +250,7 @@ const ms = {
     kicker: 'Maklumat permainan', title: 'Di sebalik', titleHighlight: 'GTA VI',
     description: 'Fakta pelancaran yang disahkan, skala dunia terbuka baharu Rockstar dan ringkasan ensiklopedia langsung dalam satu halaman.',
     launchCard: 'Kiraan detik pelancaran rasmi',
+    contentCta: 'Terokai fakta',
   },
   stats: {
     eyebrow: 'Angka utama', title: 'Skala sepintas lalu',
