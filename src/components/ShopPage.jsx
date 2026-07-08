@@ -4,11 +4,21 @@ import CryptoCheckoutPanel from './CryptoCheckoutPanel'
 import ProductPreviewModal from './ProductPreviewModal'
 import ShopLineItemThumbnail from './ShopLineItemThumbnail'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs, formatShopPrice } from '../shop/shopData'
+import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs, formatShopPrice, shopProductSlug } from '../shop/shopData'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import './ShopPage.css'
 
-const SHOP_PRODUCTS_PER_PAGE = 6
+const SHOP_PRODUCTS_PER_PAGE = 10
+
+function isPlainLeftClick(event) {
+  return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
+}
+
+function navigateInternally(event, href, onNavigate) {
+  if (!onNavigate || !isPlainLeftClick(event)) return
+  event.preventDefault()
+  onNavigate(href)
+}
 
 function ShopProductArtwork({ product, loading = 'eager' }) {
   if (product.previewImage) {
@@ -60,7 +70,13 @@ function getMiddleProduct(products) {
   return products[Math.floor(products.length / 2)] || null
 }
 
-function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onRemoveCartItem = () => {} }) {
+function ShopPage({
+  cartItems = [],
+  cartTotal = 0,
+  onAddCartItem = () => {},
+  onRemoveCartItem = () => {},
+  onNavigate,
+}) {
   const { t, lang } = useTranslation()
   const shopCopy = { ...t.shop, lang }
   const defaultProducts = SHOP_PRODUCTS_BY_CATEGORY['stream-overlays'] || []
@@ -94,6 +110,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
   const featuredProduct = products.find((product) => product.id === featuredId) || getMiddleProduct(products)
   const displayFeaturedProduct = localizeShopProduct(featuredProduct, shopCopy)
   const activeFeaturedId = featuredProduct?.id
+  const featuredProductHref = featuredProduct ? `/shop/${shopProductSlug(featuredProduct)}` : ''
 
   const openCheckout = () => {
     setPaymentOpen(true)
@@ -186,6 +203,14 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                   <ShoppingCart size={16} />
                   {shopCopy.addPrice(formatShopPrice(featuredProduct.price))}
                 </button>
+                <a
+                  className="shop-detail-link"
+                  href={featuredProductHref}
+                  onClick={(event) => navigateInternally(event, featuredProductHref, onNavigate)}
+                >
+                  Details
+                  <ChevronRight size={16} />
+                </a>
               </div>
             </div>
           </article>
@@ -197,6 +222,7 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
               {visibleProducts.map((product) => {
                 const inCart = cartItems.some((item) => item.id === product.id)
                 const displayProduct = localizeShopProduct(product, shopCopy)
+                const productHref = `/shop/${shopProductSlug(product)}`
 
                 return (
                   <article
@@ -218,6 +244,14 @@ function ShopPage({ cartItems = [], cartTotal = 0, onAddCartItem = () => {}, onR
                       <div>
                         <h3>{displayProduct.title}</h3>
                         <p>{displayProduct.format} / {displayProduct.resolution}</p>
+                        <a
+                          className="shop-product-detail-link"
+                          href={productHref}
+                          onClick={(event) => navigateInternally(event, productHref, onNavigate)}
+                        >
+                          Details
+                          <ChevronRight size={14} />
+                        </a>
                       </div>
                       <strong>${formatShopPrice(product.price)}</strong>
                     </div>

@@ -112,10 +112,10 @@ function Header({
   const ariaCurrent = (target) => (isActive(target) ? 'page' : undefined)
 
   const bottomTabs = [
+    { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
     { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
     { key: 'leonida', href: '/leonida', label: t.nav.leonida || 'Leonida', icon: MapPinned },
     { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
-    { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
   ]
 
   const moreLinks = [
@@ -137,6 +137,7 @@ function Header({
         </a>
 
         <div className="nav-links">
+          <a className={navLinkClass('shop')} href="/shop" onClick={(event) => navigate(event, '/shop')} aria-current={ariaCurrent('shop')}>{t.nav.shop || 'Shop'}</a>
           <a
             className={navLinkClass('p2p', 'nav-p2p-link')}
             href="/p2p"
@@ -145,7 +146,6 @@ function Header({
           >
             {t.nav.p2pTrading || 'P2P Trading'}
           </a>
-          <a className={navLinkClass('shop')} href="/shop" onClick={(event) => navigate(event, '/shop')} aria-current={ariaCurrent('shop')}>{t.nav.shop || 'Shop'}</a>
           <a className={navLinkClass('leonida')} href="/leonida" onClick={(event) => navigate(event, '/leonida')} aria-current={ariaCurrent('leonida')}>{t.nav.leonida}</a>
           <a className={navLinkClass('news')} href="/news" onClick={(event) => navigate(event, '/news')} aria-current={ariaCurrent('news')}>{t.nav.news}</a>
           <a className={navLinkClass('about')} href="/about" onClick={(event) => navigate(event, '/about')} aria-current={ariaCurrent('about')}>{t.nav.about}</a>

@@ -82,6 +82,18 @@ function ShopProductPage({ slug, onNavigate, onAddCartItem = () => {} }) {
         </header>
 
         <div className="commerce-detail-grid">
+          <section className="commerce-wide commerce-editorial-copy">
+            <h2>Product details</h2>
+            {productContent.longCopy.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+          </section>
+
+          {productContent.detailSections.map((section) => (
+            <section key={section.title}>
+              <h2>{section.title}</h2>
+              <p>{section.body}</p>
+            </section>
+          ))}
+
           <section className="commerce-wide">
             <h2>Preview gallery</h2>
             <p>{productContent.galleryAlt}</p>

@@ -798,10 +798,13 @@ Shop catalog SEO and UI behavior:
 
 - `/shop` is the category catalog and checkout entry point.
 - The visible category grid in `ShopPage.jsx` is intentionally paginated. Keep the default visible page small enough that the route does not become a noisy wall of product cards.
-- Current catalog pagination shows 6 products per category page.
+- Current catalog pagination shows 10 products per category page.
 - Deeper product copy belongs on `/shop/:slug` through `ShopProductPage.jsx` and `src/content/products.js`.
+- Only shop products listed in `SHOP_ROUTES_WITH_UNIQUE_DETAIL_COPY` from `src/content/products.js` should be indexable, included in the sitemap, and treated as SEO landing pages.
+- Weak, generated, or image-only catalog items may still render at `/shop/:slug`, but they must remain `noindex,follow` until they have hand-written long-form product copy, unique included-file details, FAQ, and usage context.
 - Product detail pages should include crawlable descriptions, preview/gallery context, included files, FAQ, license/unofficial disclaimers, and related product links.
 - Do not reintroduce weak generated product names such as `Leonida Stream Overlay 28`; product names should be unique and useful in visible UI and generated HTML.
+- `npm run build` runs `scripts/seo-validate.mjs`, which blocks indexable shop product routes that do not have approved unique long-form copy and blocks visible `Loading...` placeholder text in generated HTML.
 
 Important constants in `src/shop/shopData.js`:
 

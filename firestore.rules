@@ -206,6 +206,114 @@ service cloud.firestore {
         && request.resource.data.defaultCommunityFeed in ['latest', 'trending', 'followed'];
     }
 
+    function validClientErrorLogShape() {
+      return request.resource.data.keys().hasOnly([
+          'severity',
+          'source',
+          'name',
+          'message',
+          'stack',
+          'componentStack',
+          'details',
+          'code',
+          'filename',
+          'line',
+          'column',
+          'pagePath',
+          'referrerHost',
+          'userAgent',
+          'language',
+          'viewport',
+          'online',
+          'mode',
+          'release',
+          'sessionId',
+          'fingerprint',
+          'userId',
+          'createdAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'severity',
+          'source',
+          'name',
+          'message',
+          'stack',
+          'componentStack',
+          'details',
+          'code',
+          'filename',
+          'line',
+          'column',
+          'pagePath',
+          'referrerHost',
+          'userAgent',
+          'language',
+          'viewport',
+          'online',
+          'mode',
+          'release',
+          'sessionId',
+          'fingerprint',
+          'userId',
+          'createdAt'
+        ])
+        && request.resource.data.severity == 'critical'
+        && request.resource.data.source in [
+          'window.error',
+          'unhandledrejection',
+          'react-error-boundary',
+          'runtime'
+        ]
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 500
+        && request.resource.data.stack is string
+        && request.resource.data.stack.size() <= 4000
+        && request.resource.data.componentStack is string
+        && request.resource.data.componentStack.size() <= 4000
+        && request.resource.data.details is string
+        && request.resource.data.details.size() <= 1000
+        && request.resource.data.code is string
+        && request.resource.data.code.size() <= 120
+        && request.resource.data.filename is string
+        && request.resource.data.filename.size() <= 500
+        && request.resource.data.line is number
+        && request.resource.data.line >= 0
+        && request.resource.data.line <= 100000
+        && request.resource.data.column is number
+        && request.resource.data.column >= 0
+        && request.resource.data.column <= 100000
+        && request.resource.data.pagePath is string
+        && request.resource.data.pagePath.size() <= 500
+        && request.resource.data.referrerHost is string
+        && request.resource.data.referrerHost.size() <= 200
+        && request.resource.data.userAgent is string
+        && request.resource.data.userAgent.size() <= 300
+        && request.resource.data.language is string
+        && request.resource.data.language.size() <= 40
+        && request.resource.data.viewport is string
+        && request.resource.data.viewport.size() <= 40
+        && request.resource.data.online is bool
+        && request.resource.data.mode is string
+        && request.resource.data.mode.size() <= 40
+        && request.resource.data.release is string
+        && request.resource.data.release.size() <= 80
+        && request.resource.data.sessionId is string
+        && request.resource.data.sessionId.size() > 0
+        && request.resource.data.sessionId.size() <= 80
+        && request.resource.data.fingerprint is string
+        && request.resource.data.fingerprint.size() > 0
+        && request.resource.data.fingerprint.size() <= 120
+        && (
+          (signedIn() && request.resource.data.userId == request.auth.uid)
+          || (!signedIn() && request.resource.data.userId == null)
+        )
+        && request.resource.data.createdAt == request.time;
+    }
+
     function recipientAllowsMessage(recipientId) {
       let settingsPath = /databases/$(database)/documents/userSettings/$(recipientId);
       return !exists(settingsPath)
@@ -274,6 +382,12 @@ service cloud.firestore {
     match /newsletterSubscriptions/{userId} {
       allow read: if owns(userId);
       allow create, update, delete: if false;
+    }
+
+    match /clientErrorLogs/{logId} {
+      allow read: if isAdmin();
+      allow create: if validClientErrorLogShape();
+      allow update, delete: if false;
     }
 
     match /userActivity/{userId} {

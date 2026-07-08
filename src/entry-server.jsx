@@ -20,6 +20,7 @@ import ShopProductPage from './components/ShopProductPage'
 import SocialHub from './components/SocialHub'
 import TrustPage from './components/TrustPage'
 import UserProfilePage from './components/UserProfilePage'
+import { SHOP_ROUTES_WITH_UNIQUE_DETAIL_COPY } from './content/products'
 import {
   NOINDEX_PRERENDER_ROUTES,
   PRERENDER_ROUTES,
@@ -57,6 +58,7 @@ export {
   PRERENDER_ROUTES,
   SITEMAP_ROUTES,
   SITE_ORIGIN,
+  SHOP_ROUTES_WITH_UNIQUE_DETAIL_COPY,
   indexableSeoRoutes,
 }
 

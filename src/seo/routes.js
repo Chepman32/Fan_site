@@ -5,6 +5,7 @@ import { LEONIDA_SECTIONS } from '../data/leonidaSections'
 import { TRUST_PAGES } from '../data/trustPages'
 import { P2P_SEED_LISTING_ROUTES, P2P_SEED_LISTINGS, p2pListingSlug } from '../p2p/p2pData'
 import { SHOP_PRODUCT_ROUTES, SHOP_PRODUCT_BY_SLUG, shopProductSlug } from '../shop/shopData'
+import { getProductSeoContent, hasUniqueProductDetailCopy } from '../content/products'
 
 export const SITE_ORIGIN = 'https://leonidaloot.com'
 export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`
@@ -236,14 +237,18 @@ const productRoutes = SHOP_PRODUCT_ROUTES.map((path) => {
   const slug = path.slice('/shop/'.length)
   const product = SHOP_PRODUCT_BY_SLUG[slug]
   const title = product?.title || slug
+  const productContent = getProductSeoContent(slug)
+  const isIndexable = hasUniqueProductDetailCopy(slug)
 
   return route({
     path,
     type: 'product',
     title: `${title} | Leonida Loot Shop`,
-    description: `${title} is an unofficial GTA VI-inspired ${product?.categoryLabel?.toLowerCase() || 'creator asset'} with digital delivery, file details, license terms, FAQ, and related products.`,
+    description: productContent?.seoDescription
+      || `${title} is an unofficial GTA VI-inspired ${product?.categoryLabel?.toLowerCase() || 'creator asset'} with digital delivery, file details, license terms, FAQ, and related products.`,
     h1: title,
-    priority: path === `/shop/${shopProductSlug(product)}` ? 0.66 : 0.6,
+    robots: isIndexable ? 'index,follow' : 'noindex,follow',
+    priority: isIndexable && path === `/shop/${shopProductSlug(product)}` ? 0.66 : 0.25,
     changefreq: 'monthly',
     jsonLdTypes: ['Product', 'Offer', 'FAQPage', 'BreadcrumbList'],
   })

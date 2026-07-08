@@ -3,7 +3,7 @@ import { SEO_GUIDES, getSeoGuide } from '../data/guideContent'
 import { LEONIDA_SECTIONS, getLeonidaSection } from '../data/leonidaSections'
 import { TRUST_PAGES, getTrustPage } from '../data/trustPages'
 import { getNewsArticle, newsArticles } from '../content/news'
-import { getProductSeoContent } from '../content/products'
+import { getProductSeoContent, hasUniqueProductDetailCopy } from '../content/products'
 import { getMarketplaceListingContent } from '../content/marketplaceListings'
 import {
   P2P_SEED_LISTING_BY_SLUG,
@@ -386,12 +386,16 @@ function shopProductMetadata(route) {
 
   const productUrl = absoluteUrl(`/shop/${shopProductSlug(product)}`)
   const productContent = getProductSeoContent(product)
-  const description = productContent?.description || `${product.title} is an unofficial GTA VI-inspired ${product.categoryLabel.toLowerCase()} for creators, delivered as ${product.format}.`
+  const description = productContent?.seoDescription
+    || productContent?.description
+    || `${product.title} is an unofficial GTA VI-inspired ${product.categoryLabel.toLowerCase()} for creators, delivered as ${product.format}.`
+  const robots = routeConfig?.robots || (hasUniqueProductDetailCopy(product) ? 'index,follow' : 'noindex,follow')
 
   return pageMetadata({
     route,
     title: routeConfig?.title || `${product.title} | Leonida Loot Shop`,
     description,
+    robots,
     schemaType: 'ItemPage',
     breadcrumbs: [
       { name: 'Shop', url: absoluteUrl('/shop') },

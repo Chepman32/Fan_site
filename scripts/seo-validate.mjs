@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises'
+import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
@@ -12,6 +12,7 @@ const {
   PRERENDER_ROUTES,
   SITEMAP_ROUTES,
   SITE_ORIGIN,
+  SHOP_ROUTES_WITH_UNIQUE_DETAIL_COPY,
 } = await import(pathToFileURL(serverEntryPath).href)
 
 const failures = []
@@ -49,9 +50,21 @@ const routeSpecificForbiddenPhrases = {
     'Preparing social media guide',
   ],
 }
+const loadingPlaceholderPattern = /\bLoading\b(?:[\s:.!?-]+[^<]{0,90})?/g
 
 function fail(message) {
   failures.push(message)
+}
+
+async function listHtmlFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true })
+  const files = await Promise.all(entries.map(async (entry) => {
+    const entryPath = path.join(directory, entry.name)
+    if (entry.isDirectory()) return listHtmlFiles(entryPath)
+    return entry.isFile() && entry.name.endsWith('.html') ? [entryPath] : []
+  }))
+
+  return files.flat()
 }
 
 function routeFilePath(route) {
@@ -86,6 +99,17 @@ function textFromHtml(html) {
 function mainText(html) {
   const rawMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1] || ''
   return textFromHtml(rawMain)
+}
+
+function validateNoLoadingPlaceholder(label, html) {
+  const visibleText = textFromHtml(html)
+  const matches = Array.from(visibleText.matchAll(loadingPlaceholderPattern))
+    .map((match) => match[0].trim())
+    .filter(Boolean)
+
+  for (const match of matches) {
+    fail(`${label} contains loading placeholder text: "${match}"`)
+  }
 }
 
 async function readRouteHtml(route) {
@@ -184,6 +208,12 @@ for (const route of requiredRoutes) {
   }
 }
 
+for (const htmlFile of await listHtmlFiles(distDir)) {
+  const html = await readFile(htmlFile, 'utf8')
+  const relativePath = path.relative(distDir, htmlFile)
+  validateNoLoadingPlaceholder(relativePath, html)
+}
+
 const sitemap = await readFile(path.join(distDir, 'sitemap.xml'), 'utf8')
 const sitemapRoutes = Array.from(sitemap.matchAll(/<loc>https:\/\/leonidaloot\.com(\/[^<]*)<\/loc>/g))
   .map((match) => (match[1] === '/' ? '/' : match[1].replace(/\/$/, '')))
@@ -196,6 +226,28 @@ if (JSON.stringify(sitemapRoutes) !== JSON.stringify(expectedRoutes)) {
 
 for (const route of NOINDEX_PRERENDER_ROUTES) {
   if (sitemapRoutes.includes(route)) fail(`${route} must not be in sitemap.xml`)
+}
+
+const uniqueShopRoutes = new Set(SHOP_ROUTES_WITH_UNIQUE_DETAIL_COPY)
+const sitemapShopRoutes = SITEMAP_ROUTES.filter((route) => route.startsWith('/shop/'))
+const prerenderedShopRoutes = PRERENDER_ROUTES.filter((route) => route.startsWith('/shop/'))
+
+for (const route of sitemapShopRoutes) {
+  if (!uniqueShopRoutes.has(route)) {
+    fail(`${route} is indexable but does not have unique long-form product copy`)
+  }
+}
+
+for (const route of uniqueShopRoutes) {
+  if (!SITEMAP_ROUTES.includes(route)) {
+    fail(`${route} has unique long-form product copy but is missing from the sitemap`)
+  }
+}
+
+for (const route of prerenderedShopRoutes) {
+  if (!uniqueShopRoutes.has(route) && !NOINDEX_PRERENDER_ROUTES.includes(route)) {
+    fail(`${route} must be noindex until it has unique long-form product copy`)
+  }
 }
 
 const robots = await readFile(path.join(distDir, 'robots.txt'), 'utf8')

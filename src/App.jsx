@@ -493,6 +493,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
               cartTotal={cartTotal}
               onAddCartItem={addCartItem}
               onRemoveCartItem={removeCartItem}
+              onNavigate={navigateTo}
             />
           </LazyRoute>
         </main>
