@@ -2,5 +2,14 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /__/firebase/
+Disallow: /account
+Disallow: /cart
+Disallow: /dashboard
+Disallow: /checkout
+Disallow: /payment
+Disallow: /messages
+Disallow: /admin
+Disallow: /seller/onboarding
+Disallow: /search
 
 Sitemap: https://leonidaloot.com/sitemap.xml

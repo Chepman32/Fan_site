@@ -213,6 +213,73 @@
   text-transform: uppercase;
 }
 
+.character-static-guide {
+  display: grid;
+  gap: 18px;
+  padding-top: 6px;
+}
+
+.character-guide-intro,
+.character-guide-grid article,
+.character-guide-notes article {
+  display: grid;
+  gap: 10px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-card);
+}
+
+.character-guide-intro h3,
+.character-guide-grid h3,
+.character-guide-notes h3 {
+  margin: 0;
+  color: var(--text-primary);
+  letter-spacing: 0;
+}
+
+.character-guide-intro p,
+.character-guide-grid p,
+.character-guide-notes p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.character-guide-grid,
+.character-guide-notes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.character-guide-notes {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.character-guide-grid span {
+  width: fit-content;
+  padding: 5px 8px;
+  border: 1px solid rgba(0, 217, 255, 0.24);
+  border-radius: 999px;
+  color: var(--accent-cyan);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.character-guide-grid strong {
+  color: var(--accent-orange);
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+.character-guide-grid a {
+  color: var(--accent-pink);
+  font-size: 13px;
+  font-weight: 800;
+}
+
 @media (max-width: 968px) {
   .characters-overview,
   .featured-character {
@@ -220,7 +287,9 @@
   }
 
   .featured-characters-grid,
-  .characters-grid {
+  .characters-grid,
+  .character-guide-grid,
+  .character-guide-notes {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -231,7 +300,9 @@
 
 @media (max-width: 720px) {
   .featured-characters-grid,
-  .characters-grid {
+  .characters-grid,
+  .character-guide-grid,
+  .character-guide-notes {
     grid-template-columns: 1fr;
   }
 

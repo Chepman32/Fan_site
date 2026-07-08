@@ -83,23 +83,23 @@ function Header({
 
   const currentPath = routePath || '/'
   const isActive = (target) => {
-    if (target === 'shop') return currentPath === '/shop'
-    if (target === 'p2p') return currentPath === '/' || currentPath === '/p2p'
+    if (target === 'shop') return currentPath === '/shop' || currentPath.startsWith('/shop/')
+    if (target === 'p2p') return currentPath === '/p2p' || currentPath.startsWith('/marketplace/')
     if (target === 'news') return currentPath === '/news' || currentPath.startsWith('/news/')
     if (target === 'community') return currentPath === '/community'
     if (target === 'profile') return currentPath === '/profile' || currentPath.startsWith('/profile/')
     if (target === 'settings') return quickSettingsOpen || settingsOpen || currentPath === '/settings'
-    if (target === 'about') return currentPath === '/about'
-    if (target === 'characters') return currentPath === '/leonida/characters'
-    if (target === 'locations') return currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
+    if (target === 'about') return currentPath === '/about' || currentPath === '/about-gta-vi'
+    if (target === 'characters') return currentPath === '/characters' || currentPath === '/leonida/characters'
+    if (target === 'locations') return currentPath === '/locations' || currentPath === '/leonida/locations' || currentPath.startsWith('/leonida/locations/') || currentPath.startsWith('/locations/')
     if (target === 'leonida') {
       return currentPath === '/leonida'
         || currentPath.startsWith('/leonida/')
         || currentPath.startsWith('/locations/')
     }
-    if (target === 'vehicles') return currentPath === '/leonida/vehicles'
-    if (target === 'weapons') return currentPath === '/leonida/weapons'
-    if (target === 'social-media') return currentPath === '/leonida/social-media'
+    if (target === 'vehicles') return currentPath === '/vehicles' || currentPath === '/leonida/vehicles'
+    if (target === 'weapons') return currentPath === '/weapons' || currentPath === '/leonida/weapons'
+    if (target === 'social-media') return currentPath === '/social-media' || currentPath === '/leonida/social-media'
     if (target === 'more') return bottomMoreOpen || currentPath === '/about' || currentPath === '/community'
     return false
   }
@@ -112,7 +112,7 @@ function Header({
   const ariaCurrent = (target) => (isActive(target) ? 'page' : undefined)
 
   const bottomTabs = [
-    { key: 'p2p', href: '/', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
+    { key: 'p2p', href: '/p2p', label: t.nav.p2pTrading || 'P2P Trading', icon: Handshake },
     { key: 'leonida', href: '/leonida', label: t.nav.leonida || 'Leonida', icon: MapPinned },
     { key: 'news', href: '/news', label: t.nav.news || 'News', icon: Newspaper },
     { key: 'shop', href: '/shop', label: t.nav.shop || 'Shop', icon: Store },
@@ -139,8 +139,8 @@ function Header({
         <div className="nav-links">
           <a
             className={navLinkClass('p2p', 'nav-p2p-link')}
-            href="/"
-            onClick={(event) => navigate(event, '/')}
+            href="/p2p"
+            onClick={(event) => navigate(event, '/p2p')}
             aria-current={ariaCurrent('p2p')}
           >
             {t.nav.p2pTrading || 'P2P Trading'}
@@ -162,7 +162,7 @@ function Header({
                 <span>{cartItems.length}</span>
               </button>
               <div className="nav-cart-popover">
-                <Suspense fallback={<div className="nav-cart-loading">Loading checkout...</div>}>
+                <Suspense fallback={<div className="nav-cart-loading">Preparing checkout</div>}>
                   <CryptoCheckoutPanel
                     key={checkoutKey}
                     cartItems={cartItems}

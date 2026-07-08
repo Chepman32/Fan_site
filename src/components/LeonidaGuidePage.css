@@ -152,6 +152,37 @@
   border-color: color-mix(in srgb, var(--guide-accent) 30%, transparent);
 }
 
+.leonida-guide-primer {
+  padding: 42px 0 12px;
+  background: var(--bg-primary);
+}
+
+.leonida-guide-primer .container {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.leonida-guide-primer article {
+  padding: 22px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.leonida-guide-primer h2 {
+  margin: 0 0 10px;
+  color: var(--text-primary);
+  font-size: 22px;
+  letter-spacing: 0;
+}
+
+.leonida-guide-primer p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
 .leonida-guide-page > .characters,
 .leonida-guide-page > .leonida-section,
 .leonida-guide-page > .ign-guide-section {
@@ -187,5 +218,9 @@
 
   .leonida-guide-tabs {
     top: 62px;
+  }
+
+  .leonida-guide-primer .container {
+    grid-template-columns: 1fr;
   }
 }

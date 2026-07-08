@@ -5,6 +5,7 @@ import {
   newsRouteFromIgnUrl,
   sourceUrlForNewsSlug,
 } from '../news/ignNews'
+import { getNewsArticle } from '../content/news'
 import {
   newsArticleTranslationSource,
   translateNewsArticle,
@@ -27,6 +28,89 @@ function formatDate(value) {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date)
+}
+
+function titleFromSlug(slug = '') {
+  const acronyms = new Set(['gta', 'ign', 'pc', 'ps5', 'rdr', 'vi'])
+  const lowercaseWords = new Set(['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into', 'is', 'of', 'on', 'or', 'the', 'to', 'with'])
+
+  return String(slug || '')
+    .split('-')
+    .filter(Boolean)
+    .map((part, index) => {
+      if (acronyms.has(part)) return part.toUpperCase()
+      if (index > 0 && lowercaseWords.has(part)) return part
+      return `${part.charAt(0).toUpperCase()}${part.slice(1)}`
+    })
+    .join(' ')
+}
+
+function fallbackArticleForSlug(slug, type, sourceUrl) {
+  const title = titleFromSlug(slug) || 'GTA VI News Article'
+
+  return {
+    id: `fallback-${slug}`,
+    slug,
+    title,
+    description: `${title} coverage for Grand Theft Auto VI, with source attribution and clearly separated public context.`,
+    author: 'Leonida Loot',
+    source: 'Leonida Loot',
+    sourceUrl,
+    publishedAt: '',
+    updatedAt: '2026-07-07T00:00:00.000Z',
+    image: '',
+    blocks: [
+      {
+        type: 'paragraph',
+        text: `This article page is reserved for ${title}. Leonida Loot loads source coverage in the browser when available and keeps this fallback readable for crawlers and visitors.`,
+        segments: [{ type: 'text', text: `This article page is reserved for ${title}. Leonida Loot loads source coverage in the browser when available and keeps this fallback readable for crawlers and visitors.` }],
+      },
+      {
+        type: 'paragraph',
+        text: 'For GTA VI news, the site separates official announcements, reputable source coverage, rumor tracking, and fan analysis so readers can understand what is confirmed.',
+        segments: [{ type: 'text', text: 'For GTA VI news, the site separates official announcements, reputable source coverage, rumor tracking, and fan analysis so readers can understand what is confirmed.' }],
+      },
+      {
+        type: type === 'video' ? 'video' : 'gallery',
+        title,
+        sourceUrl,
+      },
+    ],
+  }
+}
+
+function staticArticleToPage(article) {
+  if (!article) return null
+
+  return {
+    id: `static-${article.slug}`,
+    slug: article.slug,
+    title: article.title,
+    description: article.description,
+    author: article.author || 'Leonida Loot Editorial',
+    source: 'Leonida Loot',
+    sourceUrl: article.sources?.[0]?.url || '/news',
+    publishedAt: article.publishedAt,
+    updatedAt: article.updatedAt,
+    image: article.image,
+    blocks: [
+      ...(article.body || []).flatMap((section) => [
+        {
+          type: 'heading',
+          text: section.heading,
+        },
+        ...(section.paragraphs || []).map((paragraph) => ({
+          type: 'paragraph',
+          text: paragraph,
+          segments: [{ type: 'text', text: paragraph }],
+        })),
+      ]),
+      {
+        type: 'sources',
+        sources: article.sources || [],
+      },
+    ],
+  }
 }
 
 function navigateInternally(event, href, onNavigate) {
@@ -92,8 +176,26 @@ function MediaBlock({ block }) {
 }
 
 function ArticleBlock({ block, onNavigate }) {
+  if (block.type === 'heading') return <h2>{block.text}</h2>
   if (block.type === 'paragraph') return <ParagraphBlock block={block} onNavigate={onNavigate} />
   if (block.type === 'gallery' || block.type === 'video') return <MediaBlock block={block} />
+  if (block.type === 'sources' && block.sources?.length) {
+    return (
+      <aside className="news-article-sources">
+        <h2>Sources</h2>
+        <ul>
+          {block.sources.map((source) => (
+            <li key={source.url}>
+              <a href={source.url} target="_blank" rel="noopener noreferrer">
+                {source.label}
+                <ExternalLink size={14} aria-hidden="true" />
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )
+  }
   if (block.type === 'image' && block.url) {
     return (
       <figure className="news-article-inline-image">
@@ -107,10 +209,13 @@ function ArticleBlock({ block, onNavigate }) {
 
 function NewsArticlePage({ slug, type = 'article', onNavigate }) {
   const { lang } = useTranslation()
-  const [article, setArticle] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const staticArticle = useMemo(() => getNewsArticle(slug), [slug])
+  const staticPageArticle = useMemo(() => staticArticleToPage(staticArticle), [staticArticle])
   const fallbackSourceUrl = useMemo(() => sourceUrlForNewsSlug(slug, type), [slug, type])
+  const [remoteArticle, setRemoteArticle] = useState(() => fallbackArticleForSlug(slug, type, fallbackSourceUrl))
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const article = staticPageArticle || remoteArticle
   const translationSource = useMemo(
     () => (article ? newsArticleTranslationSource(article) : null),
     [article],
@@ -124,18 +229,19 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
   })
 
   useEffect(() => {
+    if (staticArticle) return undefined
+
     let canceled = false
 
     const loadArticle = async () => {
       try {
-        setLoading(true)
         setError('')
         const nextArticle = await fetchIgnArticleBySlug(slug, type)
-        if (!canceled) setArticle(nextArticle)
+        if (!canceled) setRemoteArticle(nextArticle)
       } catch (nextError) {
         console.log('IGN article fetch failed:', nextError)
         if (!canceled) {
-          setArticle(null)
+          setRemoteArticle(fallbackArticleForSlug(slug, type, fallbackSourceUrl))
           setError(nextError.message || 'Unable to load this IGN article.')
         }
       } finally {
@@ -146,7 +252,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
     loadArticle()
 
     return () => { canceled = true }
-  }, [slug, type])
+  }, [fallbackSourceUrl, slug, staticArticle, type])
 
   useEffect(() => {
     if (!displayArticle?.title) return undefined
@@ -169,14 +275,14 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
         <div className="container news-article-shell">
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Loading news article...</p>
+            <p>Preparing news article</p>
           </div>
         </div>
       </section>
     )
   }
 
-  if (error || !displayArticle) {
+  if (!displayArticle) {
     return (
       <section className="section-padding news-article-page">
         <div className="container news-article-shell">
@@ -186,7 +292,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
           </a>
           <div className="news-article-empty">
             <h1>News article unavailable</h1>
-            <p>{error || 'The article could not be parsed yet.'}</p>
+            <p>The article could not be parsed yet.</p>
             <a href={fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
               Open source on IGN
               <ExternalLink size={16} aria-hidden="true" />
@@ -224,6 +330,8 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
             </a>
           </div>
         </header>
+
+        {!staticArticle && error && <p className="news-article-source-note">Source refresh unavailable: {error}</p>}
 
         {displayArticle.image && (
           <figure className="news-article-cover">

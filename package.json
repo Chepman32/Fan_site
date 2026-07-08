@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:client && npm run build:ssr && npm run prerender && npm run seo:validate",
+    "build": "npm run build:client && npm run build:ssr && npm run prerender && npm run sitemap:generate && npm run seo:validate",
     "build:client": "vite build",
     "build:ssr": "vite build --ssr src/entry-server.jsx --outDir dist-ssr",
     "lint": "eslint .",
     "media:sync": "node scripts/sync-rockstar-promo-media.mjs",
     "prerender": "node scripts/prerender.mjs",
+    "sitemap:generate": "node scripts/generate-sitemap.mjs",
     "seo:validate": "node scripts/seo-validate.mjs",
     "preview": "vite preview"
   },

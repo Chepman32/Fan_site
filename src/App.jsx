@@ -13,40 +13,82 @@ import './App.css'
 
 const AuthModal = lazy(() => import('./components/AuthModal'))
 const AboutPage = lazy(() => import('./components/AboutPage'))
+const GuidePage = lazy(() => import('./components/GuidePage'))
+const HomePage = lazy(() => import('./components/HomePage'))
 const LeonidaGuidePage = lazy(() => import('./components/LeonidaGuidePage'))
 const LeonidaHub = lazy(() => import('./components/LeonidaHub'))
 const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
+const MarketplaceListingPage = lazy(() => import('./components/MarketplaceListingPage'))
 const MessagesPage = lazy(() => import('./components/MessagesPage'))
 const NewsArticlePage = lazy(() => import('./components/NewsArticlePage'))
 const P2PTradingPage = lazy(() => import('./components/P2PTradingPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
 const SettingsPage = lazy(() => import('./components/SettingsPage'))
 const ShopPage = lazy(() => import('./components/ShopPage'))
+const ShopProductPage = lazy(() => import('./components/ShopProductPage'))
 const SocialHub = lazy(() => import('./components/SocialHub'))
+const TrustPage = lazy(() => import('./components/TrustPage'))
 const UserProfilePage = lazy(() => import('./components/UserProfilePage'))
 
-const APP_ROUTES = new Set(['/about', '/community', '/profile', '/settings', '/shop', '/p2p', '/messages', '/news', '/leonida'])
+const LEONIDA_ROUTE_ALIASES = {
+  '/characters': 'characters',
+  '/locations': 'locations',
+  '/vehicles': 'vehicles',
+  '/weapons': 'weapons',
+  '/social-media': 'social-media',
+}
+const TRUST_ROUTES = new Set([
+  '/buyer-protection',
+  '/seller-policy',
+  '/refund-policy',
+  '/dmca',
+  '/content-policy',
+  '/terms',
+  '/privacy',
+  '/contact',
+])
+const APP_ROUTES = new Set([
+  '/',
+  '/about',
+  '/about-gta-vi',
+  '/community',
+  '/profile',
+  '/settings',
+  '/shop',
+  '/p2p',
+  '/messages',
+  '/news',
+  '/guides',
+  '/leonida',
+  ...Object.keys(LEONIDA_ROUTE_ALIASES),
+  ...TRUST_ROUTES,
+])
 const HASH_SCROLL_CORRECTION_DELAYS = [450, 900]
 const DEFAULT_ROUTE_COMPONENTS = {
   AuthModal,
   AboutPage,
+  GuidePage,
+  HomePage,
   LeonidaGuidePage,
   LeonidaHub,
   LocationGuidePage,
+  MarketplaceListingPage,
   MessagesPage,
   NewsArticlePage,
   P2PTradingPage,
   ProfilePage,
   SettingsPage,
   ShopPage,
+  ShopProductPage,
   SocialHub,
+  TrustPage,
   UserProfilePage,
 }
 
 function RouteLoading() {
   return (
     <div className="route-loading" role="status" aria-live="polite">
-      Loading...
+      Preparing route
     </div>
   )
 }
@@ -115,10 +157,13 @@ function currentRoute(fallbackRoute = '/') {
 
   const { pathname } = window.location
   if (APP_ROUTES.has(pathname)) return pathname
+  if (pathname.startsWith('/guides/')) return pathname
   if (pathname.startsWith('/leonida/')) return pathname
   if (pathname.startsWith('/profile/')) return pathname
   if (pathname.startsWith('/locations/')) return pathname
+  if (pathname.startsWith('/marketplace/')) return pathname
   if (pathname.startsWith('/news/')) return pathname
+  if (pathname.startsWith('/shop/')) return pathname
   return '/'
 }
 
@@ -140,16 +185,21 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   const {
     AuthModal: AuthModalComponent,
     AboutPage: AboutPageComponent,
+    GuidePage: GuidePageComponent,
+    HomePage: HomePageComponent,
     LeonidaGuidePage: LeonidaGuidePageComponent,
     LeonidaHub: LeonidaHubComponent,
     LocationGuidePage: LocationGuidePageComponent,
+    MarketplaceListingPage: MarketplaceListingPageComponent,
     MessagesPage: MessagesPageComponent,
     NewsArticlePage: NewsArticlePageComponent,
     P2PTradingPage: P2PTradingPageComponent,
     ProfilePage: ProfilePageComponent,
     SettingsPage: SettingsPageComponent,
     ShopPage: ShopPageComponent,
+    ShopProductPage: ShopProductPageComponent,
     SocialHub: SocialHubComponent,
+    TrustPage: TrustPageComponent,
     UserProfilePage: UserProfilePageComponent,
   } = routeComponents
   const seoMetadata = useMemo(
@@ -190,10 +240,13 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   const navigateTo = (href) => {
     const nextUrl = new URL(href, window.location.origin)
     const isKnown = APP_ROUTES.has(nextUrl.pathname)
+      || nextUrl.pathname.startsWith('/guides/')
       || nextUrl.pathname.startsWith('/leonida/')
       || nextUrl.pathname.startsWith('/profile/')
       || nextUrl.pathname.startsWith('/locations/')
+      || nextUrl.pathname.startsWith('/marketplace/')
       || nextUrl.pathname.startsWith('/news/')
+      || nextUrl.pathname.startsWith('/shop/')
     const nextRoute = isKnown ? nextUrl.pathname : '/'
 
     window.history.pushState(null, '', `${nextUrl.pathname}${nextUrl.hash}`)
@@ -232,6 +285,22 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     <LazyAuthModal open={authOpen} onClose={() => setAuthOpen(false)} Component={AuthModalComponent} />
   )
 
+  if (route === '/') {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <HomePageComponent onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
   if (route === '/community') {
     return (
       <div className="app">
@@ -265,7 +334,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
-  if (route === '/about') {
+  if (route === '/about' || route === '/about-gta-vi') {
     return (
       <div className="app">
         <SeoHead metadata={seoMetadata} lang={lang} />
@@ -273,6 +342,23 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <AboutPageComponent />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
+  if (route === '/guides' || route.startsWith('/guides/')) {
+    const guideSlug = route.startsWith('/guides/') ? route.slice('/guides/'.length) : ''
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <GuidePageComponent slug={guideSlug} onNavigate={navigateTo} />
           </LazyRoute>
         </main>
         <Footer />
@@ -289,6 +375,22 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <LeonidaHubComponent onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
+  if (LEONIDA_ROUTE_ALIASES[route]) {
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <LeonidaGuidePageComponent sectionId={LEONIDA_ROUTE_ALIASES[route]} onNavigate={navigateTo} />
           </LazyRoute>
         </main>
         <Footer />
@@ -400,6 +502,23 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
+  if (route.startsWith('/shop/')) {
+    const productSlug = route.slice('/shop/'.length)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <ShopProductPageComponent slug={productSlug} onNavigate={navigateTo} onAddCartItem={addCartItem} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
   if (route === '/settings') {
     return (
       <div className="app">
@@ -416,7 +535,24 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     )
   }
 
-  if (route === '/' || route === '/p2p') {
+  if (route.startsWith('/marketplace/')) {
+    const listingSlug = route.slice('/marketplace/'.length)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <MarketplaceListingPageComponent slug={listingSlug} onNavigate={navigateTo} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
+  if (route === '/p2p') {
     return (
       <div className="app">
         <SeoHead metadata={seoMetadata} lang={lang} />
@@ -424,6 +560,23 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
         <main className="page-main">
           <LazyRoute>
             <P2PTradingPageComponent onOpenAuth={() => setAuthOpen(true)} />
+          </LazyRoute>
+        </main>
+        <Footer />
+        {overlays}
+      </div>
+    )
+  }
+
+  if (TRUST_ROUTES.has(route)) {
+    const trustSlug = route.slice(1)
+    return (
+      <div className="app">
+        <SeoHead metadata={seoMetadata} lang={lang} />
+        <Header {...sharedHeaderProps} solid />
+        <main className="page-main">
+          <LazyRoute>
+            <TrustPageComponent slug={trustSlug} onNavigate={navigateTo} />
           </LazyRoute>
         </main>
         <Footer />
@@ -474,7 +627,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
       <Header {...sharedHeaderProps} solid />
       <main className="page-main">
         <LazyRoute>
-          <P2PTradingPageComponent onOpenAuth={() => setAuthOpen(true)} />
+          <HomePageComponent onNavigate={navigateTo} />
         </LazyRoute>
       </main>
       <Footer />

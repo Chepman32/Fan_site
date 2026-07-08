@@ -15,6 +15,33 @@ const {
 } = await import(pathToFileURL(serverEntryPath).href)
 
 const failures = []
+const requiredRoutes = [
+  '/',
+  '/news',
+  '/about',
+  '/leonida',
+  '/leonida/characters',
+  '/leonida/locations',
+  '/leonida/vehicles',
+  '/leonida/weapons',
+  '/leonida/social-media',
+  '/shop',
+  '/p2p',
+  '/community',
+]
+const forbiddenPhrases = [
+  'Loading latest news',
+  'Loading character guide',
+  'Loading Leonida guide',
+  'Loading vehicle guide',
+  'Loading weapons guide',
+  'Loading social media guide',
+  'Loading game information',
+  'Loading news article',
+  'Loading...',
+  'undefined',
+  'NaN',
+]
 
 function fail(message) {
   failures.push(message)
@@ -36,6 +63,22 @@ function readTag(html, pattern) {
 
 function canonicalFor(route) {
   return `${SITE_ORIGIN}${route === '/' ? '/' : route}`
+}
+
+function textFromHtml(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/g, ' ')
+    .replace(/<style[\s\S]*?<\/style>/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function mainText(html) {
+  const rawMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1] || ''
+  return textFromHtml(rawMain)
 }
 
 async function readRouteHtml(route) {
@@ -75,6 +118,9 @@ function validateJsonLd(html, route) {
   }
 }
 
+const titleOwners = new Map()
+const descriptionOwners = new Map()
+
 for (const route of PRERENDER_ROUTES) {
   const html = await readRouteHtml(route)
   if (!html) continue
@@ -100,7 +146,32 @@ for (const route of PRERENDER_ROUTES) {
   if (!isNoindex && robots.includes('noindex')) fail(`${route} should be indexable`)
   if (!isNoindex && h1Count !== 1) fail(`${route} should have exactly one H1, found ${h1Count}`)
 
+  for (const phrase of forbiddenPhrases) {
+    if (html.includes(phrase)) fail(`${route} contains forbidden placeholder/value: "${phrase}"`)
+  }
+  if (html.includes('>null<')) fail(`${route} contains null placeholder text`)
+
+  if (!isNoindex) {
+    const readableMainText = mainText(html)
+    if (!readableMainText) fail(`${route} has empty main content`)
+    if (readableMainText.length < 500) fail(`${route} main content is too thin (${readableMainText.length} characters)`)
+
+    if (titleOwners.has(title)) fail(`${route} duplicates title with ${titleOwners.get(title)}`)
+    else titleOwners.set(title, route)
+
+    if (descriptionOwners.has(description)) fail(`${route} duplicates description with ${descriptionOwners.get(description)}`)
+    else descriptionOwners.set(description, route)
+  }
+
   validateJsonLd(html, route)
+}
+
+for (const route of requiredRoutes) {
+  try {
+    await readFile(routeFilePath(route), 'utf8')
+  } catch {
+    fail(`Missing required prerendered HTML for ${route}`)
+  }
 }
 
 const sitemap = await readFile(path.join(distDir, 'sitemap.xml'), 'utf8')

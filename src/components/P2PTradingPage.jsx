@@ -84,6 +84,28 @@ const CONFIRM_EXIT_SPRING = {
   mass: 0.66,
   velocity: -2.8,
 }
+const MARKETPLACE_TRUST_SECTIONS = [
+  {
+    title: 'How buying works',
+    body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
+  },
+  {
+    title: 'How sellers deliver files',
+    body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
+  },
+  {
+    title: 'Buyer protection',
+    body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
+  },
+  {
+    title: 'Dispute window',
+    body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
+  },
+  {
+    title: 'Prohibited content',
+    body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
+  },
+]
 
 const FORM_SEEDS = {
   en: { deliveryMethod: 'Telegram handoff', properties: ['Format', 'Platform', 'License'] },
@@ -1413,6 +1435,28 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             </div>
           </div>
         </header>
+
+        <section className="p2p-trust-panel" aria-labelledby="p2p-trust-title">
+          <div className="p2p-trust-heading">
+            <span className="p2p-kicker">
+              <ShieldCheck size={16} />
+              Marketplace trust
+            </span>
+            <h2 id="p2p-trust-title">Buying, delivery, protection, and content rules</h2>
+            <p>
+              The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official
+              Rockstar files, leaks, ripped assets, or impersonation material.
+            </p>
+          </div>
+          <div className="p2p-trust-grid">
+            {MARKETPLACE_TRUST_SECTIONS.map((section) => (
+              <article key={section.title}>
+                <h3>{section.title}</h3>
+                <p>{section.body}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         <div className="p2p-view-tabs" aria-label={copy.tabs.label}>
           <button

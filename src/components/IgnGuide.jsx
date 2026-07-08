@@ -41,7 +41,7 @@ const DEFAULT_COPY = {
     badge: 'IGN WIKI GUIDE',
     title: 'GTA 6',
     titleHighlight: 'WEAPONS',
-    loading: 'Loading weapons guide...',
+    loading: 'Preparing weapons guide',
     updatedOn: 'Updated',
     fallbackNote: 'Live IGN parsing failed, showing the latest saved IGN wiki data.',
     ignGuide: 'IGN guide',
@@ -58,7 +58,7 @@ const DEFAULT_COPY = {
     badge: 'IGN WIKI GUIDE',
     title: 'GTA 6',
     titleHighlight: 'SOCIAL MEDIA',
-    loading: 'Loading social media guide...',
+    loading: 'Preparing social media guide',
     updatedOn: 'Updated',
     fallbackNote: 'Live IGN parsing failed, showing the latest saved IGN wiki data.',
     ignGuide: 'IGN guide',
@@ -75,7 +75,7 @@ const DEFAULT_COPY = {
     badge: 'IGN WIKI GUIDE',
     title: 'GTA 6',
     titleHighlight: 'VEHICLES',
-    loading: 'Loading vehicle guide...',
+    loading: 'Preparing vehicle guide',
     updatedOn: 'Updated',
     fallbackNote: 'Live IGN parsing failed, showing the latest saved IGN wiki data.',
     ignGuide: 'Open IGN subpage',
@@ -1009,7 +1009,7 @@ function SimpleGuideSection({ config }) {
   const { t, lang } = useTranslation()
   const copy = guideCopy(t, config.key)
   const [data, setData] = useState(config.fallback)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
@@ -1017,7 +1017,6 @@ function SimpleGuideSection({ config }) {
 
     const fetchGuide = async () => {
       try {
-        setLoading(true)
         const html = await fetchTextWithTimeout(config.url)
         const parsedData = parseGuidePage(html, config.url, config.fallback)
         if (!canceled) {
@@ -1119,7 +1118,7 @@ export function VehiclesGuide() {
   const copy = guideCopy(t, 'vehicles')
   const [data, setData] = useState(VEHICLES_FALLBACK)
   const [activeCategoryId, setActiveCategoryId] = useState('cars')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
@@ -1127,7 +1126,6 @@ export function VehiclesGuide() {
 
     const fetchVehicles = async () => {
       try {
-        setLoading(true)
         const overviewHtml = await fetchTextWithTimeout(GUIDE_URLS.vehicles)
         const overview = parseVehicleOverviewPage(overviewHtml, VEHICLES_FALLBACK)
 

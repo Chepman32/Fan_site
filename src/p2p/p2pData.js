@@ -1,6 +1,7 @@
 import emotePackPreview from '../assets/shop/Emote pack sheet previews/gta_vi_emote_pack_03.webp'
 import overlayPreview from '../assets/shop/Stream overlay previews/20.webp'
 import bannerPreview from '../assets/shop/Profile banner previews/B7A7EEDD-4A0B-43A9-9D41-893635EA6D91.webp'
+import { slugify } from '../data/slugify'
 
 export const P2P_CATEGORIES = [
   { id: 'digital-assets', label: 'Digital assets' },
@@ -106,6 +107,18 @@ export const P2P_SEED_LISTINGS = [
     updatedAt: '2026-05-18T10:05:00.000Z',
   },
 ]
+
+export function p2pListingSlug(listing) {
+  return slugify(listing?.title || listing?.id)
+}
+
+export const P2P_SEED_LISTING_BY_SLUG = Object.fromEntries(
+  P2P_SEED_LISTINGS.map((listing) => [p2pListingSlug(listing), listing]),
+)
+
+export const P2P_SEED_LISTING_ROUTES = P2P_SEED_LISTINGS.map((listing) => (
+  `/marketplace/${p2pListingSlug(listing)}`
+))
 
 export function p2pCategoryLabel(categoryId, copy = {}) {
   return copy.categories?.[categoryId] || P2P_CATEGORIES.find((category) => category.id === categoryId)?.label || copy.otherCategory || 'Other'

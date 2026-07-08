@@ -24,6 +24,7 @@ function Footer() {
               <h4>{t.footer.game}</h4>
               <a href="/about">{t.footer.about}</a>
               <a href="/leonida/characters">{t.footer.characters}</a>
+              <a href="/leonida/locations">{t.nav.locations || 'Locations'}</a>
               <a href="/leonida/weapons">{t.nav.weapons || 'Weapons'}</a>
               <a href="/leonida/vehicles">{t.nav.vehicles || 'Vehicles'}</a>
               <a href="/leonida/social-media">{t.nav.socialMedia || 'Social Media'}</a>
@@ -46,6 +47,17 @@ function Footer() {
               <a href="https://www.ign.com/games/grand-theft-auto-vi" target="_blank" rel="noopener noreferrer">
                 IGN GTA VI <ExternalLink size={12} />
               </a>
+            </div>
+            <div className="footer-column">
+              <h4>Trust</h4>
+              <a href="/buyer-protection">Buyer Protection</a>
+              <a href="/seller-policy">Seller Policy</a>
+              <a href="/refund-policy">Refund Policy</a>
+              <a href="/content-policy">Content Policy</a>
+              <a href="/dmca">DMCA</a>
+              <a href="/privacy">Privacy</a>
+              <a href="/terms">Terms</a>
+              <a href="/contact">Contact</a>
             </div>
           </div>
         </div>

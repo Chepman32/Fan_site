@@ -1,4 +1,5 @@
 import { shopCentsToPrice, shopPriceToCents } from './paymentConfig'
+import { slugify } from '../data/slugify'
 
 export {
   PAYMENT_ADDRESS,
@@ -75,6 +76,24 @@ const overlayNames = [
   'Palm Island Broadcast Kit',
   'Glades Trail Stream Set',
   'Highway Heat Creator Pack',
+  'Vice Marina Broadcast Suite',
+  'Little Haiti Night Overlay',
+  'South Beach Alert Kit',
+  'Leonida Motel Intermission',
+  'Keys Bridge Stream Pack',
+  'Rooftop Chase Scene Set',
+  'Vice Port Gameplay Frame',
+  'Neon Palms Chat Overlay',
+  'Downtown Radio Creator Kit',
+  'Grassrivers Watch Party Set',
+  'Sunset Highway Overlay Suite',
+  'Ambrosia Stream Scene Pack',
+  'Mount Kalaga Creator Kit',
+  'Ocean Pier Broadcast Set',
+  'Vice Club Starting Screen',
+  'Bayfront Pursuit Overlay',
+  'Leonida Coast Live Kit',
+  'Night Run Stream Bundle',
 ]
 
 const overlayTags = [
@@ -584,6 +603,20 @@ export const SHOP_PRODUCT_BY_ID = Object.fromEntries(
     .flat()
     .map((product) => [product.id, product]),
 )
+
+export function shopProductSlug(product) {
+  return slugify(product?.title || product?.id)
+}
+
+export const SHOP_PRODUCT_BY_SLUG = Object.fromEntries(
+  Object.values(SHOP_PRODUCTS_BY_CATEGORY)
+    .flat()
+    .map((product) => [shopProductSlug(product), product]),
+)
+
+export const SHOP_PRODUCT_ROUTES = Object.values(SHOP_PRODUCTS_BY_CATEGORY)
+  .flat()
+  .map((product) => `/shop/${shopProductSlug(product)}`)
 
 export function getShopProductThumbnail(product) {
   if (!product) return ''

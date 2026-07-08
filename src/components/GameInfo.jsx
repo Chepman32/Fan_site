@@ -8,6 +8,15 @@ import './GameInfo.css'
 // 'hi' is intentionally absent — falls back to English automatically.
 const WIKI_LANGS = { en: 'en', zh: 'zh', ru: 'ru', it: 'it', id: 'id', pl: 'pl', ms: 'ms' }
 const WIKI_TITLE = 'Grand_Theft_Auto_VI'
+const FALLBACK_EXTRACT = `Grand Theft Auto VI is Rockstar Games' next open-world action-adventure game set in the fictional state of Leonida.
+==Setting==
+Leonida brings Vice City, coastlines, wetlands, highways, small towns, and social-media-driven local culture into the center of GTA VI coverage.
+==Main characters==
+The public reveal material centers Lucia Caminos and Jason Duval, with supporting characters connected to crime, music, business, and local communities.
+==Platforms and release==
+The announced launch platforms are PlayStation 5 and Xbox Series X/S, with the official release date currently set for November 19, 2026.
+==Fan guide context==
+Leonida Loot separates official information from estimates and speculation so readers can track confirmed details, map clues, vehicles, weapons, and creator assets clearly.`
 const ACCORDION_LAYOUT_SPRING = { type: 'spring', stiffness: 460, damping: 38, mass: 0.78 }
 const ACCORDION_OPEN_SPRING = { type: 'spring', stiffness: 430, damping: 34, mass: 0.78, velocity: 6 }
 const ACCORDION_CLOSE_SPRING = { type: 'spring', stiffness: 520, damping: 40, mass: 0.72, velocity: -6 }
@@ -59,16 +68,26 @@ function formatExtract(text) {
     .filter((section) => section.title || section.content)
 }
 
+function fallbackWikiData(lang = 'en') {
+  return {
+    requestLang: lang,
+    title: 'Grand Theft Auto VI',
+    description: 'Open-world action-adventure game',
+    extract: FALLBACK_EXTRACT,
+    thumbnail: '',
+  }
+}
+
 function GameInfo() {
   const { t, lang } = useTranslation()
   const reduceMotion = useReducedMotion()
-  const [wikiData, setWikiData] = useState(null)
+  const [wikiData, setWikiData] = useState(() => fallbackWikiData(lang))
   const [wikiError, setWikiError] = useState(null)
   const [openSection, setOpenSection] = useState(0)
 
-  const activeWikiData = wikiData?.requestLang === lang ? wikiData : null
+  const activeWikiData = wikiData?.requestLang === lang ? wikiData : fallbackWikiData(lang)
   const activeError = wikiError?.requestLang === lang ? wikiError.message : null
-  const loading = !activeWikiData && !activeError
+  const loading = false
 
   useEffect(() => {
     const wikiLang = WIKI_LANGS[lang] ?? 'en'
@@ -109,7 +128,8 @@ function GameInfo() {
         }
       }
       if (!cancelled) {
-        setWikiError({ requestLang: lang, message: t.gameInfo.error })
+        setWikiData(fallbackWikiData(lang))
+        setWikiError(null)
       }
     }
 
@@ -117,7 +137,6 @@ function GameInfo() {
     return () => {
       cancelled = true
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 
   const features = [

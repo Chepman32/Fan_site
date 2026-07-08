@@ -13,6 +13,7 @@ import {
   translateLeonidaData,
   useTranslatedIgnContent,
 } from '../i18n/ignContentTranslation'
+import { locationGuideItems, locationGuideSections } from '../content/leonidaLocations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaLocations.css'
 
@@ -23,13 +24,12 @@ function isPlainLeftClick(event) {
 function LeonidaLocations({ onNavigate }) {
   const { t, lang } = useTranslation()
   const [data, setData] = useState(FALLBACK_LEONIDA_DATA)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   useEffect(() => {
     let canceled = false
 
     const fetchLeonidaLocations = async () => {
       try {
-        setLoading(true)
         const html = await fetchTextWithTimeout(LEONIDA_URL)
         const parsedData = parseLeonidaPage(html)
         if (!canceled) {
@@ -171,6 +171,43 @@ function LeonidaLocations({ onNavigate }) {
                   ))}
                 </div>
               </article>
+            </div>
+
+            <div className="leonida-static-guide" aria-label="GTA VI Leonida locations guide">
+              <div className="leonida-guide-intro">
+                <h3>GTA VI Leonida locations guide</h3>
+                <p>
+                  This static location guide keeps the major Leonida regions visible in the
+                  first HTML response, including Vice City, the Leonida Keys, wetlands,
+                  coastal towns, industrial areas, wilderness, roads, beaches, hotels, and highways.
+                </p>
+              </div>
+              <div className="leonida-guide-grid">
+                {locationGuideItems.map((location) => (
+                  <article key={location.title}>
+                    <span>{location.status}</span>
+                    <h3>{location.title}</h3>
+                    <strong>{location.subtitle}</strong>
+                    <p>{location.description}</p>
+                    <ul>
+                      {location.facts.map((fact) => <li key={fact}>{fact}</li>)}
+                    </ul>
+                    {location.relatedLinks?.map((link) => (
+                      <a key={link.href} href={link.href} onClick={(event) => navigateToLocation(event, link.href)}>
+                        {link.label}
+                      </a>
+                    ))}
+                  </article>
+                ))}
+              </div>
+              <div className="leonida-guide-notes">
+                {locationGuideSections.map((section) => (
+                  <article key={section.title}>
+                    <h3>{section.title}</h3>
+                    <p>{section.body}</p>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         )}

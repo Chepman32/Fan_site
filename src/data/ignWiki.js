@@ -43,7 +43,7 @@ export const LOCATION_GUIDES = [
 ].map((guide) => ({
   ...guide,
   url: `${IGN_ORIGIN}${guide.ignPath}`,
-  path: `/leonida/locations/${guide.id}`,
+  path: `/locations/${guide.id}`,
 }))
 
 export const FALLBACK_LEONIDA_DATA = {
@@ -274,17 +274,41 @@ export function parseLeonidaPage(html) {
 }
 
 export function createFallbackLocationPage(guide) {
+  const relatedLinks = LOCATION_GUIDES
+    .filter((location) => location.id !== guide.id)
+    .map(({ id, name, path, url }) => ({ id, name, path, url }))
+
   return {
     id: guide.id,
     title: guide.name,
     sourceUrl: guide.url,
     updatedAt: '',
     description: guide.fallbackSummary,
-    intro: [guide.fallbackSummary],
-    sections: [],
-    relatedLinks: LOCATION_GUIDES
-      .filter((location) => location.id !== guide.id)
-      .map(({ id, name, path, url }) => ({ id, name, path, url })),
+    intro: [
+      guide.fallbackSummary,
+      `${guide.name} is tracked as part of the Leonida location guide because it helps connect GTA VI trailer geography, character movement, vehicles, and regional worldbuilding into one crawlable map hub.`,
+      'Leonida Loot keeps this page focused on public source context and clearly labeled fan analysis, avoiding unsupported leak claims while still giving readers enough detail to understand why the location matters.',
+    ],
+    sections: [
+      {
+        id: 'source-context',
+        title: 'Source context',
+        paragraphs: [
+          `The ${guide.name} page links back to public GTA VI wiki coverage and uses saved fallback text when the live source cannot be parsed during prerendering.`,
+          'This keeps the initial HTML useful for search engines and readers before browser-side JavaScript refreshes remote article details.',
+        ],
+        links: [],
+      },
+      {
+        id: 'related-exploration',
+        title: 'Related exploration',
+        paragraphs: [
+          'Use this location together with the characters, vehicles, weapons, and creator marketplace pages to understand how Leonida guides connect informational search intent with fan-made assets.',
+        ],
+        links: relatedLinks.slice(0, 3),
+      },
+    ],
+    relatedLinks,
     images: [],
   }
 }

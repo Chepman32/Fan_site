@@ -5,6 +5,7 @@ import {
   translateCharactersData,
   useTranslatedIgnContent,
 } from '../i18n/ignContentTranslation'
+import { characterGuideItems, characterGuideSections } from '../content/leonidaCharacters'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import ImageZoomModal from './ImageZoomModal'
 import './Characters.css'
@@ -303,7 +304,7 @@ function CharacterCard({ character, featured = false, index = 0, onZoom }) {
 function Characters() {
   const { t, lang } = useTranslation()
   const [data, setData] = useState(FALLBACK_DATA)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [zoomed, setZoomed] = useState(null)
 
   useEffect(() => {
@@ -311,7 +312,6 @@ function Characters() {
 
     const fetchCharacters = async () => {
       try {
-        setLoading(true)
         const html = await fetchTextWithTimeout(CHARACTERS_URL)
         const parsedData = parseCharactersPage(html)
         if (!canceled) {
@@ -403,6 +403,40 @@ function Characters() {
               {supportingCharacters.map((character, index) => (
                 <CharacterCard key={character.id} character={character} index={index + featuredCharacters.length} onZoom={setZoomed} />
               ))}
+            </div>
+
+            <div className="character-static-guide" aria-label="GTA VI character guide">
+              <div className="character-guide-intro">
+                <h3>GTA VI character guide</h3>
+                <p>
+                  The Leonida cast guide keeps official and reputable public character coverage
+                  separate from rumor-only claims, with role, status, description, and source
+                  labels for every major named character.
+                </p>
+              </div>
+              <div className="character-guide-grid">
+                {characterGuideItems.map((character) => (
+                  <article key={character.name}>
+                    <span>{character.status}</span>
+                    <h3>{character.name}</h3>
+                    <strong>{character.role}</strong>
+                    <p>{character.description}</p>
+                    {character.sourceUrl && (
+                      <a href={character.sourceUrl} target="_blank" rel="noopener noreferrer">
+                        {character.sourceLabel || 'Source'}
+                      </a>
+                    )}
+                  </article>
+                ))}
+              </div>
+              <div className="character-guide-notes">
+                {characterGuideSections.map((section) => (
+                  <article key={section.title}>
+                    <h3>{section.title}</h3>
+                    <p>{section.body}</p>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         )}

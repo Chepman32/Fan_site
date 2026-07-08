@@ -17,8 +17,8 @@ const en = {
   today: 'Today',
   hero: {
     kicker: 'P2P exchange',
-    title: 'Trade GTA VI fan-made goods directly.',
-    description: 'Buy and sell overlays, emotes, guides, services, collectibles, and other GTA VI related drops with seller-to-buyer messaging.',
+    title: 'GTA VI Fan Asset Marketplace',
+    description: 'Buy and sell unofficial GTA VI-inspired stream overlays, emotes, guides, services, profile banners, and fan-made creator goods with seller-to-buyer messaging.',
     summaryLabel: 'Marketplace summary',
     activeListings: 'active listings',
     storedFiles: 'stored files',

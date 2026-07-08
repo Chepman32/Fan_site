@@ -82,6 +82,60 @@
   overflow-wrap: anywhere;
 }
 
+.p2p-trust-panel {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.p2p-trust-heading {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.p2p-trust-heading h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.p2p-trust-heading p,
+.p2p-trust-grid p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.p2p-trust-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.p2p-trust-grid article {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(10, 10, 15, 0.36);
+}
+
+.p2p-trust-grid h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
 .p2p-toolbar {
   display: grid;
   grid-template-columns: minmax(220px, 320px) minmax(0, 1fr) auto;
@@ -1601,6 +1655,7 @@
 
 @media (max-width: 1100px) {
   .p2p-hero,
+  .p2p-trust-panel,
   .p2p-toolbar,
   .p2p-upload-grid {
     grid-template-columns: 1fr;
@@ -1627,6 +1682,7 @@
   }
 
   .p2p-hero-panel,
+  .p2p-trust-grid,
   .p2p-form-grid,
   .p2p-market-grid {
     grid-template-columns: 1fr;

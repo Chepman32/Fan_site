@@ -165,7 +165,7 @@ function QuickSettingsModal({ onClose, onOpenAuth }) {
               }}
             >
               <UserPlus size={18} aria-hidden="true" />
-              <span>{settingsCopy.guestBanner || 'Sign Up to unlock more settings'}</span>
+              <span>{settingsCopy.guestBanner || 'Sign In to unlock more settings'}</span>
               <ArrowRight size={17} aria-hidden="true" />
             </button>
           ) : null}
