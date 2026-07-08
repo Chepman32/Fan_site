@@ -105,7 +105,6 @@ function HomePage({ onNavigate }) {
         />
         <div className="home-hero-scrim" aria-hidden="true" />
         <div className="container home-hero-inner">
-          <p className="home-kicker">Unofficial GTA VI fan hub</p>
           <h1>GTA VI Fan Hub & Creator Marketplace</h1>
           <p>
             Track GTA VI news, release updates, Leonida map details, characters, vehicles,

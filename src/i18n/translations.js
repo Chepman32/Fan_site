@@ -3,6 +3,7 @@ import { p2pTranslations } from './p2pTranslations'
 import { settingsTranslations } from './settingsTranslations'
 import { leonidaTranslations } from './leonidaTranslations'
 import { aboutTranslations } from './aboutTranslations'
+import { newsTranslations } from './newsTranslations'
 
 // GTA VI Fan Site — i18n translations
 // Languages: en, zh, ru, it, id, pl, hi, ms
@@ -434,18 +435,7 @@ const en = {
   },
   guides: enGuides,
   // NewsSection
-  news: {
-    badge: 'IGN COVERAGE',
-    title: 'LATEST',
-    titleHighlight: 'UPDATES',
-    loading: 'Preparing latest news',
-    showMore: 'Show more',
-    showLess: 'Show less',
-    showing: 'Showing',
-    of: 'of',
-    justNow: 'Just now',
-    timeAgo: { year: 'year', month: 'month', week: 'week', day: 'day', hour: 'hour', minute: 'minute' },
-  },
+  news: newsTranslations.en,
   // SocialHub
   social: {
     badge: 'COMMUNITY',
@@ -668,18 +658,7 @@ const zh = {
     shopsAndBusinesses: '商店与商家',
   },
   guides: zhGuides,
-  news: {
-    badge: 'IGN 报道',
-    title: '最新',
-    titleHighlight: '动态',
-    loading: '正在加载最新新闻……',
-    showMore: '显示更多',
-    showLess: '收起',
-    showing: '显示',
-    of: '共',
-    justNow: '刚刚',
-    timeAgo: { year: '年', month: '个月', week: '周', day: '天', hour: '小时', minute: '分钟' },
-  },
+  news: newsTranslations.zh,
   social: {
     badge: '社区',
     title: 'GTA VI',
@@ -880,18 +859,7 @@ const ru = {
     shopsAndBusinesses: 'Магазины и заведения',
   },
   guides: ruGuides,
-  news: {
-    badge: 'МАТЕРИАЛЫ IGN',
-    title: 'ПОСЛЕДНИЕ',
-    titleHighlight: 'НОВОСТИ',
-    loading: 'Загрузка последних новостей…',
-    showMore: 'Показать больше',
-    showLess: 'Свернуть',
-    showing: 'Показано',
-    of: 'из',
-    justNow: 'Только что',
-    timeAgo: { year: 'год', month: 'месяц', week: 'неделю', day: 'день', hour: 'час', minute: 'минуту' },
-  },
+  news: newsTranslations.ru,
   social: {
     badge: 'СООБЩЕСТВО',
     title: 'GTA VI',
@@ -1092,18 +1060,7 @@ const it = {
     shopsAndBusinesses: 'Negozi e attività',
   },
   guides: itGuides,
-  news: {
-    badge: 'COPERTURA IGN',
-    title: 'ULTIMI',
-    titleHighlight: 'AGGIORNAMENTI',
-    loading: 'Caricamento ultime notizie…',
-    showMore: 'Mostra altro',
-    showLess: 'Mostra meno',
-    showing: 'Mostrati',
-    of: 'di',
-    justNow: 'Adesso',
-    timeAgo: { year: 'anno', month: 'mese', week: 'settimana', day: 'giorno', hour: 'ora', minute: 'minuto' },
-  },
+  news: newsTranslations.it,
   social: {
     badge: 'COMMUNITY',
     title: 'GTA VI',
@@ -1303,18 +1260,7 @@ const id = {
     shopsAndBusinesses: 'Toko dan bisnis',
   },
   guides: idGuides,
-  news: {
-    badge: 'LIPUTAN IGN',
-    title: 'UPDATE',
-    titleHighlight: 'TERBARU',
-    loading: 'Memuat berita terbaru…',
-    showMore: 'Tampilkan lebih banyak',
-    showLess: 'Tampilkan lebih sedikit',
-    showing: 'Menampilkan',
-    of: 'dari',
-    justNow: 'Baru saja',
-    timeAgo: { year: 'tahun', month: 'bulan', week: 'minggu', day: 'hari', hour: 'jam', minute: 'menit' },
-  },
+  news: newsTranslations.id,
   social: {
     badge: 'KOMUNITAS',
     title: 'GTA VI',
@@ -1514,18 +1460,7 @@ const pl = {
     shopsAndBusinesses: 'Sklepy i biznesy',
   },
   guides: plGuides,
-  news: {
-    badge: 'RELACJE IGN',
-    title: 'NAJNOWSZE',
-    titleHighlight: 'AKTUALNOŚCI',
-    loading: 'Ładowanie najnowszych wiadomości…',
-    showMore: 'Pokaż więcej',
-    showLess: 'Pokaż mniej',
-    showing: 'Wyświetlono',
-    of: 'z',
-    justNow: 'Przed chwilą',
-    timeAgo: { year: 'rok', month: 'miesiąc', week: 'tydzień', day: 'dzień', hour: 'godzinę', minute: 'minutę' },
-  },
+  news: newsTranslations.pl,
   social: {
     badge: 'SPOŁECZNOŚĆ',
     title: 'GTA VI',
@@ -1725,18 +1660,7 @@ const hi = {
     shopsAndBusinesses: 'दुकानें और व्यवसाय',
   },
   guides: hiGuides,
-  news: {
-    badge: 'IGN कवरेज',
-    title: 'ताज़ा',
-    titleHighlight: 'अपडेट',
-    loading: 'ताज़ा खबरें लोड हो रही हैं…',
-    showMore: 'और दिखाएं',
-    showLess: 'कम दिखाएं',
-    showing: 'दिखाए जा रहे हैं',
-    of: 'में से',
-    justNow: 'अभी-अभी',
-    timeAgo: { year: 'साल', month: 'महीना', week: 'हफ्ता', day: 'दिन', hour: 'घंटा', minute: 'मिनट' },
-  },
+  news: newsTranslations.hi,
   social: {
     badge: 'कम्युनिटी',
     title: 'GTA VI',
@@ -1936,18 +1860,7 @@ const ms = {
     shopsAndBusinesses: 'Kedai dan perniagaan',
   },
   guides: msGuides,
-  news: {
-    badge: 'LIPUTAN IGN',
-    title: 'KEMASKINI',
-    titleHighlight: 'TERKINI',
-    loading: 'Memuatkan berita terkini…',
-    showMore: 'Tunjuk lebih',
-    showLess: 'Tunjuk kurang',
-    showing: 'Memaparkan',
-    of: 'daripada',
-    justNow: 'Baru sahaja',
-    timeAgo: { year: 'tahun', month: 'bulan', week: 'minggu', day: 'hari', hour: 'jam', minute: 'minit' },
-  },
+  news: newsTranslations.ms,
   social: {
     badge: 'KOMUNITI',
     title: 'GTA VI',

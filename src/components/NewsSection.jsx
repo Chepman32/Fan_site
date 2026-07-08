@@ -1,30 +1,57 @@
 import { useState } from 'react'
 import { ArrowRight, CalendarDays, Clock, Newspaper, Tag } from 'lucide-react'
 import { newsArticles } from '../content/news'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 
 const INITIAL_ARTICLE_COUNT = 4
+const DATE_LOCALES = {
+  zh: 'zh-CN',
+  hi: 'hi-IN',
+  ms: 'ms-MY',
+}
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
-function formatDate(value) {
+function dateLocale(lang) {
+  return DATE_LOCALES[lang] || lang || undefined
+}
+
+function formatDate(value, lang) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return value
 
-  return new Intl.DateTimeFormat('en', {
+  return new Intl.DateTimeFormat(dateLocale(lang), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(date)
 }
 
+function localizedArticle(article, newsCopy) {
+  const articleCopy = newsCopy.articles?.[article.slug] || {}
+  const categoryLabel = newsCopy.categoryLabels?.[article.category] || articleCopy.category || article.category
+
+  return {
+    ...article,
+    ...articleCopy,
+    categoryLabel,
+  }
+}
+
 function NewsSection({ onNavigate }) {
+  const { t, lang } = useTranslation()
+  const newsCopy = t.news || {}
   const [showAll, setShowAll] = useState(false)
-  const featuredArticle = newsArticles[0]
-  const visibleArticles = showAll ? newsArticles : newsArticles.slice(0, INITIAL_ARTICLE_COUNT)
-  const categories = Array.from(new Set(newsArticles.map((article) => article.category)))
+  const localizedArticles = newsArticles.map((article) => localizedArticle(article, newsCopy))
+  const featuredArticle = localizedArticles[0]
+  const visibleArticles = showAll ? localizedArticles : localizedArticles.slice(0, INITIAL_ARTICLE_COUNT)
+  const categories = Array.from(new Set(localizedArticles.map((article) => article.categoryLabel)))
+  const showingCount = typeof newsCopy.showingCount === 'function'
+    ? newsCopy.showingCount(visibleArticles.length, localizedArticles.length)
+    : `${newsCopy.showing || 'Showing'} ${visibleArticles.length} ${newsCopy.of || 'of'} ${localizedArticles.length}`
 
   const navigate = (event, href) => {
     if (!onNavigate || !isPlainLeftClick(event)) return
@@ -36,31 +63,28 @@ function NewsSection({ onNavigate }) {
     <section id="news" className="section-padding news-section">
       <div className="container news-shell">
         <header className="news-page-header">
-          <span><Newspaper size={15} /> GTA VI updates</span>
-          <h1>GTA VI News</h1>
-          <p>
-            Follow GTA VI release updates, Rockstar announcements, trailer analysis, Leonida map
-            details, characters, vehicles, weapons, and platform news from one static news hub.
-          </p>
-          <nav aria-label="News hub links">
-            <a href="/about" onClick={(event) => navigate(event, '/about')}>About GTA VI</a>
-            <a href="/leonida" onClick={(event) => navigate(event, '/leonida')}>Leonida guide</a>
-            <a href="/community" onClick={(event) => navigate(event, '/community')}>Community</a>
-            <a href="/shop" onClick={(event) => navigate(event, '/shop')}>Creator shop</a>
+          <span><Newspaper size={15} /> {newsCopy.pageBadge || 'GTA VI updates'}</span>
+          <h1>{newsCopy.pageTitle || 'GTA VI News'}</h1>
+          <p>{newsCopy.pageDescription}</p>
+          <nav aria-label={newsCopy.linksLabel || 'News hub links'}>
+            <a href="/about" onClick={(event) => navigate(event, '/about')}>{newsCopy.links?.about || t.nav.about}</a>
+            <a href="/leonida" onClick={(event) => navigate(event, '/leonida')}>{newsCopy.links?.leonida || t.nav.leonida}</a>
+            <a href="/community" onClick={(event) => navigate(event, '/community')}>{newsCopy.links?.community || t.nav.community || t.nav.social}</a>
+            <a href="/shop" onClick={(event) => navigate(event, '/shop')}>{newsCopy.links?.shop || t.nav.shop}</a>
           </nav>
         </header>
 
         <section className="news-featured" aria-labelledby="featured-news-title">
           <div>
-            <span>Featured article</span>
+            <span>{newsCopy.featuredLabel || 'Featured article'}</span>
             <h2 id="featured-news-title">{featuredArticle.title}</h2>
             <p>{featuredArticle.description}</p>
             <div className="news-featured-meta">
-              <span><CalendarDays size={14} /> Updated {formatDate(featuredArticle.updatedAt)}</span>
-              <span><Tag size={14} /> {featuredArticle.category}</span>
+              <span><CalendarDays size={14} /> {newsCopy.updatedLabel || 'Updated'} {formatDate(featuredArticle.updatedAt, lang)}</span>
+              <span><Tag size={14} /> {featuredArticle.categoryLabel}</span>
             </div>
             <a href={`/news/${featuredArticle.slug}`} onClick={(event) => navigate(event, `/news/${featuredArticle.slug}`)}>
-              Read featured article
+              {newsCopy.readFeatured || 'Read featured article'}
               <ArrowRight size={16} />
             </a>
           </div>
@@ -69,15 +93,15 @@ function NewsSection({ onNavigate }) {
 
         <section className="news-confirmed" aria-labelledby="confirmed-updates-title">
           <header>
-            <span>Latest confirmed updates</span>
-            <h2 id="confirmed-updates-title">Latest confirmed updates</h2>
+            <span>{newsCopy.confirmedKicker || 'Latest confirmed updates'}</span>
+            <h2 id="confirmed-updates-title">{newsCopy.confirmedTitle || 'Latest confirmed updates'}</h2>
           </header>
           <div className="news-confirmed-grid">
-            {newsArticles.map((article) => (
+            {localizedArticles.map((article) => (
               <article key={article.slug}>
                 <strong>{article.title}</strong>
                 <p>{article.description}</p>
-                <small><Clock size={13} /> Last updated {formatDate(article.updatedAt)}</small>
+                <small><Clock size={13} /> {newsCopy.lastUpdatedLabel || 'Last updated'} {formatDate(article.updatedAt, lang)}</small>
               </article>
             ))}
           </div>
@@ -86,10 +110,10 @@ function NewsSection({ onNavigate }) {
         <section aria-labelledby="article-list-title">
           <header className="news-list-heading">
             <div>
-              <span>Article cards</span>
-              <h2 id="article-list-title">GTA VI article list</h2>
+              <span>{newsCopy.listKicker || 'Article cards'}</span>
+              <h2 id="article-list-title">{newsCopy.listTitle || 'GTA VI article list'}</h2>
             </div>
-            <div className="news-category-list" aria-label="News categories">
+            <div className="news-category-list" aria-label={newsCopy.categoriesLabel || 'News categories'}>
               {categories.map((category) => <span key={category}>{category}</span>)}
             </div>
           </header>
@@ -107,10 +131,10 @@ function NewsSection({ onNavigate }) {
                   onClick={(event) => navigate(event, href)}
                 >
                   <div className="news-header">
-                    <span className="news-source">Leonida Loot</span>
+                    <span className="news-source">{newsCopy.sourceName || 'Leonida Loot'}</span>
                     <span className="news-time">
                       <Clock size={12} />
-                      {formatDate(article.publishedAt)}
+                      {formatDate(article.publishedAt, lang)}
                     </span>
                   </div>
 
@@ -120,22 +144,20 @@ function NewsSection({ onNavigate }) {
                   <div className="news-footer">
                     <span className="news-stat">
                       <ArrowRight size={14} />
-                      Read article
+                      {newsCopy.readArticle || 'Read article'}
                     </span>
-                    <span className="news-author">{article.category}</span>
+                    <span className="news-author">{article.categoryLabel}</span>
                   </div>
                 </a>
               )
             })}
           </div>
 
-          {newsArticles.length > INITIAL_ARTICLE_COUNT && (
+          {localizedArticles.length > INITIAL_ARTICLE_COUNT && (
             <div className="news-actions">
-              <span className="news-count">
-                Showing {visibleArticles.length} of {newsArticles.length}
-              </span>
+              <span className="news-count">{showingCount}</span>
               <button type="button" className="show-more-button" onClick={() => setShowAll((current) => !current)}>
-                {showAll ? 'Show fewer' : 'Show more'}
+                {showAll ? newsCopy.showLess || 'Show fewer' : newsCopy.showMore || 'Show more'}
               </button>
             </div>
           )}
