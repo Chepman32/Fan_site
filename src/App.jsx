@@ -87,9 +87,8 @@ const DEFAULT_ROUTE_COMPONENTS = {
 
 function RouteLoading() {
   return (
-    <div className="route-loading" role="status" aria-live="polite">
+    <div className="route-loading" role="status" aria-live="polite" aria-label="Loading page">
       <span className="route-loading-spinner" aria-hidden="true" />
-      <span>Opening page</span>
     </div>
   )
 }

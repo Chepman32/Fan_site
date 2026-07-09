@@ -90,7 +90,6 @@ function robotsTxt() {
     'Disallow: /messages',
     'Disallow: /admin',
     'Disallow: /seller/onboarding',
-    'Disallow: /search',
     '',
     `Sitemap: ${SITE_ORIGIN}/sitemap.xml`,
     '',
