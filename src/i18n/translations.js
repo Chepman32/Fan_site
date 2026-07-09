@@ -562,7 +562,7 @@ const en = {
   },
   // Footer
   footer: {
-    description: 'An unofficial fan site dedicated to Grand Theft Auto VI. All game content and trademarks are property of Rockstar Games.',
+    description: 'A GTA VI trade platform to let the game\'s fans to earn money on content dedicated to Grand Theft Auto VI.',
     game: 'Game',
     official: 'Official',
     coverage: 'Coverage',
@@ -766,7 +766,7 @@ const zh = {
     closeSignIn: '关闭登录',
   },
   footer: {
-    description: '这是一个非官方粉丝网站，专注于《侠盗猎车手 VI》。所有游戏内容及商标均为 Rockstar Games 所有。',
+    description: '一个 GTA VI 交易平台，让游戏粉丝通过 Grand Theft Auto VI 相关内容赚钱。',
     game: '游戏',
     official: '官方',
     coverage: '报道',
@@ -970,7 +970,7 @@ const ru = {
     closeSignIn: 'Закрыть',
   },
   footer: {
-    description: 'Неофициальный фан-сайт, посвящённый Grand Theft Auto VI. Весь игровой контент и торговые марки принадлежат Rockstar Games.',
+    description: 'Торговая платформа GTA VI, где фанаты игры могут зарабатывать на контенте, посвященном Grand Theft Auto VI.',
     game: 'Игра',
     official: 'Официальное',
     coverage: 'Материалы',
@@ -1174,7 +1174,7 @@ const it = {
     closeSignIn: 'Chiudi accesso',
   },
   footer: {
-    description: 'Un sito fan non ufficiale dedicato a Grand Theft Auto VI. Tutti i contenuti di gioco e i marchi sono di proprietà di Rockstar Games.',
+    description: 'Una piattaforma di scambio GTA VI che permette ai fan del gioco di guadagnare con contenuti dedicati a Grand Theft Auto VI.',
     game: 'Gioco',
     official: 'Ufficiale',
     coverage: 'Copertura',
@@ -1377,7 +1377,7 @@ const id = {
     closeSignIn: 'Tutup masuk',
   },
   footer: {
-    description: 'Situs penggemar tidak resmi yang didedikasikan untuk Grand Theft Auto VI. Semua konten game dan merek dagang adalah milik Rockstar Games.',
+    description: 'Platform perdagangan GTA VI yang memungkinkan penggemar game menghasilkan uang dari konten yang didedikasikan untuk Grand Theft Auto VI.',
     game: 'Game',
     official: 'Resmi',
     coverage: 'Liputan',
@@ -1580,7 +1580,7 @@ const pl = {
     closeSignIn: 'Zamknij logowanie',
   },
   footer: {
-    description: 'Nieoficjalny fanowski serwis poświęcony Grand Theft Auto VI. Wszelkie treści gry i znaki towarowe są własnością Rockstar Games.',
+    description: 'Platforma handlowa GTA VI, która pozwala fanom gry zarabiać na treściach poświęconych Grand Theft Auto VI.',
     game: 'Gra',
     official: 'Oficjalne',
     coverage: 'Relacje',
@@ -1783,7 +1783,7 @@ const hi = {
     closeSignIn: 'साइन इन बंद करें',
   },
   footer: {
-    description: 'Grand Theft Auto VI को समर्पित एक अनौपचारिक फैन साइट। सभी गेम कंटेंट और ट्रेडमार्क Rockstar Games की संपत्ति हैं।',
+    description: 'एक GTA VI ट्रेड प्लेटफॉर्म, जहां गेम के फैन Grand Theft Auto VI को समर्पित कंटेंट से पैसा कमा सकते हैं।',
     game: 'गेम',
     official: 'आधिकारिक',
     coverage: 'कवरेज',
@@ -1986,7 +1986,7 @@ const ms = {
     closeSignIn: 'Tutup log masuk',
   },
   footer: {
-    description: 'Laman peminat tidak rasmi yang didedikasikan untuk Grand Theft Auto VI. Semua kandungan permainan dan tanda dagangan adalah hak milik Rockstar Games.',
+    description: 'Platform dagangan GTA VI yang membolehkan peminat permainan menjana wang melalui kandungan khusus untuk Grand Theft Auto VI.',
     game: 'Permainan',
     official: 'Rasmi',
     coverage: 'Liputan',

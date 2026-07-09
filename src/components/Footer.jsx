@@ -25,7 +25,7 @@ function Footer() {
           <div className="footer-brand">
             <div className="footer-logo">
               <Gamepad2 size={24} className="footer-icon" />
-              <span>GTA VI <span className="highlight">HUB</span></span>
+              <span>Leonida <span className="highlight">Loot</span></span>
             </div>
             <p className="footer-description">{t.footer.description}</p>
           </div>
