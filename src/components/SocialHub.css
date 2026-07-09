@@ -149,11 +149,11 @@
 }
 
 .sidebar-auth-button,
-.auth-prompt button,
-.social-auth-prompt button {
+.guest-access-notice button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 7px;
   min-height: 38px;
   padding: 0 14px;
   color: white;
@@ -1375,7 +1375,7 @@
   margin-top: 10px;
 }
 
-.social-auth-prompt {
+.guest-access-notice {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1387,7 +1387,38 @@
   border-radius: 8px;
 }
 
-.social-auth-prompt.compact {
+.guest-access-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  color: var(--accent-cyan);
+  background: rgba(0, 217, 255, 0.12);
+  border: 1px solid rgba(0, 217, 255, 0.28);
+  border-radius: 50%;
+}
+
+.guest-access-notice > div:nth-child(2) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.guest-access-notice strong {
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.guest-access-notice span {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.guest-access-notice.compact {
   padding: 12px;
   font-size: 13px;
 }
@@ -1634,7 +1665,7 @@
   }
 
   .composer-bottom,
-  .social-auth-prompt,
+  .guest-access-notice,
   .source-card-top,
   .profile-hero {
     align-items: stretch;
@@ -1673,7 +1704,7 @@
     grid-template-columns: 1fr;
   }
 
-  .social-auth-prompt button,
+  .guest-access-notice button,
   .compose-button,
   .analysis-toggle {
     width: 100%;

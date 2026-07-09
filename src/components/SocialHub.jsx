@@ -123,13 +123,24 @@ function Avatar({ user, size = 'md', onClick }) {
   )
 }
 
-function AuthPrompt({ onOpenAuth, compact = false }) {
+function GuestAccessNotice({ onOpenAuth, compact = false }) {
   const { t } = useTranslation()
+  const title = t.social.guestBrowseTitle || 'Browse the community as a guest'
+  const description = t.social.guestBrowseDescription || 'Posts, source checks, rumor votes, and poll results stay visible. Sign in when you want to post, react, vote, save, or comment.'
+
   return (
-    <div className={compact ? 'social-auth-prompt compact' : 'social-auth-prompt'}>
-      <LogIn size={compact ? 16 : 20} />
-      <span>{t.social.signInPrompt}</span>
-      <button type="button" onClick={onOpenAuth}>{t.social.signIn}</button>
+    <div className={compact ? 'guest-access-notice compact' : 'guest-access-notice'}>
+      <div className="guest-access-icon">
+        <Users size={compact ? 17 : 20} />
+      </div>
+      <div>
+        <strong>{title}</strong>
+        <span>{description}</span>
+      </div>
+      <button type="button" onClick={onOpenAuth}>
+        <LogIn size={16} />
+        {t.social.signIn}
+      </button>
     </div>
   )
 }
@@ -734,9 +745,11 @@ function FeedTab({ onOpenAuth, onViewUser }) {
 
   return (
     <div className="social-stack">
-      <PostComposer onOpenAuth={onOpenAuth} />
-
-      {!isSignedIn && <AuthPrompt onOpenAuth={onOpenAuth} compact />}
+      {isSignedIn ? (
+        <PostComposer onOpenAuth={onOpenAuth} />
+      ) : (
+        <GuestAccessNotice onOpenAuth={onOpenAuth} />
+      )}
 
       <AnimatePresence initial={false}>
       {posts.map((post) => {
@@ -954,12 +967,16 @@ function SourceForm({ onOpenAuth }) {
 }
 
 function SourcesTab({ onOpenAuth, onViewUser }) {
-  const { state, usersById } = useSocial()
+  const { state, usersById, isSignedIn } = useSocial()
   const { t } = useTranslation()
 
   return (
     <div className="social-stack">
-      <SourceForm onOpenAuth={onOpenAuth} />
+      {isSignedIn ? (
+        <SourceForm onOpenAuth={onOpenAuth} />
+      ) : (
+        <GuestAccessNotice onOpenAuth={onOpenAuth} compact />
+      )}
 
       <div className="source-list">
         {state.sources.map((source) => {

@@ -8,6 +8,14 @@ import { installCriticalErrorLogging } from './monitoring/errorLogger'
 
 installCriticalErrorLogging()
 
+function registerServiceWorker() {
+  if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
+
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {})
+  })
+}
+
 const rootElement = document.getElementById('root')
 const app = (
   <StrictMode>
@@ -24,3 +32,4 @@ if (rootElement.hasChildNodes()) {
 }
 
 logAnalyticsPageView()
+registerServiceWorker()

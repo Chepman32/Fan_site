@@ -1,6 +1,7 @@
 let firebaseAppPromise
 let firebaseServicesPromise
 let firebaseAnalyticsPromise
+let firebaseAppCheckPromise
 
 function envConfig() {
   const config = {
@@ -56,6 +57,28 @@ async function getFirebaseApp() {
   }
 
   return firebaseAppPromise
+}
+
+async function initializeFirebaseAppCheck(app) {
+  const siteKey = import.meta.env.VITE_FIREBASE_APPCHECK_SITE_KEY?.trim()
+  if (typeof window === 'undefined' || !siteKey) return null
+
+  if (!firebaseAppCheckPromise) {
+    firebaseAppCheckPromise = import('firebase/app-check')
+      .then(({ initializeAppCheck, ReCaptchaV3Provider }) => initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider(siteKey),
+        isTokenAutoRefreshEnabled: true,
+      }))
+      .catch((error) => {
+        firebaseAppCheckPromise = null
+        if (import.meta.env.DEV) {
+          console.warn('Firebase App Check was not initialized.', error)
+        }
+        return null
+      })
+  }
+
+  return firebaseAppCheckPromise
 }
 
 export async function initializeFirebaseAnalytics() {
@@ -114,7 +137,9 @@ export async function getFirebaseServices() {
       getFirebaseApp(),
       import('firebase/auth'),
       import('firebase/firestore'),
-    ]).then(([app, authModule, firestoreModule]) => {
+    ]).then(async ([app, authModule, firestoreModule]) => {
+      await initializeFirebaseAppCheck(app)
+
       const {
         createUserWithEmailAndPassword,
         EmailAuthProvider,

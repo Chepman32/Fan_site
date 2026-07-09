@@ -18,12 +18,89 @@ service cloud.firestore {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
     }
 
+    function validHttpsUrl(value) {
+      return value is string
+        && value.size() <= 2048
+        && value.matches('^https?://.+');
+    }
+
+    function validPublicUserShape() {
+      return request.resource.data.keys().hasOnly([
+          'username',
+          'usernameLower',
+          'avatarColor',
+          'bio',
+          'photoDataUrl',
+          'joinedAt',
+          'followedTopics',
+          'badges',
+          'bookmarkedPostIds',
+          'purchasesByTx',
+          'updatedAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'username',
+          'usernameLower',
+          'avatarColor',
+          'joinedAt',
+          'followedTopics',
+          'badges'
+        ])
+        && request.resource.data.username is string
+        && request.resource.data.username.size() >= 3
+        && request.resource.data.username.size() <= 60
+        && request.resource.data.usernameLower is string
+        && request.resource.data.usernameLower.size() >= 3
+        && request.resource.data.usernameLower.size() <= 60
+        && request.resource.data.avatarColor is string
+        && request.resource.data.avatarColor.matches('^#[0-9A-Fa-f]{6}$')
+        && (
+          request.resource.data.joinedAt is timestamp
+          || (request.resource.data.joinedAt is string
+            && request.resource.data.joinedAt.size() <= 40)
+        )
+        && (!('bio' in request.resource.data)
+          || (request.resource.data.bio is string && request.resource.data.bio.size() <= 220))
+        && (!('photoDataUrl' in request.resource.data)
+          || (request.resource.data.photoDataUrl is string
+            && request.resource.data.photoDataUrl.size() <= 500000))
+        && request.resource.data.followedTopics is list
+        && request.resource.data.followedTopics.size() <= 24
+        && request.resource.data.badges is list
+        && request.resource.data.badges.size() <= 12
+        && (!('bookmarkedPostIds' in request.resource.data)
+          || (request.resource.data.bookmarkedPostIds is list
+            && request.resource.data.bookmarkedPostIds.size() <= 300))
+        && (!('purchasesByTx' in request.resource.data)
+          || (request.resource.data.purchasesByTx is map
+            && request.resource.data.purchasesByTx.keys().size() <= 120));
+    }
+
     function validReactionMap() {
-      return request.resource.data.reactions.keys().hasOnly([
-        'useful',
-        'interesting',
-        'doubtful'
-      ]);
+      return request.resource.data.reactions is map
+        && request.resource.data.reactions.keys().hasOnly([
+          'useful',
+          'interesting',
+          'doubtful'
+        ])
+        && (!('useful' in request.resource.data.reactions)
+          || (request.resource.data.reactions.useful is list
+            && request.resource.data.reactions.useful.size() <= 5000))
+        && (!('interesting' in request.resource.data.reactions)
+          || (request.resource.data.reactions.interesting is list
+            && request.resource.data.reactions.interesting.size() <= 5000))
+        && (!('doubtful' in request.resource.data.reactions)
+          || (request.resource.data.reactions.doubtful is list
+            && request.resource.data.reactions.doubtful.size() <= 5000));
+    }
+
+    function validPostShape() {
+      return request.resource.data.body is string
+        && request.resource.data.body.size() <= 4000
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 3
+        && (!('linkUrl' in request.resource.data)
+          || validHttpsUrl(request.resource.data.linkUrl));
     }
 
     function validPostAttachment(attachment) {
@@ -91,12 +168,21 @@ service cloud.firestore {
     }
 
     function validRumorVoteMap() {
-      return request.resource.data.votes.keys().hasOnly([
-        'looks_real',
-        'probably_fake',
-        'need_more_proof',
-        'debunked'
-      ]);
+      return request.resource.data.votes is map
+        && request.resource.data.votes.keys().hasOnly([
+          'looks_real',
+          'probably_fake',
+          'need_more_proof',
+          'debunked'
+        ])
+        && request.resource.data.votes.looks_real is list
+        && request.resource.data.votes.looks_real.size() <= 5000
+        && request.resource.data.votes.probably_fake is list
+        && request.resource.data.votes.probably_fake.size() <= 5000
+        && request.resource.data.votes.need_more_proof is list
+        && request.resource.data.votes.need_more_proof.size() <= 5000
+        && request.resource.data.votes.debunked is list
+        && request.resource.data.votes.debunked.size() <= 5000;
     }
 
     function validCommentTarget() {
@@ -113,6 +199,109 @@ service cloud.firestore {
         'active',
         'sold'
       ];
+    }
+
+    function validP2PProperty(property) {
+      return property is map
+        && property.keys().hasOnly(['key', 'value'])
+        && property.key is string
+        && property.key.size() > 0
+        && property.key.size() <= 30
+        && property.value is string
+        && property.value.size() > 0
+        && property.value.size() <= 64;
+    }
+
+    function validP2PProperties() {
+      return request.resource.data.properties is list
+        && request.resource.data.properties.size() > 0
+        && request.resource.data.properties.size() <= 12
+        && validP2PProperty(request.resource.data.properties[0])
+        && (request.resource.data.properties.size() < 2
+          || validP2PProperty(request.resource.data.properties[1]))
+        && (request.resource.data.properties.size() < 3
+          || validP2PProperty(request.resource.data.properties[2]))
+        && (request.resource.data.properties.size() < 4
+          || validP2PProperty(request.resource.data.properties[3]))
+        && (request.resource.data.properties.size() < 5
+          || validP2PProperty(request.resource.data.properties[4]))
+        && (request.resource.data.properties.size() < 6
+          || validP2PProperty(request.resource.data.properties[5]))
+        && (request.resource.data.properties.size() < 7
+          || validP2PProperty(request.resource.data.properties[6]))
+        && (request.resource.data.properties.size() < 8
+          || validP2PProperty(request.resource.data.properties[7]))
+        && (request.resource.data.properties.size() < 9
+          || validP2PProperty(request.resource.data.properties[8]))
+        && (request.resource.data.properties.size() < 10
+          || validP2PProperty(request.resource.data.properties[9]))
+        && (request.resource.data.properties.size() < 11
+          || validP2PProperty(request.resource.data.properties[10]))
+        && (request.resource.data.properties.size() < 12
+          || validP2PProperty(request.resource.data.properties[11]));
+    }
+
+    function validP2PFile(file) {
+      return file is map
+        && file.keys().hasOnly([
+          'name',
+          'size',
+          'type',
+          'provider',
+          'fileId',
+          'fileUniqueId',
+          'messageId',
+          'kind',
+          'storageStatus'
+        ])
+        && file.keys().hasAll([
+          'name',
+          'size',
+          'type',
+          'provider',
+          'fileId',
+          'kind',
+          'storageStatus'
+        ])
+        && file.name is string
+        && file.name.size() > 0
+        && file.name.size() <= 160
+        && file.size is number
+        && file.size > 0
+        && file.size <= 52428800
+        && file.type is string
+        && file.type.size() <= 120
+        && file.provider == 'telegram_bot'
+        && file.fileId is string
+        && file.fileId.size() > 0
+        && file.fileId.size() <= 512
+        && (!('fileUniqueId' in file)
+          || (file.fileUniqueId is string && file.fileUniqueId.size() <= 256))
+        && (!('messageId' in file)
+          || (file.messageId is string && file.messageId.size() <= 64))
+        && file.kind in ['p2p-listing-file', 'p2p-listing-edit-file']
+        && file.storageStatus == 'stored';
+    }
+
+    function validP2PFiles() {
+      return request.resource.data.files is list
+        && request.resource.data.files.size() <= 8
+        && (request.resource.data.files.size() < 1
+          || validP2PFile(request.resource.data.files[0]))
+        && (request.resource.data.files.size() < 2
+          || validP2PFile(request.resource.data.files[1]))
+        && (request.resource.data.files.size() < 3
+          || validP2PFile(request.resource.data.files[2]))
+        && (request.resource.data.files.size() < 4
+          || validP2PFile(request.resource.data.files[3]))
+        && (request.resource.data.files.size() < 5
+          || validP2PFile(request.resource.data.files[4]))
+        && (request.resource.data.files.size() < 6
+          || validP2PFile(request.resource.data.files[5]))
+        && (request.resource.data.files.size() < 7
+          || validP2PFile(request.resource.data.files[6]))
+        && (request.resource.data.files.size() < 8
+          || validP2PFile(request.resource.data.files[7]));
     }
 
     function validP2PListingShape() {
@@ -137,25 +326,37 @@ service cloud.firestore {
         && request.resource.data.title.size() >= 3
         && request.resource.data.title.size() <= 90
         && request.resource.data.description is string
+        && request.resource.data.description.size() <= 520
         && request.resource.data.category is string
+        && request.resource.data.category in [
+          'digital-assets',
+          'streaming',
+          'guides',
+          'services',
+          'collectibles',
+          'other'
+        ]
         && request.resource.data.price is number
         && request.resource.data.price >= 0
+        && request.resource.data.price <= 100000
         && request.resource.data.currency is string
+        && request.resource.data.currency == 'USDT'
         && (!('cryptoWalletAddress' in request.resource.data)
           || (request.resource.data.cryptoWalletAddress is string
-            && request.resource.data.cryptoWalletAddress.size() <= 128))
+            && request.resource.data.cryptoWalletAddress.size() <= 128
+            && (request.resource.data.cryptoWalletAddress == ''
+              || request.resource.data.cryptoWalletAddress.matches('^T[1-9A-HJ-NP-Za-km-z]{33}$'))))
         && request.resource.data.deliveryMethod is string
+        && request.resource.data.deliveryMethod.size() <= 80
         && (!('paymentMethods' in request.resource.data)
           || (request.resource.data.paymentMethods is list
             && request.resource.data.paymentMethods.size() > 0
             && request.resource.data.paymentMethods.size() <= 2
             && request.resource.data.paymentMethods.hasOnly(['crypto', 'card'])))
-        && request.resource.data.properties is list
-        && request.resource.data.properties.size() > 0
-        && request.resource.data.properties.size() <= 12
+        && validP2PProperties()
         && request.resource.data.previewDataUrl is string
-        && request.resource.data.files is list
-        && request.resource.data.files.size() <= 8
+        && request.resource.data.previewDataUrl.size() <= 500000
+        && validP2PFiles()
         && validP2PStatus();
     }
 
@@ -330,27 +531,7 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
       allow create: if owns(userId)
-        && request.resource.data.keys().hasOnly([
-          'username',
-          'usernameLower',
-          'avatarColor',
-          'bio',
-          'photoDataUrl',
-          'joinedAt',
-          'followedTopics',
-          'badges',
-          'bookmarkedPostIds',
-          'purchasesByTx',
-          'updatedAt'
-        ])
-        && request.resource.data.username is string
-        && request.resource.data.usernameLower is string
-        && request.resource.data.followedTopics is list
-        && request.resource.data.badges is list
-        && (!('bio' in request.resource.data) || request.resource.data.bio is string)
-        && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
-        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list)
-        && (!('purchasesByTx' in request.resource.data) || request.resource.data.purchasesByTx is map);
+        && validPublicUserShape();
       allow update: if owns(userId)
         && changedOnly([
           'username',
@@ -364,12 +545,7 @@ service cloud.firestore {
           'purchasesByTx',
           'updatedAt'
         ])
-        && request.resource.data.followedTopics is list
-        && request.resource.data.badges is list
-        && (!('bio' in request.resource.data) || request.resource.data.bio is string)
-        && (!('photoDataUrl' in request.resource.data) || request.resource.data.photoDataUrl is string)
-        && (!('bookmarkedPostIds' in request.resource.data) || request.resource.data.bookmarkedPostIds is list)
-        && (!('purchasesByTx' in request.resource.data) || request.resource.data.purchasesByTx is map);
+        && validPublicUserShape();
       allow delete: if false;
     }
 
@@ -411,9 +587,7 @@ service cloud.firestore {
           'createdAt',
           'reactions'
         ])
-        && request.resource.data.body is string
-        && request.resource.data.tags is list
-        && (!('linkUrl' in request.resource.data) || request.resource.data.linkUrl is string)
+        && validPostShape()
         && validPostAttachments()
         && validReactionMap();
       allow update: if signedIn()
@@ -426,8 +600,12 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn()
         && request.resource.data.title is string
+        && request.resource.data.title.size() >= 3
+        && request.resource.data.title.size() <= 140
         && request.resource.data.summary is string
+        && request.resource.data.summary.size() <= 700
         && request.resource.data.topic is string
+        && request.resource.data.topic.size() <= 80
         && validRumorVoteMap();
       allow update: if signedIn()
         && changedOnly(['votes'])
@@ -439,11 +617,16 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn()
         && request.resource.data.question is string
+        && request.resource.data.question.size() >= 3
+        && request.resource.data.question.size() <= 180
         && request.resource.data.options is list
+        && request.resource.data.options.size() >= 2
+        && request.resource.data.options.size() <= 8
         && request.resource.data.votes is map;
       allow update: if signedIn()
         && changedOnly(['votes'])
-        && request.resource.data.votes is map;
+        && request.resource.data.votes is map
+        && request.resource.data.votes.keys().size() <= 8;
       allow delete: if isAdmin();
     }
 
@@ -451,10 +634,15 @@ service cloud.firestore {
       allow read: if true;
       allow create: if signedIn()
         && request.resource.data.authorId == request.auth.uid
-        && request.resource.data.url is string
+        && validHttpsUrl(request.resource.data.url)
         && request.resource.data.claim is string
+        && request.resource.data.claim.size() >= 3
+        && request.resource.data.claim.size() <= 220
         && request.resource.data.category is string
+        && request.resource.data.category.size() <= 80
         && request.resource.data.reason is string
+        && request.resource.data.reason.size() >= 3
+        && request.resource.data.reason.size() <= 700
         && request.resource.data.status == 'review';
       allow update: if isAdmin();
       allow delete: if isAdmin();
@@ -465,7 +653,10 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.authorId == request.auth.uid
         && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 1200
         && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() <= 160
         && validCommentTarget();
       allow update, delete: if isAdmin();
     }
@@ -476,8 +667,11 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.fromId == request.auth.uid
         && request.resource.data.toId is string
+        && request.resource.data.toId != request.auth.uid
         && recipientAllowsMessage(request.resource.data.toId)
         && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 2000
         && request.resource.data.participantIds is list
         && request.auth.uid in request.resource.data.participantIds
         && request.resource.data.toId in request.resource.data.participantIds
@@ -491,8 +685,12 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.reporterId == request.auth.uid
         && request.resource.data.targetType is string
+        && request.resource.data.targetType.size() <= 80
         && request.resource.data.targetId is string
+        && request.resource.data.targetId.size() <= 160
         && request.resource.data.reason is string
+        && request.resource.data.reason.size() >= 3
+        && request.resource.data.reason.size() <= 700
         && request.resource.data.status == 'submitted';
       allow update: if isAdmin();
       allow delete: if false;

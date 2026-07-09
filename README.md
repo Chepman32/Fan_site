@@ -9,6 +9,8 @@ The news section parses live GTA VI coverage from IGN in the frontend at runtime
 
 For local development, either run through Firebase Hosting's reserved config endpoint or set the Vite variables from `.env.example`. The Vite dev server proxies `/__/firebase/init.json` to the configured Firebase Hosting project.
 
+Firebase web configuration values such as `apiKey`, `projectId`, and `authDomain` are public client identifiers. Do not treat `/__/firebase/init.json` as a secret boundary. Production protection comes from Firestore rules, Firebase Auth, backend-only secrets, and Firebase App Check. To reduce abuse from non-app clients, create a web App Check provider, set `VITE_FIREBASE_APPCHECK_SITE_KEY`, verify the app still loads, then enforce App Check for Firestore and callable/HTTP Functions in the Firebase console.
+
 IGN wiki sections can translate parsed English content in the browser through Google Cloud Translation Basic. Set `VITE_GOOGLE_TRANSLATE_API_KEY` in `.env.local`; translated payloads are cached in `localStorage` by language and parsed content hash, so unchanged IGN text is not translated again on the same browser.
 
 Community posts can attach up to four images/videos (20 MiB each). Media is uploaded through the authenticated Telegram storage bridge and streamed through `VITE_TELEGRAM_FILE_ENDPOINT`; the bot token remains server-side. Deploy the matching `telegramUpload`/`telegramFile` Firebase Functions or the Cloudflare Worker plus the updated Firestore rules before enabling this in production.
