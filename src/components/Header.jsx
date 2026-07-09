@@ -133,7 +133,7 @@ function Header({
       <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`} aria-label="Primary navigation">
         <a className="nav-brand" href="/" onClick={(event) => navigate(event, '/')}>
           <img className="nav-favicon" src="/favicon.svg" alt="" aria-hidden="true" width="32" height="32" />
-          <span>GTA VI <span className="highlight">HUB</span></span>
+          <span>Leonida <span className="highlight">Loot</span></span>
         </a>
 
         <div className="nav-links">

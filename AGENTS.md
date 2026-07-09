@@ -74,6 +74,10 @@ Important root files:
   - User-facing project setup notes.
 - `AGENTS.md`
   - This file.
+- `public/site.webmanifest`
+  - PWA manifest used by the browser shell and mobile install surfaces.
+- `public/sw.js`
+  - Minimal production service worker for app-shell asset caching.
 
 Frontend source:
 
@@ -229,6 +233,12 @@ Deploy Firestore rules only:
 firebase deploy --only firestore:rules --project gta-vi-fan-site
 ```
 
+Deploy Hosting only:
+
+```sh
+firebase deploy --only hosting --project gta-vi-fan-site
+```
+
 Set the payout private key secret:
 
 ```sh
@@ -283,6 +293,7 @@ VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
+VITE_FIREBASE_APPCHECK_SITE_KEY=
 VITE_GOOGLE_TRANSLATE_API_KEY=
 VITE_TELEGRAM_UPLOAD_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/upload
 VITE_TELEGRAM_FILE_ENDPOINT=https://gta-vi-p2p-telegram-upload.antonkerch555.workers.dev/api/telegram/file
@@ -297,6 +308,9 @@ Notes:
 
 - Every `VITE_` variable is bundled into the frontend if referenced.
 - Do not put private keys, service account JSON, bot tokens, or admin credentials in `VITE_` variables.
+- Firebase Web API keys, app ids, project ids, auth domains, and the reCAPTCHA v3 App Check site key are public client configuration. Do not treat public Firebase web config as the access-control boundary.
+- The reCAPTCHA secret key is not public. Never commit it, paste it into chat/docs, or expose it in screenshots; rotate it immediately if it is exposed.
+- Protect Firebase data with Firestore rules, Firebase Auth, Firebase App Check, Google Cloud API key restrictions, and quotas.
 - `VITE_P2P_PLATFORM_USDT_ADDRESS` is public and safe to expose.
 - `VITE_P2P_COMMISSION_RATE` is public display/config for the client. The backend must always independently calculate commission.
 
@@ -419,7 +433,7 @@ https://leonidaloot.com
 Technical SEO is handled in a few places:
 
 - `index.html`
-  - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, Google-compatible favicon links, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
+  - Contains the fallback title, description, canonical URL, robots tag, Open Graph/Twitter card tags, Google-compatible favicon links, mobile/PWA meta tags, font preconnects, base JSON-LD, and the SEO head replacement markers used by prerendering.
 - `src/seo/routes.js`
   - Central route registry for canonical route definitions, route type, indexability, sitemap membership, prerender membership, priorities, and change frequencies.
   - Keep route additions here in sync with `App.jsx`, `src/entry-server.jsx`, and `scripts/seo-validate.mjs`.
@@ -442,7 +456,7 @@ Technical SEO is handled in a few places:
   - Runs after the client and SSR builds.
   - Generates raw route HTML for indexable routes such as `/`, `/news`, `/about`, `/leonida`, `/leonida/characters`, `/leonida/locations`, `/leonida/vehicles`, `/leonida/weapons`, `/leonida/social-media`, `/community`, `/shop`, `/shop/:slug`, `/p2p`, `/p2p/:slug`, trust pages, known `/locations/:slug` pages, and noindex HTML for private/legacy pages.
   - Writes both `route/index.html` files and matching `route.html` aliases so Firebase clean URLs and local Vite preview can serve slashless route HTML.
-  - Regenerates `dist/robots.txt` and writes prerender output. `scripts/generate-sitemap.mjs` writes the final sitemap from the SSR route registry.
+  - Regenerates `dist/robots.txt` and writes prerender output. Keep its robots output in sync with `public/robots.txt`. `scripts/generate-sitemap.mjs` writes the final sitemap from the SSR route registry.
 - `scripts/generate-sitemap.mjs`
   - Imports `indexableSeoRoutes` from the SSR bundle and writes `dist/sitemap.xml`.
 - `scripts/seo-validate.mjs`
@@ -450,7 +464,8 @@ Technical SEO is handled in a few places:
   - Fails if generated HTML contains forbidden placeholder values such as `Loading latest news`, `Loading character guide`, `Loading Leonida guide`, `Loading vehicle guide`, `Loading weapons guide`, `Loading social media guide`, `Preparing social media guide`, `Loading game information`, `Loading news article`, `Loading...`, `undefined`, or `NaN`.
   - Has a route-specific guard for `/leonida/social-media` so the social media guide cannot regress to loading copy.
 - `public/robots.txt`
-  - Allows public crawling, blocks API/reserved Firebase paths, and points crawlers to the sitemap.
+  - Allows public crawling, blocks API/reserved Firebase paths and private account/payment/admin surfaces, and points crawlers to the sitemap.
+  - Do not add `Disallow: /search` unless a future search route is intentionally private or low-quality; public search/discovery surfaces should not be blocked by default.
 - `public/sitemap.xml`
   - Static source/fallback sitemap. The final production sitemap is generated into `dist/sitemap.xml` by `scripts/generate-sitemap.mjs` during build.
   - The generated sitemap intentionally omits auth-only pages, private messages, and dynamic user profile pages.
@@ -464,6 +479,10 @@ Technical SEO is handled in a few places:
   - Optional scalable favicon fallback/source asset. Do not rely on SVG alone for Google Search favicons.
 - `public/apple-touch-icon.png`
   - 180x180 touch icon for Apple and mobile surfaces.
+- `public/site.webmanifest`
+  - PWA manifest linked from `index.html`. Keep name, icons, theme/background colors, and scope aligned with production branding.
+- `public/sw.js`
+  - Production service worker registered by `src/main.jsx`. Keep it conservative: cache stable shell assets, avoid caching authenticated API responses or user-specific Firebase data.
 
 Build and validation commands:
 
@@ -490,6 +509,8 @@ Current public SEO expectations:
 - `/shop` should avoid a giant visible product wall; keep the category grid paginated and route deeper product detail content to `/shop/:slug`.
 - `/leonida/social-media` must be static/crawlable and must not contain `Loading social media guide` or `Preparing social media guide` in generated HTML.
 - Public `/leonida/characters`, `/leonida/locations`, `/leonida/vehicles`, `/leonida/weapons`, and `/leonida/social-media` are indexable and should not be added to noindex lists.
+- Public routes should not expose visible placeholder text such as `Preparing route` or `Opening page` during prerendering or normal hydration. `src/App.jsx` keeps the route suspense fallback spinner-only with an accessible status label.
+- Mobile checks should confirm the viewport/mobile meta tags are present, the bottom navigation appears at phone widths, desktop nav hides at mobile breakpoints, and key routes avoid horizontal overflow.
 
 SEO limitations:
 
@@ -500,7 +521,7 @@ SEO limitations:
 
 ## Top-Level React Composition
 
-`src/main.jsx` mounts the app.
+`src/main.jsx` mounts the app and registers `public/sw.js` in production for PWA shell caching.
 
 `src/App.jsx` wraps the app in:
 
@@ -521,6 +542,7 @@ SEO limitations:
 - Auth modal open/close state.
 - Page selection.
 - Landing page sections.
+- Route-level suspense fallback behavior. Keep the fallback visually minimal; do not reintroduce visible `Opening page` or `Preparing route` copy.
 
 `Header` receives shared app state including:
 
@@ -542,7 +564,9 @@ The client initializes Firebase lazily. It tries browser/Vite env configuration 
 /__/firebase/init.json
 ```
 
-This supports production Hosting and local development with the configured dev proxy.
+This supports production Hosting and local development with the configured dev proxy. On Firebase Hosting, `/__/firebase/init.json` is a reserved public endpoint and will expose the Firebase web config by design. Do not try to "secure" Firebase by hiding this file or the browser API key; secure the app with rules, Auth, App Check, API restrictions, quotas, and backend-only secrets.
+
+If `VITE_FIREBASE_APPCHECK_SITE_KEY` is set, the client initializes Firebase App Check with the reCAPTCHA v3 provider before Firestore/Auth services are used. The value must be the public reCAPTCHA site key. Never use or commit the reCAPTCHA secret key in frontend configuration.
 
 `getFirebaseServices()` returns:
 
@@ -558,6 +582,8 @@ Guidelines:
 - Prefer `getFirebaseServices()` over importing and initializing Firebase repeatedly.
 - Keep Firebase client code browser-safe.
 - Do not import Admin SDK into frontend files.
+- Keep App Check initialization lazy and optional for local/dev environments, but configure and enforce App Check for production Firebase services from Firebase Console/Google Cloud after verifying legitimate clients receive tokens.
+- Restrict the Firebase browser API key in Google Cloud Console to Firebase-required APIs and expected HTTP referrers such as the production domain and Firebase Hosting domain. Do not include unrelated billable APIs on that public key.
 - If adding Firestore operations, verify both SocialContext data flow and Firestore rules.
 
 ## Social Context
@@ -2067,6 +2093,16 @@ Change Firebase client config behavior:
 
 - `src/firebase/firebaseClient.js`
 
+Change mobile/PWA shell behavior:
+
+- `index.html`
+- `src/main.jsx`
+- `src/App.jsx`
+- `src/App.css`
+- `src/components/Header.css`
+- `public/site.webmanifest`
+- `public/sw.js`
+
 Change social data behavior:
 
 - `src/social/SocialContext.jsx`
@@ -2090,6 +2126,9 @@ Change Telegram upload Cloudflare backend:
 - The payout private key belongs only in Firebase Secret Manager.
 - The platform address, displayed address, and private key signer must match.
 - Firestore rules are part of the product, not optional hardening.
+- Firebase browser config is public by design; do not confuse public identifiers with backend secrets.
+- App Check, API key restrictions, quotas, Auth, and Firestore rules are the real Firebase abuse controls.
+- Keep route loading fallbacks from looking like broken pages, especially on prerendered public routes.
 - Keep `p2pDeals` backend-owned.
 - Test payment changes with tiny amounts.
 - When in doubt, prefer a pending/manual-review state over an automatic payout.
