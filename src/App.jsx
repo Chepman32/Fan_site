@@ -86,8 +86,10 @@ const DEFAULT_ROUTE_COMPONENTS = {
 }
 
 function RouteLoading() {
+  const { t } = useTranslation()
+
   return (
-    <div className="route-loading" role="status" aria-live="polite" aria-label="Loading page">
+    <div className="route-loading" role="status" aria-live="polite" aria-label={t.nav.loadingPage || 'Loading page'}>
       <span className="route-loading-spinner" aria-hidden="true" />
     </div>
   )

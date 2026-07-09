@@ -37,9 +37,14 @@ const TAB_IDS = ['feed', 'rumors', 'sources', 'polls']
 const TAB_ICONS = { feed: MessageSquare, rumors: Radio, sources: Link, polls: Vote }
 const MAX_POST_MEDIA = 4
 const MAX_POST_MEDIA_BYTES = 20 * 1024 * 1024
-const createDefaultQueryOptions = () => [
-  { id: 'option-1', name: 'Option 1' },
-  { id: 'option-2', name: 'Option 2' },
+const DEFAULT_COMPOSER_COPY = {
+  optionLabel: (index) => `Option ${index}`,
+  queryPrefix: 'Query:',
+  optionsPrefix: 'Options:',
+}
+const createDefaultQueryOptions = (copy = DEFAULT_COMPOSER_COPY) => [
+  { id: 'option-1', name: copy.optionLabel(1) },
+  { id: 'option-2', name: copy.optionLabel(2) },
 ]
 
 const SOURCE_STATUS_ICONS = {
@@ -48,43 +53,55 @@ const SOURCE_STATUS_ICONS = {
   rejected: XCircle,
 }
 
-function formatDate(date) {
-  return new Intl.DateTimeFormat('en', {
+function formatDate(date, locale = 'en') {
+  return new Intl.DateTimeFormat(locale, {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
   }).format(new Date(date))
 }
 
-function formatRelative(date) {
+function formatRelative(date, copy, locale = 'en') {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
-  if (minutes < 1) return 'now'
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 1) return copy.relativeNow
+  if (minutes < 60) return `${minutes}${copy.relativeMin}`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return `${hours}${copy.relativeHour}`
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
-  return formatDate(date)
+  if (days < 7) return `${days}${copy.relativeDay}`
+  return formatDate(date, locale)
 }
 
-function getHostname(url) {
+function getHostname(url, copy) {
   try {
     return new URL(url).hostname.replace(/^www\./, '')
   } catch {
-    return 'submitted source'
+    return copy.submittedSource
   }
 }
 
-function formatAttachedQuery(query) {
+function formatAttachedQuery(query, copy = DEFAULT_COMPOSER_COPY) {
   if (!query) return ''
   const options = query.options
     .map((option, index) => `${index + 1}. ${option}`)
     .join('\n')
 
-  return [`Query: ${query.title}`, options ? `Options:\n${options}` : '']
+  return [`${copy.queryPrefix} ${query.title}`, options ? `${copy.optionsPrefix}\n${options}` : '']
     .filter(Boolean)
     .join('\n')
+}
+
+function topicLabel(topic, copy) {
+  return copy.topicLabels?.[topic] || topic
+}
+
+function sourceCategoryLabel(category, copy) {
+  return copy.sourceCategories?.[category] || category
+}
+
+function sourceLabel(label, copy) {
+  return copy.sourceLabels?.[label] || label
 }
 
 function mediaSelectionId(file) {
@@ -94,10 +111,10 @@ function mediaSelectionId(file) {
   return `${file.name}-${file.lastModified}-${randomId}`
 }
 
-function userFallback(userId) {
+function userFallback(userId, copy) {
   return {
     id: userId,
-    username: 'Unknown user',
+    username: copy.unknownUser,
     avatarColor: '#6b6b7b',
     photoDataUrl: '',
     followedTopics: [],
@@ -219,7 +236,7 @@ function Sidebar({ onOpenAuth }) {
                 type="button"
                 onClick={() => (isSignedIn ? followTopic(topic) : onOpenAuth())}
               >
-                <span>{topic}</span>
+                <span>{topicLabel(topic, t.social)}</span>
                 <small>{following ? t.social.following : `${count} ${t.social.watching}`}</small>
               </button>
             )
@@ -247,13 +264,14 @@ function Sidebar({ onOpenAuth }) {
 function PostComposer({ onOpenAuth }) {
   const { createPost, isSignedIn } = useSocial()
   const { t } = useTranslation()
+  const composerCopy = t.social.composer
   const [body, setBody] = useState('')
   const [selectedTags, setSelectedTags] = useState(['Trailers'])
   const [attachMenuOpen, setAttachMenuOpen] = useState(false)
   const [attachmentModal, setAttachmentModal] = useState(null)
   const [linkDraft, setLinkDraft] = useState('')
   const [queryTitleDraft, setQueryTitleDraft] = useState('')
-  const [queryOptionsDraft, setQueryOptionsDraft] = useState(createDefaultQueryOptions)
+  const [queryOptionsDraft, setQueryOptionsDraft] = useState(() => createDefaultQueryOptions(composerCopy))
   const [attachedLink, setAttachedLink] = useState('')
   const [attachedQuery, setAttachedQuery] = useState(null)
   const [attachedMedia, setAttachedMedia] = useState([])
@@ -306,7 +324,7 @@ function PostComposer({ onOpenAuth }) {
     if (isPublishing) return
 
     const cleanTextBody = typedBodyUrl ? removeFirstPostUrl(body) : body.trim()
-    const cleanQuery = formatAttachedQuery(attachedQuery)
+    const cleanQuery = formatAttachedQuery(attachedQuery, composerCopy)
     const cleanBody = cleanQuery
       ? [cleanTextBody, cleanQuery].filter(Boolean).join('\n\n')
       : cleanTextBody
@@ -323,10 +341,10 @@ function PostComposer({ onOpenAuth }) {
 
       for (let index = 0; index < pendingMedia.length; index += 1) {
         const pendingItem = pendingMedia[index]
-        setUploadProgress(`Uploading ${index + 1} of ${pendingMedia.length}: ${pendingItem.file.name}`)
+        setUploadProgress(composerCopy.uploading?.(index + 1, pendingMedia.length, pendingItem.file.name) || `Uploading ${index + 1} of ${pendingMedia.length}: ${pendingItem.file.name}`)
         const storedFile = await uploadTelegramFile(pendingItem.file, {
           kind: 'ugc-post-media',
-          title: cleanBody.slice(0, 160) || 'Community post',
+          title: cleanBody.slice(0, 160) || t.social.communityPost,
         })
         preparedMedia = preparedMedia.map((item) => (
           item.id === pendingItem.id ? { ...item, storedFile } : item
@@ -334,7 +352,7 @@ function PostComposer({ onOpenAuth }) {
         setAttachedMedia(preparedMedia)
       }
 
-      setUploadProgress('Publishing post...')
+      setUploadProgress(composerCopy.publishingPost || composerCopy.publishing || 'Publishing post...')
       const didCreate = await createPost({
         body: cleanBody,
         tags: selectedTags,
@@ -351,7 +369,7 @@ function PostComposer({ onOpenAuth }) {
         setSelectedTags(['Trailers'])
       }
     } catch (error) {
-      setComposerError(error.message || 'Could not upload the attached media.')
+      setComposerError(error.message || composerCopy.uploadFailed || 'Could not upload the attached media.')
     } finally {
       setIsPublishing(false)
       setUploadProgress('')
@@ -375,13 +393,13 @@ function PostComposer({ onOpenAuth }) {
 
     const invalidType = selectedFiles.find((file) => !/^(image|video)\//.test(file.type))
     if (invalidType) {
-      setComposerError(`${invalidType.name} is not an image or video.`)
+      setComposerError(composerCopy.invalidMedia?.(invalidType.name) || `${invalidType.name} is not an image or video.`)
       return
     }
 
     const oversizedFile = selectedFiles.find((file) => file.size > MAX_POST_MEDIA_BYTES)
     if (oversizedFile) {
-      setComposerError(`${oversizedFile.name} is larger than 20 MB.`)
+      setComposerError(composerCopy.mediaTooLarge?.(oversizedFile.name, 20) || `${oversizedFile.name} is larger than 20 MB.`)
       return
     }
 
@@ -395,7 +413,7 @@ function PostComposer({ onOpenAuth }) {
     const acceptedFiles = uniqueFiles.slice(0, Math.max(availableSlots, 0))
 
     if (acceptedFiles.length === 0) {
-      setComposerError(`Attach up to ${MAX_POST_MEDIA} unique images or videos.`)
+      setComposerError(composerCopy.attachUpTo?.(MAX_POST_MEDIA) || `Attach up to ${MAX_POST_MEDIA} unique images or videos.`)
       return
     }
 
@@ -410,7 +428,7 @@ function PostComposer({ onOpenAuth }) {
     ])
     setComposerError(
       acceptedFiles.length < uniqueFiles.length
-        ? `Only the first ${MAX_POST_MEDIA} media files were attached.`
+        ? composerCopy.firstFilesAttached?.(MAX_POST_MEDIA) || `Only the first ${MAX_POST_MEDIA} media files were attached.`
         : '',
     )
   }
@@ -438,7 +456,7 @@ function PostComposer({ onOpenAuth }) {
     }
     if (type === 'query' && !attachedQuery) {
       setQueryTitleDraft('')
-      setQueryOptionsDraft(createDefaultQueryOptions())
+      setQueryOptionsDraft(createDefaultQueryOptions(composerCopy))
       nextQueryOptionIdRef.current = 3
     }
   }
@@ -467,7 +485,7 @@ function PostComposer({ onOpenAuth }) {
   const addQueryOption = () => {
     const id = `option-${nextQueryOptionIdRef.current}`
     nextQueryOptionIdRef.current += 1
-    setQueryOptionsDraft((options) => [...options, { id, name: `Option ${options.length + 1}` }])
+    setQueryOptionsDraft((options) => [...options, { id, name: composerCopy.optionLabel(options.length + 1) }])
   }
 
   const removeQueryOption = (id) => {
@@ -498,8 +516,8 @@ function PostComposer({ onOpenAuth }) {
         .map((option) => option.name.trim())
         .filter(Boolean)
       setAttachedQuery({
-        title: title || 'Untitled query',
-        options: options.length >= 2 ? options : ['Option 1', 'Option 2'],
+        title: title || composerCopy.untitledQuery,
+        options: options.length >= 2 ? options : createDefaultQueryOptions(composerCopy).map((option) => option.name),
       })
     }
 
@@ -519,7 +537,7 @@ function PostComposer({ onOpenAuth }) {
           <button
             className="composer-attach-button"
             type="button"
-            aria-label="Attach content"
+            aria-label={composerCopy.attachContent}
             aria-haspopup="menu"
             aria-expanded={attachMenuOpen}
             onClick={(event) => {
@@ -533,15 +551,15 @@ function PostComposer({ onOpenAuth }) {
             <div className="composer-attach-menu" role="menu">
               <button type="button" role="menuitem" onClick={() => openAttachmentModal('link')}>
                 <Link size={15} />
-                Link
+                {composerCopy.link}
               </button>
               <button type="button" role="menuitem" onClick={openMediaPicker}>
                 <ImagePlus size={15} />
-                Image/Video
+                {composerCopy.media}
               </button>
               <button type="button" role="menuitem" onClick={() => openAttachmentModal('query')}>
                 <MessageSquare size={15} />
-                Query
+                {composerCopy.query}
               </button>
             </div>
           )}
@@ -556,12 +574,12 @@ function PostComposer({ onOpenAuth }) {
         />
       </div>
       {previewPost && (
-        <div className="composer-preview" aria-label="Post attachment preview">
+        <div className="composer-preview" aria-label={composerCopy.previewLabel}>
           <PostAttachment post={previewPost} />
           <button
             className="composer-remove-attachment"
             type="button"
-            aria-label="Remove attached link"
+            aria-label={composerCopy.removeAttachedLink}
             onClick={removeAttachedLink}
           >
             <XCircle size={16} />
@@ -575,13 +593,13 @@ function PostComposer({ onOpenAuth }) {
             <strong>{attachedQuery.title}</strong>
             <small>{attachedQuery.options.join(' / ')}</small>
           </span>
-          <button type="button" aria-label="Remove query attachment" onClick={() => setAttachedQuery(null)}>
+          <button type="button" aria-label={composerCopy.removeQueryAttachment} onClick={() => setAttachedQuery(null)}>
             <XCircle size={15} />
           </button>
         </div>
       )}
       {attachedMedia.length > 0 && (
-        <div className={`composer-media-grid media-count-${attachedMedia.length}`} aria-label="Attached images and videos">
+        <div className={`composer-media-grid media-count-${attachedMedia.length}`} aria-label={composerCopy.mediaLabel}>
           {attachedMedia.map((item) => (
             <div className="composer-media-item" key={item.id}>
               {item.file.type.startsWith('video/') ? (
@@ -592,7 +610,7 @@ function PostComposer({ onOpenAuth }) {
               <span title={item.file.name}>{item.file.name}</span>
               <button
                 type="button"
-                aria-label={`Remove ${item.file.name}`}
+                aria-label={composerCopy.removeFile(item.file.name)}
                 disabled={isPublishing}
                 onClick={() => removeAttachedMedia(item.id)}
               >
@@ -604,7 +622,7 @@ function PostComposer({ onOpenAuth }) {
       )}
       {composerError && <div className="composer-error" role="alert">{composerError}</div>}
       <div className="composer-bottom">
-        <div className="composer-tags" aria-label="Post topics">
+        <div className="composer-tags" aria-label={composerCopy.postTopics}>
           {SOCIAL_TOPICS.slice(0, 6).map((topic) => (
             <button
               key={topic}
@@ -612,13 +630,13 @@ function PostComposer({ onOpenAuth }) {
               type="button"
               onClick={() => toggleTag(topic)}
             >
-              {topic}
+              {topicLabel(topic, t.social)}
             </button>
           ))}
         </div>
         <button className="compose-button" type="submit" disabled={isPublishing}>
           {isPublishing ? <Loader2 size={16} className="composer-spin" /> : <Plus size={16} />}
-          {isPublishing ? (uploadProgress || 'Publishing...') : t.social.post}
+          {isPublishing ? (uploadProgress || composerCopy.publishing) : t.social.post}
         </button>
       </div>
       {attachmentModal && (
@@ -632,18 +650,18 @@ function PostComposer({ onOpenAuth }) {
           >
             <div className="composer-modal-header">
               <h3 id="composer-attachment-title">
-                {attachmentModal === 'link' ? 'Attach link' : 'Attach query'}
+                {attachmentModal === 'link' ? composerCopy.attachLink : composerCopy.attachQuery}
               </h3>
-              <button type="button" aria-label="Close attachment modal" onClick={() => setAttachmentModal(null)}>
+              <button type="button" aria-label={composerCopy.closeAttachmentModal} onClick={() => setAttachmentModal(null)}>
                 <XCircle size={18} />
               </button>
             </div>
 
             {attachmentModal === 'link' ? (
               <label>
-                <span>Link URL</span>
+                <span>{composerCopy.linkUrl}</span>
                 <div className="composer-icon-input">
-                  <button type="button" aria-label="Paste link URL" onClick={pasteLinkDraft}>
+                  <button type="button" aria-label={composerCopy.pasteLinkUrl} onClick={pasteLinkDraft}>
                     <ClipboardPaste size={16} />
                   </button>
                   <input
@@ -658,19 +676,19 @@ function PostComposer({ onOpenAuth }) {
             ) : (
               <div className="query-builder">
                 <label>
-                  <span>Query title</span>
+                  <span>{composerCopy.queryTitle}</span>
                   <input
                     autoFocus
                     value={queryTitleDraft}
                     onChange={(event) => setQueryTitleDraft(event.target.value)}
-                    placeholder="What should this post ask?"
+                    placeholder={composerCopy.queryTitlePlaceholder}
                   />
                 </label>
                 <div className="query-options-header">
-                  <span>Options</span>
+                  <span>{composerCopy.options}</span>
                   <button type="button" onClick={addQueryOption}>
                     <Plus size={14} />
-                    Add option
+                    {composerCopy.addOption}
                   </button>
                 </div>
                 <div className="query-option-list">
@@ -700,11 +718,11 @@ function PostComposer({ onOpenAuth }) {
                         <input
                           value={option.name}
                           onChange={(event) => updateQueryOption(option.id, event.target.value)}
-                          placeholder={`Option ${index + 1}`}
+                          placeholder={composerCopy.optionLabel(index + 1)}
                         />
                         <button
                           type="button"
-                          aria-label={`Remove option ${index + 1}`}
+                          aria-label={composerCopy.removeOption(index + 1)}
                           disabled={queryOptionsDraft.length <= 2}
                           onClick={() => removeQueryOption(option.id)}
                         >
@@ -718,8 +736,8 @@ function PostComposer({ onOpenAuth }) {
             )}
 
             <div className="composer-modal-actions">
-              <button type="button" onClick={() => setAttachmentModal(null)}>Cancel</button>
-              <button className="compose-button" type="button" onClick={saveAttachment}>Attach</button>
+              <button type="button" onClick={() => setAttachmentModal(null)}>{composerCopy.cancel}</button>
+              <button className="compose-button" type="button" onClick={saveAttachment}>{composerCopy.attach}</button>
             </div>
           </div>
         </div>
@@ -730,6 +748,7 @@ function PostComposer({ onOpenAuth }) {
 
 function FeedTab({ onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, currentProfile, isSignedIn, reactToPost, toggleBookmark, deletePost } = useSocial()
+  const { t } = useTranslation()
   const { defaultCommunityFeed, reducedMotion } = usePreferences()
   const posts = useMemo(() => {
     const feedPosts = defaultCommunityFeed === 'followed'
@@ -753,7 +772,7 @@ function FeedTab({ onOpenAuth, onViewUser }) {
 
       <AnimatePresence initial={false}>
       {posts.map((post) => {
-        const author = usersById[post.authorId] ?? userFallback(post.authorId)
+        const author = usersById[post.authorId] ?? userFallback(post.authorId, t.social)
 
         return (
           <motion.div
@@ -785,6 +804,7 @@ function FeedTab({ onOpenAuth, onViewUser }) {
 
 function CommentsPanel({ targetType, targetId, onOpenAuth, onViewUser }) {
   const { state, usersById, currentUser, isSignedIn, addComment } = useSocial()
+  const { t, lang } = useTranslation()
   const [body, setBody] = useState('')
   const comments = state.comments.filter(
     (comment) => comment.targetType === targetType && comment.targetId === targetId,
@@ -805,19 +825,19 @@ function CommentsPanel({ targetType, targetId, onOpenAuth, onViewUser }) {
     <div className="comments-panel">
       <div className="comments-heading">
         <MessageSquare size={14} />
-        <span>{comments.length} comments</span>
+        <span>{t.social.commentsCount(comments.length)}</span>
       </div>
 
       {comments.length > 0 && (
         <div className="comments-list">
           {comments.map((comment) => {
-            const author = usersById[comment.authorId] ?? userFallback(comment.authorId)
+            const author = usersById[comment.authorId] ?? userFallback(comment.authorId, t.social)
             return (
               <div key={comment.id} className="comment-item">
                 <Avatar user={author} size="sm" onClick={() => onViewUser?.(comment.authorId)} />
                 <div>
                   <strong>{author.username}</strong>
-                  <span>{formatRelative(comment.createdAt)}</span>
+                  <span>{formatRelative(comment.createdAt, t.social, lang)}</span>
                   <p>{comment.body}</p>
                 </div>
               </div>
@@ -830,9 +850,9 @@ function CommentsPanel({ targetType, targetId, onOpenAuth, onViewUser }) {
         <input
           value={body}
           onChange={(event) => setBody(event.target.value)}
-          placeholder={currentUser ? 'Add a focused note...' : 'Sign in to comment here.'}
+          placeholder={currentUser ? t.social.addFocusedNote : t.social.signInToComment}
         />
-        <button type="submit" aria-label="Send comment">
+        <button type="submit" aria-label={t.social.submitComment}>
           <Send size={15} />
         </button>
       </form>
@@ -842,6 +862,7 @@ function CommentsPanel({ targetType, targetId, onOpenAuth, onViewUser }) {
 
 function RumorsTab({ onOpenAuth, onViewUser }) {
   const { state, currentUser, isSignedIn, voteRumor, totalVotes } = useSocial()
+  const { t, lang } = useTranslation()
 
   return (
     <div className="social-stack">
@@ -852,13 +873,13 @@ function RumorsTab({ onOpenAuth, onViewUser }) {
         return (
           <article key={rumor.id} className="rumor-card">
             <div className="rumor-topline">
-              <span>{rumor.topic}</span>
-              <small>{formatRelative(rumor.updatedAt)}</small>
+              <span>{topicLabel(rumor.topic, t.social)}</span>
+              <small>{formatRelative(rumor.updatedAt, t.social, lang)}</small>
             </div>
 
             <h3>{rumor.title}</h3>
             <p>{rumor.summary}</p>
-            <div className="rumor-source">Source type: {rumor.sourceLabel}</div>
+            <div className="rumor-source">{t.social.sourceType}: {sourceLabel(rumor.sourceLabel, t.social)}</div>
 
             <div className="vote-grid">
               {RUMOR_VOTE_OPTIONS.map((option) => {
@@ -872,7 +893,7 @@ function RumorsTab({ onOpenAuth, onViewUser }) {
                     type="button"
                     onClick={() => (isSignedIn ? voteRumor(rumor.id, option.id) : onOpenAuth())}
                   >
-                    <span>{option.label}</span>
+                    <span>{t.social.rumorVotes[option.id] || option.label}</span>
                     <strong>{count}</strong>
                     <em style={{ width: `${percent}%` }} />
                   </button>
@@ -891,6 +912,7 @@ function RumorsTab({ onOpenAuth, onViewUser }) {
 function SourceForm({ onOpenAuth }) {
   const { isSignedIn, submitSource } = useSocial()
   const { t } = useTranslation()
+  const sourceCopy = t.social.sourceForm
   const [form, setForm] = useState({
     url: '',
     claim: '',
@@ -924,7 +946,7 @@ function SourceForm({ onOpenAuth }) {
     <form className="source-form" onSubmit={handleSubmit}>
       <div className="form-grid">
         <label>
-          <span>Source URL</span>
+          <span>{sourceCopy.sourceUrl}</span>
           <input
             value={form.url}
             onChange={(event) => updateForm('url', event.target.value)}
@@ -932,29 +954,29 @@ function SourceForm({ onOpenAuth }) {
           />
         </label>
         <label>
-          <span>Category</span>
+          <span>{sourceCopy.category}</span>
           <select value={form.category} onChange={(event) => updateForm('category', event.target.value)}>
             {SOURCE_CATEGORIES.map((category) => (
-              <option key={category} value={category}>{category}</option>
+              <option key={category} value={category}>{sourceCategoryLabel(category, t.social)}</option>
             ))}
           </select>
         </label>
       </div>
       <label>
-        <span>What does it claim?</span>
+        <span>{sourceCopy.claimPrompt}</span>
         <textarea
           value={form.claim}
           onChange={(event) => updateForm('claim', event.target.value)}
-          placeholder="Summarize the exact claim."
+          placeholder={sourceCopy.claimPlaceholder}
           rows={3}
         />
       </label>
       <label>
-        <span>Why should it be reviewed?</span>
+        <span>{sourceCopy.reasonPrompt}</span>
         <textarea
           value={form.reason}
           onChange={(event) => updateForm('reason', event.target.value)}
-          placeholder="Explain why this source matters."
+          placeholder={sourceCopy.reasonPlaceholder}
           rows={3}
         />
       </label>
@@ -968,7 +990,7 @@ function SourceForm({ onOpenAuth }) {
 
 function SourcesTab({ onOpenAuth, onViewUser }) {
   const { state, usersById, isSignedIn } = useSocial()
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
 
   return (
     <div className="social-stack">
@@ -980,7 +1002,7 @@ function SourcesTab({ onOpenAuth, onViewUser }) {
 
       <div className="source-list">
         {state.sources.map((source) => {
-          const author = usersById[source.authorId] ?? userFallback(source.authorId)
+          const author = usersById[source.authorId] ?? userFallback(source.authorId, t.social)
           const StatusIcon = SOURCE_STATUS_ICONS[source.status] ?? SOURCE_STATUS_ICONS.review
           const statusLabel = t.social.sourceStatus[source.status] ?? t.social.sourceStatus.review
 
@@ -994,22 +1016,22 @@ function SourcesTab({ onOpenAuth, onViewUser }) {
                   </span>
                   <h3>{source.claim}</h3>
                 </div>
-                <a href={source.url} target="_blank" rel="noopener noreferrer" aria-label="Open source">
+                <a href={source.url} target="_blank" rel="noopener noreferrer" aria-label={t.social.sourceForm.openSource}>
                   <Link size={18} />
                 </a>
               </div>
 
               <div className="source-meta">
-                <span>{source.category}</span>
-                <span>{getHostname(source.url)}</span>
-                <span>{formatRelative(source.createdAt)}</span>
+                <span>{sourceCategoryLabel(source.category, t.social)}</span>
+                <span>{getHostname(source.url, t.social)}</span>
+                <span>{formatRelative(source.createdAt, t.social, lang)}</span>
               </div>
 
               <p>{source.reason}</p>
 
               <div className="source-author">
                 <Avatar user={author} size="sm" onClick={() => onViewUser(source.authorId)} />
-                <span>Submitted by {author.username}</span>
+                <span>{t.social.submittedBy(author.username)}</span>
               </div>
 
               <CommentsPanel targetType="source" targetId={source.id} onOpenAuth={onOpenAuth} onViewUser={onViewUser} />
@@ -1023,6 +1045,7 @@ function SourcesTab({ onOpenAuth, onViewUser }) {
 
 function PollsTab({ onOpenAuth, onViewUser }) {
   const { state, currentUser, isSignedIn, votePoll, totalVotes } = useSocial()
+  const { t } = useTranslation()
 
   return (
     <div className="social-stack">
@@ -1053,7 +1076,7 @@ function PollsTab({ onOpenAuth, onViewUser }) {
                 )
               })}
             </div>
-            <span className="poll-total">{totalVotes(poll.votes)} votes</span>
+            <span className="poll-total">{t.social.votesCount(totalVotes(poll.votes))}</span>
             <CommentsPanel targetType="poll" targetId={poll.id} onOpenAuth={onOpenAuth} onViewUser={onViewUser} />
           </article>
         )
@@ -1094,7 +1117,7 @@ function SocialHub({ onOpenAuth, onNavigate }) {
           <Sidebar onOpenAuth={onOpenAuth} />
 
           <div className="social-main">
-            <div className="social-tabs" role="tablist" aria-label="Social sections">
+            <div className="social-tabs" role="tablist" aria-label={t.social.sectionsLabel || t.social.tabs.profile}>
               {TABS.map((tab) => {
                 const Icon = tab.icon
                 return (

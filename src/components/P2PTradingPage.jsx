@@ -47,6 +47,7 @@ import {
 } from '../p2p/p2pData'
 import { settleP2PUsdtPayment } from '../p2p/p2pPayouts'
 import { uploadTelegramFiles } from '../p2p/telegramStorage'
+import { plainContentTranslationSource, translatePlainContent, useTranslatedIgnContent } from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { p2pTranslations } from '../i18n/p2pTranslations.js'
 import MessageConversationModal from './MessageConversationModal.jsx'
@@ -84,33 +85,53 @@ const CONFIRM_EXIT_SPRING = {
   mass: 0.66,
   velocity: -2.8,
 }
-const MARKETPLACE_TRUST_SECTIONS = [
-  {
-    title: 'How buying works',
-    body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
-  },
-  {
-    title: 'How sellers deliver files',
-    body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
-  },
-  {
-    title: 'Buyer protection',
-    body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
-  },
-  {
-    title: 'Dispute window',
-    body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
-  },
-  {
-    title: 'Prohibited content',
-    body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
-  },
-]
-const BUYER_PROTECTION_POINTS = [
-  'Exact USDT TRC20 amount and transaction hash are recorded for review.',
-  'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
-  'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
-]
+const P2P_TRUST_COPY = {
+  kicker: 'Buyer protection',
+  title: 'Buyer protection and marketplace trust',
+  description: 'The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official Rockstar files, leaks, ripped assets, or impersonation material.',
+  listLabel: 'Buyer protection checkpoints',
+  points: [
+    'Exact USDT TRC20 amount and transaction hash are recorded for review.',
+    'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
+    'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
+  ],
+  sections: [
+    {
+      title: 'How buying works',
+      body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
+    },
+    {
+      title: 'How sellers deliver files',
+      body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
+    },
+    {
+      title: 'Buyer protection',
+      body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
+    },
+    {
+      title: 'Dispute window',
+      body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
+    },
+    {
+      title: 'Prohibited content',
+      body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
+    },
+  ],
+}
+const P2P_TRUST_TRANSLATION_OPTIONS = {
+  keys: ['kicker', 'listLabel'],
+}
+const P2P_LISTING_TRANSLATION_OPTIONS = {
+  onlyKeys: ['title', 'description', 'deliveryMethod', 'key', 'value'],
+}
+
+function translateP2PTrustCopy(data, lang) {
+  return translatePlainContent(data, lang, P2P_TRUST_TRANSLATION_OPTIONS)
+}
+
+function translateP2PListings(data, lang) {
+  return translatePlainContent(data, lang, P2P_LISTING_TRANSLATION_OPTIONS)
+}
 
 const FORM_SEEDS = {
   en: { deliveryMethod: 'Telegram handoff', properties: ['Format', 'Platform', 'License'] },
@@ -252,6 +273,7 @@ function shortenAddress(value = '') {
 
 function P2PListingCard({
   listing,
+  displayListing = listing,
   seller,
   currentUserId,
   copy,
@@ -292,7 +314,7 @@ function P2PListingCard({
     >
       <div className="p2p-listing-media">
         {listing.previewDataUrl ? (
-          <img src={listing.previewDataUrl} alt={listing.title} loading="lazy" decoding="async" />
+          <img src={listing.previewDataUrl} alt={displayListing.title} loading="lazy" decoding="async" />
         ) : (
           <div className="p2p-listing-placeholder" aria-hidden="true">
             <FileArchive size={34} />
@@ -312,12 +334,12 @@ function P2PListingCard({
           <strong>{formatP2PPrice(listing, lang)}</strong>
         </div>
 
-        <h2>{listing.title}</h2>
-        <p>{listing.description}</p>
+        <h2>{displayListing.title}</h2>
+        <p>{displayListing.description}</p>
 
         <div className="p2p-listing-properties">
-          {(listing.properties || []).slice(0, 4).map((property) => (
-            <span key={`${property.key}-${property.value}`}>
+          {(displayListing.properties || []).slice(0, 4).map((property, index) => (
+            <span key={`${property.key}-${property.value}-${index}`}>
               <b>{property.key}</b>
               {property.value}
             </span>
@@ -416,7 +438,7 @@ function P2PListingCard({
   )
 }
 
-function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessageSeller }) {
+function P2PUsdtCheckoutBox({ listing, displayListing = listing, isSignedIn, copy, onRequireAuth, onMessageSeller }) {
   const { t } = useTranslation()
   const shopCheckoutCopy = t.shop.checkout
   const [copiedField, setCopiedField] = useState('')
@@ -584,7 +606,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessag
             <span aria-hidden="true"><FileArchive size={24} /></span>
           )}
           <div>
-            <strong>{listing.title}</strong>
+            <strong>{displayListing.title}</strong>
             <small>{paymentAmount} USDT</small>
           </div>
         </div>
@@ -713,7 +735,7 @@ function P2PUsdtCheckoutBox({ listing, isSignedIn, copy, onRequireAuth, onMessag
   )
 }
 
-function P2PCheckoutModal({ listing, isSignedIn, copy, onClose, onRequireAuth, onMessageSeller }) {
+function P2PCheckoutModal({ listing, displayListing = listing, isSignedIn, copy, onClose, onRequireAuth, onMessageSeller }) {
   return (
     <div className="p2p-checkout-overlay" role="presentation" onMouseDown={onClose}>
       <section
@@ -733,6 +755,7 @@ function P2PCheckoutModal({ listing, isSignedIn, copy, onClose, onRequireAuth, o
         </button>
         <P2PUsdtCheckoutBox
           listing={listing}
+          displayListing={displayListing}
           isSignedIn={isSignedIn}
           copy={copy}
           onRequireAuth={onRequireAuth}
@@ -745,6 +768,7 @@ function P2PCheckoutModal({ listing, isSignedIn, copy, onClose, onRequireAuth, o
 
 function P2PProductDetailsModal({
   listing,
+  displayListing = listing,
   seller,
   currentUserId,
   copy,
@@ -773,7 +797,7 @@ function P2PProductDetailsModal({
               <Info size={15} />
               {copy.modal.productDetails}
             </span>
-            <h2 id="p2p-product-details-title">{listing.title}</h2>
+            <h2 id="p2p-product-details-title">{displayListing.title}</h2>
           </div>
           <button type="button" onClick={onClose} aria-label={copy.modal.closeProductDetails}>
             <X size={18} />
@@ -783,7 +807,7 @@ function P2PProductDetailsModal({
         <div className="p2p-modal-layout">
           <div className="p2p-modal-media">
             {listing.previewDataUrl ? (
-              <img src={listing.previewDataUrl} alt={listing.title} decoding="async" />
+              <img src={listing.previewDataUrl} alt={displayListing.title} decoding="async" />
             ) : (
               <div className="p2p-listing-placeholder" aria-hidden="true">
                 <FileArchive size={42} />
@@ -803,7 +827,7 @@ function P2PProductDetailsModal({
               <strong>{formatP2PPrice(listing, lang)}</strong>
             </div>
 
-            <p>{listing.description || copy.modal.fallbackDescription}</p>
+            <p>{displayListing.description || copy.modal.fallbackDescription}</p>
 
             <div className="p2p-modal-seller">
               <span
@@ -853,7 +877,7 @@ function P2PProductDetailsModal({
             <div className="p2p-included-list">
               <span>
                 <b>{copy.modal.delivery}</b>
-                {listing.deliveryMethod || copy.modal.sellerHandoff}
+                {displayListing.deliveryMethod || copy.modal.sellerHandoff}
               </span>
               <span>
                 <b>{copy.modal.files}</b>
@@ -880,8 +904,8 @@ function P2PProductDetailsModal({
               {copy.modal.otherProperties}
             </h3>
             <div className="p2p-detail-properties">
-              {(listing.properties || []).map((property) => (
-                <span key={`${property.key}-${property.value}`}>
+              {(displayListing.properties || []).map((property, index) => (
+                <span key={`${property.key}-${property.value}-${index}`}>
                   <b>{property.key}</b>
                   {property.value}
                 </span>
@@ -894,7 +918,7 @@ function P2PProductDetailsModal({
   )
 }
 
-function DeleteListingConfirmModal({ listing, copy, busy, onCancel, onConfirm }) {
+function DeleteListingConfirmModal({ listing, displayListing = listing, copy, busy, onCancel, onConfirm }) {
   const closeOnBackdrop = (event) => {
     if (!busy && event.target === event.currentTarget) onCancel()
   }
@@ -929,7 +953,7 @@ function DeleteListingConfirmModal({ listing, copy, busy, onCancel, onConfirm })
 
         <div className="p2p-confirm-copy">
           <h2 id="p2p-remove-title">{copy.confirm.title}</h2>
-          <p id="p2p-remove-description">{copy.confirm.removeListing(listing.title)}</p>
+          <p id="p2p-remove-description">{copy.confirm.removeListing(displayListing.title)}</p>
           <span>{copy.confirm.warning}</span>
         </div>
 
@@ -1036,6 +1060,29 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   }, [busyListingId, deleteCandidate])
 
   const listings = state.p2pListings || EMPTY_LISTINGS
+  const listingTranslationSource = useMemo(
+    () => plainContentTranslationSource(listings, P2P_LISTING_TRANSLATION_OPTIONS),
+    [listings],
+  )
+  const trustTranslationSource = useMemo(
+    () => plainContentTranslationSource(P2P_TRUST_COPY, P2P_TRUST_TRANSLATION_OPTIONS),
+    [],
+  )
+  const { data: trustCopy } = useTranslatedIgnContent(P2P_TRUST_COPY, {
+    lang,
+    scope: 'p2p-trust-copy',
+    source: trustTranslationSource,
+    translate: translateP2PTrustCopy,
+  })
+  const { data: displayListings } = useTranslatedIgnContent(listings, {
+    lang,
+    scope: 'p2p-marketplace-listings',
+    source: listingTranslationSource,
+    translate: translateP2PListings,
+  })
+  const displayListingsById = useMemo(() => (
+    Object.fromEntries((displayListings || []).map((listing) => [listing.id, listing]))
+  ), [displayListings])
   const isEditing = Boolean(editingListingId)
   const currentProfileId = currentProfile?.id || ''
   const activeListingCount = listings.filter((listing) => listing.status !== 'sold').length
@@ -1059,6 +1106,10 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
   const conversationListing = useMemo(() => {
     return listings.find((listing) => listing.id === conversationListingId) || null
   }, [conversationListingId, listings])
+  const displaySelectedListing = selectedListing ? displayListingsById[selectedListing.id] || selectedListing : null
+  const displayCheckoutListing = checkoutListing ? displayListingsById[checkoutListing.id] || checkoutListing : null
+  const displayConversationListing = conversationListing ? displayListingsById[conversationListing.id] || conversationListing : null
+  const displayDeleteCandidate = deleteCandidate ? displayListingsById[deleteCandidate.id] || deleteCandidate : null
 
   const filteredListings = useMemo(() => {
     const cleanQuery = searchQuery.trim().toLowerCase()
@@ -1066,16 +1117,21 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     return baseListings
       .filter((listing) => {
+        const displayListing = displayListingsById[listing.id] || listing
         const seller = usersById[listing.sellerId]
         const matchesCategory = selectedCategory === 'all' || listing.category === selectedCategory
         const searchText = [
           listing.title,
           listing.description,
+          displayListing.title,
+          displayListing.description,
+          displayListing.deliveryMethod,
           listing.cryptoWalletAddress,
           p2pCategoryLabel(listing.category, copy),
           p2pPaymentMethodLabel('crypto', copy),
           seller?.username,
           ...(listing.properties || []).flatMap((property) => [property.key, property.value]),
+          ...(displayListing.properties || []).flatMap((property) => [property.key, property.value]),
         ].join(' ').toLowerCase()
 
         return matchesCategory && (!cleanQuery || searchText.includes(cleanQuery))
@@ -1085,7 +1141,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         if (first.status !== 'sold' && second.status === 'sold') return -1
         return new Date(second.createdAt ?? 0) - new Date(first.createdAt ?? 0)
       })
-  }, [activeTab, copy, listings, myListings, searchQuery, selectedCategory, usersById])
+  }, [activeTab, copy, displayListingsById, listings, myListings, searchQuery, selectedCategory, usersById])
 
   const updateFormField = (field, value) => {
     setForm((currentForm) => ({ ...currentForm, [field]: value }))
@@ -1445,15 +1501,12 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           <div className="p2p-trust-heading">
             <span className="p2p-kicker">
               <ShieldCheck size={16} />
-              Buyer protection
+              {trustCopy.kicker}
             </span>
-            <h2 id="p2p-trust-title">Buyer protection and marketplace trust</h2>
-            <p>
-              The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official
-              Rockstar files, leaks, ripped assets, or impersonation material.
-            </p>
-            <ul className="p2p-protection-list" aria-label="Buyer protection checkpoints">
-              {BUYER_PROTECTION_POINTS.map((point) => (
+            <h2 id="p2p-trust-title">{trustCopy.title}</h2>
+            <p>{trustCopy.description}</p>
+            <ul className="p2p-protection-list" aria-label={trustCopy.listLabel}>
+              {trustCopy.points.map((point) => (
                 <li key={point}>
                   <ShieldCheck size={15} />
                   <span>{point}</span>
@@ -1462,7 +1515,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             </ul>
           </div>
           <div className="p2p-trust-grid">
-            {MARKETPLACE_TRUST_SECTIONS.map((section) => (
+            {trustCopy.sections.map((section) => (
               <article key={section.title}>
                 <h3>{section.title}</h3>
                 <p>{section.body}</p>
@@ -1744,6 +1797,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             <P2PListingCard
               key={listing.id}
               listing={listing}
+              displayListing={displayListingsById[listing.id] || listing}
               seller={usersById[listing.sellerId]}
               currentUserId={currentProfileId}
               copy={copy}
@@ -1775,6 +1829,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
         {selectedListing && (
           <P2PProductDetailsModal
             listing={selectedListing}
+            displayListing={displaySelectedListing}
             seller={usersById[selectedListing.sellerId]}
             currentUserId={currentProfileId}
             copy={copy}
@@ -1790,6 +1845,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           <P2PCheckoutModal
             key={checkoutListing.id}
             listing={checkoutListing}
+            displayListing={displayCheckoutListing}
             isSignedIn={isSignedIn}
             copy={copy}
             onClose={() => setCheckoutListingId('')}
@@ -1802,7 +1858,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
           <MessageConversationModal
             key={`${conversationListing.id}:${conversationDraft}`}
             recipient={usersById[conversationListing.sellerId]}
-            contextLabel={conversationListing.title}
+            contextLabel={displayConversationListing.title}
             initialBody={conversationDraft}
             hiddenBodies={legacyP2PMessageBodies(conversationListing)}
             onClose={() => {
@@ -1817,6 +1873,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
             <DeleteListingConfirmModal
               key={deleteCandidate.id}
               listing={deleteCandidate}
+              displayListing={displayDeleteCandidate}
               copy={copy}
               busy={busyListingId === deleteCandidate.id}
               onCancel={() => setDeleteCandidate(null)}

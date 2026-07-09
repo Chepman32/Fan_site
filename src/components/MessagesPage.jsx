@@ -6,10 +6,10 @@ import { useSocial } from '../social/SocialContext'
 import { usePreferences } from '../preferences/AppPreferences.jsx'
 import './MessagesPage.css'
 
-function userFallback(userId) {
+function userFallback(userId, copy) {
   return {
     id: userId,
-    username: 'Unknown user',
+    username: copy.unknownUser,
     avatarColor: '#6b6b7b',
     photoDataUrl: '',
   }
@@ -39,6 +39,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
     usersById,
   } = useSocial()
   const { t, lang } = useTranslation()
+  const copy = t.social.messagesPage
   const { dateTimeFormat } = usePreferences()
   const [selectedUserId, setSelectedUserId] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -58,15 +59,15 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
     if (!query) return dialogs
 
     return dialogs.filter((dialog) => {
-      const user = usersById[dialog.userId] || userFallback(dialog.userId)
+      const user = usersById[dialog.userId] || userFallback(dialog.userId, t.social)
       const text = `${user.username} ${dialog.lastMessage?.body || ''}`.toLowerCase()
       return text.includes(query)
     })
-  }, [dialogs, searchQuery, usersById])
+  }, [dialogs, searchQuery, t.social, usersById])
 
   const effectiveSelectedUserId = selectedUserId || dialogs[0]?.userId || ''
   const selectedUser = effectiveSelectedUserId
-    ? (usersById[effectiveSelectedUserId] || userFallback(effectiveSelectedUserId))
+    ? (usersById[effectiveSelectedUserId] || userFallback(effectiveSelectedUserId, t.social))
     : null
   const selectedMessages = useMemo(() => {
     if (!currentUserId || !effectiveSelectedUserId) return []
@@ -88,10 +89,10 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
     setSending(false)
 
     if (sent) {
-      setDraft('')
-      setStatus('Message sent.')
+    setDraft('')
+      setStatus(copy.messageSent)
     } else {
-      setStatus('Could not send the message.')
+      setStatus(copy.messageFailed)
     }
   }
 
@@ -102,8 +103,8 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
           <div className="messages-guest-panel">
             <MessageCircle size={28} />
             <span>{t.social.tabs.messages}</span>
-            <h1>Sign in to read and send messages.</h1>
-            <p>Your P2P conversations and direct messages will appear here after you sign in.</p>
+            <h1>{copy.guestTitle}</h1>
+            <p>{copy.guestDescription}</p>
             <button type="button" onClick={onOpenAuth}>
               <User size={17} />
               {t.social.signIn}
@@ -119,25 +120,25 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
       <div className="container messages-container">
         <header className="messages-page-head">
           <span>{t.social.tabs.messages}</span>
-          <h1>Messages</h1>
-          <p>Keep P2P deals, delivery details, and community conversations in one place.</p>
+          <h1>{copy.title}</h1>
+          <p>{copy.description}</p>
         </header>
 
         <div className="messages-shell">
-          <aside className="messages-dialogs" aria-label="Dialogs">
+          <aside className="messages-dialogs" aria-label={copy.dialogsLabel}>
             <label className="messages-search">
               <Search size={16} />
               <input
                 type="search"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Search dialogs"
+                placeholder={copy.searchPlaceholder}
               />
             </label>
 
             <div className="messages-dialog-list">
               {filteredDialogs.map((dialog) => {
-                const user = usersById[dialog.userId] || userFallback(dialog.userId)
+                const user = usersById[dialog.userId] || userFallback(dialog.userId, t.social)
                 const mine = dialog.lastMessage?.fromId === currentUserId
 
                 return (
@@ -153,7 +154,7 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                     <DialogAvatar user={user} size="sm" />
                     <span>
                       <b>{user.username}</b>
-                      <small>{mine ? 'You: ' : ''}{dialog.lastMessage?.body || 'No messages yet'}</small>
+                      <small>{mine ? copy.youPrefix : ''}{dialog.lastMessage?.body || copy.noMessagesYet}</small>
                     </span>
                     <time>{messageTimeLabel(dialog.lastMessage?.createdAt, lang, dateTimeFormat)}</time>
                   </button>
@@ -163,21 +164,21 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
               {!filteredDialogs.length && (
                 <div className="messages-dialog-empty">
                   <Inbox size={22} />
-                  <strong>No dialogs yet</strong>
-                  <span>Open a P2P product and message the seller to start a conversation.</span>
-                  <button type="button" onClick={() => onNavigate?.('/')}>Browse P2P</button>
+                  <strong>{copy.emptyTitle}</strong>
+                  <span>{copy.emptyDescription}</span>
+                  <button type="button" onClick={() => onNavigate?.('/p2p')}>{copy.browseP2P}</button>
                 </div>
               )}
             </div>
           </aside>
 
-          <section className="messages-thread" aria-label="Conversation">
+          <section className="messages-thread" aria-label={copy.conversationLabel}>
             {selectedUser ? (
               <>
                 <header className="messages-thread-head">
                   <DialogAvatar user={selectedUser} />
                   <div>
-                    <span>Chat with</span>
+                    <span>{copy.chatWith}</span>
                     <h2>{selectedUser.username}</h2>
                   </div>
                 </header>
@@ -205,21 +206,21 @@ function MessagesPage({ onOpenAuth, onNavigate }) {
                   <textarea
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
-                    placeholder="Write a message..."
+                    placeholder={copy.writePlaceholder}
                     rows={2}
                     maxLength={700}
                   />
                   <button type="submit" disabled={sending || !draft.trim()}>
                     {sending ? <Loader2 size={16} className="messages-spin" /> : <Send size={16} />}
-                    Send
+                    {copy.send}
                   </button>
                 </form>
               </>
             ) : (
               <div className="messages-thread-empty">
                 <MessageCircle size={28} />
-                <strong>Select a dialog</strong>
-                <span>Your conversations will appear here.</span>
+                <strong>{copy.selectDialogTitle}</strong>
+                <span>{copy.selectDialogDescription}</span>
               </div>
             )}
           </section>

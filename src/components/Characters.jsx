@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Image as ImageIcon, Loader, UserRound } from 'lucide-react'
 import {
   charactersTranslationSource,
+  plainContentTranslationSource,
   translateCharactersData,
+  translatePlainContent,
   useTranslatedIgnContent,
 } from '../i18n/ignContentTranslation'
 import { characterGuideItems, characterGuideSections } from '../content/leonidaCharacters'
@@ -13,6 +15,20 @@ import './Characters.css'
 const IGN_ORIGIN = 'https://www.ign.com'
 const CHARACTERS_URL = 'https://www.ign.com/wikis/gta-6/GTA_6_Characters'
 const FETCH_TIMEOUT_MS = 10000
+const STATIC_GUIDE_TRANSLATION_OPTIONS = {
+  keys: ['ariaLabel', 'description', 'role', 'sourceLabel', 'status', 'subtitle', 'title'],
+  arrayKeys: ['facts'],
+}
+const CHARACTER_STATIC_GUIDE = {
+  ariaLabel: 'GTA VI character guide',
+  title: 'GTA VI character guide',
+  description: 'The Leonida cast guide keeps official and reputable public character coverage separate from rumor-only claims, with role, status, description, and source labels for every major named character.',
+  source: 'Source',
+}
+
+function translateCharacterStaticGuide(data, lang) {
+  return translatePlainContent(data, lang, STATIC_GUIDE_TRANSLATION_OPTIONS)
+}
 
 const FALLBACK_DATA = {
   updatedAt: '2025-05-07T00:51:37Z',
@@ -342,6 +358,22 @@ function Characters() {
     source: translationSource,
     translate: translateCharactersData,
   })
+  const staticGuideData = useMemo(() => ({
+    chrome: CHARACTER_STATIC_GUIDE,
+    items: characterGuideItems,
+    sections: characterGuideSections,
+  }), [])
+  const staticGuideSource = useMemo(
+    () => plainContentTranslationSource(staticGuideData, STATIC_GUIDE_TRANSLATION_OPTIONS),
+    [staticGuideData],
+  )
+  const { data: displayStaticGuide } = useTranslatedIgnContent(staticGuideData, {
+    enabled: !loading,
+    lang,
+    scope: 'characters-static-guide',
+    source: staticGuideSource,
+    translate: translateCharacterStaticGuide,
+  })
 
   const stats = useMemo(
     () => [
@@ -405,17 +437,13 @@ function Characters() {
               ))}
             </div>
 
-            <div className="character-static-guide" aria-label="GTA VI character guide">
+            <div className="character-static-guide" aria-label={displayStaticGuide.chrome.ariaLabel}>
               <div className="character-guide-intro">
-                <h3>GTA VI character guide</h3>
-                <p>
-                  The Leonida cast guide keeps official and reputable public character coverage
-                  separate from rumor-only claims, with role, status, description, and source
-                  labels for every major named character.
-                </p>
+                <h3>{displayStaticGuide.chrome.title}</h3>
+                <p>{displayStaticGuide.chrome.description}</p>
               </div>
               <div className="character-guide-grid">
-                {characterGuideItems.map((character) => (
+                {displayStaticGuide.items.map((character) => (
                   <article key={character.name}>
                     <span>{character.status}</span>
                     <h3>{character.name}</h3>
@@ -423,14 +451,14 @@ function Characters() {
                     <p>{character.description}</p>
                     {character.sourceUrl && (
                       <a href={character.sourceUrl} target="_blank" rel="noopener noreferrer">
-                        {character.sourceLabel || 'Source'}
+                        {character.sourceLabel || displayStaticGuide.chrome.source}
                       </a>
                     )}
                   </article>
                 ))}
               </div>
               <div className="character-guide-notes">
-                {characterGuideSections.map((section) => (
+                {displayStaticGuide.sections.map((section) => (
                   <article key={section.title}>
                     <h3>{section.title}</h3>
                     <p>{section.body}</p>

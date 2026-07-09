@@ -34,15 +34,15 @@ function formatDate(date, locale) {
   }).format(new Date(date))
 }
 
-function formatRelative(date, locale) {
+function formatRelative(date, locale, copy) {
   const diff = Date.now() - new Date(date).getTime()
   const minutes = Math.max(Math.floor(diff / 60000), 0)
-  if (minutes < 1) return 'now'
-  if (minutes < 60) return `${minutes}m ago`
+  if (minutes < 1) return copy.relativeNow
+  if (minutes < 60) return `${minutes}${copy.relativeMin}`
   const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h ago`
+  if (hours < 24) return `${hours}${copy.relativeHour}`
   const days = Math.floor(hours / 24)
-  if (days < 7) return `${days}d ago`
+  if (days < 7) return `${days}${copy.relativeDay}`
   return formatDate(date, locale)
 }
 
@@ -72,6 +72,8 @@ function PostMenu({
   onOpenAuth,
   onToggleBookmark,
 }) {
+  const { t } = useTranslation()
+  const copy = t.social.post
   const [open, setOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -90,7 +92,7 @@ function PostMenu({
     const url = `${window.location.origin}/community`
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Community Post', url })
+        await navigator.share({ title: t.social.communityPost, url })
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url)
       }
@@ -122,7 +124,7 @@ function PostMenu({
         onClick={() => setOpen((prev) => !prev)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Post options"
+        aria-label={copy.options}
       >
         <MoreVertical size={17} />
       </button>
@@ -130,15 +132,15 @@ function PostMenu({
         <div className="post-menu-dropdown" role="menu">
           <button type="button" role="menuitem" onClick={handleShare}>
             <Share2 size={14} />
-            Share
+            {copy.share}
           </button>
           <button type="button" role="menuitem" onClick={handleToggleFavorite}>
             {bookmarked ? <StarOff size={14} /> : <Star size={14} />}
-            {bookmarked ? 'Remove from favorites' : 'Add to favorites'}
+            {bookmarked ? copy.removeFavorite : copy.addFavorite}
           </button>
           <button type="button" role="menuitem" onClick={handleDelete}>
             <Trash2 size={14} />
-            Remove
+            {copy.remove}
           </button>
         </div>
       )}
@@ -158,7 +160,9 @@ function CommunityPostCard({
   onDeletePost,
   onReactToPost,
 }) {
-  const { lang } = useTranslation()
+  const { t, lang } = useTranslation()
+  const socialCopy = t.social
+  const postCopy = socialCopy.post
   const { dateTimeFormat, hideSpoilers } = usePreferences()
   const [spoilerRevealed, setSpoilerRevealed] = useState(false)
   const currentReaction = REACTION_OPTIONS.find((option) =>
@@ -180,7 +184,7 @@ function CommunityPostCard({
           <Avatar user={author} onClick={onViewUser ? () => onViewUser(post.authorId) : undefined} />
           <div>
             <h3>{author.username}</h3>
-            <span>{formatRelative(post.createdAt, locale)}</span>
+            <span>{formatRelative(post.createdAt, locale, socialCopy)}</span>
           </div>
         </div>
         <div className="post-header-actions">
@@ -189,9 +193,9 @@ function CommunityPostCard({
               className={bookmarked ? 'post-bookmark-button active' : 'post-bookmark-button'}
               type="button"
               onClick={() => (isSignedIn ? onToggleBookmark(post.id) : onOpenAuth?.())}
-              aria-label={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+              aria-label={bookmarked ? postCopy.removeBookmark : postCopy.addBookmark}
               aria-pressed={Boolean(bookmarked)}
-              title={bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+              title={bookmarked ? postCopy.removeBookmark : postCopy.addBookmark}
             >
               {bookmarked ? <BookmarkCheck size={17} /> : <Bookmark size={17} />}
             </button>
@@ -212,9 +216,9 @@ function CommunityPostCard({
       {concealSpoiler ? (
         <div className="post-spoiler-cover">
           <EyeOff size={22} />
-          <strong>Spoiler hidden</strong>
-          <span>This post is tagged as a spoiler.</span>
-          <button type="button" onClick={() => setSpoilerRevealed(true)}>Reveal post</button>
+          <strong>{postCopy.spoilerHidden}</strong>
+          <span>{postCopy.spoilerDescription}</span>
+          <button type="button" onClick={() => setSpoilerRevealed(true)}>{postCopy.revealPost}</button>
         </div>
       ) : (
         <>
@@ -243,7 +247,7 @@ function CommunityPostCard({
               aria-pressed={active}
             >
               <Icon size={15} />
-              <span>{reaction.icon} {reaction.label}</span>
+              <span>{reaction.icon} {socialCopy.reactions[reaction.id] || reaction.label}</span>
               <strong>{post.reactions?.[reaction.id]?.length ?? 0}</strong>
             </button>
           )

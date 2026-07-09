@@ -50,13 +50,17 @@ function shortenTxId(txId = '') {
   return `${txId.slice(0, 10)}...${txId.slice(-8)}`
 }
 
-function userFallback(userId) {
+function userFallback(userId, copy) {
   return {
     id: userId,
-    username: 'Unknown user',
+    username: copy.unknownUser,
     avatarColor: '#6b6b7b',
     photoDataUrl: '',
   }
+}
+
+function sourceCategoryLabel(category, copy) {
+  return copy.sourceCategories?.[category] || category
 }
 
 function profileToForm(profile) {
@@ -348,7 +352,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
               <MessageSquare size={18} />
               <span>
                 <strong>{t.social.tabs.messages}</strong>
-                <small>{messageDialogCount} dialog{messageDialogCount === 1 ? '' : 's'}</small>
+                <small>{s.profileChrome.dialogsCount(messageDialogCount)}</small>
               </span>
             </button>
 
@@ -452,7 +456,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
               ) : (
                 <div className="profile-bookmark-list">
                   {bookmarkedPosts.map((post) => {
-                    const author = usersById[post.authorId] ?? userFallback(post.authorId)
+                    const author = usersById[post.authorId] ?? userFallback(post.authorId, s)
                     return (
                       <article key={post.id} className="profile-bookmark-card">
                         <div className="profile-bookmark-top">
@@ -496,7 +500,7 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
               ) : (
                 mySources.map((source) => (
                   <div key={source.id} className="profile-mini-source">
-                    <strong>{source.category}</strong>
+                    <strong>{sourceCategoryLabel(source.category, s)}</strong>
                     <span>{source.status} · {formatRelative(source.createdAt, s, lang, dateTimeFormat)}</span>
                     <p>{source.claim}</p>
                   </div>

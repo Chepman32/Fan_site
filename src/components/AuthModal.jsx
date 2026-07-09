@@ -31,7 +31,7 @@ function AuthModal({ onClose }) {
         ? await signup(form)
         : await login({ email: form.email, password: form.password })
     } catch (error) {
-      setSubmitError(error?.message || 'Sign-in request failed.')
+      setSubmitError(error?.message || t.auth.signInFailed || 'Sign-in request failed.')
     } finally {
       setBusy(false)
     }
@@ -51,7 +51,7 @@ function AuthModal({ onClose }) {
           <p>{t.auth.description}</p>
         </div>
 
-        <div className="auth-tabs" role="tablist" aria-label="Authentication mode">
+        <div className="auth-tabs" role="tablist" aria-label={t.auth.communityAccess}>
           <button className={mode === 'signup' ? 'active' : ''} type="button" onClick={() => setMode('signup')}>
             {t.auth.signUp}
           </button>

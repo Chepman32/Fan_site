@@ -21,6 +21,7 @@ function isPlainLeftClick(event) {
 
 function LocationGuidePage({ locationSlug, onNavigate }) {
   const { t, lang } = useTranslation()
+  const copy = t.leonida.locationDetail
   const guide = useMemo(() => getLocationGuideBySlug(locationSlug), [locationSlug])
   const fallbackPage = useMemo(() => (guide ? createFallbackLocationPage(guide) : null), [guide])
   const [remoteState, setRemoteState] = useState({ guideId: '', page: null, failed: false })
@@ -78,12 +79,12 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
         <div className="container location-detail-container">
           <a className="location-back-link" href="/locations" onClick={(event) => navigate(event, '/locations')}>
             <ArrowLeft size={16} />
-            Leonida locations
+            {copy.backLocations}
           </a>
           <div className="location-empty-state">
             <MapPin size={28} />
-            <h1>Location not found</h1>
-            <p>Choose one of the six major Leonida locations from the guide list.</p>
+            <h1>{copy.notFoundTitle}</h1>
+            <p>{copy.notFoundDescription}</p>
           </div>
         </div>
       </section>
@@ -98,13 +99,13 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
       <div className="container location-detail-container">
         <a className="location-back-link" href="/locations" onClick={(event) => navigate(event, '/locations')}>
           <ArrowLeft size={16} />
-          Leonida locations
+          {copy.backLocations}
         </a>
 
         {loading && (
           <div className="loading-state location-detail-loader">
             <Loader size={32} className="animate-spin" />
-            <p>Loading {guide.name} guide...</p>
+            <p>{copy.loadingGuide(guide.name)}</p>
           </div>
         )}
 
@@ -114,7 +115,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
               <div className="location-detail-copy">
                 <span className="location-detail-kicker">
                   <MapPin size={15} />
-                  IGN wiki location guide
+                  {copy.kicker}
                 </span>
                 <h1>{displayPage.title}</h1>
                 {displayPage.description && <p>{displayPage.description}</p>}
@@ -125,7 +126,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
                   </span>
                   <a href={displayPage.sourceUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink size={15} />
-                    IGN source
+                    {copy.ignSource}
                   </a>
                 </div>
               </div>
@@ -143,7 +144,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
 
             {failed && (
               <div className="location-source-note">
-                Live IGN parsing failed, so this page is showing the saved fallback summary.
+                {copy.fallbackNote}
               </div>
             )}
 
@@ -154,7 +155,7 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
             </div>
 
             {galleryImages.length > 0 && (
-              <div className="location-detail-gallery" aria-label={`${displayPage.title} images`}>
+              <div className="location-detail-gallery" aria-label={copy.imagesLabel(displayPage.title)}>
                 {galleryImages.map((image) => (
                   <figure key={image.id}>
                     <img src={image.url} alt={image.title} loading="lazy" decoding="async" />
@@ -195,13 +196,13 @@ function LocationGuidePage({ locationSlug, onNavigate }) {
               </div>
             ) : (
               <div className="location-empty-copy">
-                <p>Detailed section content will appear here when the IGN wiki article can be parsed.</p>
+                <p>{copy.emptyCopy}</p>
               </div>
             )}
 
             {displayPage.relatedLinks.length > 0 && (
               <aside className="location-related-panel">
-                <h2>Other Leonida locations</h2>
+                <h2>{copy.relatedTitle}</h2>
                 <div>
                   {displayPage.relatedLinks.map((link) => (
                     <a

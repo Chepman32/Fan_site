@@ -130,7 +130,7 @@ function Header({
 
   return (
     <>
-      <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`} aria-label="Primary navigation">
+      <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`} aria-label={t.nav.primaryNavigation || 'Primary navigation'}>
         <a className="nav-brand" href="/" onClick={(event) => navigate(event, '/')}>
           <img className="nav-favicon" src="/favicon.svg" alt="" aria-hidden="true" width="32" height="32" />
           <span>Leonida <span className="highlight">Loot</span></span>
@@ -157,12 +157,12 @@ function Header({
         <div className="nav-auth">
           {cartItems.length > 0 && (
             <div className="nav-cart">
-              <button type="button" className="nav-cart-toggle" aria-label={`${cartItems.length} cart items`}>
+              <button type="button" className="nav-cart-toggle" aria-label={t.nav.cartItems?.(cartItems.length) || `${cartItems.length} cart items`}>
                 <ShoppingCart size={16} />
                 <span>{cartItems.length}</span>
               </button>
               <div className="nav-cart-popover">
-                <Suspense fallback={<div className="nav-cart-loading">Preparing checkout</div>}>
+                <Suspense fallback={<div className="nav-cart-loading">{t.nav.preparingCheckout || 'Preparing checkout'}</div>}>
                   <CryptoCheckoutPanel
                     key={checkoutKey}
                     cartItems={cartItems}
@@ -180,7 +180,7 @@ function Header({
               type="button"
               className="lang-toggle"
               onClick={() => setLangOpen((open) => !open)}
-              aria-label="Change language"
+              aria-label={t.nav.changeLanguage || 'Change language'}
               aria-expanded={langOpen}
             >
               <Globe size={15} />
@@ -227,7 +227,7 @@ function Header({
                 className={navLinkClass('profile', 'nav-profile')}
                 href="/profile"
                 onClick={(event) => navigate(event, '/profile')}
-                aria-label="Open profile"
+                aria-label={t.nav.openProfile || 'Open profile'}
                 aria-current={ariaCurrent('profile')}
               >
                 <span
@@ -255,7 +255,7 @@ function Header({
         </div>
       </nav>
 
-      <nav className="bottom-tabs-navbar" aria-label="Mobile primary navigation">
+      <nav className="bottom-tabs-navbar" aria-label={t.nav.mobilePrimaryNavigation || 'Mobile primary navigation'}>
         {bottomTabs.map(({ key, href, label, icon: Icon }) => (
           <a
             key={key}
@@ -274,7 +274,7 @@ function Header({
             type="button"
             className={`bottom-tab bottom-more-toggle ${isActive('more') ? 'active' : ''}`}
             onClick={() => setBottomMoreOpen((open) => !open)}
-            aria-label="Show more navigation links"
+            aria-label={t.nav.showMoreNavigationLinks || 'Show more navigation links'}
             aria-expanded={bottomMoreOpen}
             aria-haspopup="menu"
           >

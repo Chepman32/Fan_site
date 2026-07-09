@@ -249,7 +249,7 @@ function ShopPage({
                           href={productHref}
                           onClick={(event) => navigateInternally(event, productHref, onNavigate)}
                         >
-                          Details
+                          {shopCopy.details}
                           <ChevronRight size={14} />
                         </a>
                       </div>
@@ -276,22 +276,22 @@ function ShopPage({
             </div>
 
             {products.length > SHOP_PRODUCTS_PER_PAGE && (
-              <nav className="shop-pagination" aria-label="Shop product pages">
+              <nav className="shop-pagination" aria-label={shopCopy.productPagesLabel}>
                 <button
                   type="button"
                   disabled={safeProductPage === 0}
                   onClick={() => setProductPage((page) => Math.max(0, page - 1))}
                 >
                   <ChevronLeft size={16} />
-                  Previous
+                  {shopCopy.previousPage}
                 </button>
-                <span>Page {safeProductPage + 1} of {totalProductPages}</span>
+                <span>{shopCopy.pageCount(safeProductPage + 1, totalProductPages)}</span>
                 <button
                   type="button"
                   disabled={safeProductPage >= totalProductPages - 1}
                   onClick={() => setProductPage((page) => Math.min(totalProductPages - 1, page + 1))}
                 >
-                  Next
+                  {shopCopy.nextPage}
                   <ChevronRight size={16} />
                 </button>
               </nav>

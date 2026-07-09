@@ -36,6 +36,10 @@ function ProfileAvatar({ user, size = 'md' }) {
   )
 }
 
+function sourceCategoryLabel(category, copy) {
+  return copy.sourceCategories?.[category] || category
+}
+
 function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
   const {
     activityByUserId,
@@ -51,6 +55,7 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
   const { t, lang } = useTranslation()
   const { dateTimeFormat } = usePreferences()
   const s = t.social
+  const profileCopy = s.profileChrome
 
   const rawUser = state.users.find((u) => u.id === userId)
   const profile = useMemo(() => getUserProfile(rawUser, state), [rawUser, state])
@@ -76,11 +81,11 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
       <section className="profile-page section-padding">
         <div className="container">
           <div className="profile-page-heading">
-            <span>{s.community ?? 'Community'}</span>
-            <h1>User not found</h1>
+            <span>{t.nav.community || t.nav.social}</span>
+            <h1>{profileCopy.userNotFound}</h1>
           </div>
           <button className="profile-primary-action" type="button" onClick={() => onNavigate('/community')}>
-            ← Back
+            ← {profileCopy.back}
           </button>
         </div>
       </section>
@@ -91,11 +96,11 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
     <section className="profile-page section-padding">
       <div className="container profile-page-layout">
         <div className="profile-page-heading">
-          <span>{s.community ?? 'Community'}</span>
+          <span>{t.nav.community || t.nav.social}</span>
           <h1>{profile.username}</h1>
           <p>
             {s.joinedOn} {formatDate(profile.joinedAt, lang, dateTimeFormat)} · {s.level} {profile.reputation.level} {profile.reputation.name}
-            {activity?.active ? ' · Online now' : ''}
+            {activity?.active ? ` · ${profileCopy.onlineNow}` : ''}
             {profile.bio && ` · ${profile.bio}`}
           </p>
         </div>
@@ -137,7 +142,7 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
             <div className="profile-metrics-card">
               <span><strong>{profile.submittedSources}</strong>{s.sources}</span>
               <span><strong>{profile.acceptedSources}</strong>{s.accepted}</span>
-              <span><strong>{userPosts.length}</strong> posts</span>
+              <span><strong>{userPosts.length}</strong>{profileCopy.postsCount(userPosts.length).replace(String(userPosts.length), '')}</span>
             </div>
 
             <div className="profile-badges-card">
@@ -148,7 +153,7 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
               <div className="profile-badge-list">
                 {profile.badges.length > 0
                   ? profile.badges.map((badge) => <span key={badge}>{badge}</span>)
-                  : <span style={{ opacity: 0.5 }}>No badges yet.</span>}
+                  : <span style={{ opacity: 0.5 }}>{profileCopy.noBadges}</span>}
               </div>
             </div>
           </aside>
@@ -165,7 +170,7 @@ function UserProfilePage({ userId, onNavigate, onOpenAuth }) {
             ) : (
               userSources.map((source) => (
                 <div key={source.id} className="profile-mini-source">
-                  <strong>{source.category}</strong>
+                  <strong>{sourceCategoryLabel(source.category, s)}</strong>
                   <span>{source.status} · {formatRelative(source.createdAt, s, lang, dateTimeFormat)}</span>
                   <p>{source.claim}</p>
                 </div>

@@ -2,6 +2,17 @@ import { Gamepad2, Heart, ExternalLink } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './Footer.css'
 
+const TRUST_LINKS = [
+  { href: '/buyer-protection', key: 'buyerProtection' },
+  { href: '/seller-policy', key: 'sellerPolicy' },
+  { href: '/refund-policy', key: 'refundPolicy' },
+  { href: '/content-policy', key: 'contentPolicy' },
+  { href: '/dmca', key: 'dmca' },
+  { href: '/privacy', key: 'privacy' },
+  { href: '/terms', key: 'terms' },
+  { href: '/contact', key: 'contact' },
+]
+
 function Footer() {
   const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
@@ -49,15 +60,10 @@ function Footer() {
               </a>
             </div>
             <div className="footer-column">
-              <h4>Trust</h4>
-              <a href="/buyer-protection">Buyer Protection</a>
-              <a href="/seller-policy">Seller Policy</a>
-              <a href="/refund-policy">Refund Policy</a>
-              <a href="/content-policy">Content Policy</a>
-              <a href="/dmca">DMCA</a>
-              <a href="/privacy">Privacy</a>
-              <a href="/terms">Terms</a>
-              <a href="/contact">Contact</a>
+              <h4>{t.footer.trust}</h4>
+              {TRUST_LINKS.map((link) => (
+                <a key={link.href} href={link.href}>{t.footer[link.key]}</a>
+              ))}
             </div>
           </div>
         </div>

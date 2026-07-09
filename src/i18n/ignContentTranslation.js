@@ -12,6 +12,39 @@ const GOOGLE_TARGET_LANGUAGES = {
   zh: 'zh-CN',
 }
 
+const DEFAULT_TRANSLATABLE_KEYS = new Set([
+  'answer',
+  'alt',
+  'body',
+  'caption',
+  'categoryLabel',
+  'description',
+  'galleryAlt',
+  'heading',
+  'key',
+  'label',
+  'license',
+  'longDescription',
+  'name',
+  'question',
+  'seoDescription',
+  'shortDescription',
+  'shortTitle',
+  'subtitle',
+  'summary',
+  'text',
+  'title',
+  'value',
+])
+
+const DEFAULT_TRANSLATABLE_ARRAY_KEYS = new Set([
+  'points',
+  'included',
+  'intro',
+  'longCopy',
+  'paragraphs',
+])
+
 function googleTargetLanguage(lang) {
   return GOOGLE_TARGET_LANGUAGES[lang] || lang
 }
@@ -462,23 +495,29 @@ export function newsTranslationSource(articles) {
   return articles.map((article) => ({
     id: article.id,
     title: article.title,
+    description: article.description,
     summary: article.summary,
     type: article.type,
+    categoryLabel: article.categoryLabel,
   }))
 }
 
 export async function translateNewsArticles(articles, lang) {
   const map = await translateTextMap([
     ...articles.map((article) => article.title),
+    ...articles.map((article) => article.description),
     ...articles.map((article) => article.summary),
     ...articles.map((article) => article.type),
+    ...articles.map((article) => article.categoryLabel),
   ], lang)
 
   return articles.map((article) => ({
     ...article,
     title: translated(map, article.title),
+    description: translated(map, article.description),
     summary: translated(map, article.summary),
     type: translated(map, article.type),
+    categoryLabel: translated(map, article.categoryLabel),
   }))
 }
 
@@ -493,6 +532,9 @@ export function newsArticleTranslationSource(article) {
       title: block.title,
       caption: block.caption,
       alt: block.alt,
+      sources: (block.sources || []).map((source) => ({
+        label: source.label,
+      })),
       segments: (block.segments || []).map((segment) => ({
         type: segment.type,
         text: segment.text,
@@ -511,6 +553,7 @@ export async function translateNewsArticle(article, lang) {
       block.title,
       block.caption,
       block.alt,
+      ...(block.sources || []).map((source) => source.label),
       ...(block.segments || []).map((segment) => segment.text),
     ]),
   ], lang)
@@ -525,12 +568,144 @@ export async function translateNewsArticle(article, lang) {
       title: translated(map, block.title),
       caption: translated(map, block.caption),
       alt: translated(map, block.alt),
+      sources: (block.sources || []).map((source) => ({
+        ...source,
+        label: translated(map, source.label),
+      })),
       segments: (block.segments || []).map((segment) => ({
         ...segment,
         text: translated(map, segment.text),
       })),
     })),
   }
+}
+
+function translatableKeySet(keys) {
+  const nextKeys = new Set(DEFAULT_TRANSLATABLE_KEYS)
+  if (Array.isArray(keys)) {
+    keys.forEach((key) => nextKeys.add(key))
+  }
+  return nextKeys
+}
+
+function translatableOptionsKeySet({ keys, onlyKeys, excludeKeys } = {}) {
+  const nextKeys = Array.isArray(onlyKeys)
+    ? new Set(onlyKeys)
+    : new Set(translatableKeySet(keys))
+
+  if (Array.isArray(excludeKeys)) {
+    excludeKeys.forEach((key) => nextKeys.delete(key))
+  }
+
+  return nextKeys
+}
+
+function translatableArrayKeySet(arrayKeys) {
+  const nextKeys = new Set(DEFAULT_TRANSLATABLE_ARRAY_KEYS)
+  if (Array.isArray(arrayKeys)) {
+    arrayKeys.forEach((key) => nextKeys.add(key))
+  }
+  return nextKeys
+}
+
+function translatableOptionsArrayKeySet({ arrayKeys, onlyArrayKeys, excludeArrayKeys } = {}) {
+  const nextKeys = Array.isArray(onlyArrayKeys)
+    ? new Set(onlyArrayKeys)
+    : new Set(translatableArrayKeySet(arrayKeys))
+
+  if (Array.isArray(excludeArrayKeys)) {
+    excludeArrayKeys.forEach((key) => nextKeys.delete(key))
+  }
+
+  return nextKeys
+}
+
+function isTranslatableStringKey(key, options = {}) {
+  return translatableOptionsKeySet(options).has(key)
+}
+
+function isTranslatableStringArrayKey(key, options = {}) {
+  return translatableOptionsArrayKeySet(options).has(key)
+}
+
+function collectPlainContentTexts(value, options = {}, parentKey = '') {
+  if (typeof value === 'string') {
+    return isTranslatableStringArrayKey(parentKey, options) ? [value] : []
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectPlainContentTexts(item, options, parentKey))
+  }
+
+  if (!value || typeof value !== 'object') return []
+
+  return Object.entries(value).flatMap(([key, item]) => {
+    if (typeof item === 'string') {
+      return isTranslatableStringKey(key, options) ? [item] : []
+    }
+
+    return collectPlainContentTexts(item, options, key)
+  })
+}
+
+function plainContentSource(value, options = {}, parentKey = '') {
+  if (typeof value === 'string') {
+    return isTranslatableStringArrayKey(parentKey, options) ? value : undefined
+  }
+
+  if (Array.isArray(value)) {
+    const items = value
+      .map((item) => plainContentSource(item, options, parentKey))
+      .filter((item) => item !== undefined)
+
+    return items.length ? items : undefined
+  }
+
+  if (!value || typeof value !== 'object') return undefined
+
+  const entries = Object.entries(value)
+    .map(([key, item]) => {
+      if (typeof item === 'string') {
+        return isTranslatableStringKey(key, options) ? [key, item] : null
+      }
+
+      const nested = plainContentSource(item, options, key)
+      return nested === undefined ? null : [key, nested]
+    })
+    .filter(Boolean)
+
+  return entries.length ? Object.fromEntries(entries) : undefined
+}
+
+function translatePlainContentValue(value, map, options = {}, parentKey = '') {
+  if (typeof value === 'string') {
+    return isTranslatableStringArrayKey(parentKey, options) ? translated(map, value) : value
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => translatePlainContentValue(item, map, options, parentKey))
+  }
+
+  if (!value || typeof value !== 'object') return value
+
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => {
+      if (typeof item === 'string' && isTranslatableStringKey(key, options)) {
+        return [key, translated(map, item)]
+      }
+
+      return [key, translatePlainContentValue(item, map, options, key)]
+    }),
+  )
+}
+
+export function plainContentTranslationSource(data, options = {}) {
+  return plainContentSource(data, options) || null
+}
+
+export async function translatePlainContent(data, lang, options = {}) {
+  const map = await translateTextMap(collectPlainContentTexts(data, options), lang)
+  return translatePlainContentValue(data, map, options)
 }
 
 export function useTranslatedIgnContent(data, {
@@ -593,5 +768,6 @@ export function useTranslatedIgnContent(data, {
   return {
     data: hasTranslatedData ? state.data : data,
     translating: Boolean(key && state.key !== key),
+    translated: Boolean(hasTranslatedData),
   }
 }

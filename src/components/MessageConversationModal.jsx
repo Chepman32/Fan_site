@@ -28,7 +28,8 @@ function MessageConversationModal({
   onClose,
 }) {
   const { backendError, currentProfile, sendMessage, state } = useSocial()
-  const { lang } = useTranslation()
+  const { t, lang } = useTranslation()
+  const copy = t.social.conversation
   const { dateTimeFormat } = usePreferences()
   const [body, setBody] = useState(initialBody)
   const [sending, setSending] = useState(false)
@@ -69,9 +70,9 @@ function MessageConversationModal({
 
     if (sent) {
       setBody('')
-      setStatus('Message sent.')
+      setStatus(copy.messageSent)
     } else {
-      setStatus('Could not send the message.')
+      setStatus(copy.messageFailed)
     }
   }
 
@@ -87,11 +88,11 @@ function MessageConversationModal({
         <header className="chat-modal-head">
           <ChatAvatar user={recipient} />
           <div>
-            <span>Conversation</span>
-            <h2 id="chat-modal-title">{recipient?.username || 'Seller'}</h2>
+            <span>{copy.title}</span>
+            <h2 id="chat-modal-title">{recipient?.username || copy.sellerFallback}</h2>
             {contextLabel && <p>{contextLabel}</p>}
           </div>
-          <button type="button" onClick={onClose} aria-label="Close conversation">
+          <button type="button" onClick={onClose} aria-label={copy.closeLabel}>
             <X size={18} />
           </button>
         </header>
@@ -100,8 +101,8 @@ function MessageConversationModal({
           {threadMessages.length === 0 ? (
             <div className="chat-empty-state">
               <MessageCircle size={24} />
-              <strong>Start the conversation</strong>
-              <span>Ask about payment, delivery, what is included, or anything you need before making a deal.</span>
+              <strong>{copy.emptyTitle}</strong>
+              <span>{copy.emptyDescription}</span>
             </div>
           ) : (
             threadMessages.map((message) => {
@@ -127,13 +128,13 @@ function MessageConversationModal({
           <textarea
             value={body}
             onChange={(event) => setBody(event.target.value)}
-            placeholder="Write a message..."
+            placeholder={copy.writePlaceholder}
             maxLength={700}
             rows={3}
           />
           <button type="submit" disabled={sending || !body.trim()}>
             {sending ? <Loader2 size={16} className="chat-spin" /> : <Send size={16} />}
-            Send
+            {copy.send}
           </button>
         </form>
       </section>

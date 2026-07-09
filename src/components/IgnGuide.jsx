@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 import {
   guideTranslationSource,
+  plainContentTranslationSource,
   translateGuideData,
+  translatePlainContent,
   translateVehiclesData,
   useTranslatedIgnContent,
   vehiclesTranslationSource,
@@ -35,6 +37,38 @@ const GUIDE_URLS = {
   motorcycles: 'https://www.ign.com/wikis/gta-6/Bikes_and_Motorcycles_List',
   aircrafts: 'https://www.ign.com/wikis/gta-6/Aircrafts_List',
   boats: 'https://www.ign.com/wikis/gta-6/Watercraft_and_Boats_List',
+}
+const SOCIAL_MEDIA_STATIC_TRANSLATION_OPTIONS = {
+  excludeKeys: ['name'],
+  keys: ['body', 'collectionTitle', 'confirmedLinkLabel', 'description', 'kicker', 'label', 'referencesLabel', 'reportedAccountLabel', 'title'],
+  arrayKeys: ['paragraphs'],
+}
+const SOCIAL_MEDIA_STATIC_GUIDE = {
+  kicker: 'Static Leonida field guide',
+  paragraphs: [
+    'GTA VI social media references show how Leonida performs online: viral wildlife clips, neighborhood-watch posts, music personalities, local stunts, and fictional account handles that connect trailer moments to places and characters.',
+    'This guide keeps the visible accounts and social moments crawlable as static page content. Leonida Loot treats every handle as in-game worldbuilding unless Rockstar confirms otherwise, and avoids presenting fictional profiles as real official channels.',
+  ],
+  stats: {
+    tracked: 'Tracked references',
+    confirmed: 'Confirmed links',
+    reported: 'Reported accounts',
+  },
+  collectionTitle: 'Fictional accounts and social moments',
+  referencesLabel: 'references',
+  confirmedLinkLabel: 'Confirmed character link',
+  reportedAccountLabel: 'Reported trailer account',
+  linksLabel: 'Related social media guide links',
+  links: [
+    { href: '/leonida/characters', label: 'Characters' },
+    { href: '/leonida/locations', label: 'Leonida locations' },
+    { href: '/news', label: 'GTA VI news' },
+    { href: '/community', label: 'Community feed' },
+  ],
+}
+
+function translateSocialMediaStaticGuide(data, lang) {
+  return translatePlainContent(data, lang, SOCIAL_MEDIA_STATIC_TRANSLATION_OPTIONS)
 }
 
 const DEFAULT_COPY = {
@@ -1232,7 +1266,7 @@ export function VehiclesGuide() {
           <div className="ign-guide-content">
             <OverviewPanel copy={copy} data={displayData} stats={stats} images={displayData.images} />
 
-            <div className="vehicle-tabs" role="tablist" aria-label="GTA 6 vehicle subpages">
+            <div className="vehicle-tabs" role="tablist" aria-label={copy.subpageLabel}>
               {displayData.categories.map((category) => {
                 const tabConfig = VEHICLE_CATEGORIES.find((item) => item.id === category.id) || VEHICLE_CATEGORIES[0]
                 const TabIcon = tabConfig.icon
@@ -1334,59 +1368,67 @@ export function WeaponsGuide() {
 }
 
 export function SocialMediaGuide() {
-  const confirmedCount = socialMediaGuideItems.filter((item) => item.status === 'confirmed').length
-  const reportedCount = socialMediaGuideItems.length - confirmedCount
+  const { t, lang } = useTranslation()
+  const copy = guideCopy(t, 'socialMedia')
+  const staticGuideData = useMemo(() => ({
+    ...SOCIAL_MEDIA_STATIC_GUIDE,
+    items: socialMediaGuideItems,
+    sections: socialMediaGuideSections,
+  }), [])
+  const staticGuideSource = useMemo(
+    () => plainContentTranslationSource(staticGuideData, SOCIAL_MEDIA_STATIC_TRANSLATION_OPTIONS),
+    [staticGuideData],
+  )
+  const { data: displayStaticGuide } = useTranslatedIgnContent(staticGuideData, {
+    lang,
+    scope: 'social-media-static-guide',
+    source: staticGuideSource,
+    translate: translateSocialMediaStaticGuide,
+  })
+  const confirmedCount = displayStaticGuide.items.filter((item) => item.status === 'confirmed').length
+  const reportedCount = displayStaticGuide.items.length - confirmedCount
 
   return (
     <section id="social-media-guide" className="section-padding ign-guide-section social-media-static-guide">
       <div className="container">
         <div className="section-header">
           <h2 className="section-title">
-            GTA 6 <span className="gradient-text">SOCIAL MEDIA</span>
+            {copy.title} <span className="gradient-text">{copy.titleHighlight}</span>
           </h2>
         </div>
 
         <div className="ign-guide-content">
           <div className="ign-guide-overview">
             <div>
-              <span className="ign-guide-kicker">Static Leonida field guide</span>
+              <span className="ign-guide-kicker">{displayStaticGuide.kicker}</span>
               <div className="ign-guide-copy">
-                <p>
-                  GTA VI social media references show how Leonida performs online: viral wildlife clips,
-                  neighborhood-watch posts, music personalities, local stunts, and fictional account
-                  handles that connect trailer moments to places and characters.
-                </p>
-                <p>
-                  This guide keeps the visible accounts and social moments crawlable as static page
-                  content. Leonida Loot treats every handle as in-game worldbuilding unless Rockstar
-                  confirms otherwise, and avoids presenting fictional profiles as real official channels.
-                </p>
+                {displayStaticGuide.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
               </div>
             </div>
 
             <div className="ign-guide-stats">
               <div className="ign-guide-stat">
-                <strong>{socialMediaGuideItems.length}</strong>
-                <span>Tracked references</span>
+                <strong>{displayStaticGuide.items.length}</strong>
+                <span>{displayStaticGuide.stats.tracked}</span>
               </div>
               <div className="ign-guide-stat">
                 <strong>{confirmedCount}</strong>
-                <span>Confirmed links</span>
+                <span>{displayStaticGuide.stats.confirmed}</span>
               </div>
               <div className="ign-guide-stat">
                 <strong>{reportedCount}</strong>
-                <span>Reported accounts</span>
+                <span>{displayStaticGuide.stats.reported}</span>
               </div>
             </div>
           </div>
 
           <article className="ign-guide-collection">
             <div className="ign-guide-collection-heading">
-              <h3>Fictional accounts and social moments</h3>
-              <span>{socialMediaGuideItems.length} references</span>
+              <h3>{displayStaticGuide.collectionTitle}</h3>
+              <span>{displayStaticGuide.items.length} {displayStaticGuide.referencesLabel}</span>
             </div>
             <div className="ign-guide-grid">
-              {socialMediaGuideItems.map((item, index) => (
+              {displayStaticGuide.items.map((item, index) => (
                 <article
                   key={item.name}
                   className="ign-guide-card static-social-card"
@@ -1400,7 +1442,7 @@ export function SocialMediaGuide() {
                   <div className="ign-guide-card-body">
                     <span className="ign-guide-source">
                       <Tag size={13} />
-                      <span>{item.status === 'confirmed' ? 'Confirmed character link' : 'Reported trailer account'}</span>
+                      <span>{item.status === 'confirmed' ? displayStaticGuide.confirmedLinkLabel : displayStaticGuide.reportedAccountLabel}</span>
                     </span>
                     <h3>{item.name}</h3>
                     <p>{item.description}</p>
@@ -1411,7 +1453,7 @@ export function SocialMediaGuide() {
           </article>
 
           <div className="social-static-guide-grid">
-            {socialMediaGuideSections.map((section) => (
+            {displayStaticGuide.sections.map((section) => (
               <article key={section.title}>
                 <h3>{section.title}</h3>
                 <p>{section.body}</p>
@@ -1419,11 +1461,10 @@ export function SocialMediaGuide() {
             ))}
           </div>
 
-          <nav className="social-static-guide-links" aria-label="Related social media guide links">
-            <a href="/leonida/characters">Characters</a>
-            <a href="/leonida/locations">Leonida locations</a>
-            <a href="/news">GTA VI news</a>
-            <a href="/community">Community feed</a>
+          <nav className="social-static-guide-links" aria-label={displayStaticGuide.linksLabel}>
+            {displayStaticGuide.links.map((link) => (
+              <a key={link.href} href={link.href}>{link.label}</a>
+            ))}
           </nav>
         </div>
       </div>

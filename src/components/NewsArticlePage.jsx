@@ -18,13 +18,23 @@ function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
-function formatDate(value) {
+const DATE_LOCALES = {
+  zh: 'zh-CN',
+  hi: 'hi-IN',
+  ms: 'ms-MY',
+}
+
+function dateLocale(lang) {
+  return DATE_LOCALES[lang] || lang || undefined
+}
+
+function formatDate(value, lang) {
   if (!value) return 'IGN'
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'IGN'
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(dateLocale(lang), {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date)
@@ -154,10 +164,10 @@ function ParagraphBlock({ block, onNavigate }) {
   )
 }
 
-function MediaBlock({ block }) {
+function MediaBlock({ block, copy }) {
   const isVideo = block.type === 'video'
   const Icon = isVideo ? PlayCircle : ImageIcon
-  const label = isVideo ? 'IGN video' : 'IGN gallery'
+  const label = isVideo ? copy.videoLabel : copy.galleryLabel
 
   return (
     <aside className="news-article-media-callout">
@@ -167,7 +177,7 @@ function MediaBlock({ block }) {
         <strong>{block.title}</strong>
       </div>
       {block.sourceUrl && (
-        <a href={block.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={`Open ${block.title} on IGN`}>
+        <a href={block.sourceUrl} target="_blank" rel="noopener noreferrer" aria-label={copy.openOnIgn(block.title)}>
           <ExternalLink size={17} aria-hidden="true" />
         </a>
       )}
@@ -175,14 +185,14 @@ function MediaBlock({ block }) {
   )
 }
 
-function ArticleBlock({ block, onNavigate }) {
+function ArticleBlock({ block, onNavigate, copy }) {
   if (block.type === 'heading') return <h2>{block.text}</h2>
   if (block.type === 'paragraph') return <ParagraphBlock block={block} onNavigate={onNavigate} />
-  if (block.type === 'gallery' || block.type === 'video') return <MediaBlock block={block} />
+  if (block.type === 'gallery' || block.type === 'video') return <MediaBlock block={block} copy={copy} />
   if (block.type === 'sources' && block.sources?.length) {
     return (
       <aside className="news-article-sources">
-        <h2>Sources</h2>
+        <h2>{copy.sources}</h2>
         <ul>
           {block.sources.map((source) => (
             <li key={source.url}>
@@ -208,7 +218,23 @@ function ArticleBlock({ block, onNavigate }) {
 }
 
 function NewsArticlePage({ slug, type = 'article', onNavigate }) {
-  const { lang } = useTranslation()
+  const { t, lang } = useTranslation()
+  const copy = t.news?.article || {}
+  const articleCopy = {
+    backToNews: copy.backToNews || 'Back to news',
+    galleryLabel: copy.galleryLabel || 'IGN gallery',
+    imageViaIgn: copy.imageViaIgn || 'Image via IGN',
+    kicker: copy.kicker || 'IGN coverage',
+    loading: copy.loading || 'Preparing news article',
+    openOnIgn: copy.openOnIgn || ((title) => `Open ${title} on IGN`),
+    openSourceOnIgn: copy.openSourceOnIgn || 'Open source on IGN',
+    parsedUnavailable: copy.parsedUnavailable || 'The article could not be parsed yet.',
+    source: copy.source || 'Source',
+    sourceRefreshUnavailable: copy.sourceRefreshUnavailable || ((message) => `Source refresh unavailable: ${message}`),
+    sources: copy.sources || 'Sources',
+    unavailable: copy.unavailable || 'News article unavailable',
+    videoLabel: copy.videoLabel || 'IGN video',
+  }
   const staticArticle = useMemo(() => getNewsArticle(slug), [slug])
   const staticPageArticle = useMemo(() => staticArticleToPage(staticArticle), [staticArticle])
   const fallbackSourceUrl = useMemo(() => sourceUrlForNewsSlug(slug, type), [slug, type])
@@ -275,7 +301,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
         <div className="container news-article-shell">
           <div className="loading-state">
             <Loader size={32} className="animate-spin" />
-            <p>Preparing news article</p>
+            <p>{articleCopy.loading}</p>
           </div>
         </div>
       </section>
@@ -288,13 +314,13 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
         <div className="container news-article-shell">
           <a href="/news" className="news-article-back" onClick={(event) => navigateInternally(event, '/news', onNavigate)}>
             <ArrowLeft size={16} aria-hidden="true" />
-            Back to news
+            {articleCopy.backToNews}
           </a>
           <div className="news-article-empty">
-            <h1>News article unavailable</h1>
-            <p>The article could not be parsed yet.</p>
+            <h1>{articleCopy.unavailable}</h1>
+            <p>{articleCopy.parsedUnavailable}</p>
             <a href={fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
-              Open source on IGN
+              {articleCopy.openSourceOnIgn}
               <ExternalLink size={16} aria-hidden="true" />
             </a>
           </div>
@@ -308,11 +334,11 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
       <article className="container news-article-shell">
         <a href="/news" className="news-article-back" onClick={(event) => navigateInternally(event, '/news', onNavigate)}>
           <ArrowLeft size={16} aria-hidden="true" />
-          Back to news
+          {articleCopy.backToNews}
         </a>
 
         <header className="news-article-hero">
-          <div className="news-article-kicker">IGN coverage</div>
+          <div className="news-article-kicker">{articleCopy.kicker}</div>
           <h1>{displayArticle.title}</h1>
           {displayArticle.description && <p className="news-article-dek">{displayArticle.description}</p>}
           <div className="news-article-meta">
@@ -322,27 +348,27 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
             </span>
             <span>
               <Clock size={15} aria-hidden="true" />
-              {formatDate(displayArticle.publishedAt || displayArticle.updatedAt)}
+              {formatDate(displayArticle.publishedAt || displayArticle.updatedAt, lang)}
             </span>
             <a href={displayArticle.sourceUrl || fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
-              Source
+              {articleCopy.source}
               <ExternalLink size={15} aria-hidden="true" />
             </a>
           </div>
         </header>
 
-        {!staticArticle && error && <p className="news-article-source-note">Source refresh unavailable: {error}</p>}
+        {!staticArticle && error && <p className="news-article-source-note">{articleCopy.sourceRefreshUnavailable(error)}</p>}
 
         {displayArticle.image && (
           <figure className="news-article-cover">
             <img src={displayArticle.image} alt="" loading="eager" />
-            <figcaption>Image via IGN</figcaption>
+            <figcaption>{articleCopy.imageViaIgn}</figcaption>
           </figure>
         )}
 
         <div className="news-article-body">
           {(displayArticle.blocks || []).map((block, index) => (
-            <ArticleBlock key={`${block.type}-${index}`} block={block} onNavigate={onNavigate} />
+            <ArticleBlock key={`${block.type}-${index}`} block={block} onNavigate={onNavigate} copy={articleCopy} />
           ))}
         </div>
       </article>

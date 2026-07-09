@@ -1,8 +1,15 @@
 import { ArrowRight, Map, Sparkles } from 'lucide-react'
+import { useMemo } from 'react'
 import { localizeLeonidaSections } from '../data/leonidaSections'
+import { plainContentTranslationSource, translatePlainContent, useTranslatedIgnContent } from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaHub.css'
 
+const LEONIDA_EXPLAINER_CHROME = {
+  eyebrow: 'Reader context',
+  title: 'How Leonida Loot Organizes GTA VI Coverage',
+  description: 'Use this hub as the stable doorway into GTA VI map, character, vehicle, weapon, social-media, shop, and marketplace coverage.',
+}
 const LEONIDA_EXPLAINER_SECTIONS = [
   {
     title: 'What This Leonida Hub Covers',
@@ -21,15 +28,36 @@ const LEONIDA_EXPLAINER_SECTIONS = [
     body: 'Leonida Loot also connects guide readers to unofficial creator assets in the shop and P2P marketplace. These items must stay clearly fan-made and must never imply official Rockstar affiliation, leaked files, or ripped game assets.',
   },
 ]
+const EXPLAINER_TRANSLATION_OPTIONS = {
+  keys: ['body', 'description', 'eyebrow', 'title'],
+}
+
+function translateExplainer(data, lang) {
+  return translatePlainContent(data, lang, EXPLAINER_TRANSLATION_OPTIONS)
+}
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
 function LeonidaHub({ onNavigate }) {
-  const { t } = useTranslation()
+  const { t, lang } = useTranslation()
   const copy = t.leonidaHub
   const sections = localizeLeonidaSections(copy)
+  const explainerData = useMemo(() => ({
+    chrome: LEONIDA_EXPLAINER_CHROME,
+    sections: LEONIDA_EXPLAINER_SECTIONS,
+  }), [])
+  const explainerSource = useMemo(
+    () => plainContentTranslationSource(explainerData, EXPLAINER_TRANSLATION_OPTIONS),
+    [explainerData],
+  )
+  const { data: displayExplainer } = useTranslatedIgnContent(explainerData, {
+    lang,
+    scope: 'leonida-hub-explainer',
+    source: explainerSource,
+    translate: translateExplainer,
+  })
 
   const navigate = (event, href) => {
     if (!onNavigate || !isPlainLeftClick(event)) return
@@ -66,16 +94,13 @@ function LeonidaHub({ onNavigate }) {
       <section className="section-padding leonida-explainer" aria-labelledby="leonida-explainer-title">
         <div className="container">
           <header className="leonida-explainer-heading">
-            <span>Reader context</span>
-            <h2 id="leonida-explainer-title">How Leonida Loot Organizes GTA VI Coverage</h2>
-            <p>
-              Use this hub as the stable doorway into GTA VI map, character, vehicle, weapon,
-              social-media, shop, and marketplace coverage.
-            </p>
+            <span>{displayExplainer.chrome.eyebrow}</span>
+            <h2 id="leonida-explainer-title">{displayExplainer.chrome.title}</h2>
+            <p>{displayExplainer.chrome.description}</p>
           </header>
 
           <div className="leonida-explainer-grid">
-            {LEONIDA_EXPLAINER_SECTIONS.map((section) => (
+            {displayExplainer.sections.map((section) => (
               <article key={section.title}>
                 <h3>{section.title}</h3>
                 <p>{section.body}</p>

@@ -10,87 +10,107 @@ import {
   Store,
   UsersRound,
 } from 'lucide-react'
+import { useMemo } from 'react'
 import { newsArticles } from '../content/news'
 import { SEO_GUIDES } from '../data/guideContent'
-import { LEONIDA_SECTIONS } from '../data/leonidaSections'
+import { localizeLeonidaSections } from '../data/leonidaSections'
+import {
+  newsTranslationSource,
+  translateNewsArticles,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
+import { newsTranslations } from '../i18n/newsTranslations'
+import { useTranslation } from '../i18n/useTranslation.jsx'
 import { STREAM_OVERLAY_PRODUCTS, formatShopPrice, shopProductSlug } from '../shop/shopData'
+import { localizeShopProduct } from '../shop/shopLocalization'
 import './HomePage.css'
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
 }
 
+const DATE_LOCALES = {
+  zh: 'zh-CN',
+  hi: 'hi-IN',
+  ms: 'ms-MY',
+}
+
+const HUB_LINKS = [
+  { id: 'news', href: '/news', icon: Newspaper },
+  { id: 'leonida', href: '/leonida', icon: BookOpenText },
+  { id: 'characters', href: '/leonida/characters', icon: UsersRound },
+  { id: 'locations', href: '/leonida/locations', icon: MapPinned },
+  { id: 'vehicles', href: '/leonida/vehicles', icon: Car },
+  { id: 'weapons', href: '/leonida/weapons', icon: Crosshair },
+  { id: 'shop', href: '/shop', icon: ShoppingBag },
+  { id: 'p2p', href: '/p2p', icon: Store },
+  { id: 'community', href: '/community', icon: MessageCircle },
+  { id: 'about', href: '/about', icon: BookOpenText },
+]
+
+function dateLocale(lang) {
+  return DATE_LOCALES[lang] || lang || undefined
+}
+
+function formatDate(value, lang) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+
+  return new Intl.DateTimeFormat(dateLocale(lang), {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(date)
+}
+
+function localizedArticle(article, newsCopy) {
+  const articleCopy = newsCopy.articles?.[article.slug] || {}
+  const categoryLabel = newsCopy.categoryLabels?.[article.category] || articleCopy.category || article.category
+
+  return {
+    ...article,
+    ...articleCopy,
+    categoryLabel,
+  }
+}
+
 function HomePage({ onNavigate }) {
+  const { t, lang } = useTranslation()
+  const homeCopy = t.home
+  const newsCopy = useMemo(() => t.news || {}, [t.news])
+  const shopCopy = { ...t.shop, lang }
+  const hubLinks = HUB_LINKS.map((link) => ({
+    ...link,
+    ...(homeCopy.hubLinks?.[link.id] || {}),
+  }))
+  const featuredProducts = STREAM_OVERLAY_PRODUCTS.slice(0, 3).map((product) => ({
+    product,
+    displayProduct: localizeShopProduct(product, shopCopy),
+  }))
+  const fallbackNews = useMemo(
+    () => newsArticles.slice(0, 3).map((article) => localizedArticle(article, newsCopy)),
+    [newsCopy],
+  )
+  const englishNews = useMemo(
+    () => newsArticles.slice(0, 3).map((article) => localizedArticle(article, newsTranslations.en)),
+    [],
+  )
+  const newsTranslationPayload = useMemo(() => newsTranslationSource(englishNews), [englishNews])
+  const { data: googleTranslatedNews, translated: hasGoogleTranslatedNews } = useTranslatedIgnContent(englishNews, {
+    enabled: lang !== 'en',
+    lang,
+    scope: 'home-featured-news',
+    source: newsTranslationPayload,
+    translate: translateNewsArticles,
+  })
+  const featuredNews = lang === 'en' || hasGoogleTranslatedNews ? googleTranslatedNews : fallbackNews
+  const leonidaSections = localizeLeonidaSections(t.leonidaHub)
+
   const navigate = (event, href) => {
     if (!href.startsWith('/') || !onNavigate || !isPlainLeftClick(event)) return
     event.preventDefault()
     onNavigate(href)
   }
-
-  const hubLinks = [
-    {
-      href: '/news',
-      icon: Newspaper,
-      title: 'Latest GTA VI Updates',
-      description: 'Follow official updates, trailer context, source-linked coverage, and release status.',
-    },
-    {
-      href: '/leonida',
-      icon: BookOpenText,
-      title: 'Leonida Field Guide',
-      description: 'Read the broad Leonida hub for map, cast, vehicles, weapons, and social-media worldbuilding.',
-    },
-    {
-      href: '/leonida/characters',
-      icon: UsersRound,
-      title: 'Characters',
-      description: 'Meet Lucia, Jason, and the supporting cast visible in public GTA VI material.',
-    },
-    {
-      href: '/leonida/locations',
-      icon: MapPinned,
-      title: 'Locations',
-      description: 'Explore Vice City, Port Gellhorn, Grassrivers, the Keys, Ambrosia, and other known regions.',
-    },
-    {
-      href: '/leonida/vehicles',
-      icon: Car,
-      title: 'Vehicles',
-      description: 'Browse cars, bikes, boats, aircraft, and public trailer vehicle references.',
-    },
-    {
-      href: '/leonida/weapons',
-      icon: Crosshair,
-      title: 'Weapons',
-      description: 'Review known weapon categories and clearly separated speculation notes.',
-    },
-    {
-      href: '/shop',
-      icon: ShoppingBag,
-      title: 'Creator Shop',
-      description: 'Buy unofficial GTA VI-inspired overlays, emotes, and profile banners with digital delivery.',
-    },
-    {
-      href: '/p2p',
-      icon: Store,
-      title: 'P2P Marketplace',
-      description: 'Trade fan-made creator goods, guides, and services with P2P listing tools.',
-    },
-    {
-      href: '/community',
-      icon: MessageCircle,
-      title: 'Community',
-      description: 'Post theories, vote in polls, track sources, and follow fan conversation around Leonida.',
-    },
-    {
-      href: '/about',
-      icon: BookOpenText,
-      title: 'About GTA VI',
-      description: 'Check release facts, countdown details, platform notes, and estimate boundaries.',
-    },
-  ]
-  const featuredProducts = STREAM_OVERLAY_PRODUCTS.slice(0, 3)
-  const featuredNews = newsArticles.slice(0, 3)
 
   return (
     <div className="home-page">
@@ -105,22 +125,19 @@ function HomePage({ onNavigate }) {
         />
         <div className="home-hero-scrim" aria-hidden="true" />
         <div className="container home-hero-inner">
-          <h1>GTA VI Fan Hub & Creator Marketplace</h1>
-          <p>
-            Track GTA VI news, release updates, Leonida map details, characters, vehicles,
-            weapons, and fan-made creator assets in one unofficial hub.
-          </p>
+          <h1>{homeCopy.hero.title}</h1>
+          <p>{homeCopy.hero.description}</p>
           <div className="home-hero-actions">
             <a href="/news" onClick={(event) => navigate(event, '/news')}>
-              Latest GTA VI news
+              {homeCopy.hero.ctas.news}
               <ArrowRight size={17} />
             </a>
             <a href="/leonida" onClick={(event) => navigate(event, '/leonida')}>
-              Explore Leonida
+              {homeCopy.hero.ctas.leonida}
               <MapPinned size={17} />
             </a>
             <a href="/shop" onClick={(event) => navigate(event, '/shop')}>
-              Creator Shop
+              {homeCopy.hero.ctas.shop}
               <ShoppingBag size={17} />
             </a>
           </div>
@@ -131,22 +148,19 @@ function HomePage({ onNavigate }) {
         <div className="container">
           <header className="home-section-heading">
             <div>
-              <span>News hub</span>
-              <h2>Latest GTA VI Updates</h2>
+              <span>{homeCopy.news.kicker}</span>
+              <h2>{homeCopy.news.title}</h2>
             </div>
-            <p>
-              Static, source-aware coverage for release status, Leonida map details, characters,
-              vehicles, weapons, platforms, and official announcements.
-            </p>
+            <p>{homeCopy.news.description}</p>
           </header>
 
           <div className="home-news-grid">
             {featuredNews.map((article) => (
               <a key={article.slug} href={`/news/${article.slug}`} onClick={(event) => navigate(event, `/news/${article.slug}`)}>
-                <span>{article.category}</span>
+                <span>{article.categoryLabel}</span>
                 <h3>{article.title}</h3>
                 <p>{article.description}</p>
-                <small>Updated {article.updatedAt}</small>
+                <small>{newsCopy.updatedLabel || 'Updated'} {formatDate(article.updatedAt, lang)}</small>
               </a>
             ))}
           </div>
@@ -157,13 +171,10 @@ function HomePage({ onNavigate }) {
         <div className="container">
           <header className="home-section-heading">
             <div>
-              <span>Start here</span>
-              <h2>GTA VI hubs and creator paths</h2>
+              <span>{homeCopy.start.kicker}</span>
+              <h2>{homeCopy.start.title}</h2>
             </div>
-            <p>
-              Leonida Loot connects informational GTA VI research with clearly unofficial creator
-              assets, community discussion, and marketplace listings.
-            </p>
+            <p>{homeCopy.start.description}</p>
           </header>
 
           <div className="home-hub-grid">
@@ -176,7 +187,7 @@ function HomePage({ onNavigate }) {
                   <h3>{link.title}</h3>
                   <p>{link.description}</p>
                   <strong>
-                    Explore
+                    {homeCopy.start.cardCta}
                     <ArrowRight size={15} />
                   </strong>
                 </a>
@@ -189,25 +200,26 @@ function HomePage({ onNavigate }) {
       <section className="section-padding home-section home-guides-band">
         <div className="container home-split">
           <div>
-            <span className="home-kicker">Evergreen guides</span>
-            <h2>Confirmed details separated from rumor</h2>
-            <p>
-              Guide pages keep official information, source context, and fan analysis in separate
-              sections so GTA VI readers can scan quickly without mistaking speculation for fact.
-            </p>
+            <span className="home-kicker">{homeCopy.guides.kicker}</span>
+            <h2>{homeCopy.guides.title}</h2>
+            <p>{homeCopy.guides.description}</p>
             <a className="home-inline-link" href="/guides" onClick={(event) => navigate(event, '/guides')}>
-              View all guides
+              {homeCopy.guides.cta}
               <ArrowRight size={16} />
             </a>
           </div>
 
           <div className="home-guide-list">
-            {SEO_GUIDES.slice(0, 4).map((guide) => (
-              <a key={guide.slug} href={`/guides/${guide.slug}`} onClick={(event) => navigate(event, `/guides/${guide.slug}`)}>
-                <strong>{guide.title}</strong>
-                <span>{guide.summary}</span>
-              </a>
-            ))}
+            {SEO_GUIDES.slice(0, 4).map((guide) => {
+              const guideCopy = homeCopy.guideCards?.[guide.slug] || guide
+
+              return (
+                <a key={guide.slug} href={`/guides/${guide.slug}`} onClick={(event) => navigate(event, `/guides/${guide.slug}`)}>
+                  <strong>{guideCopy.title}</strong>
+                  <span>{guideCopy.summary}</span>
+                </a>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -216,17 +228,14 @@ function HomePage({ onNavigate }) {
         <div className="container">
           <header className="home-section-heading">
             <div>
-              <span>Leonida field guide</span>
-              <h2>Characters, locations, vehicles, weapons and social media</h2>
+              <span>{homeCopy.leonida.kicker}</span>
+              <h2>{homeCopy.leonida.title}</h2>
             </div>
-            <p>
-              The field guide keeps the major Leonida search paths separated into crawlable
-              pages with clear confirmed-versus-reported context.
-            </p>
+            <p>{homeCopy.leonida.description}</p>
           </header>
 
           <div className="home-leonida-grid">
-            {LEONIDA_SECTIONS.map((section) => (
+            {leonidaSections.map((section) => (
               <a key={section.id} href={section.href} onClick={(event) => navigate(event, section.href)}>
                 <img src={section.image} alt="" aria-hidden="true" loading="lazy" decoding="async" />
                 <span>{section.shortTitle}</span>
@@ -241,33 +250,34 @@ function HomePage({ onNavigate }) {
       <section className="section-padding home-section home-market-band">
         <div className="container home-commerce-grid">
           <div>
-            <span className="home-kicker">Creator assets</span>
-            <h2>Creator Shop and P2P Marketplace</h2>
-            <p>
-              Browse first-party creator packs in the shop or open the P2P marketplace for
-              seller-to-buyer listings, messaging, file delivery, and trust policies.
-            </p>
+            <span className="home-kicker">{homeCopy.market.kicker}</span>
+            <h2>{homeCopy.market.title}</h2>
+            <p>{homeCopy.market.description}</p>
             <div className="home-cta-pair">
               <a className="home-inline-link" href="/shop" onClick={(event) => navigate(event, '/shop')}>
-                Browse Creator Shop
+                {homeCopy.market.shopCta}
                 <ArrowRight size={16} />
               </a>
               <a className="home-inline-link" href="/p2p" onClick={(event) => navigate(event, '/p2p')}>
-                Open P2P Marketplace
+                {homeCopy.market.p2pCta}
                 <Store size={16} />
               </a>
             </div>
           </div>
 
           <div className="home-commerce-list">
-            {featuredProducts.map((product) => (
-              <a key={product.id} href={`/shop/${shopProductSlug(product)}`} onClick={(event) => navigate(event, `/shop/${shopProductSlug(product)}`)}>
-                <img src={product.image} alt={`Preview of ${product.title}`} loading="lazy" decoding="async" />
-                <span>{product.categoryLabel}</span>
-                <strong>{product.title}</strong>
-                <em>${formatShopPrice(product.price)}</em>
-              </a>
-            ))}
+            {featuredProducts.map(({ product, displayProduct }) => {
+              const href = `/shop/${shopProductSlug(product)}`
+
+              return (
+                <a key={product.id} href={href} onClick={(event) => navigate(event, href)}>
+                  <img src={displayProduct.image} alt={homeCopy.productPreviewAlt(displayProduct.title)} loading="lazy" decoding="async" />
+                  <span>{displayProduct.categoryLabel}</span>
+                  <strong>{displayProduct.title}</strong>
+                  <em>${formatShopPrice(displayProduct.price)}</em>
+                </a>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -275,26 +285,20 @@ function HomePage({ onNavigate }) {
       <section className="section-padding home-section">
         <div className="container home-bottom-grid">
           <article>
-            <span>Community</span>
-            <h2>Community</h2>
-            <p>
-              Read and share GTA VI posts, theories, polls, source notes, and Leonida fan
-              discussion from the community hub.
-            </p>
+            <span>{homeCopy.bottom.community.kicker}</span>
+            <h2>{homeCopy.bottom.community.title}</h2>
+            <p>{homeCopy.bottom.community.description}</p>
             <a href="/community" onClick={(event) => navigate(event, '/community')}>
-              Read community updates
+              {homeCopy.bottom.community.cta}
               <ArrowRight size={16} />
             </a>
           </article>
           <article>
-            <span>Release facts</span>
-            <h2>About GTA VI</h2>
-            <p>
-              Review the GTA VI release countdown, platform notes, pricing context, and clearly
-              labeled estimates in the About GTA VI page.
-            </p>
+            <span>{homeCopy.bottom.about.kicker}</span>
+            <h2>{homeCopy.bottom.about.title}</h2>
+            <p>{homeCopy.bottom.about.description}</p>
             <a href="/about" onClick={(event) => navigate(event, '/about')}>
-              Open About GTA VI
+              {homeCopy.bottom.about.cta}
               <ArrowRight size={16} />
             </a>
           </article>

@@ -96,7 +96,7 @@ function Hero({
         </div>
       </div>
 
-      <button className="scroll-indicator" type="button" onClick={scrollToInfo} aria-label="Scroll to GTA VI game information">
+      <button className="scroll-indicator" type="button" onClick={scrollToInfo} aria-label={t.hero.exploreGame}>
         <ChevronDown size={24} className="animate-float" />
       </button>
     </section>

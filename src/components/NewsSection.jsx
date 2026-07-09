@@ -1,6 +1,12 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowRight, CalendarDays, Clock, Newspaper, Tag } from 'lucide-react'
 import { newsArticles } from '../content/news'
+import {
+  newsTranslationSource,
+  translateNewsArticles,
+  useTranslatedIgnContent,
+} from '../i18n/ignContentTranslation'
+import { newsTranslations } from '../i18n/newsTranslations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 
@@ -43,9 +49,30 @@ function localizedArticle(article, newsCopy) {
 
 function NewsSection({ onNavigate }) {
   const { t, lang } = useTranslation()
-  const newsCopy = t.news || {}
+  const newsCopy = useMemo(() => t.news || {}, [t.news])
   const [showAll, setShowAll] = useState(false)
-  const localizedArticles = newsArticles.map((article) => localizedArticle(article, newsCopy))
+  const fallbackArticles = useMemo(
+    () => newsArticles.map((article) => localizedArticle(article, newsCopy)),
+    [newsCopy],
+  )
+  const englishArticles = useMemo(
+    () => newsArticles.map((article) => localizedArticle(article, newsTranslations.en)),
+    [],
+  )
+  const articleTranslationSource = useMemo(
+    () => newsTranslationSource(englishArticles),
+    [englishArticles],
+  )
+  const { data: googleTranslatedArticles, translated: hasGoogleTranslatedArticles } = useTranslatedIgnContent(englishArticles, {
+    enabled: lang !== 'en',
+    lang,
+    scope: 'news-section-articles',
+    source: articleTranslationSource,
+    translate: translateNewsArticles,
+  })
+  const localizedArticles = lang === 'en' || hasGoogleTranslatedArticles
+    ? googleTranslatedArticles
+    : fallbackArticles
   const featuredArticle = localizedArticles[0]
   const visibleArticles = showAll ? localizedArticles : localizedArticles.slice(0, INITIAL_ARTICLE_COUNT)
   const categories = Array.from(new Set(localizedArticles.map((article) => article.categoryLabel)))

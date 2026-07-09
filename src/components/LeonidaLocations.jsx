@@ -10,12 +10,28 @@ import {
 } from '../data/ignWiki'
 import {
   leonidaTranslationSource,
+  plainContentTranslationSource,
   translateLeonidaData,
+  translatePlainContent,
   useTranslatedIgnContent,
 } from '../i18n/ignContentTranslation'
 import { locationGuideItems, locationGuideSections } from '../content/leonidaLocations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaLocations.css'
+
+const STATIC_GUIDE_TRANSLATION_OPTIONS = {
+  keys: ['ariaLabel', 'body', 'description', 'status', 'subtitle', 'title'],
+  arrayKeys: ['facts'],
+}
+const LOCATION_STATIC_GUIDE = {
+  ariaLabel: 'GTA VI Leonida locations guide',
+  title: 'GTA VI Leonida locations guide',
+  description: 'This static location guide keeps the major Leonida regions visible in the first HTML response, including Vice City, the Leonida Keys, wetlands, coastal towns, industrial areas, wilderness, roads, beaches, hotels, and highways.',
+}
+
+function translateLocationStaticGuide(data, lang) {
+  return translatePlainContent(data, lang, STATIC_GUIDE_TRANSLATION_OPTIONS)
+}
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
@@ -59,6 +75,22 @@ function LeonidaLocations({ onNavigate }) {
     scope: 'leonida',
     source: translationSource,
     translate: translateLeonidaData,
+  })
+  const staticGuideData = useMemo(() => ({
+    chrome: LOCATION_STATIC_GUIDE,
+    items: locationGuideItems,
+    sections: locationGuideSections,
+  }), [])
+  const staticGuideSource = useMemo(
+    () => plainContentTranslationSource(staticGuideData, STATIC_GUIDE_TRANSLATION_OPTIONS),
+    [staticGuideData],
+  )
+  const { data: displayStaticGuide } = useTranslatedIgnContent(staticGuideData, {
+    enabled: !loading,
+    lang,
+    scope: 'leonida-locations-static-guide',
+    source: staticGuideSource,
+    translate: translateLocationStaticGuide,
   })
 
   const locationStats = useMemo(
@@ -115,7 +147,7 @@ function LeonidaLocations({ onNavigate }) {
               </div>
             </div>
 
-            <div className="leonida-images" aria-label="IGN Leonida location images">
+            <div className="leonida-images" aria-label={t.leonida.locationDetail.imagesLabel(t.leonida.title)}>
               {displayData.images.map((image) => (
                 <figure key={image.id} className="leonida-image-card">
                   <img src={image.url} alt={image.title} loading="lazy" decoding="async" />
@@ -173,17 +205,13 @@ function LeonidaLocations({ onNavigate }) {
               </article>
             </div>
 
-            <div className="leonida-static-guide" aria-label="GTA VI Leonida locations guide">
+            <div className="leonida-static-guide" aria-label={displayStaticGuide.chrome.ariaLabel}>
               <div className="leonida-guide-intro">
-                <h3>GTA VI Leonida locations guide</h3>
-                <p>
-                  This static location guide keeps the major Leonida regions visible in the
-                  first HTML response, including Vice City, the Leonida Keys, wetlands,
-                  coastal towns, industrial areas, wilderness, roads, beaches, hotels, and highways.
-                </p>
+                <h3>{displayStaticGuide.chrome.title}</h3>
+                <p>{displayStaticGuide.chrome.description}</p>
               </div>
               <div className="leonida-guide-grid">
-                {locationGuideItems.map((location) => (
+                {displayStaticGuide.items.map((location) => (
                   <article key={location.title}>
                     <span>{location.status}</span>
                     <h3>{location.title}</h3>
@@ -201,7 +229,7 @@ function LeonidaLocations({ onNavigate }) {
                 ))}
               </div>
               <div className="leonida-guide-notes">
-                {locationGuideSections.map((section) => (
+                {displayStaticGuide.sections.map((section) => (
                   <article key={section.title}>
                     <h3>{section.title}</h3>
                     <p>{section.body}</p>
