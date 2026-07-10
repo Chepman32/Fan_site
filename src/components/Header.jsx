@@ -18,11 +18,11 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { LANGUAGE_NAMES } from '../i18n/translations'
-import QuickSettingsModal from './QuickSettingsModal'
+import { LANGUAGE_NAMES } from '../i18n/languages'
 import './Header.css'
 
 const CryptoCheckoutPanel = lazy(() => import('./CryptoCheckoutPanel'))
+const QuickSettingsModal = lazy(() => import('./QuickSettingsModal'))
 
 function isPlainLeftClick(event) {
   return event.button === 0 && !event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey
@@ -301,10 +301,12 @@ function Header({
       </nav>
 
       {quickSettingsOpen && (
-        <QuickSettingsModal
-          onClose={() => setQuickSettingsOpen(false)}
-          onOpenAuth={onOpenAuth}
-        />
+        <Suspense fallback={null}>
+          <QuickSettingsModal
+            onClose={() => setQuickSettingsOpen(false)}
+            onOpenAuth={onOpenAuth}
+          />
+        </Suspense>
       )}
     </>
   )

@@ -279,4 +279,5 @@ const ms = {
   sources: { label: 'Sumber dan konteks', official: 'Pengumuman prapesan rasmi', wikipedia: 'Ringkasan Wikipedia', map: 'Anggaran peta komuniti' },
 }
 
+export const aboutTranslationEn = en
 export const aboutTranslations = { en, zh, ru, it, id, pl, hi, ms }

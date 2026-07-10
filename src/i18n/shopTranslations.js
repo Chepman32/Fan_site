@@ -392,6 +392,8 @@ function createPreviewTranslation(code) {
   }
 }
 
+export const shopTranslationEn = en
+
 export const shopTranslations = {
   en,
   zh: createShopTranslation('zh'),

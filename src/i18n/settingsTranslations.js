@@ -1437,4 +1437,5 @@ const ms = {
   footer: "Tetapan peribadi disimpan dalam dokumen Firestore hanya pemilik.",
 };
 
+export const settingsTranslationEn = en;
 export const settingsTranslations = { en, zh, ru, it, id, pl, hi, ms };

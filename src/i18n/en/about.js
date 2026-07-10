@@ -1,0 +1,42 @@
+export const aboutTranslationEn = {
+  hero: {
+    kicker: 'Game intelligence',
+    title: 'Inside',
+    titleHighlight: 'GTA VI',
+    description: 'The confirmed launch facts, the scale behind Rockstar’s next open world, and a live encyclopedia overview in one place.',
+    launchCard: 'Official launch countdown',
+    contentCta: 'Explore the facts',
+  },
+  stats: {
+    eyebrow: 'The numbers',
+    title: 'Scale at a glance',
+    description: 'Official values are marked separately from reporting, community reconstructions, and unverified production estimates.',
+    official: 'Official',
+    estimate: 'Estimate',
+    items: {
+      release: { label: 'Release date', note: 'Worldwide console launch' },
+      price: { label: 'Pre-order price', note: 'Standard Edition in the US' },
+      budget: { label: 'Reported budget', note: 'Rumored development and marketing range' },
+      team: { label: 'Team size', note: 'Reported contributors across Rockstar studios' },
+      map: { label: 'Estimated map', note: 'Fan reconstruction; Rockstar has not published an area' },
+      regions: { label: 'Major regions', note: 'Named by Rockstar so far' },
+    },
+  },
+  media: {
+    eyebrow: 'Official media', title: 'Promo image vault',
+    description: 'Browse official artwork, wallpapers, game screenshots, and Ultimate Edition benefits parsed from Rockstar’s GTA VI media library.',
+    tabsLabel: 'Promo image collections',
+    tabs: { artwork: 'Artwork & wallpapers', screenshots: 'Screenshots', ultimate: 'Ultimate Edition' },
+    official: 'Rockstar Games', viewSource: 'View official source', openImage: 'Open image',
+    showing: 'Showing', of: 'of', showMore: 'Show more',
+    sourceNote: 'Titles and imagery are sourced from Rockstar Games.',
+    fullSize: 'Open full size', close: 'Close gallery', previous: 'Previous image', next: 'Next image',
+  },
+  notice: 'Rockstar has not confirmed the project budget, contributor count, or map area. Those cards are estimates and may change.',
+  sources: {
+    label: 'Sources and context',
+    official: 'Official preorder announcement',
+    wikipedia: 'Wikipedia overview',
+    map: 'Community map estimate',
+  },
+}

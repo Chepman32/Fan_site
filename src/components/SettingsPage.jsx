@@ -37,7 +37,7 @@ import {
   sendVerificationEmail,
   signOutEverywhere,
 } from '../account/accountClient'
-import { LANGUAGE_NAMES } from '../i18n/translations'
+import { LANGUAGE_NAMES } from '../i18n/languages'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { usePreferences } from '../preferences/AppPreferences.jsx'
 import { SOCIAL_TOPICS } from '../social/socialData'

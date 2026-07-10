@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
-import { SITE_NAME, createJsonLd } from './seoConfig'
+import { useEffect, useRef } from 'react'
+
+const SITE_NAME = 'Leonida Loot'
 
 function upsertMeta(attribute, key, content) {
   if (!content) return
@@ -30,7 +31,7 @@ function upsertLink(rel, href) {
   element.setAttribute('href', href)
 }
 
-function upsertJsonLd(metadata) {
+function upsertJsonLd(metadata, createJsonLd) {
   const id = 'structured-data'
   let element = document.getElementById(id)
 
@@ -44,33 +45,60 @@ function upsertJsonLd(metadata) {
   element.textContent = JSON.stringify(createJsonLd(metadata))
 }
 
-function SeoHead({ metadata, lang = 'en' }) {
+function applyMetadata(metadata, createJsonLd) {
+  document.title = metadata.title
+
+  upsertMeta('name', 'description', metadata.description)
+  upsertMeta('name', 'robots', metadata.robots)
+  upsertMeta('name', 'author', SITE_NAME)
+  upsertMeta('name', 'application-name', SITE_NAME)
+
+  upsertMeta('property', 'og:site_name', SITE_NAME)
+  upsertMeta('property', 'og:title', metadata.title)
+  upsertMeta('property', 'og:description', metadata.description)
+  upsertMeta('property', 'og:type', metadata.type)
+  upsertMeta('property', 'og:url', metadata.canonicalUrl)
+  upsertMeta('property', 'og:image', metadata.image)
+  upsertMeta('property', 'og:image:alt', metadata.imageAlt)
+
+  upsertMeta('name', 'twitter:card', 'summary_large_image')
+  upsertMeta('name', 'twitter:title', metadata.title)
+  upsertMeta('name', 'twitter:description', metadata.description)
+  upsertMeta('name', 'twitter:image', metadata.image)
+  upsertMeta('name', 'twitter:image:alt', metadata.imageAlt)
+
+  upsertLink('canonical', metadata.canonicalUrl)
+  upsertJsonLd(metadata, createJsonLd)
+}
+
+function SeoHead({ metadata, route = '/', state, currentProfile, lang = 'en' }) {
+  const initialRouteRef = useRef(route)
+  const hasNavigatedRef = useRef(false)
+
   useEffect(() => {
     document.documentElement.lang = lang || 'en'
-    document.title = metadata.title
+  }, [lang])
 
-    upsertMeta('name', 'description', metadata.description)
-    upsertMeta('name', 'robots', metadata.robots)
-    upsertMeta('name', 'author', SITE_NAME)
-    upsertMeta('name', 'application-name', SITE_NAME)
+  useEffect(() => {
+    if (!metadata && route !== initialRouteRef.current) {
+      hasNavigatedRef.current = true
+    }
 
-    upsertMeta('property', 'og:site_name', SITE_NAME)
-    upsertMeta('property', 'og:title', metadata.title)
-    upsertMeta('property', 'og:description', metadata.description)
-    upsertMeta('property', 'og:type', metadata.type)
-    upsertMeta('property', 'og:url', metadata.canonicalUrl)
-    upsertMeta('property', 'og:image', metadata.image)
-    upsertMeta('property', 'og:image:alt', metadata.imageAlt)
+    if (!metadata && !hasNavigatedRef.current) return undefined
 
-    upsertMeta('name', 'twitter:card', 'summary_large_image')
-    upsertMeta('name', 'twitter:title', metadata.title)
-    upsertMeta('name', 'twitter:description', metadata.description)
-    upsertMeta('name', 'twitter:image', metadata.image)
-    upsertMeta('name', 'twitter:image:alt', metadata.imageAlt)
+    let canceled = false
 
-    upsertLink('canonical', metadata.canonicalUrl)
-    upsertJsonLd(metadata)
-  }, [lang, metadata])
+    import('./seoConfig').then(({ createJsonLd, createSeoMetadata }) => {
+      if (canceled) return
+
+      const nextMetadata = metadata || createSeoMetadata({ route, state, currentProfile })
+      applyMetadata(nextMetadata, createJsonLd)
+    })
+
+    return () => {
+      canceled = true
+    }
+  }, [currentProfile, metadata, route, state])
 
   return null
 }

@@ -439,4 +439,5 @@ const ms = {
   messages: { default: (title) => `Hai, saya berminat dengan senarai P2P anda "${title}".`, proof: ({ title, paymentTxId, payoutTxId }) => [`Hai, saya telah membayar senarai P2P anda "${title}" dengan USDT TRC20.`, '', `Hash bayaran pembeli: ${paymentTxId}`, payoutTxId ? `Hash payout penjual: ${payoutTxId}` : ''].filter(Boolean).join('\n') },
 }
 
+export const p2pTranslationEn = en
 export const p2pTranslations = { en, zh, ru, it, id, pl, hi, ms }

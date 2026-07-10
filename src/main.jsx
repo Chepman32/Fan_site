@@ -16,6 +16,25 @@ function registerServiceWorker() {
   })
 }
 
+function scheduleInitialPageView() {
+  if (typeof window === 'undefined') return
+
+  const scheduleIdle = () => {
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(() => logAnalyticsPageView(), { timeout: 5000 })
+      return
+    }
+
+    window.setTimeout(() => logAnalyticsPageView(), 2500)
+  }
+
+  if (document.readyState === 'complete') {
+    scheduleIdle()
+  } else {
+    window.addEventListener('load', scheduleIdle, { once: true })
+  }
+}
+
 const rootElement = document.getElementById('root')
 const app = (
   <StrictMode>
@@ -31,5 +50,5 @@ if (rootElement.hasChildNodes()) {
   createRoot(rootElement).render(app)
 }
 
-logAnalyticsPageView()
+scheduleInitialPageView()
 registerServiceWorker()

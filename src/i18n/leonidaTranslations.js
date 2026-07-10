@@ -301,4 +301,5 @@ const ms = {
   },
 }
 
+export const leonidaTranslationEn = en
 export const leonidaTranslations = { en, zh, ru, it, id, pl, hi, ms }

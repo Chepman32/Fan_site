@@ -7,7 +7,7 @@ import {
   createSeedSocialState,
 } from './socialData'
 import { normalizePostUrl } from './postLinks'
-import { P2P_PAYMENT_METHODS, P2P_SEED_LISTINGS } from '../p2p/p2pData'
+import { P2P_PAYMENT_METHODS } from '../p2p/p2pConstants'
 import {
   DEFAULT_ACCOUNT_SETTINGS,
   normalizeAccountSettings,
@@ -413,11 +413,15 @@ const initialState = {
   polls: seedState.polls,
   comments: sortOldest(seedState.comments),
   messages: [],
-  p2pListings: sortNewest(P2P_SEED_LISTINGS),
+  p2pListings: [],
 }
 
 export function SocialProvider({ children }) {
+  const [backendEnabled, setBackendEnabled] = useState(false)
+  const [marketplaceDataEnabled, setMarketplaceDataEnabled] = useState(false)
+  const [realtimeDataEnabled, setRealtimeDataEnabledState] = useState(false)
   const [services, setServices] = useState(null)
+  const [p2pSeedListings, setP2pSeedListings] = useState([])
   const [state, setState] = useState(initialState)
   const [authUser, setAuthUser] = useState(null)
   const [authRevision, setAuthRevision] = useState(0)
@@ -429,8 +433,17 @@ export function SocialProvider({ children }) {
   const [authError, setAuthError] = useState('')
   const [backendError, setBackendError] = useState('')
   const clearBackendError = useCallback(() => setBackendError(''), [])
+  const enableBackend = useCallback(() => setBackendEnabled(true), [])
+  const enableMarketplaceData = useCallback(() => setMarketplaceDataEnabled(true), [])
+  const setRealtimeDataEnabled = useCallback((enabled = true) => {
+    const nextEnabled = Boolean(enabled)
+    if (nextEnabled) setBackendEnabled(true)
+    setRealtimeDataEnabledState(nextEnabled)
+  }, [])
 
   useEffect(() => {
+    if (!backendEnabled) return undefined
+
     let canceled = false
 
     getFirebaseServices()
@@ -447,7 +460,31 @@ export function SocialProvider({ children }) {
     return () => {
       canceled = true
     }
-  }, [])
+  }, [backendEnabled])
+
+  useEffect(() => {
+    if (!marketplaceDataEnabled) return undefined
+
+    let canceled = false
+
+    import('../p2p/p2pData')
+      .then(({ P2P_SEED_LISTINGS }) => {
+        if (canceled) return
+
+        setP2pSeedListings(P2P_SEED_LISTINGS)
+        setState((currentState) => ({
+          ...currentState,
+          p2pListings: sortNewest(mergeById(P2P_SEED_LISTINGS, currentState.p2pListings)),
+        }))
+      })
+      .catch((error) => {
+        if (!canceled) setBackendError(firebaseErrorMessage(error))
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [marketplaceDataEnabled])
 
   useEffect(() => {
     if (!services) return undefined
@@ -499,7 +536,7 @@ export function SocialProvider({ children }) {
   }, [authUser, services])
 
   useEffect(() => {
-    if (!services) return undefined
+    if (!services || !realtimeDataEnabled) return undefined
 
     const subscriptions = [
       services.onSnapshot(services.collection(services.db, 'users'), (snapshot) => {
@@ -548,7 +585,7 @@ export function SocialProvider({ children }) {
         const p2pListings = snapshot.docs.map(docData)
         setState((currentState) => ({
           ...currentState,
-          p2pListings: sortNewest(mergeById(P2P_SEED_LISTINGS, p2pListings)),
+          p2pListings: sortNewest(mergeById(p2pSeedListings, p2pListings)),
         }))
       }, (error) => setBackendError(firebaseErrorMessage(error))),
       services.onSnapshot(services.collection(services.db, 'userActivity'), (snapshot) => {
@@ -561,7 +598,7 @@ export function SocialProvider({ children }) {
     ]
 
     return () => subscriptions.forEach((unsubscribe) => unsubscribe())
-  }, [services])
+  }, [p2pSeedListings, realtimeDataEnabled, services])
 
   useEffect(() => {
     if (!services || !authUser || accountSettingsLoading) return undefined
@@ -649,6 +686,8 @@ export function SocialProvider({ children }) {
 
   const getReadyServices = async () => {
     if (services) return services
+
+    setBackendEnabled(true)
 
     try {
       const loadedServices = await withFirebaseTimeout(getFirebaseServices())
@@ -1216,6 +1255,9 @@ export function SocialProvider({ children }) {
     authError,
     backendError,
     clearBackendError,
+    enableBackend,
+    enableMarketplaceData,
+    setRealtimeDataEnabled,
     authLoading,
     authAccount: authUser ? {
       email: authUser.email || '',

@@ -12,6 +12,7 @@ import LocationGuidePage from './components/LocationGuidePage'
 import MarketplaceListingPage from './components/MarketplaceListingPage'
 import MessagesPage from './components/MessagesPage'
 import NewsArticlePage from './components/NewsArticlePage'
+import NewsSection from './components/NewsSection'
 import P2PTradingPage from './components/P2PTradingPage'
 import ProfilePage from './components/ProfilePage'
 import SettingsPage from './components/SettingsPage'
@@ -43,6 +44,7 @@ const routeComponents = {
   MarketplaceListingPage,
   MessagesPage,
   NewsArticlePage,
+  NewsSection,
   P2PTradingPage,
   ProfilePage,
   SettingsPage,

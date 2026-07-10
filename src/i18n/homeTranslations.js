@@ -721,6 +721,8 @@ function createHomeTranslation(code) {
   }
 }
 
+export const homeTranslationEn = en
+
 export const homeTranslations = {
   en,
   zh: createHomeTranslation('zh'),

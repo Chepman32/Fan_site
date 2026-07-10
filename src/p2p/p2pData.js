@@ -2,21 +2,9 @@ import emotePackPreview from '../assets/shop/Emote pack sheet previews/gta_vi_em
 import overlayPreview from '../assets/shop/Stream overlay previews/20.webp'
 import bannerPreview from '../assets/shop/Profile banner previews/B7A7EEDD-4A0B-43A9-9D41-893635EA6D91.webp'
 import { slugify } from '../data/slugify'
+import { P2P_CATEGORIES, P2P_PAYMENT_METHODS } from './p2pConstants'
 
-export const P2P_CATEGORIES = [
-  { id: 'digital-assets', label: 'Digital assets' },
-  { id: 'streaming', label: 'Streaming kits' },
-  { id: 'guides', label: 'Guides' },
-  { id: 'services', label: 'Services' },
-  { id: 'collectibles', label: 'Collectibles' },
-  { id: 'other', label: 'Other' },
-]
-
-export const P2P_CURRENCIES = ['USDT']
-
-export const P2P_PAYMENT_METHODS = [
-  { id: 'crypto', label: 'Crypto', detail: 'USDT on TRON/TRC20' },
-]
+export { P2P_CATEGORIES, P2P_CURRENCIES, P2P_PAYMENT_METHODS } from './p2pConstants'
 
 export const P2P_SEED_LISTINGS = [
   {

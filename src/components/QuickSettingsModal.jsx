@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { ArrowRight, Car, Languages, Moon, Settings, Sun, UserPlus, X } from 'lucide-react'
-import { LANGUAGE_NAMES } from '../i18n/translations'
+import { LANGUAGE_NAMES } from '../i18n/languages'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import { usePreferences } from '../preferences/AppPreferences.jsx'
 import { useSocial } from '../social/SocialContext'

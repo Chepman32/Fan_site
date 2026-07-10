@@ -1,5 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
-import NewsSection from './components/NewsSection'
+import { lazy, Suspense, useEffect, useRef, useState } from 'react'
 import Header from './components/Header'
 import Footer from './components/Footer'
 import { logAnalyticsPageView } from './firebase/firebaseClient'
@@ -8,7 +7,6 @@ import { LanguageProvider, useTranslation } from './i18n/useTranslation.jsx'
 import { PreferencesProvider, usePreferences } from './preferences/AppPreferences.jsx'
 import { shopCentsToPrice, shopPriceToCents } from './shop/paymentConfig'
 import SeoHead from './seo/SeoHead'
-import { createSeoMetadata } from './seo/seoConfig'
 import './App.css'
 
 const AuthModal = lazy(() => import('./components/AuthModal'))
@@ -21,6 +19,7 @@ const LocationGuidePage = lazy(() => import('./components/LocationGuidePage'))
 const MarketplaceListingPage = lazy(() => import('./components/MarketplaceListingPage'))
 const MessagesPage = lazy(() => import('./components/MessagesPage'))
 const NewsArticlePage = lazy(() => import('./components/NewsArticlePage'))
+const NewsSection = lazy(() => import('./components/NewsSection'))
 const P2PTradingPage = lazy(() => import('./components/P2PTradingPage'))
 const ProfilePage = lazy(() => import('./components/ProfilePage'))
 const SettingsPage = lazy(() => import('./components/SettingsPage'))
@@ -75,6 +74,7 @@ const DEFAULT_ROUTE_COMPONENTS = {
   MarketplaceListingPage,
   MessagesPage,
   NewsArticlePage,
+  NewsSection,
   P2PTradingPage,
   ProfilePage,
   SettingsPage,
@@ -169,6 +169,15 @@ function currentRoute(fallbackRoute = '/') {
   return '/'
 }
 
+function routeNeedsRealtimeData(route) {
+  return route === '/community'
+    || route === '/messages'
+    || route === '/p2p'
+    || route === '/profile'
+    || route === '/settings'
+    || route.startsWith('/profile/')
+}
+
 function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPONENTS }) {
   const [authOpen, setAuthOpen] = useState(false)
   const [route, setRoute] = useState(() => currentRoute(initialRoute))
@@ -178,8 +187,11 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     accountSettings,
     accountSettingsLoading,
     currentProfile,
+    enableBackend,
+    enableMarketplaceData,
     isSignedIn,
     logout,
+    setRealtimeDataEnabled,
     state,
   } = useSocial()
   const { lang, setLang } = useTranslation()
@@ -195,6 +207,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     MarketplaceListingPage: MarketplaceListingPageComponent,
     MessagesPage: MessagesPageComponent,
     NewsArticlePage: NewsArticlePageComponent,
+    NewsSection: NewsSectionComponent,
     P2PTradingPage: P2PTradingPageComponent,
     ProfilePage: ProfilePageComponent,
     SettingsPage: SettingsPageComponent,
@@ -204,11 +217,6 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     TrustPage: TrustPageComponent,
     UserProfilePage: UserProfilePageComponent,
   } = routeComponents
-  const seoMetadata = useMemo(
-    () => createSeoMetadata({ route, state, currentProfile }),
-    [currentProfile, route, state],
-  )
-
   useEffect(() => {
     const handlePopState = () => {
       const nextRoute = currentRoute()
@@ -219,6 +227,18 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  useEffect(() => {
+    const liveDataEnabled = routeNeedsRealtimeData(route) || authOpen
+
+    setRealtimeDataEnabled(liveDataEnabled)
+    if (route === '/p2p') {
+      enableMarketplaceData()
+    }
+    if (liveDataEnabled || cartItems.length > 0) {
+      enableBackend()
+    }
+  }, [authOpen, cartItems.length, enableBackend, enableMarketplaceData, route, setRealtimeDataEnabled])
 
   useEffect(() => {
     if (window.location.hash) scrollToHash(window.location.hash)
@@ -290,7 +310,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -306,7 +326,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/community') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -323,7 +343,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const userId = route.slice('/profile/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -339,7 +359,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/about' || route === '/about-gta-vi') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -356,7 +376,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const guideSlug = route.startsWith('/guides/') ? route.slice('/guides/'.length) : ''
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -372,7 +392,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/leonida') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -388,7 +408,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (LEONIDA_ROUTE_ALIASES[route]) {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -405,7 +425,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const locationSlug = route.slice('/leonida/locations/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -422,7 +442,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const sectionId = route.slice('/leonida/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -439,7 +459,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const locationSlug = route.slice('/locations/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -455,10 +475,12 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/news') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
-          <NewsSection onNavigate={navigateTo} />
+          <LazyRoute>
+            <NewsSectionComponent onNavigate={navigateTo} />
+          </LazyRoute>
         </main>
         <Footer />
         {overlays}
@@ -470,7 +492,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const newsSlug = route.slice('/news/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -486,7 +508,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/shop') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -509,7 +531,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const productSlug = route.slice('/shop/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -525,7 +547,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/settings') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -542,7 +564,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const listingSlug = route.slice('/marketplace/'.length)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -558,7 +580,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/p2p') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -575,7 +597,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
     const trustSlug = route.slice(1)
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -591,7 +613,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/messages') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -607,7 +629,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
   if (route === '/profile') {
     return (
       <div className="app">
-        <SeoHead metadata={seoMetadata} lang={lang} />
+        <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
         <Header {...sharedHeaderProps} solid />
         <main className="page-main">
           <LazyRoute>
@@ -626,7 +648,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
 
   return (
     <div className="app">
-      <SeoHead metadata={seoMetadata} lang={lang} />
+      <SeoHead route={route} state={state} currentProfile={currentProfile} lang={lang} />
       <Header {...sharedHeaderProps} solid />
       <main className="page-main">
         <LazyRoute>

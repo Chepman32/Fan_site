@@ -11,6 +11,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useMemo } from 'react'
+import { HOME_FEATURED_PRODUCTS } from '../content/homeFeaturedProducts'
 import { newsArticles } from '../content/news'
 import { SEO_GUIDES } from '../data/guideContent'
 import { localizeLeonidaSections } from '../data/leonidaSections'
@@ -21,8 +22,7 @@ import {
 } from '../i18n/ignContentTranslation'
 import { newsTranslations } from '../i18n/newsTranslations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { STREAM_OVERLAY_PRODUCTS, formatShopPrice, shopProductSlug } from '../shop/shopData'
-import { localizeShopProduct } from '../shop/shopLocalization'
+import { formatShopPrice } from '../shop/paymentConfig'
 import './HomePage.css'
 
 function isPlainLeftClick(event) {
@@ -83,9 +83,10 @@ function HomePage({ onNavigate }) {
     ...link,
     ...(homeCopy.hubLinks?.[link.id] || {}),
   }))
-  const featuredProducts = STREAM_OVERLAY_PRODUCTS.slice(0, 3).map((product) => ({
-    product,
-    displayProduct: localizeShopProduct(product, shopCopy),
+  const featuredProducts = HOME_FEATURED_PRODUCTS.map((product) => ({
+    ...product,
+    title: shopCopy.productTitles?.[product.id] || shopCopy.productTitles?.[product.title] || product.title,
+    categoryLabel: shopCopy.categories?.[product.categoryId] || product.categoryLabel,
   }))
   const fallbackNews = useMemo(
     () => newsArticles.slice(0, 3).map((article) => localizedArticle(article, newsCopy)),
@@ -117,11 +118,16 @@ function HomePage({ onNavigate }) {
       <section className="home-hero">
         <img
           src="/images/leonida/locations-day.webp"
+          srcSet="/images/leonida/locations-day-800.webp 800w, /images/leonida/locations-day-960.webp 960w, /images/leonida/locations-day-1200.webp 1200w, /images/leonida/locations-day.webp 1600w"
+          sizes="100vw"
           alt=""
           className="home-hero-image"
           aria-hidden="true"
           loading="eager"
           decoding="async"
+          fetchPriority="high"
+          width="1600"
+          height="900"
         />
         <div className="home-hero-scrim" aria-hidden="true" />
         <div className="container home-hero-inner">
@@ -266,15 +272,15 @@ function HomePage({ onNavigate }) {
           </div>
 
           <div className="home-commerce-list">
-            {featuredProducts.map(({ product, displayProduct }) => {
-              const href = `/shop/${shopProductSlug(product)}`
+            {featuredProducts.map((product) => {
+              const href = `/shop/${product.slug}`
 
               return (
                 <a key={product.id} href={href} onClick={(event) => navigate(event, href)}>
-                  <img src={displayProduct.image} alt={homeCopy.productPreviewAlt(displayProduct.title)} loading="lazy" decoding="async" />
-                  <span>{displayProduct.categoryLabel}</span>
-                  <strong>{displayProduct.title}</strong>
-                  <em>${formatShopPrice(displayProduct.price)}</em>
+                  <img src={product.image} alt={homeCopy.productPreviewAlt(product.title)} loading="lazy" decoding="async" />
+                  <span>{product.categoryLabel}</span>
+                  <strong>{product.title}</strong>
+                  <em>${formatShopPrice(product.price)}</em>
                 </a>
               )
             })}

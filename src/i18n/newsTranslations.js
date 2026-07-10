@@ -537,6 +537,8 @@ function createNewsTranslation(code) {
   }
 }
 
+export const newsTranslationEn = en
+
 export const newsTranslations = {
   en,
   zh: createNewsTranslation('zh'),
