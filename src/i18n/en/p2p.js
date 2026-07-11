@@ -24,6 +24,39 @@ export const p2pTranslationEn = {
     storedFiles: 'stored files',
     tradeLanes: 'trade lanes',
   },
+  trust: {
+    kicker: 'Buyer protection',
+    title: 'Buyer protection and marketplace trust',
+    description: 'The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official Rockstar files, leaks, ripped assets, or impersonation material.',
+    listLabel: 'Buyer protection checkpoints',
+    points: [
+      'Exact USDT TRC20 amount and transaction hash are recorded for review.',
+      'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
+      'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
+    ],
+    sections: [
+      {
+        title: 'How buying works',
+        body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
+      },
+      {
+        title: 'How sellers deliver files',
+        body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
+      },
+      {
+        title: 'Buyer protection',
+        body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
+      },
+      {
+        title: 'Dispute window',
+        body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
+      },
+      {
+        title: 'Prohibited content',
+        body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
+      },
+    ],
+  },
   tabs: {
     label: 'P2P trading views',
     marketplace: 'Marketplace',
@@ -102,6 +135,7 @@ export const p2pTranslationEn = {
     price: 'Price',
     wallet: 'Crypto wallet address',
     walletPlaceholder: 'USDT TRC20 wallet address',
+    confirmWallet: (address) => `Confirm seller payout address:\n\n${address}\n\nUSDT payouts for this listing will be sent to this address.`,
     paymentOptions: 'Payment options',
     delivery: 'Delivery',
     deliveryPlaceholder: 'Telegram handoff, Discord delivery, local meetup',

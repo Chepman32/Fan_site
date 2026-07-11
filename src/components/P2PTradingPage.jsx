@@ -85,48 +85,8 @@ const CONFIRM_EXIT_SPRING = {
   mass: 0.66,
   velocity: -2.8,
 }
-const P2P_TRUST_COPY = {
-  kicker: 'Buyer protection',
-  title: 'Buyer protection and marketplace trust',
-  description: 'The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official Rockstar files, leaks, ripped assets, or impersonation material.',
-  listLabel: 'Buyer protection checkpoints',
-  points: [
-    'Exact USDT TRC20 amount and transaction hash are recorded for review.',
-    'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
-    'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
-  ],
-  sections: [
-    {
-      title: 'How buying works',
-      body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
-    },
-    {
-      title: 'How sellers deliver files',
-      body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
-    },
-    {
-      title: 'Buyer protection',
-      body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
-    },
-    {
-      title: 'Dispute window',
-      body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
-    },
-    {
-      title: 'Prohibited content',
-      body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
-    },
-  ],
-}
-const P2P_TRUST_TRANSLATION_OPTIONS = {
-  keys: ['kicker', 'listLabel'],
-}
 const P2P_LISTING_TRANSLATION_OPTIONS = {
   onlyKeys: ['title', 'description', 'deliveryMethod', 'key', 'value'],
-}
-
-function translateP2PTrustCopy(data, lang) {
-  return translatePlainContent(data, lang, P2P_TRUST_TRANSLATION_OPTIONS)
 }
 
 function translateP2PListings(data, lang) {
@@ -1064,22 +1024,13 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
     () => plainContentTranslationSource(listings, P2P_LISTING_TRANSLATION_OPTIONS),
     [listings],
   )
-  const trustTranslationSource = useMemo(
-    () => plainContentTranslationSource(P2P_TRUST_COPY, P2P_TRUST_TRANSLATION_OPTIONS),
-    [],
-  )
-  const { data: trustCopy } = useTranslatedIgnContent(P2P_TRUST_COPY, {
-    lang,
-    scope: 'p2p-trust-copy',
-    source: trustTranslationSource,
-    translate: translateP2PTrustCopy,
-  })
   const { data: displayListings } = useTranslatedIgnContent(listings, {
     lang,
     scope: 'p2p-marketplace-listings',
     source: listingTranslationSource,
     translate: translateP2PListings,
   })
+  const trustCopy = copy.trust
   const displayListingsById = useMemo(() => (
     Object.fromEntries((displayListings || []).map((listing) => [listing.id, listing]))
   ), [displayListings])
@@ -1345,7 +1296,7 @@ function P2PTradingPage({ onOpenAuth = () => {} }) {
 
     if (
       accountSettings.confirmWalletBeforeListing
-      && !window.confirm(`Confirm seller payout address:\n\n${cryptoWalletAddress}\n\nUSDT payouts for this listing will be sent to this address.`)
+      && !window.confirm(copy.form.confirmWallet(cryptoWalletAddress))
     ) {
       return
     }

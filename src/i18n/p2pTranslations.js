@@ -1,3 +1,270 @@
+const trustTranslations = {
+  en: {
+    kicker: 'Buyer protection',
+    title: 'Buyer protection and marketplace trust',
+    description: 'The P2P marketplace is for unofficial GTA VI-inspired creator goods, not official Rockstar files, leaks, ripped assets, or impersonation material.',
+    listLabel: 'Buyer protection checkpoints',
+    points: [
+      'Exact USDT TRC20 amount and transaction hash are recorded for review.',
+      'Listing description, seller messages, file notes, and delivery method remain visible during a dispute.',
+      'Reports can flag missing delivery, materially different files, malware, stolen art, or impersonation.',
+    ],
+    sections: [
+      {
+        title: 'How buying works',
+        body: 'Open a listing, review the preview and file details, message the seller if anything is unclear, then use the USDT TRC20 checkout flow only when the price, delivery method, and license are understood.',
+      },
+      {
+        title: 'How sellers deliver files',
+        body: 'Sellers attach or hand off creator-owned files through the listing and messaging workflow. Delivery notes should state formats, file size, license, and whether extra customization is included.',
+      },
+      {
+        title: 'Buyer protection',
+        body: 'Buyers should keep transaction hashes, listing screenshots, and message history. Suspicious files, missing delivery, or mismatched descriptions can be reported for review.',
+      },
+      {
+        title: 'Dispute window',
+        body: 'Use marketplace messages quickly after purchase if delivery is missing or materially different from the listing. Clear records help operators review disputes.',
+      },
+      {
+        title: 'Prohibited content',
+        body: 'No official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales, or misleading claims of affiliation are allowed.',
+      },
+    ],
+  },
+  zh: {
+    kicker: '买家保护',
+    title: '买家保护与市场信任',
+    description: 'P2P 市场仅用于非官方、受 GTA VI 启发的创作者商品，不允许官方 Rockstar 文件、泄露内容、提取素材或冒充材料。',
+    listLabel: '买家保护检查点',
+    points: [
+      '准确的 USDT TRC20 金额和交易哈希会被记录以便审核。',
+      '商品描述、卖家消息、文件说明和交付方式会在纠纷期间保持可见。',
+      '举报可标记未交付、文件严重不符、恶意软件、盗用作品或冒充行为。',
+    ],
+    sections: [
+      {
+        title: '购买流程',
+        body: '打开商品后，先查看预览和文件详情；如有疑问请联系卖家。只有在确认价格、交付方式和授权范围后，再使用 USDT TRC20 结账流程。',
+      },
+      {
+        title: '卖家如何交付文件',
+        body: '卖家通过商品页面和私信流程附加或交付自己拥有的创作文件。交付说明应写清格式、文件大小、授权以及是否包含额外定制。',
+      },
+      {
+        title: '买家保护',
+        body: '买家应保留交易哈希、商品截图和消息记录。可疑文件、未交付或描述不符的情况都可以提交审核。',
+      },
+      {
+        title: '纠纷窗口',
+        body: '购买后如果没有交付，或交付内容与商品明显不符，请尽快使用市场私信沟通。清晰记录有助于运营人员审核纠纷。',
+      },
+      {
+        title: '禁止内容',
+        body: '不允许官方 Rockstar 文件、GTA VI 泄露内容、提取的游戏素材、盗用作品、恶意软件、冒充、账号买卖或误导性的官方关联声明。',
+      },
+    ],
+  },
+  ru: {
+    kicker: 'Защита покупателя',
+    title: 'Защита покупателя и доверие на маркетплейсе',
+    description: 'P2P-маркетплейс предназначен для неофициальных авторских товаров по мотивам GTA VI, а не для официальных файлов Rockstar, утечек, извлеченных ассетов или материалов с выдачей себя за других.',
+    listLabel: 'Пункты защиты покупателя',
+    points: [
+      'Точная сумма USDT TRC20 и хэш транзакции сохраняются для проверки.',
+      'Описание объявления, сообщения продавца, заметки к файлам и способ доставки остаются видимыми во время спора.',
+      'Жалобы могут отмечать отсутствие доставки, существенно отличающиеся файлы, вредоносные файлы, украденный арт или выдачу себя за другого.',
+    ],
+    sections: [
+      {
+        title: 'Как проходит покупка',
+        body: 'Откройте объявление, проверьте превью и сведения о файлах, напишите продавцу, если что-то неясно, и используйте оплату USDT TRC20 только после понимания цены, способа доставки и лицензии.',
+      },
+      {
+        title: 'Как продавцы передают файлы',
+        body: 'Продавцы прикрепляют или передают собственные авторские файлы через объявление и сообщения. В заметках к доставке должны быть указаны форматы, размер файлов, лицензия и наличие дополнительной настройки.',
+      },
+      {
+        title: 'Защита покупателя',
+        body: 'Покупателям стоит сохранять хэши транзакций, скриншоты объявлений и историю сообщений. Подозрительные файлы, отсутствие доставки или несоответствие описанию можно отправить на проверку.',
+      },
+      {
+        title: 'Окно спора',
+        body: 'Если доставка отсутствует или существенно отличается от объявления, быстро используйте сообщения маркетплейса после покупки. Четкие записи помогают операторам разбирать споры.',
+      },
+      {
+        title: 'Запрещенный контент',
+        body: 'Запрещены официальные файлы Rockstar, утечки GTA VI, извлеченные игровые ассеты, украденный арт, вредоносные файлы, выдача себя за других, продажа аккаунтов и ложные заявления об аффилиации.',
+      },
+    ],
+  },
+  it: {
+    kicker: 'Protezione acquirente',
+    title: 'Protezione acquirente e fiducia nel marketplace',
+    description: 'Il marketplace P2P ospita beni creativi non ufficiali ispirati a GTA VI, non file Rockstar ufficiali, leak, asset estratti o materiali di impersonificazione.',
+    listLabel: 'Controlli di protezione acquirente',
+    points: [
+      'Importo USDT TRC20 esatto e hash della transazione vengono registrati per la revisione.',
+      'Descrizione annuncio, messaggi del venditore, note sui file e metodo di consegna restano visibili durante una disputa.',
+      'Le segnalazioni possono indicare consegna mancante, file molto diversi, malware, arte rubata o impersonificazione.',
+    ],
+    sections: [
+      {
+        title: 'Come funziona l’acquisto',
+        body: 'Apri un annuncio, controlla anteprima e dettagli dei file, scrivi al venditore se qualcosa non è chiaro, poi usa il checkout USDT TRC20 solo quando prezzo, consegna e licenza sono compresi.',
+      },
+      {
+        title: 'Come i venditori consegnano i file',
+        body: 'I venditori allegano o consegnano file di loro proprietà tramite annuncio e messaggi. Le note di consegna devono indicare formati, dimensione file, licenza e eventuale personalizzazione inclusa.',
+      },
+      {
+        title: 'Protezione acquirente',
+        body: 'Gli acquirenti dovrebbero conservare hash delle transazioni, screenshot degli annunci e cronologia messaggi. File sospetti, consegna mancante o descrizioni non coerenti possono essere segnalati per revisione.',
+      },
+      {
+        title: 'Finestra disputa',
+        body: 'Usa rapidamente i messaggi del marketplace dopo l’acquisto se la consegna manca o differisce molto dall’annuncio. Record chiari aiutano gli operatori a valutare le dispute.',
+      },
+      {
+        title: 'Contenuti vietati',
+        body: 'Non sono ammessi file Rockstar ufficiali, leak di GTA VI, asset di gioco estratti, arte rubata, malware, impersonificazione, vendita di account o false affermazioni di affiliazione.',
+      },
+    ],
+  },
+  id: {
+    kicker: 'Perlindungan pembeli',
+    title: 'Perlindungan pembeli dan kepercayaan marketplace',
+    description: 'Marketplace P2P hanya untuk barang kreator tidak resmi yang terinspirasi GTA VI, bukan file resmi Rockstar, bocoran, aset hasil rip, atau materi impersonasi.',
+    listLabel: 'Poin perlindungan pembeli',
+    points: [
+      'Jumlah USDT TRC20 yang tepat dan hash transaksi dicatat untuk ditinjau.',
+      'Deskripsi listing, pesan penjual, catatan file, dan metode pengiriman tetap terlihat selama sengketa.',
+      'Laporan dapat menandai pengiriman yang hilang, file yang sangat berbeda, malware, karya curian, atau impersonasi.',
+    ],
+    sections: [
+      {
+        title: 'Cara membeli',
+        body: 'Buka listing, cek pratinjau dan detail file, kirim pesan ke penjual jika ada yang belum jelas, lalu gunakan checkout USDT TRC20 hanya setelah harga, metode pengiriman, dan lisensi dipahami.',
+      },
+      {
+        title: 'Cara penjual mengirim file',
+        body: 'Penjual melampirkan atau menyerahkan file milik kreator melalui listing dan alur pesan. Catatan pengiriman harus menyebut format, ukuran file, lisensi, dan apakah kustomisasi tambahan termasuk.',
+      },
+      {
+        title: 'Perlindungan pembeli',
+        body: 'Pembeli sebaiknya menyimpan hash transaksi, screenshot listing, dan riwayat pesan. File mencurigakan, pengiriman hilang, atau deskripsi yang tidak cocok dapat dilaporkan untuk ditinjau.',
+      },
+      {
+        title: 'Jendela sengketa',
+        body: 'Gunakan pesan marketplace segera setelah pembelian jika pengiriman hilang atau sangat berbeda dari listing. Catatan yang jelas membantu operator meninjau sengketa.',
+      },
+      {
+        title: 'Konten terlarang',
+        body: 'File resmi Rockstar, bocoran GTA VI, aset game hasil rip, karya curian, malware, impersonasi, penjualan akun, atau klaim afiliasi yang menyesatkan tidak diizinkan.',
+      },
+    ],
+  },
+  pl: {
+    kicker: 'Ochrona kupującego',
+    title: 'Ochrona kupującego i zaufanie na rynku',
+    description: 'Rynek P2P jest przeznaczony dla nieoficjalnych dóbr twórców inspirowanych GTA VI, a nie dla oficjalnych plików Rockstar, przecieków, wyciągniętych assetów lub podszywania się.',
+    listLabel: 'Punkty ochrony kupującego',
+    points: [
+      'Dokładna kwota USDT TRC20 i hash transakcji są zapisywane do weryfikacji.',
+      'Opis oferty, wiadomości sprzedawcy, notatki plików i metoda dostawy pozostają widoczne podczas sporu.',
+      'Zgłoszenia mogą oznaczać brak dostawy, istotnie różne pliki, malware, skradzioną grafikę lub podszywanie się.',
+    ],
+    sections: [
+      {
+        title: 'Jak działa zakup',
+        body: 'Otwórz ofertę, sprawdź podgląd i szczegóły plików, napisz do sprzedawcy, jeśli coś jest niejasne, a potem użyj checkoutu USDT TRC20 dopiero po zrozumieniu ceny, dostawy i licencji.',
+      },
+      {
+        title: 'Jak sprzedawcy dostarczają pliki',
+        body: 'Sprzedawcy dołączają lub przekazują własne pliki twórcy przez ofertę i wiadomości. Notatki dostawy powinny podawać formaty, rozmiar pliku, licencję i ewentualną dodatkową personalizację.',
+      },
+      {
+        title: 'Ochrona kupującego',
+        body: 'Kupujący powinni zachować hashe transakcji, zrzuty ekranu ofert i historię wiadomości. Podejrzane pliki, brak dostawy lub niezgodne opisy można zgłosić do przeglądu.',
+      },
+      {
+        title: 'Okno sporu',
+        body: 'Użyj wiadomości rynku szybko po zakupie, jeśli dostawy brakuje albo znacząco różni się od oferty. Jasne zapisy pomagają operatorom rozpatrywać spory.',
+      },
+      {
+        title: 'Zakazane treści',
+        body: 'Nie wolno oferować oficjalnych plików Rockstar, przecieków GTA VI, wyciągniętych assetów gry, skradzionej grafiki, malware, podszywania się, sprzedaży kont ani mylących twierdzeń o afiliacji.',
+      },
+    ],
+  },
+  hi: {
+    kicker: 'खरीदार सुरक्षा',
+    title: 'खरीदार सुरक्षा और marketplace भरोसा',
+    description: 'P2P marketplace केवल GTA VI से प्रेरित अनौपचारिक creator goods के लिए है, आधिकारिक Rockstar files, leaks, ripped assets या impersonation material के लिए नहीं।',
+    listLabel: 'खरीदार सुरक्षा checkpoints',
+    points: [
+      'सटीक USDT TRC20 राशि और transaction hash review के लिए रिकॉर्ड किए जाते हैं।',
+      'Listing description, seller messages, file notes और delivery method dispute के दौरान दिखाई देते रहते हैं।',
+      'Reports missing delivery, materially different files, malware, stolen art या impersonation flag कर सकते हैं।',
+    ],
+    sections: [
+      {
+        title: 'खरीद कैसे होती है',
+        body: 'Listing खोलें, preview और file details देखें, कुछ unclear हो तो seller को message करें, फिर price, delivery method और license समझने के बाद ही USDT TRC20 checkout flow इस्तेमाल करें।',
+      },
+      {
+        title: 'Seller files कैसे deliver करते हैं',
+        body: 'Seller listing और messaging workflow से creator-owned files attach या hand off करते हैं। Delivery notes में formats, file size, license और extra customization शामिल है या नहीं, यह लिखा होना चाहिए।',
+      },
+      {
+        title: 'खरीदार सुरक्षा',
+        body: 'Buyers को transaction hashes, listing screenshots और message history संभालकर रखनी चाहिए। Suspicious files, missing delivery या mismatched descriptions review के लिए report किए जा सकते हैं।',
+      },
+      {
+        title: 'Dispute window',
+        body: 'Purchase के बाद delivery missing हो या listing से काफी अलग हो, तो marketplace messages जल्दी इस्तेमाल करें। साफ records operators को disputes review करने में मदद करते हैं।',
+      },
+      {
+        title: 'निषिद्ध content',
+        body: 'Official Rockstar files, GTA VI leaks, ripped game assets, stolen art, malware, impersonation, account sales या affiliation के misleading claims allowed नहीं हैं।',
+      },
+    ],
+  },
+  ms: {
+    kicker: 'Perlindungan pembeli',
+    title: 'Perlindungan pembeli dan kepercayaan pasaran',
+    description: 'Pasaran P2P adalah untuk barangan pencipta tidak rasmi yang diilhamkan oleh GTA VI, bukan fail rasmi Rockstar, bocoran, aset yang dirip, atau bahan penyamaran.',
+    listLabel: 'Titik semak perlindungan pembeli',
+    points: [
+      'Jumlah USDT TRC20 yang tepat dan hash transaksi direkodkan untuk semakan.',
+      'Penerangan senarai, mesej penjual, nota fail, dan kaedah penghantaran kekal terlihat semasa pertikaian.',
+      'Laporan boleh menandakan penghantaran hilang, fail yang jauh berbeza, malware, seni curi, atau penyamaran.',
+    ],
+    sections: [
+      {
+        title: 'Cara membeli',
+        body: 'Buka senarai, semak pratonton dan butiran fail, mesej penjual jika ada yang tidak jelas, kemudian guna checkout USDT TRC20 hanya selepas harga, kaedah penghantaran, dan lesen difahami.',
+      },
+      {
+        title: 'Cara penjual menghantar fail',
+        body: 'Penjual melampirkan atau menyerahkan fail milik pencipta melalui senarai dan aliran mesej. Nota penghantaran patut menyatakan format, saiz fail, lesen, dan sama ada penyesuaian tambahan disertakan.',
+      },
+      {
+        title: 'Perlindungan pembeli',
+        body: 'Pembeli patut menyimpan hash transaksi, screenshot senarai, dan sejarah mesej. Fail mencurigakan, penghantaran hilang, atau penerangan tidak sepadan boleh dilaporkan untuk semakan.',
+      },
+      {
+        title: 'Tetingkap pertikaian',
+        body: 'Gunakan mesej pasaran dengan cepat selepas pembelian jika penghantaran hilang atau jauh berbeza daripada senarai. Rekod yang jelas membantu operator menyemak pertikaian.',
+      },
+      {
+        title: 'Kandungan dilarang',
+        body: 'Fail rasmi Rockstar, bocoran GTA VI, aset permainan yang dirip, seni curi, malware, penyamaran, jualan akaun, atau dakwaan afiliasi yang mengelirukan tidak dibenarkan.',
+      },
+    ],
+  },
+}
+
 const en = {
   documentTitle: 'P2P Trading | GTA VI Hub',
   categories: {
@@ -24,6 +291,7 @@ const en = {
     storedFiles: 'stored files',
     tradeLanes: 'trade lanes',
   },
+  trust: trustTranslations.en,
   tabs: {
     label: 'P2P trading views',
     marketplace: 'Marketplace',
@@ -102,6 +370,7 @@ const en = {
     price: 'Price',
     wallet: 'Crypto wallet address',
     walletPlaceholder: 'USDT TRC20 wallet address',
+    confirmWallet: (address) => `Confirm seller payout address:\n\n${address}\n\nUSDT payouts for this listing will be sent to this address.`,
     paymentOptions: 'Payment options',
     delivery: 'Delivery',
     deliveryPlaceholder: 'Telegram handoff, Discord delivery, local meetup',
@@ -203,6 +472,7 @@ const zh = {
     storedFiles: '已存文件',
     tradeLanes: '交易分类',
   },
+  trust: trustTranslations.zh,
   tabs: { label: 'P2P 交易视图', marketplace: '市场', myProducts: '我的商品' },
   toolbar: {
     searchPlaceholder: '搜索商品、卖家、属性',
@@ -255,6 +525,7 @@ const zh = {
     price: '价格',
     wallet: '加密钱包地址',
     walletPlaceholder: 'USDT TRC20 钱包地址',
+    confirmWallet: (address) => `确认卖家收款地址：\n\n${address}\n\n该商品的 USDT 打款会发送到此地址。`,
     paymentOptions: '付款方式',
     delivery: '交付方式',
     deliveryPlaceholder: 'Telegram 交付、Discord 交付、本地交接',
@@ -315,13 +586,14 @@ const ru = {
   sellerFallback: 'Продавец',
   today: 'Сегодня',
   hero: { kicker: 'P2P обмен', title: 'Торгуйте фанатскими товарами GTA VI напрямую.', description: 'Покупайте и продавайте оверлеи, эмоции, гайды, услуги, коллекционные предметы и другие материалы GTA VI с перепиской между продавцом и покупателем.', summaryLabel: 'Сводка маркетплейса', activeListings: 'активных объявлений', storedFiles: 'файлов сохранено', tradeLanes: 'направлений' },
+  trust: trustTranslations.ru,
   tabs: { label: 'Разделы P2P торговли', marketplace: 'Маркетплейс', myProducts: 'Мои товары' },
   toolbar: { searchPlaceholder: 'Поиск по товарам, продавцам, свойствам', categoriesLabel: 'Категории маркетплейса', all: 'Все', closeForm: 'Закрыть форму', createListing: 'Создать объявление', signInToSell: 'Войдите, чтобы продавать' },
   actions: { edit: 'Редактировать', setActive: 'Активировать', markSold: 'Отметить проданным', remove: 'Удалить', buy: 'Купить', messageSeller: 'Написать продавцу', copied: 'Скопировано', copy: 'Копировать' },
   card: { storedViaTelegram: (count) => `${count} файл(ов) сохранено через Telegram`, sellerDelivers: 'Продавец передаст после сделки', listingFilesLabel: 'Файлы объявления' },
   checkout: { title: 'USDT TRC20 escrow-оплата', subtitle: (network) => `${network}: автоматическая выплата продавцу`, sendExactly: 'Отправьте ровно', platformAddress: 'Адрес платформы', commission: 'Комиссия', sellerPayout: 'Выплата продавцу', txHash: 'Хэш транзакции', txPlaceholder: 'Вставьте хэш TRC20 транзакции', verifyHash: 'Проверить хэш', messageProof: 'Написать продавцу с подтверждением', statuses: { success: 'Платеж подтвержден', failed: 'Проверка не удалась', pending: 'Проверяем платеж' }, messages: { checkingNetwork: 'Проверяем сеть TRON...', verifyFailed: 'Не удалось проверить платеж или отправить выплату.', signIn: 'Войдите перед проверкой P2P платежа.', preparing: 'Проверяем платеж и готовим автоматическую выплату продавцу...' } },
   modal: { productDetails: 'Детали товара', closeProductDetails: 'Закрыть детали товара', fallbackDescription: 'Продавец может уточнить детали в чате до сделки.', listed: (date) => `Опубликовано ${date}`, paymentOptions: 'Способы оплаты', ownListingNote: 'Это ваше объявление. Управляйте им в разделе Мои товары.', whatsIncluded: 'Что включено', delivery: 'Доставка', sellerHandoff: 'Передача продавцом после оплаты', files: 'Файлы', storedFiles: (count) => `${count} сохраненных файл(ов)`, noUploadedFiles: 'Файловый пакет пока не загружен', otherProperties: 'Другие свойства' },
-  form: { editKicker: 'Редактирование', newKicker: 'Новый товар', editTitle: 'Редактировать объявление', createTitle: 'Создать объявление о продаже', closeLabel: 'Закрыть форму объявления', title: 'Название', titlePlaceholder: 'Пак исходников оверлея Vice City', category: 'Категория', price: 'Цена', wallet: 'Адрес криптокошелька', walletPlaceholder: 'Адрес USDT TRC20 кошелька', paymentOptions: 'Способы оплаты', delivery: 'Доставка', deliveryPlaceholder: 'Telegram, Discord или личная передача', description: 'Описание', descriptionPlaceholder: 'Что входит, что получит покупатель и как пройдет доставка.', properties: 'Свойства', add: 'Добавить', propertyPlaceholder: 'Свойство', valuePlaceholder: 'Значение', removeProperty: 'Удалить свойство', previewImage: 'Превью', imageTypes: 'JPG, PNG или WebP', listingPreviewAlt: 'Превью объявления', saleFiles: 'Файлы продажи', selected: (count) => `Выбрано: ${count}`, slotsAvailable: (count) => `Доступно мест: ${count}`, fileTypes: 'Паки, архивы, исходники', storedFilesLabel: 'Сохраненные файлы объявления', removeFile: (name) => `Удалить ${name}`, footerNote: 'Файлы загружаются через серверный Telegram bot connector.', saving: 'Сохранение', publishing: 'Публикация', saveChanges: 'Сохранить', publishListing: 'Опубликовать' },
+  form: { editKicker: 'Редактирование', newKicker: 'Новый товар', editTitle: 'Редактировать объявление', createTitle: 'Создать объявление о продаже', closeLabel: 'Закрыть форму объявления', title: 'Название', titlePlaceholder: 'Пак исходников оверлея Vice City', category: 'Категория', price: 'Цена', wallet: 'Адрес криптокошелька', walletPlaceholder: 'Адрес USDT TRC20 кошелька', confirmWallet: (address) => `Подтвердите адрес выплаты продавца:\n\n${address}\n\nUSDT-выплаты по этому объявлению будут отправляться на этот адрес.`, paymentOptions: 'Способы оплаты', delivery: 'Доставка', deliveryPlaceholder: 'Telegram, Discord или личная передача', description: 'Описание', descriptionPlaceholder: 'Что входит, что получит покупатель и как пройдет доставка.', properties: 'Свойства', add: 'Добавить', propertyPlaceholder: 'Свойство', valuePlaceholder: 'Значение', removeProperty: 'Удалить свойство', previewImage: 'Превью', imageTypes: 'JPG, PNG или WebP', listingPreviewAlt: 'Превью объявления', saleFiles: 'Файлы продажи', selected: (count) => `Выбрано: ${count}`, slotsAvailable: (count) => `Доступно мест: ${count}`, fileTypes: 'Паки, архивы, исходники', storedFilesLabel: 'Сохраненные файлы объявления', removeFile: (name) => `Удалить ${name}`, footerNote: 'Файлы загружаются через серверный Telegram bot connector.', saving: 'Сохранение', publishing: 'Публикация', saveChanges: 'Сохранить', publishListing: 'Опубликовать' },
   empty: { noProducts: 'Товаров пока нет', noListings: 'Объявления не найдены', createFirst: 'Создайте первое объявление, чтобы управлять им здесь.', tryAnother: 'Попробуйте другую категорию или поисковый запрос.' },
   errors: { readPreview: 'Не удалось прочитать превью.', renderPreview: 'Не удалось отрисовать превью.', smallerPreview: 'Выберите изображение поменьше.', choosePreview: 'Выберите изображение для превью.', removeExistingFile: 'Удалите существующий файл перед добавлением нового.', duplicateFiles: 'Эти файлы уже прикреплены к объявлению.', attachUpTo: (count) => `Можно прикрепить еще до ${count} файл(ов).`, minTitle: 'Добавьте название минимум из 3 символов.', validPrice: 'Укажите корректную цену.', oneProperty: 'Добавьте хотя бы одно свойство.', onePayment: 'Выберите хотя бы один способ оплаты.', validWallet: 'Добавьте корректный адрес USDT TRC20 кошелька.', maxFiles: (count) => `В объявлении должно быть не больше ${count} файлов.`, updateFailed: 'Не удалось обновить объявление.', publishFailed: 'Не удалось опубликовать объявление.', removeFailed: 'Не удалось удалить товар.' },
   notices: { updated: 'Товар обновлен.', published: 'Объявление опубликовано на P2P маркетплейсе.', uploading: ({ index, total, name }) => `Загрузка ${index + 1}/${total}: ${name}`, markedSold: 'Объявление отмечено как проданное.', statusUpdated: (status) => `Объявление отмечено как ${status}.`, removed: 'Товар удален.' },
@@ -337,13 +609,14 @@ const it = {
   sellerFallback: 'Venditore',
   today: 'Oggi',
   hero: { kicker: 'Scambio P2P', title: 'Scambia direttamente beni fan-made di GTA VI.', description: 'Compra e vendi overlay, emote, guide, servizi, collezionabili e altri contenuti legati a GTA VI con messaggi tra venditore e acquirente.', summaryLabel: 'Riepilogo marketplace', activeListings: 'annunci attivi', storedFiles: 'file salvati', tradeLanes: 'categorie' },
+  trust: trustTranslations.it,
   tabs: { label: 'Viste scambi P2P', marketplace: 'Marketplace', myProducts: 'I miei prodotti' },
   toolbar: { searchPlaceholder: 'Cerca oggetti, venditori, proprietà', categoriesLabel: 'Categorie marketplace', all: 'Tutto', closeForm: 'Chiudi modulo', createListing: 'Crea annuncio', signInToSell: 'Accedi per vendere' },
   actions: { edit: 'Modifica', setActive: 'Rendi attivo', markSold: 'Segna venduto', remove: 'Rimuovi', buy: 'Compra', messageSeller: 'Scrivi al venditore', copied: 'Copiato', copy: 'Copia' },
   card: { storedViaTelegram: (count) => `${count} file salvati via Telegram`, sellerDelivers: 'Il venditore consegna dopo l’accordo', listingFilesLabel: 'File annuncio' },
   checkout: { title: 'Checkout escrow USDT TRC20', subtitle: (network) => `${network} con pagamento automatico al venditore`, sendExactly: 'Invia esattamente', platformAddress: 'Indirizzo piattaforma', commission: 'Commissione', sellerPayout: 'Pagamento venditore', txHash: 'Hash transazione', txPlaceholder: 'Incolla l’hash della transazione TRC20', verifyHash: 'Verifica hash', messageProof: 'Scrivi al venditore con prova', statuses: { success: 'Pagamento verificato', failed: 'Verifica fallita', pending: 'Controllo pagamento' }, messages: { checkingNetwork: 'Controllo rete TRON...', verifyFailed: 'Impossibile verificare il pagamento o inviare il payout.', signIn: 'Accedi prima di verificare un pagamento P2P.', preparing: 'Controllo pagamento e preparo il payout automatico al venditore...' } },
   modal: { productDetails: 'Dettagli prodotto', closeProductDetails: 'Chiudi dettagli prodotto', fallbackDescription: 'Il venditore può condividere altri dettagli in chat prima dell’accordo.', listed: (date) => `Pubblicato ${date}`, paymentOptions: 'Opzioni di pagamento', ownListingNote: 'Questo è il tuo annuncio. Gestiscilo da I miei prodotti.', whatsIncluded: 'Cosa include', delivery: 'Consegna', sellerHandoff: 'Consegna del venditore dopo il pagamento', files: 'File', storedFiles: (count) => `${count} file salvati`, noUploadedFiles: 'Nessun pacchetto file caricato', otherProperties: 'Altre proprietà' },
-  form: { editKicker: 'Modifica oggetto', newKicker: 'Nuovo oggetto', editTitle: 'Modifica annuncio prodotto', createTitle: 'Crea annuncio di vendita', closeLabel: 'Chiudi modulo annuncio', title: 'Titolo', titlePlaceholder: 'Pacchetto sorgente overlay Vice City', category: 'Categoria', price: 'Prezzo', wallet: 'Indirizzo wallet crypto', walletPlaceholder: 'Indirizzo wallet USDT TRC20', paymentOptions: 'Opzioni di pagamento', delivery: 'Consegna', deliveryPlaceholder: 'Consegna Telegram, Discord o incontro locale', description: 'Descrizione', descriptionPlaceholder: 'Cosa include, cosa riceve l’acquirente e come avviene la consegna.', properties: 'Proprietà', add: 'Aggiungi', propertyPlaceholder: 'Proprietà', valuePlaceholder: 'Valore', removeProperty: 'Rimuovi proprietà', previewImage: 'Immagine anteprima', imageTypes: 'JPG, PNG o WebP', listingPreviewAlt: 'Anteprima annuncio', saleFiles: 'File in vendita', selected: (count) => `${count} selezionati`, slotsAvailable: (count) => `${count} slot disponibili`, fileTypes: 'Bundle, archivi, sorgenti', storedFilesLabel: 'File annuncio salvati', removeFile: (name) => `Rimuovi ${name}`, footerNote: 'I file vengono caricati tramite il connector server-side del bot Telegram.', saving: 'Salvataggio', publishing: 'Pubblicazione', saveChanges: 'Salva modifiche', publishListing: 'Pubblica annuncio' },
+  form: { editKicker: 'Modifica oggetto', newKicker: 'Nuovo oggetto', editTitle: 'Modifica annuncio prodotto', createTitle: 'Crea annuncio di vendita', closeLabel: 'Chiudi modulo annuncio', title: 'Titolo', titlePlaceholder: 'Pacchetto sorgente overlay Vice City', category: 'Categoria', price: 'Prezzo', wallet: 'Indirizzo wallet crypto', walletPlaceholder: 'Indirizzo wallet USDT TRC20', confirmWallet: (address) => `Conferma indirizzo payout venditore:\n\n${address}\n\nI payout USDT per questo annuncio saranno inviati a questo indirizzo.`, paymentOptions: 'Opzioni di pagamento', delivery: 'Consegna', deliveryPlaceholder: 'Consegna Telegram, Discord o incontro locale', description: 'Descrizione', descriptionPlaceholder: 'Cosa include, cosa riceve l’acquirente e come avviene la consegna.', properties: 'Proprietà', add: 'Aggiungi', propertyPlaceholder: 'Proprietà', valuePlaceholder: 'Valore', removeProperty: 'Rimuovi proprietà', previewImage: 'Immagine anteprima', imageTypes: 'JPG, PNG o WebP', listingPreviewAlt: 'Anteprima annuncio', saleFiles: 'File in vendita', selected: (count) => `${count} selezionati`, slotsAvailable: (count) => `${count} slot disponibili`, fileTypes: 'Bundle, archivi, sorgenti', storedFilesLabel: 'File annuncio salvati', removeFile: (name) => `Rimuovi ${name}`, footerNote: 'I file vengono caricati tramite il connector server-side del bot Telegram.', saving: 'Salvataggio', publishing: 'Pubblicazione', saveChanges: 'Salva modifiche', publishListing: 'Pubblica annuncio' },
   empty: { noProducts: 'Ancora nessun prodotto', noListings: 'Nessun annuncio trovato', createFirst: 'Crea il tuo primo annuncio per gestirlo qui.', tryAnother: 'Prova un’altra categoria o termine di ricerca.' },
   errors: { readPreview: 'Impossibile leggere l’immagine di anteprima.', renderPreview: 'Impossibile renderizzare l’immagine di anteprima.', smallerPreview: 'Scegli un’immagine di anteprima più piccola.', choosePreview: 'Scegli un file immagine per l’anteprima.', removeExistingFile: 'Rimuovi un file esistente prima di allegarne un altro.', duplicateFiles: 'Questi file sono già allegati a questo annuncio.', attachUpTo: (count) => `Allega fino a ${count} nuovi file per questo annuncio.`, minTitle: 'Aggiungi un titolo di almeno 3 caratteri.', validPrice: 'Aggiungi un prezzo valido.', oneProperty: 'Aggiungi almeno una proprietà.', onePayment: 'Scegli almeno un’opzione di pagamento.', validWallet: 'Aggiungi un indirizzo wallet USDT TRC20 valido.', maxFiles: (count) => `Mantieni l’annuncio a ${count} file o meno.`, updateFailed: 'Impossibile aggiornare l’annuncio.', publishFailed: 'Impossibile pubblicare l’annuncio.', removeFailed: 'Impossibile rimuovere il prodotto.' },
   notices: { updated: 'Prodotto aggiornato.', published: 'Annuncio pubblicato nel mercato P2P.', uploading: ({ index, total, name }) => `Caricamento ${index + 1}/${total}: ${name}`, markedSold: 'Annuncio segnato come venduto.', statusUpdated: (status) => `Annuncio segnato come ${status}.`, removed: 'Prodotto rimosso.' },
@@ -359,13 +632,14 @@ const id = {
   sellerFallback: 'Penjual',
   today: 'Hari ini',
   hero: { kicker: 'Bursa P2P', title: 'Perdagangkan barang fan-made GTA VI secara langsung.', description: 'Beli dan jual overlay, emote, panduan, layanan, koleksi, dan drop terkait GTA VI lainnya dengan pesan antara penjual dan pembeli.', summaryLabel: 'Ringkasan marketplace', activeListings: 'listing aktif', storedFiles: 'file tersimpan', tradeLanes: 'jalur dagang' },
+  trust: trustTranslations.id,
   tabs: { label: 'Tampilan trading P2P', marketplace: 'Marketplace', myProducts: 'Produk Saya' },
   toolbar: { searchPlaceholder: 'Cari item, penjual, properti', categoriesLabel: 'Kategori marketplace', all: 'Semua', closeForm: 'Tutup formulir', createListing: 'Buat listing', signInToSell: 'Masuk untuk menjual' },
   actions: { edit: 'Edit', setActive: 'Jadikan aktif', markSold: 'Tandai terjual', remove: 'Hapus', buy: 'Beli', messageSeller: 'Kirim pesan ke penjual', copied: 'Disalin', copy: 'Salin' },
   card: { storedViaTelegram: (count) => `${count} file disimpan via Telegram`, sellerDelivers: 'Penjual mengirim setelah deal', listingFilesLabel: 'File listing' },
   checkout: { title: 'Checkout escrow USDT TRC20', subtitle: (network) => `${network} dengan payout penjual otomatis`, sendExactly: 'Kirim tepat', platformAddress: 'Alamat platform', commission: 'Komisi', sellerPayout: 'Payout penjual', txHash: 'Hash transaksi', txPlaceholder: 'Tempel hash transaksi TRC20 Anda', verifyHash: 'Verifikasi hash', messageProof: 'Pesan penjual dengan bukti', statuses: { success: 'Pembayaran terverifikasi', failed: 'Verifikasi gagal', pending: 'Memeriksa pembayaran' }, messages: { checkingNetwork: 'Memeriksa jaringan TRON...', verifyFailed: 'Tidak dapat memverifikasi pembayaran atau mengirim payout.', signIn: 'Masuk sebelum memverifikasi pembayaran P2P.', preparing: 'Memeriksa pembayaran dan menyiapkan payout penjual otomatis...' } },
   modal: { productDetails: 'Detail produk', closeProductDetails: 'Tutup detail produk', fallbackDescription: 'Penjual bisa memberi konteks tambahan di chat sebelum Anda membuat deal.', listed: (date) => `Terdaftar ${date}`, paymentOptions: 'Opsi pembayaran', ownListingNote: 'Ini listing Anda. Kelola dari Produk Saya.', whatsIncluded: 'Yang disertakan', delivery: 'Pengiriman', sellerHandoff: 'Serah terima penjual setelah pembayaran', files: 'File', storedFiles: (count) => `${count} file tersimpan`, noUploadedFiles: 'Belum ada bundel file yang diunggah', otherProperties: 'Properti lain' },
-  form: { editKicker: 'Edit item', newKicker: 'Item baru', editTitle: 'Edit listing produk', createTitle: 'Buat listing penjualan', closeLabel: 'Tutup formulir listing', title: 'Judul', titlePlaceholder: 'Paket sumber overlay Vice City', category: 'Kategori', price: 'Harga', wallet: 'Alamat dompet kripto', walletPlaceholder: 'Alamat dompet USDT TRC20', paymentOptions: 'Opsi pembayaran', delivery: 'Pengiriman', deliveryPlaceholder: 'Serah terima Telegram, Discord, atau lokal', description: 'Deskripsi', descriptionPlaceholder: 'Apa yang disertakan, apa yang diterima pembeli, dan cara pengiriman.', properties: 'Properti', add: 'Tambah', propertyPlaceholder: 'Properti', valuePlaceholder: 'Nilai', removeProperty: 'Hapus properti', previewImage: 'Gambar pratinjau', imageTypes: 'JPG, PNG, atau WebP', listingPreviewAlt: 'Pratinjau listing', saleFiles: 'File penjualan', selected: (count) => `${count} dipilih`, slotsAvailable: (count) => `${count} slot tersedia`, fileTypes: 'Bundel, arsip, sumber', storedFilesLabel: 'File listing tersimpan', removeFile: (name) => `Hapus ${name}`, footerNote: 'File diunggah melalui konektor bot Telegram sisi server.', saving: 'Menyimpan', publishing: 'Menerbitkan', saveChanges: 'Simpan perubahan', publishListing: 'Terbitkan listing' },
+  form: { editKicker: 'Edit item', newKicker: 'Item baru', editTitle: 'Edit listing produk', createTitle: 'Buat listing penjualan', closeLabel: 'Tutup formulir listing', title: 'Judul', titlePlaceholder: 'Paket sumber overlay Vice City', category: 'Kategori', price: 'Harga', wallet: 'Alamat dompet kripto', walletPlaceholder: 'Alamat dompet USDT TRC20', confirmWallet: (address) => `Konfirmasi alamat payout penjual:\n\n${address}\n\nPayout USDT untuk listing ini akan dikirim ke alamat ini.`, paymentOptions: 'Opsi pembayaran', delivery: 'Pengiriman', deliveryPlaceholder: 'Serah terima Telegram, Discord, atau lokal', description: 'Deskripsi', descriptionPlaceholder: 'Apa yang disertakan, apa yang diterima pembeli, dan cara pengiriman.', properties: 'Properti', add: 'Tambah', propertyPlaceholder: 'Properti', valuePlaceholder: 'Nilai', removeProperty: 'Hapus properti', previewImage: 'Gambar pratinjau', imageTypes: 'JPG, PNG, atau WebP', listingPreviewAlt: 'Pratinjau listing', saleFiles: 'File penjualan', selected: (count) => `${count} dipilih`, slotsAvailable: (count) => `${count} slot tersedia`, fileTypes: 'Bundel, arsip, sumber', storedFilesLabel: 'File listing tersimpan', removeFile: (name) => `Hapus ${name}`, footerNote: 'File diunggah melalui konektor bot Telegram sisi server.', saving: 'Menyimpan', publishing: 'Menerbitkan', saveChanges: 'Simpan perubahan', publishListing: 'Terbitkan listing' },
   empty: { noProducts: 'Belum ada produk', noListings: 'Listing tidak ditemukan', createFirst: 'Buat listing pertama Anda untuk mengelolanya di sini.', tryAnother: 'Coba kategori atau kata pencarian lain.' },
   errors: { readPreview: 'Tidak dapat membaca gambar pratinjau.', renderPreview: 'Tidak dapat merender gambar pratinjau.', smallerPreview: 'Pilih gambar pratinjau yang lebih kecil.', choosePreview: 'Pilih file gambar untuk pratinjau.', removeExistingFile: 'Hapus file yang ada sebelum melampirkan file lain.', duplicateFiles: 'File tersebut sudah dilampirkan ke listing ini.', attachUpTo: (count) => `Lampirkan hingga ${count} file baru untuk listing ini.`, minTitle: 'Tambahkan judul minimal 3 karakter.', validPrice: 'Tambahkan harga yang valid.', oneProperty: 'Tambahkan setidaknya satu properti.', onePayment: 'Pilih setidaknya satu opsi pembayaran.', validWallet: 'Tambahkan alamat dompet USDT TRC20 yang valid.', maxFiles: (count) => `Batasi listing hingga ${count} file atau kurang.`, updateFailed: 'Tidak dapat memperbarui listing.', publishFailed: 'Tidak dapat menerbitkan listing.', removeFailed: 'Tidak dapat menghapus produk.' },
   notices: { updated: 'Produk diperbarui.', published: 'Listing diterbitkan ke pasar P2P.', uploading: ({ index, total, name }) => `Mengunggah ${index + 1}/${total}: ${name}`, markedSold: 'Listing ditandai terjual.', statusUpdated: (status) => `Listing ditandai ${status}.`, removed: 'Produk dihapus.' },
@@ -381,13 +655,14 @@ const pl = {
   sellerFallback: 'Sprzedawca',
   today: 'Dzisiaj',
   hero: { kicker: 'Wymiana P2P', title: 'Handluj bezpośrednio fanowskimi dobrami GTA VI.', description: 'Kupuj i sprzedawaj overlaye, emotki, poradniki, usługi, kolekcjonalia i inne dropy związane z GTA VI z wiadomościami między sprzedawcą a kupującym.', summaryLabel: 'Podsumowanie marketplace', activeListings: 'aktywnych ofert', storedFiles: 'zapisanych plików', tradeLanes: 'kategorii handlu' },
+  trust: trustTranslations.pl,
   tabs: { label: 'Widoki handlu P2P', marketplace: 'Marketplace', myProducts: 'Moje produkty' },
   toolbar: { searchPlaceholder: 'Szukaj przedmiotów, sprzedawców, właściwości', categoriesLabel: 'Kategorie marketplace', all: 'Wszystkie', closeForm: 'Zamknij formularz', createListing: 'Utwórz ofertę', signInToSell: 'Zaloguj się, aby sprzedawać' },
   actions: { edit: 'Edytuj', setActive: 'Ustaw aktywne', markSold: 'Oznacz sprzedane', remove: 'Usuń', buy: 'Kup', messageSeller: 'Napisz do sprzedawcy', copied: 'Skopiowano', copy: 'Kopiuj' },
   card: { storedViaTelegram: (count) => `${count} plik(ów) zapisanych przez Telegram`, sellerDelivers: 'Sprzedawca dostarczy po transakcji', listingFilesLabel: 'Pliki oferty' },
   checkout: { title: 'Checkout escrow USDT TRC20', subtitle: (network) => `${network} z automatyczną wypłatą sprzedawcy`, sendExactly: 'Wyślij dokładnie', platformAddress: 'Adres platformy', commission: 'Prowizja', sellerPayout: 'Wypłata sprzedawcy', txHash: 'Hash transakcji', txPlaceholder: 'Wklej hash transakcji TRC20', verifyHash: 'Zweryfikuj hash', messageProof: 'Napisz do sprzedawcy z potwierdzeniem', statuses: { success: 'Płatność zweryfikowana', failed: 'Weryfikacja nieudana', pending: 'Sprawdzanie płatności' }, messages: { checkingNetwork: 'Sprawdzanie sieci TRON...', verifyFailed: 'Nie udało się zweryfikować płatności ani wysłać wypłaty.', signIn: 'Zaloguj się przed weryfikacją płatności P2P.', preparing: 'Sprawdzanie płatności i przygotowanie automatycznej wypłaty sprzedawcy...' } },
   modal: { productDetails: 'Szczegóły produktu', closeProductDetails: 'Zamknij szczegóły produktu', fallbackDescription: 'Sprzedawca może podać więcej informacji na czacie przed transakcją.', listed: (date) => `Wystawiono ${date}`, paymentOptions: 'Opcje płatności', ownListingNote: 'To Twoja oferta. Zarządzaj nią w Moje produkty.', whatsIncluded: 'Co zawiera', delivery: 'Dostawa', sellerHandoff: 'Przekazanie przez sprzedawcę po płatności', files: 'Pliki', storedFiles: (count) => `${count} zapisanych plik(ów)`, noUploadedFiles: 'Nie przesłano jeszcze paczki plików', otherProperties: 'Inne właściwości' },
-  form: { editKicker: 'Edytuj przedmiot', newKicker: 'Nowy przedmiot', editTitle: 'Edytuj ofertę produktu', createTitle: 'Utwórz ofertę sprzedaży', closeLabel: 'Zamknij formularz oferty', title: 'Tytuł', titlePlaceholder: 'Pakiet źródłowy overlayu Vice City', category: 'Kategoria', price: 'Cena', wallet: 'Adres portfela krypto', walletPlaceholder: 'Adres portfela USDT TRC20', paymentOptions: 'Opcje płatności', delivery: 'Dostawa', deliveryPlaceholder: 'Telegram, Discord lub odbiór lokalny', description: 'Opis', descriptionPlaceholder: 'Co zawiera oferta, co otrzyma kupujący i jak działa dostawa.', properties: 'Właściwości', add: 'Dodaj', propertyPlaceholder: 'Właściwość', valuePlaceholder: 'Wartość', removeProperty: 'Usuń właściwość', previewImage: 'Obraz podglądu', imageTypes: 'JPG, PNG lub WebP', listingPreviewAlt: 'Podgląd oferty', saleFiles: 'Pliki sprzedaży', selected: (count) => `Wybrano ${count}`, slotsAvailable: (count) => `Dostępnych miejsc: ${count}`, fileTypes: 'Paczki, archiwa, źródła', storedFilesLabel: 'Zapisane pliki oferty', removeFile: (name) => `Usuń ${name}`, footerNote: 'Pliki są przesyłane przez serwerowy konektor bota Telegram.', saving: 'Zapisywanie', publishing: 'Publikowanie', saveChanges: 'Zapisz zmiany', publishListing: 'Opublikuj ofertę' },
+  form: { editKicker: 'Edytuj przedmiot', newKicker: 'Nowy przedmiot', editTitle: 'Edytuj ofertę produktu', createTitle: 'Utwórz ofertę sprzedaży', closeLabel: 'Zamknij formularz oferty', title: 'Tytuł', titlePlaceholder: 'Pakiet źródłowy overlayu Vice City', category: 'Kategoria', price: 'Cena', wallet: 'Adres portfela krypto', walletPlaceholder: 'Adres portfela USDT TRC20', confirmWallet: (address) => `Potwierdź adres wypłaty sprzedawcy:\n\n${address}\n\nWypłaty USDT dla tej oferty będą wysyłane na ten adres.`, paymentOptions: 'Opcje płatności', delivery: 'Dostawa', deliveryPlaceholder: 'Telegram, Discord lub odbiór lokalny', description: 'Opis', descriptionPlaceholder: 'Co zawiera oferta, co otrzyma kupujący i jak działa dostawa.', properties: 'Właściwości', add: 'Dodaj', propertyPlaceholder: 'Właściwość', valuePlaceholder: 'Wartość', removeProperty: 'Usuń właściwość', previewImage: 'Obraz podglądu', imageTypes: 'JPG, PNG lub WebP', listingPreviewAlt: 'Podgląd oferty', saleFiles: 'Pliki sprzedaży', selected: (count) => `Wybrano ${count}`, slotsAvailable: (count) => `Dostępnych miejsc: ${count}`, fileTypes: 'Paczki, archiwa, źródła', storedFilesLabel: 'Zapisane pliki oferty', removeFile: (name) => `Usuń ${name}`, footerNote: 'Pliki są przesyłane przez serwerowy konektor bota Telegram.', saving: 'Zapisywanie', publishing: 'Publikowanie', saveChanges: 'Zapisz zmiany', publishListing: 'Opublikuj ofertę' },
   empty: { noProducts: 'Nie masz jeszcze produktów', noListings: 'Nie znaleziono ofert', createFirst: 'Utwórz pierwszą ofertę, aby zarządzać nią tutaj.', tryAnother: 'Spróbuj innej kategorii lub wyszukiwania.' },
   errors: { readPreview: 'Nie udało się odczytać obrazu podglądu.', renderPreview: 'Nie udało się wyrenderować obrazu podglądu.', smallerPreview: 'Wybierz mniejszy obraz podglądu.', choosePreview: 'Wybierz plik obrazu do podglądu.', removeExistingFile: 'Usuń istniejący plik przed dodaniem kolejnego.', duplicateFiles: 'Te pliki są już dołączone do tej oferty.', attachUpTo: (count) => `Dołącz do ${count} nowych plików do tej oferty.`, minTitle: 'Dodaj tytuł z co najmniej 3 znakami.', validPrice: 'Dodaj prawidłową cenę.', oneProperty: 'Dodaj co najmniej jedną właściwość.', onePayment: 'Wybierz co najmniej jedną opcję płatności.', validWallet: 'Dodaj prawidłowy adres portfela USDT TRC20.', maxFiles: (count) => `Oferta może mieć maksymalnie ${count} plików.`, updateFailed: 'Nie udało się zaktualizować oferty.', publishFailed: 'Nie udało się opublikować oferty.', removeFailed: 'Nie udało się usunąć produktu.' },
   notices: { updated: 'Produkt zaktualizowany.', published: 'Oferta opublikowana na rynku P2P.', uploading: ({ index, total, name }) => `Przesyłanie ${index + 1}/${total}: ${name}`, markedSold: 'Oferta oznaczona jako sprzedana.', statusUpdated: (status) => `Oferta oznaczona jako ${status}.`, removed: 'Produkt usunięty.' },
@@ -403,13 +678,14 @@ const hi = {
   sellerFallback: 'विक्रेता',
   today: 'आज',
   hero: { kicker: 'P2P एक्सचेंज', title: 'GTA VI फैन-मेड सामान सीधे ट्रेड करें।', description: 'ओवरले, इमोट्स, गाइड, सेवाएं, कलेक्टिबल्स और दूसरे GTA VI ड्रॉप्स खरीदें और बेचें, खरीदार-विक्रेता मैसेजिंग के साथ।', summaryLabel: 'मार्केटप्लेस सारांश', activeListings: 'सक्रिय लिस्टिंग', storedFiles: 'स्टोर की गई फाइलें', tradeLanes: 'ट्रेड श्रेणियां' },
+  trust: trustTranslations.hi,
   tabs: { label: 'P2P ट्रेडिंग व्यू', marketplace: 'मार्केटप्लेस', myProducts: 'मेरे प्रोडक्ट' },
   toolbar: { searchPlaceholder: 'आइटम, विक्रेता, प्रॉपर्टी खोजें', categoriesLabel: 'मार्केटप्लेस श्रेणियां', all: 'सभी', closeForm: 'फॉर्म बंद करें', createListing: 'लिस्टिंग बनाएं', signInToSell: 'बेचने के लिए साइन इन करें' },
   actions: { edit: 'एडिट', setActive: 'सक्रिय करें', markSold: 'बिक गया चिह्नित करें', remove: 'हटाएं', buy: 'खरीदें', messageSeller: 'विक्रेता को मैसेज करें', copied: 'कॉपी हुआ', copy: 'कॉपी' },
   card: { storedViaTelegram: (count) => `${count} फाइलें Telegram के जरिए स्टोर हैं`, sellerDelivers: 'डील के बाद विक्रेता डिलीवर करेगा', listingFilesLabel: 'लिस्टिंग फाइलें' },
   checkout: { title: 'USDT TRC20 escrow checkout', subtitle: (network) => `${network} automatic seller payout`, sendExactly: 'बिल्कुल इतना भेजें', platformAddress: 'प्लेटफॉर्म पता', commission: 'कमीशन', sellerPayout: 'विक्रेता payout', txHash: 'ट्रांजैक्शन hash', txPlaceholder: 'अपना TRC20 transaction hash पेस्ट करें', verifyHash: 'Hash सत्यापित करें', messageProof: 'प्रूफ के साथ विक्रेता को मैसेज करें', statuses: { success: 'भुगतान सत्यापित', failed: 'सत्यापन विफल', pending: 'भुगतान जांच रहे हैं' }, messages: { checkingNetwork: 'TRON नेटवर्क जांच रहे हैं...', verifyFailed: 'भुगतान सत्यापित या payout submit नहीं हो पाया।', signIn: 'P2P भुगतान सत्यापित करने से पहले साइन इन करें।', preparing: 'भुगतान जांच रहे हैं और automatic seller payout तैयार कर रहे हैं...' } },
   modal: { productDetails: 'प्रोडक्ट विवरण', closeProductDetails: 'प्रोडक्ट विवरण बंद करें', fallbackDescription: 'डील से पहले विक्रेता चैट में अतिरिक्त जानकारी दे सकता है।', listed: (date) => `लिस्ट किया गया ${date}`, paymentOptions: 'भुगतान विकल्प', ownListingNote: 'यह आपकी लिस्टिंग है। इसे मेरे प्रोडक्ट में मैनेज करें।', whatsIncluded: 'क्या शामिल है', delivery: 'डिलीवरी', sellerHandoff: 'भुगतान के बाद विक्रेता हैंडऑफ', files: 'फाइलें', storedFiles: (count) => `${count} स्टोर की गई फाइलें`, noUploadedFiles: 'अभी कोई फाइल बंडल अपलोड नहीं है', otherProperties: 'अन्य प्रॉपर्टी' },
-  form: { editKicker: 'आइटम एडिट करें', newKicker: 'नया आइटम', editTitle: 'प्रोडक्ट लिस्टिंग एडिट करें', createTitle: 'सेल लिस्टिंग बनाएं', closeLabel: 'लिस्टिंग फॉर्म बंद करें', title: 'शीर्षक', titlePlaceholder: 'Vice City overlay source pack', category: 'श्रेणी', price: 'कीमत', wallet: 'क्रिप्टो वॉलेट पता', walletPlaceholder: 'USDT TRC20 वॉलेट पता', paymentOptions: 'भुगतान विकल्प', delivery: 'डिलीवरी', deliveryPlaceholder: 'Telegram handoff, Discord delivery, local meetup', description: 'विवरण', descriptionPlaceholder: 'क्या शामिल है, खरीदार को क्या मिलेगा, और डिलीवरी कैसे होगी।', properties: 'प्रॉपर्टी', add: 'जोड़ें', propertyPlaceholder: 'प्रॉपर्टी', valuePlaceholder: 'वैल्यू', removeProperty: 'प्रॉपर्टी हटाएं', previewImage: 'प्रीव्यू इमेज', imageTypes: 'JPG, PNG, या WebP', listingPreviewAlt: 'लिस्टिंग प्रीव्यू', saleFiles: 'सेल फाइलें', selected: (count) => `${count} चुनी गई`, slotsAvailable: (count) => `${count} स्लॉट उपलब्ध`, fileTypes: 'बंडल, आर्काइव, सोर्स', storedFilesLabel: 'स्टोर की गई लिस्टिंग फाइलें', removeFile: (name) => `${name} हटाएं`, footerNote: 'फाइलें server-side Telegram bot connector से अपलोड होती हैं।', saving: 'सेव हो रहा है', publishing: 'पब्लिश हो रहा है', saveChanges: 'बदलाव सेव करें', publishListing: 'लिस्टिंग पब्लिश करें' },
+  form: { editKicker: 'आइटम एडिट करें', newKicker: 'नया आइटम', editTitle: 'प्रोडक्ट लिस्टिंग एडिट करें', createTitle: 'सेल लिस्टिंग बनाएं', closeLabel: 'लिस्टिंग फॉर्म बंद करें', title: 'शीर्षक', titlePlaceholder: 'Vice City overlay source pack', category: 'श्रेणी', price: 'कीमत', wallet: 'क्रिप्टो वॉलेट पता', walletPlaceholder: 'USDT TRC20 वॉलेट पता', confirmWallet: (address) => `Seller payout address confirm करें:\n\n${address}\n\nइस listing के USDT payouts इसी address पर भेजे जाएंगे।`, paymentOptions: 'भुगतान विकल्प', delivery: 'डिलीवरी', deliveryPlaceholder: 'Telegram handoff, Discord delivery, local meetup', description: 'विवरण', descriptionPlaceholder: 'क्या शामिल है, खरीदार को क्या मिलेगा, और डिलीवरी कैसे होगी।', properties: 'प्रॉपर्टी', add: 'जोड़ें', propertyPlaceholder: 'प्रॉपर्टी', valuePlaceholder: 'वैल्यू', removeProperty: 'प्रॉपर्टी हटाएं', previewImage: 'प्रीव्यू इमेज', imageTypes: 'JPG, PNG, या WebP', listingPreviewAlt: 'लिस्टिंग प्रीव्यू', saleFiles: 'सेल फाइलें', selected: (count) => `${count} चुनी गई`, slotsAvailable: (count) => `${count} स्लॉट उपलब्ध`, fileTypes: 'बंडल, आर्काइव, सोर्स', storedFilesLabel: 'स्टोर की गई लिस्टिंग फाइलें', removeFile: (name) => `${name} हटाएं`, footerNote: 'फाइलें server-side Telegram bot connector से अपलोड होती हैं।', saving: 'सेव हो रहा है', publishing: 'पब्लिश हो रहा है', saveChanges: 'बदलाव सेव करें', publishListing: 'लिस्टिंग पब्लिश करें' },
   empty: { noProducts: 'अभी कोई प्रोडक्ट नहीं', noListings: 'कोई लिस्टिंग नहीं मिली', createFirst: 'इसे यहां मैनेज करने के लिए अपनी पहली लिस्टिंग बनाएं।', tryAnother: 'दूसरी श्रेणी या search term आजमाएं।' },
   errors: { readPreview: 'प्रीव्यू इमेज पढ़ी नहीं जा सकी।', renderPreview: 'प्रीव्यू इमेज render नहीं हो सकी।', smallerPreview: 'छोटी प्रीव्यू इमेज चुनें।', choosePreview: 'प्रीव्यू के लिए image file चुनें।', removeExistingFile: 'नई फाइल जोड़ने से पहले कोई existing file हटाएं।', duplicateFiles: 'ये फाइलें इस लिस्टिंग से पहले ही जुड़ी हैं।', attachUpTo: (count) => `इस लिस्टिंग के लिए ${count} नई फाइल तक जोड़ें।`, minTitle: 'कम से कम 3 अक्षरों का title जोड़ें।', validPrice: 'वैध price जोड़ें।', oneProperty: 'कम से कम एक property जोड़ें।', onePayment: 'कम से कम एक payment option चुनें।', validWallet: 'वैध USDT TRC20 wallet address जोड़ें।', maxFiles: (count) => `लिस्टिंग में ${count} या उससे कम फाइलें रखें।`, updateFailed: 'लिस्टिंग update नहीं हो सकी।', publishFailed: 'लिस्टिंग publish नहीं हो सकी।', removeFailed: 'प्रोडक्ट हटाया नहीं जा सका।' },
   notices: { updated: 'प्रोडक्ट अपडेट हुआ।', published: 'लिस्टिंग P2P market में publish हुई।', uploading: ({ index, total, name }) => `अपलोड ${index + 1}/${total}: ${name}`, markedSold: 'लिस्टिंग sold चिह्नित हुई।', statusUpdated: (status) => `लिस्टिंग ${status} चिह्नित हुई।`, removed: 'प्रोडक्ट हटाया गया।' },
@@ -425,13 +701,14 @@ const ms = {
   sellerFallback: 'Penjual',
   today: 'Hari ini',
   hero: { kicker: 'Pertukaran P2P', title: 'Dagangkan barangan fan-made GTA VI secara terus.', description: 'Beli dan jual overlay, emote, panduan, perkhidmatan, koleksi, dan drop berkaitan GTA VI lain dengan mesej antara penjual dan pembeli.', summaryLabel: 'Ringkasan pasaran', activeListings: 'senarai aktif', storedFiles: 'fail disimpan', tradeLanes: 'laluan dagangan' },
+  trust: trustTranslations.ms,
   tabs: { label: 'Paparan dagangan P2P', marketplace: 'Pasaran', myProducts: 'Produk Saya' },
   toolbar: { searchPlaceholder: 'Cari item, penjual, sifat', categoriesLabel: 'Kategori pasaran', all: 'Semua', closeForm: 'Tutup borang', createListing: 'Cipta senarai', signInToSell: 'Log masuk untuk menjual' },
   actions: { edit: 'Edit', setActive: 'Jadikan aktif', markSold: 'Tanda terjual', remove: 'Buang', buy: 'Beli', messageSeller: 'Mesej penjual', copied: 'Disalin', copy: 'Salin' },
   card: { storedViaTelegram: (count) => `${count} fail disimpan melalui Telegram`, sellerDelivers: 'Penjual menghantar selepas deal', listingFilesLabel: 'Fail senarai' },
   checkout: { title: 'Checkout escrow USDT TRC20', subtitle: (network) => `${network} dengan payout penjual automatik`, sendExactly: 'Hantar tepat', platformAddress: 'Alamat platform', commission: 'Komisen', sellerPayout: 'Payout penjual', txHash: 'Hash transaksi', txPlaceholder: 'Tampal hash transaksi TRC20 anda', verifyHash: 'Sahkan hash', messageProof: 'Mesej penjual dengan bukti', statuses: { success: 'Bayaran disahkan', failed: 'Pengesahan gagal', pending: 'Memeriksa bayaran' }, messages: { checkingNetwork: 'Memeriksa rangkaian TRON...', verifyFailed: 'Tidak dapat mengesahkan bayaran atau menghantar payout.', signIn: 'Log masuk sebelum mengesahkan bayaran P2P.', preparing: 'Memeriksa bayaran dan menyediakan payout penjual automatik...' } },
   modal: { productDetails: 'Butiran produk', closeProductDetails: 'Tutup butiran produk', fallbackDescription: 'Penjual boleh berkongsi konteks tambahan dalam chat sebelum anda membuat deal.', listed: (date) => `Disenaraikan ${date}`, paymentOptions: 'Pilihan bayaran', ownListingNote: 'Ini senarai anda. Urus dari Produk Saya.', whatsIncluded: 'Apa yang disertakan', delivery: 'Penghantaran', sellerHandoff: 'Serahan penjual selepas bayaran', files: 'Fail', storedFiles: (count) => `${count} fail disimpan`, noUploadedFiles: 'Tiada bundle fail dimuat naik lagi', otherProperties: 'Sifat lain' },
-  form: { editKicker: 'Edit item', newKicker: 'Item baharu', editTitle: 'Edit senarai produk', createTitle: 'Cipta senarai jualan', closeLabel: 'Tutup borang senarai', title: 'Tajuk', titlePlaceholder: 'Pek sumber overlay Vice City', category: 'Kategori', price: 'Harga', wallet: 'Alamat dompet kripto', walletPlaceholder: 'Alamat dompet USDT TRC20', paymentOptions: 'Pilihan bayaran', delivery: 'Penghantaran', deliveryPlaceholder: 'Serahan Telegram, Discord, atau pertemuan tempatan', description: 'Penerangan', descriptionPlaceholder: 'Apa yang disertakan, apa pembeli dapat, dan cara penghantaran.', properties: 'Sifat', add: 'Tambah', propertyPlaceholder: 'Sifat', valuePlaceholder: 'Nilai', removeProperty: 'Buang sifat', previewImage: 'Imej pratonton', imageTypes: 'JPG, PNG, atau WebP', listingPreviewAlt: 'Pratonton senarai', saleFiles: 'Fail jualan', selected: (count) => `${count} dipilih`, slotsAvailable: (count) => `${count} slot tersedia`, fileTypes: 'Bundle, arkib, sumber', storedFilesLabel: 'Fail senarai disimpan', removeFile: (name) => `Buang ${name}`, footerNote: 'Fail dimuat naik melalui penyambung bot Telegram di server.', saving: 'Menyimpan', publishing: 'Menerbitkan', saveChanges: 'Simpan perubahan', publishListing: 'Terbitkan senarai' },
+  form: { editKicker: 'Edit item', newKicker: 'Item baharu', editTitle: 'Edit senarai produk', createTitle: 'Cipta senarai jualan', closeLabel: 'Tutup borang senarai', title: 'Tajuk', titlePlaceholder: 'Pek sumber overlay Vice City', category: 'Kategori', price: 'Harga', wallet: 'Alamat dompet kripto', walletPlaceholder: 'Alamat dompet USDT TRC20', confirmWallet: (address) => `Sahkan alamat payout penjual:\n\n${address}\n\nPayout USDT untuk senarai ini akan dihantar ke alamat ini.`, paymentOptions: 'Pilihan bayaran', delivery: 'Penghantaran', deliveryPlaceholder: 'Serahan Telegram, Discord, atau pertemuan tempatan', description: 'Penerangan', descriptionPlaceholder: 'Apa yang disertakan, apa pembeli dapat, dan cara penghantaran.', properties: 'Sifat', add: 'Tambah', propertyPlaceholder: 'Sifat', valuePlaceholder: 'Nilai', removeProperty: 'Buang sifat', previewImage: 'Imej pratonton', imageTypes: 'JPG, PNG, atau WebP', listingPreviewAlt: 'Pratonton senarai', saleFiles: 'Fail jualan', selected: (count) => `${count} dipilih`, slotsAvailable: (count) => `${count} slot tersedia`, fileTypes: 'Bundle, arkib, sumber', storedFilesLabel: 'Fail senarai disimpan', removeFile: (name) => `Buang ${name}`, footerNote: 'Fail dimuat naik melalui penyambung bot Telegram di server.', saving: 'Menyimpan', publishing: 'Menerbitkan', saveChanges: 'Simpan perubahan', publishListing: 'Terbitkan senarai' },
   empty: { noProducts: 'Belum ada produk', noListings: 'Tiada senarai ditemui', createFirst: 'Cipta senarai pertama anda untuk menguruskannya di sini.', tryAnother: 'Cuba kategori atau istilah carian lain.' },
   errors: { readPreview: 'Tidak dapat membaca imej pratonton.', renderPreview: 'Tidak dapat memaparkan imej pratonton.', smallerPreview: 'Pilih imej pratonton yang lebih kecil.', choosePreview: 'Pilih fail imej untuk pratonton.', removeExistingFile: 'Buang fail sedia ada sebelum melampirkan yang lain.', duplicateFiles: 'Fail tersebut sudah dilampirkan pada senarai ini.', attachUpTo: (count) => `Lampirkan sehingga ${count} fail baharu untuk senarai ini.`, minTitle: 'Tambah tajuk sekurang-kurangnya 3 aksara.', validPrice: 'Tambah harga yang sah.', oneProperty: 'Tambah sekurang-kurangnya satu sifat.', onePayment: 'Pilih sekurang-kurangnya satu pilihan bayaran.', validWallet: 'Tambah alamat dompet USDT TRC20 yang sah.', maxFiles: (count) => `Hadkan senarai kepada ${count} fail atau kurang.`, updateFailed: 'Tidak dapat mengemas kini senarai.', publishFailed: 'Tidak dapat menerbitkan senarai.', removeFailed: 'Tidak dapat membuang produk.' },
   notices: { updated: 'Produk dikemaskini.', published: 'Senarai diterbitkan ke pasaran P2P.', uploading: ({ index, total, name }) => `Memuat naik ${index + 1}/${total}: ${name}`, markedSold: 'Senarai ditanda terjual.', statusUpdated: (status) => `Senarai ditanda ${status}.`, removed: 'Produk dibuang.' },
