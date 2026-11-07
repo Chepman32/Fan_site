@@ -1,0 +1,26 @@
+{
+  "generatedOn": "2026-11-07",
+  "tool": "built-in image_gen",
+  "asset": "public/og-image-sunshine.png",
+  "legacyAsset": "public/og-image.png",
+  "dimensions": {
+    "width": 1200,
+    "height": 630
+  },
+  "export": "Resampled the generated artwork to 1200×630 with sips. Run node scripts/create-og-image.mjs to sync the legacy PNG.",
+  "references": [
+    {
+      "role": "Jason and Lucia character design and illustrated promotional art direction",
+      "title": "Jason and Lucia Beach",
+      "page": "https://www.rockstargames.com/VI/media/artwork-wallpapers",
+      "image": "https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_Beach_landscape.0419q._86ukpt.jpg?akim=1&imdensity=1&imwidth=1920"
+    },
+    {
+      "role": "Sunny Vice City setting, turquoise water, sky and tropical mood",
+      "title": "Vice City Postcard",
+      "page": "https://www.rockstargames.com/VI/media/artwork-wallpapers",
+      "image": "https://www.rockstargames.com/VI/_next/static/media/Vice_City_Postcard_landscape.0v2njmlk2n-qm.jpg?akim=1&imdensity=1&imwidth=1920"
+    }
+  ],
+  "prompt": "Use case: ads-marketing.\nCreate ONE finished premium social-sharing preview image for the unofficial GTA VI fan website Leonida Loot. Wide 1200:630 aspect ratio, preferably 2400x1260 pixels. This replaces a dull grid with pixelated lettering. The image must make a viewer curious to click.\n\nInput images: Image 1 is reference artwork for Jason and Lucia's recognizable character design and the beautiful illustrated GTA VI promotional art direction. Image 2 is a visual reference for sunny Vice City, the turquoise water, bright sky and tropical destination mood; do NOT copy its postcard frame, typography, or purple outer background.\n\nArt direction: a beautifully art-directed, sun-drenched illustrated crime-drama travel poster. Sunny Vice City waterfront, turquoise bay, pale aqua blue sky, golden afternoon sunlight, lush palm fronds framing upper corners, a pastel coral coastal skyline. Realistic detailed promotional illustration, rich confident colors and clean textures; not a photograph, not anime, not neon cyberpunk. Paradise with an intriguing undercurrent, cool and alluring.\nComposition: Full-bleed scenic artwork. Recognizable Jason and Lucia together occupy the RIGHT 45 percent, waist-up, natural confident serious expressions, warm sun on their faces, believable anatomy, consistent with image 1. Lucia in opaque white sleeveless top, Jason in light open overshirt over tank, casual sunny coastal styling. No weapons. Their heads and faces must remain comfortably inside the frame and not behind text. Recompose instead of copying image 1's exact pose. The LEFT 55 percent is quieter sunlit sky and softly detailed bay, deliberately open for crisp typography. Scene feels continuous under the typography, with no boxed text panel or split-screen. A small distant speedboat and its winding white wake add energy in the bay. No extra main characters.\n\nTypography: meticulous professional graphic design, perfectly legible at thumbnail size. Large, heavy, condensed, clean sans-serif headline in deep midnight teal, upright, beautifully kerned, no pixel fonts, no outlined type. Headline occupies left-middle in THREE lines:\n\"PARADISE\"\n\"HAS\"\n\"SECRETS.\"\nGive SECRETS. a restrained deep coral accent. Top-left above the headline, a smaller but confidently readable wordmark \"LEONIDA LOOT\". Directly under the headline, a small single line \"GTA VI NEWS · GUIDES · COMMUNITY\". Bottom-left \"leonidaloot.com\", bold and legible. A small unobtrusive \"UNOFFICIAL FAN HUB\" at bottom-right. All text spelled exactly; no other words. The headline is the dominant graphic, the characters the dominant visual. Leave at least 70px safe margin at 1200px output; no clipping, comfortable vertical spacing, the domain separated from the subline. All essential text and faces should survive minor social-card crops.\n\nConstraints: Attractive editorial campaign quality, sophisticated natural sunshine, clean edge-to-edge composition. No blue frame, no grid, no decorative UI, no buttons, no watermark, no Rockstar logo, no release dates, no claims of official affiliation. This is a fan-site editorial preview. Deliver just the single final card."
+}

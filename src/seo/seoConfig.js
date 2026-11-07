@@ -22,8 +22,8 @@ import { getSeoRouteConfig, indexableSeoRoutes, noindexSeoRoutes } from './route
 
 export const SITE_ORIGIN = 'https://leonidaloot.com'
 export const SITE_NAME = 'Leonida Loot'
-export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`
-export const DEFAULT_IMAGE_ALT = 'Leonida Loot GTA VI fan hub preview'
+export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image-sunshine.png`
+export const DEFAULT_IMAGE_ALT = 'Paradise has secrets. Jason and Lucia on a sunlit Vice City waterfront — Leonida Loot, an unofficial GTA VI fan hub.'
 
 const DEFAULT_DESCRIPTION = 'Leonida Loot is a GTA VI fan hub with Vice City and Leonida guides, news, media, community posts, creator shop assets, and a P2P digital marketplace.'
 const SHOP_CATEGORIES = [
@@ -786,6 +786,9 @@ export function createStaticSeoHead(metadata) {
     `<meta property="og:type" content="${escapeHtml(metadata.type)}" />`,
     `<meta property="og:url" content="${escapeHtml(metadata.canonicalUrl)}" />`,
     `<meta property="og:image" content="${escapeHtml(metadata.image)}" />`,
+    '<meta property="og:image:type" content="image/png" />',
+    '<meta property="og:image:width" content="1200" />',
+    '<meta property="og:image:height" content="630" />',
     `<meta property="og:image:alt" content="${escapeHtml(metadata.imageAlt)}" />`,
     '<meta name="twitter:card" content="summary_large_image" />',
     `<meta name="twitter:title" content="${escapeHtml(metadata.title)}" />`,

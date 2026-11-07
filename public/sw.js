@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'leonida-loot-v1'
+const CACHE_VERSION = 'leonida-loot-v2'
 const CORE_ASSETS = [
   '/',
   '/favicon.ico',
@@ -6,7 +6,7 @@ const CORE_ASSETS = [
   '/favicon-96x96.png',
   '/favicon.png',
   '/apple-touch-icon.png',
-  '/og-image.png',
+  '/og-image-sunshine.png',
   '/site.webmanifest',
 ]
 

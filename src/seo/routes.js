@@ -8,7 +8,7 @@ import { SHOP_PRODUCT_ROUTES, SHOP_PRODUCT_BY_SLUG, shopProductSlug } from '../s
 import { getProductSeoContent, hasUniqueProductDetailCopy } from '../content/products'
 
 export const SITE_ORIGIN = 'https://leonidaloot.com'
-export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image.png`
+export const DEFAULT_OG_IMAGE = `${SITE_ORIGIN}/og-image-sunshine.png`
 
 function absoluteUrl(path = '/') {
   return new URL(path, SITE_ORIGIN).toString()

@@ -171,8 +171,11 @@ for (const route of PRERENDER_ROUTES) {
   if (!description) fail(`${route} is missing a meta description`)
   if (!robots) fail(`${route} is missing robots metadata`)
   if (canonical !== canonicalFor(route)) fail(`${route} canonical is ${canonical || 'missing'}`)
-  if (!ogImage.endsWith('/og-image.png')) fail(`${route} og:image must use og-image.png`)
-  if (!twitterImage.endsWith('/og-image.png')) fail(`${route} twitter:image must use og-image.png`)
+  if (ogImage !== `${SITE_ORIGIN}/og-image-sunshine.png`) fail(`${route} og:image must use og-image-sunshine.png`)
+  if (twitterImage !== ogImage) fail(`${route} twitter:image must match og:image`)
+  if (!html.includes('<meta property="og:image:type" content="image/png" />')) fail(`${route} must declare the PNG preview type`)
+  if (!html.includes('<meta property="og:image:width" content="1200" />')) fail(`${route} must declare the preview width`)
+  if (!html.includes('<meta property="og:image:height" content="630" />')) fail(`${route} must declare the preview height`)
   if (isNoindex && !robots.includes('noindex')) fail(`${route} must be noindex`)
   if (!isNoindex && robots.includes('noindex')) fail(`${route} should be indexable`)
   if (!isNoindex && h1Count !== 1) fail(`${route} should have exactly one H1, found ${h1Count}`)
@@ -256,10 +259,15 @@ if (!robots.includes(`Sitemap: ${SITE_ORIGIN}/sitemap.xml`)) {
 }
 
 try {
-  const ogImage = await stat(path.join(distDir, 'og-image.png'))
-  if (ogImage.size <= 0) fail('og-image.png is empty')
+  const ogImage = await readFile(path.join(distDir, 'og-image-sunshine.png'))
+  const pngSignature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+  if (ogImage.length < 33 || !ogImage.subarray(0, 8).equals(pngSignature)) {
+    fail('og-image-sunshine.png must be a valid PNG')
+  } else if (ogImage.readUInt32BE(16) !== 1200 || ogImage.readUInt32BE(20) !== 630) {
+    fail('og-image-sunshine.png must be 1200×630 pixels')
+  }
 } catch {
-  fail('dist/og-image.png is missing')
+  fail('dist/og-image-sunshine.png is missing')
 }
 
 try {

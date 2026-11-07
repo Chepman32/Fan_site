@@ -59,6 +59,9 @@ function applyMetadata(metadata, createJsonLd) {
   upsertMeta('property', 'og:type', metadata.type)
   upsertMeta('property', 'og:url', metadata.canonicalUrl)
   upsertMeta('property', 'og:image', metadata.image)
+  upsertMeta('property', 'og:image:type', 'image/png')
+  upsertMeta('property', 'og:image:width', '1200')
+  upsertMeta('property', 'og:image:height', '630')
   upsertMeta('property', 'og:image:alt', metadata.imageAlt)
 
   upsertMeta('name', 'twitter:card', 'summary_large_image')

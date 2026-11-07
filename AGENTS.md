@@ -469,10 +469,12 @@ Technical SEO is handled in a few places:
 - `public/sitemap.xml`
   - Static source/fallback sitemap. The final production sitemap is generated into `dist/sitemap.xml` by `scripts/generate-sitemap.mjs` during build.
   - The generated sitemap intentionally omits auth-only pages, private messages, and dynamic user profile pages.
+- `public/og-image-sunshine.png`
+  - Default crawler-compatible `1200x630` social preview image used by Open Graph, Twitter card tags, and JSON-LD image references. Uses a fresh filename so crawlers can fetch the sunny artwork after deployment.
 - `public/og-image.png`
-  - Default crawler-compatible `1200x630` social preview image used by Open Graph, Twitter card tags, and JSON-LD image references.
+  - Compatibility copy of the current preview for older links. Run `node scripts/create-og-image.mjs` to refresh it from `og-image-sunshine.png`. Generation prompt and official visual-reference sources are recorded in `docs/social-preview.json`.
 - `public/og-image.svg`
-  - Optional source/design asset only. Do not use SVG as the primary Open Graph image because some social platforms do not reliably render SVG previews.
+  - Optional SVG wrapper of the PNG artwork. Do not use SVG as the primary Open Graph image because some social platforms do not reliably render SVG previews.
 - `public/favicon.ico`, `public/favicon-48x48.png`, `public/favicon-96x96.png`, `public/favicon.png`
   - Google/Search-compatible favicon assets generated from the legacy brand icon. Keep these square, crawlable, and stable; Google recommends favicon sizes that are multiples of 48px.
 - `public/favicon.svg`
