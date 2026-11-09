@@ -14,7 +14,7 @@ Leonida brings Vice City, coastlines, wetlands, highways, small towns, and socia
 ==Main characters==
 The public reveal material centers Lucia Caminos and Jason Duval, with supporting characters connected to crime, music, business, and local communities.
 ==Platforms and release==
-The announced launch platforms are PlayStation 5 and Xbox Series X/S, with the official release date currently set for November 19, 2026.
+GTA VI launches November 19, 2026, on PlayStation 5 and Xbox Series X|S. Rockstar has yet to announce a PC release date.
 ==Fan guide context==
 Leonida Loot separates official information from estimates and speculation so readers can track confirmed details, map clues, vehicles, weapons, and creator assets clearly.`
 const ACCORDION_LAYOUT_SPRING = { type: 'spring', stiffness: 460, damping: 38, mass: 0.78 }

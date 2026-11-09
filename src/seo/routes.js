@@ -72,8 +72,8 @@ const staticRoutes = [
   route({
     path: '/about',
     type: 'about',
-    title: 'GTA VI Release Countdown, Price & Development Stats | Leonida Loot',
-    description: 'Track the GTA VI release countdown and compare official launch details with clearly labeled budget, team-size, and map estimates.',
+    title: 'GTA VI Release Countdown, Preload & Editions | Leonida Loot',
+    description: 'Check the GTA VI release countdown, PS5 and Xbox preload schedule, storage needs, and US PlayStation Store prices for Standard and Ultimate.',
     h1: 'Inside GTA VI',
     priority: 0.85,
     changefreq: 'weekly',
@@ -82,8 +82,8 @@ const staticRoutes = [
   route({
     path: '/about-gta-vi',
     type: 'about',
-    title: 'About GTA VI: Release Countdown, Price & Development Stats | Leonida Loot',
-    description: 'Read the Leonida Loot GTA VI overview with release countdown, platform status, price notes, development estimates, and source links.',
+    title: 'About GTA VI: Release Countdown, Preload & Editions | Leonida Loot',
+    description: 'Read the Leonida Loot GTA VI overview with the console launch countdown, preload schedule, editions, prices, and official source links.',
     h1: 'Inside GTA VI',
     robots: 'noindex,follow',
     jsonLdTypes: ['Article', 'BreadcrumbList'],

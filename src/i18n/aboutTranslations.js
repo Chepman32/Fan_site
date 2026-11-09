@@ -1,45 +1,4 @@
-const en = {
-  hero: {
-    kicker: 'Game intelligence',
-    title: 'Inside',
-    titleHighlight: 'GTA VI',
-    description: 'The confirmed launch facts, the scale behind Rockstar’s next open world, and a live encyclopedia overview in one place.',
-    launchCard: 'Official launch countdown',
-    contentCta: 'Explore the facts',
-  },
-  stats: {
-    eyebrow: 'The numbers',
-    title: 'Scale at a glance',
-    description: 'Official values are marked separately from reporting, community reconstructions, and unverified production estimates.',
-    official: 'Official',
-    estimate: 'Estimate',
-    items: {
-      release: { label: 'Release date', note: 'Worldwide console launch' },
-      price: { label: 'Pre-order price', note: 'Standard Edition in the US' },
-      budget: { label: 'Reported budget', note: 'Rumored development and marketing range' },
-      team: { label: 'Team size', note: 'Reported contributors across Rockstar studios' },
-      map: { label: 'Estimated map', note: 'Fan reconstruction; Rockstar has not published an area' },
-      regions: { label: 'Major regions', note: 'Named by Rockstar so far' },
-    },
-  },
-  media: {
-    eyebrow: 'Official media', title: 'Promo image vault',
-    description: 'Browse official artwork, wallpapers, game screenshots, and Ultimate Edition benefits parsed from Rockstar’s GTA VI media library.',
-    tabsLabel: 'Promo image collections',
-    tabs: { artwork: 'Artwork & wallpapers', screenshots: 'Screenshots', ultimate: 'Ultimate Edition' },
-    official: 'Rockstar Games', viewSource: 'View official source', openImage: 'Open image',
-    showing: 'Showing', of: 'of', showMore: 'Show more',
-    sourceNote: 'Titles and imagery are sourced from Rockstar Games.',
-    fullSize: 'Open full size', close: 'Close gallery', previous: 'Previous image', next: 'Next image',
-  },
-  notice: 'Rockstar has not confirmed the project budget, contributor count, or map area. Those cards are estimates and may change.',
-  sources: {
-    label: 'Sources and context',
-    official: 'Official preorder announcement',
-    wikipedia: 'Wikipedia overview',
-    map: 'Community map estimate',
-  },
-}
+import { aboutTranslationEn as en } from './en/about'
 
 const zh = {
   hero: {
@@ -55,6 +14,9 @@ const zh = {
     items: {
       release: { label: '发售日期', note: '全球主机版发售' },
       price: { label: '预购价格', note: '美国标准版' },
+      ultimate: { label: '终极版', note: '美国 PlayStation Store' },
+      preload: { label: '数字版预载', value: '11 月 10 日', note: 'PS5 当地时间零点；Xbox 全球统一为 00:00 UTC。' },
+      storage: { label: '预载所需空间', note: '最多 212 GB，视设备而定。' },
       budget: { label: '传闻预算', note: '据传开发与营销费用区间' },
       team: { label: '团队规模', note: 'Rockstar 多个工作室的据报参与人数' },
       map: { label: '地图估算', note: '粉丝重建；Rockstar 尚未公布面积' },
@@ -89,6 +51,9 @@ const ru = {
     items: {
       release: { label: 'Дата релиза', note: 'Мировой запуск на консолях' },
       price: { label: 'Цена предзаказа', note: 'Стандартное издание в США' },
+      ultimate: { label: 'Ultimate Edition', note: 'PlayStation Store в США' },
+      preload: { label: 'Цифровая предзагрузка', value: '10 НОЯ', note: 'PS5 — в полночь по местному времени, Xbox — в 00:00 UTC по всему миру.' },
+      storage: { label: 'Место для предзагрузки', note: 'До 212 ГБ в зависимости от устройства.' },
       budget: { label: 'Предполагаемый бюджет', note: 'Слухи о затратах на разработку и маркетинг' },
       team: { label: 'Размер команды', note: 'Оценка числа участников из студий Rockstar' },
       map: { label: 'Размер карты', note: 'Фанатская реконструкция; официальной площади нет' },
@@ -123,6 +88,9 @@ const it = {
     items: {
       release: { label: 'Data di uscita', note: 'Lancio mondiale su console' },
       price: { label: 'Prezzo preordine', note: 'Edizione Standard negli USA' },
+      ultimate: { label: 'Ultimate Edition', note: 'PlayStation Store USA' },
+      preload: { label: 'Precaricamento digitale', value: '10 NOV', note: 'PS5 a mezzanotte locale. Xbox alle 00:00 UTC in tutto il mondo.' },
+      storage: { label: 'Spazio per il precaricamento', note: 'Fino a 212 GB, a seconda del dispositivo.' },
       budget: { label: 'Budget riportato', note: 'Intervallo ipotizzato per sviluppo e marketing' },
       team: { label: 'Dimensione del team', note: 'Contributori stimati negli studi Rockstar' },
       map: { label: 'Mappa stimata', note: "Ricostruzione dei fan; l'area non è ufficiale" },
@@ -157,6 +125,9 @@ const id = {
     items: {
       release: { label: 'Tanggal rilis', note: 'Peluncuran konsol global' },
       price: { label: 'Harga pre-order', note: 'Edisi Standar di AS' },
+      ultimate: { label: 'Ultimate Edition', note: 'PlayStation Store AS' },
+      preload: { label: 'Pramuat digital', value: '10 NOV', note: 'PS5 pada tengah malam waktu setempat. Xbox pada 00.00 UTC di seluruh dunia.' },
+      storage: { label: 'Ruang untuk pramuat', note: 'Hingga 212 GB, tergantung perangkat.' },
       budget: { label: 'Anggaran dilaporkan', note: 'Rumor rentang biaya pengembangan dan pemasaran' },
       team: { label: 'Ukuran tim', note: 'Perkiraan kontributor di berbagai studio Rockstar' },
       map: { label: 'Perkiraan peta', note: 'Rekonstruksi penggemar; luas belum diumumkan' },
@@ -191,6 +162,9 @@ const pl = {
     items: {
       release: { label: 'Data premiery', note: 'Światowa premiera konsolowa' },
       price: { label: 'Cena przedsprzedaży', note: 'Edycja Standard w USA' },
+      ultimate: { label: 'Edycja Ultimate', note: 'PlayStation Store w USA' },
+      preload: { label: 'Wstępne pobieranie', value: '10 LIS', note: 'PS5 o północy czasu lokalnego. Xbox o 00:00 UTC na całym świecie.' },
+      storage: { label: 'Miejsce na wstępne pobieranie', note: 'Do 212 GB w zależności od urządzenia.' },
       budget: { label: 'Podawany budżet', note: 'Plotki o kosztach produkcji i marketingu' },
       team: { label: 'Wielkość zespołu', note: 'Szacowani współtwórcy w studiach Rockstar' },
       map: { label: 'Szacowana mapa', note: 'Rekonstrukcja fanów; brak oficjalnej powierzchni' },
@@ -225,6 +199,9 @@ const hi = {
     items: {
       release: { label: 'रिलीज़ तिथि', note: 'दुनिया भर में कंसोल लॉन्च' },
       price: { label: 'प्री-ऑर्डर कीमत', note: 'अमेरिका में स्टैंडर्ड एडिशन' },
+      ultimate: { label: 'अल्टीमेट एडिशन', note: 'अमेरिकी PlayStation Store' },
+      preload: { label: 'डिजिटल प्रीलोड', value: '10 नवंबर', note: 'PS5 पर स्थानीय समयानुसार आधी रात। Xbox पर दुनिया भर में 00:00 UTC।' },
+      storage: { label: 'प्रीलोड के लिए जगह', note: 'डिवाइस के आधार पर 212 GB तक।' },
       budget: { label: 'रिपोर्टेड बजट', note: 'विकास और मार्केटिंग लागत की अफ़वाह' },
       team: { label: 'टीम का आकार', note: 'Rockstar स्टूडियो में अनुमानित योगदानकर्ता' },
       map: { label: 'अनुमानित नक्शा', note: 'फ़ैन पुनर्रचना; आधिकारिक क्षेत्रफल उपलब्ध नहीं' },
@@ -259,6 +236,9 @@ const ms = {
     items: {
       release: { label: 'Tarikh keluaran', note: 'Pelancaran konsol sedunia' },
       price: { label: 'Harga prapesan', note: 'Edisi Standard di AS' },
+      ultimate: { label: 'Edisi Ultimate', note: 'PlayStation Store AS' },
+      preload: { label: 'Pramuat digital', value: '10 NOV', note: 'PS5 pada tengah malam waktu tempatan. Xbox pada 00:00 UTC di seluruh dunia.' },
+      storage: { label: 'Ruang untuk pramuat', note: 'Sehingga 212 GB, bergantung pada peranti.' },
       budget: { label: 'Bajet dilaporkan', note: 'Julat khabar angin pembangunan dan pemasaran' },
       team: { label: 'Saiz pasukan', note: 'Anggaran penyumbang merentas studio Rockstar' },
       map: { label: 'Anggaran peta', note: 'Binaan semula peminat; keluasan belum rasmi' },

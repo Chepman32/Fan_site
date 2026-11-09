@@ -15,7 +15,10 @@ export const aboutTranslationEn = {
     estimate: 'Estimate',
     items: {
       release: { label: 'Release date', note: 'Worldwide console launch' },
-      price: { label: 'Pre-order price', note: 'Standard Edition in the US' },
+      price: { label: 'Standard Edition', note: 'US PlayStation Store' },
+      ultimate: { label: 'Ultimate Edition', note: 'US PlayStation Store' },
+      preload: { label: 'Digital preload', value: 'NOV 10', note: 'PS5 at midnight local time. Xbox at 00:00 UTC worldwide.' },
+      storage: { label: 'Preload storage', note: 'Up to 212 GB, depending on the device.' },
       budget: { label: 'Reported budget', note: 'Rumored development and marketing range' },
       team: { label: 'Team size', note: 'Reported contributors across Rockstar studios' },
       map: { label: 'Estimated map', note: 'Fan reconstruction; Rockstar has not published an area' },

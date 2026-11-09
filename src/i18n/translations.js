@@ -385,7 +385,7 @@ const en = {
     features: {
       openWorld: { title: 'Open World', description: 'Explore the fictional state of Leonida, featuring Vice City, the Everglades-inspired Grassrivers, and the Leonida Keys.' },
       dualProtagonists: { title: 'Dual Protagonists', description: 'Play as Jason Duval and Lucia Caminos, a romantic criminal duo inspired by Bonnie and Clyde.' },
-      nextGen: { title: 'Next-Gen Only', description: 'Built exclusively for PlayStation 5 and Xbox Series X|S, leveraging the full power of modern hardware.' },
+      nextGen: { title: 'Launch platforms', description: 'GTA VI launches on PlayStation 5 and Xbox Series X|S. Rockstar has yet to announce a PC release date.' },
       rage: { title: 'RAGE Engine', description: 'Powered by an enhanced version of the Rockstar Advanced Game Engine with stunning visuals and physics.' },
     },
   },
@@ -628,7 +628,7 @@ const zh = {
     features: {
       openWorld: { title: '开放世界', description: '探索虚构的莱昂尼达州，包括罪恶都市、以大沼泽为灵感的草河地带以及莱昂尼达群岛。' },
       dualProtagonists: { title: '双主角', description: '扮演杰森·杜瓦尔和露西娅·卡米诺斯，一对以邦妮与克莱德为原型的浪漫犯罪搭档。' },
-      nextGen: { title: '次世代专属', description: '专为 PlayStation 5 和 Xbox Series X|S 打造，充分发挥现代硬件的全部性能。' },
+      nextGen: { title: '首发平台', description: 'GTA VI 将在 PlayStation 5 和 Xbox Series X|S 上首发。Rockstar 尚未公布 PC 版发售日期。' },
       rage: { title: 'RAGE 引擎', description: '采用增强版 Rockstar 高级游戏引擎，带来震撼的视觉效果与物理表现。' },
     },
   },
@@ -832,7 +832,7 @@ const ru = {
     features: {
       openWorld: { title: 'Открытый мир', description: 'Исследуйте вымышленный штат Леонида: Вайс-Сити, болота Грассриверс и острова Леонида-Кис.' },
       dualProtagonists: { title: 'Два протагониста', description: 'Играйте за Джейсона Дюваля и Люсию Каминос — криминальный дуэт, вдохновлённый Бонни и Клайдом.' },
-      nextGen: { title: 'Только некст-ген', description: 'Создана исключительно для PlayStation 5 и Xbox Series X|S с использованием всей мощи современного железа.' },
+      nextGen: { title: 'Платформы на старте', description: 'GTA VI выходит на PlayStation 5 и Xbox Series X|S. Rockstar пока не объявила дату выхода на ПК.' },
       rage: { title: 'Движок RAGE', description: 'Работает на улучшенной версии Rockstar Advanced Game Engine с потрясающей графикой и физикой.' },
     },
   },
@@ -1036,7 +1036,7 @@ const it = {
     features: {
       openWorld: { title: 'Mondo aperto', description: 'Esplora lo stato immaginario di Leonida: Vice City, le Grassrivers ispirate alle Everglades e le Leonida Keys.' },
       dualProtagonists: { title: 'Due protagonisti', description: 'Gioca nei panni di Jason Duval e Lucia Caminos, una coppia criminale romantica ispirata a Bonnie e Clyde.' },
-      nextGen: { title: 'Solo next-gen', description: 'Sviluppato esclusivamente per PlayStation 5 e Xbox Series X|S, sfruttando tutta la potenza dell\'hardware moderno.' },
+      nextGen: { title: 'Piattaforme al lancio', description: 'GTA VI esce su PlayStation 5 e Xbox Series X|S. Rockstar non ha ancora annunciato una data per PC.' },
       rage: { title: 'Motore RAGE', description: 'Alimentato da una versione potenziata del Rockstar Advanced Game Engine con grafica e fisica mozzafiato.' },
     },
   },
@@ -1239,7 +1239,7 @@ const id = {
     features: {
       openWorld: { title: 'Dunia Terbuka', description: 'Jelajahi negara bagian fiktif Leonida, termasuk Vice City, Grassrivers yang terinspirasi Everglades, dan Leonida Keys.' },
       dualProtagonists: { title: 'Dua Protagonis', description: 'Mainkan sebagai Jason Duval dan Lucia Caminos, duo kriminal romantis yang terinspirasi dari Bonnie dan Clyde.' },
-      nextGen: { title: 'Khusus Next-Gen', description: 'Dibangun eksklusif untuk PlayStation 5 dan Xbox Series X|S, memanfaatkan sepenuhnya kekuatan hardware modern.' },
+      nextGen: { title: 'Platform saat rilis', description: 'GTA VI dirilis di PlayStation 5 dan Xbox Series X|S. Rockstar belum mengumumkan tanggal rilis PC.' },
       rage: { title: 'Mesin RAGE', description: 'Didukung versi terbaru Rockstar Advanced Game Engine dengan visual dan fisika yang memukau.' },
     },
   },
@@ -1442,7 +1442,7 @@ const pl = {
     features: {
       openWorld: { title: 'Otwarty świat', description: 'Eksploruj fikcyjny stan Leonida z Vice City, bagnami Grassrivers i archipelagiem Leonida Keys.' },
       dualProtagonists: { title: 'Dwoje protagonistów', description: 'Graj jako Jason Duval i Lucia Caminos — romantyczny duet przestępczy inspirowany Bonnie i Clydem.' },
-      nextGen: { title: 'Tylko next-gen', description: 'Stworzone wyłącznie na PlayStation 5 i Xbox Series X|S, w pełni wykorzystując możliwości nowoczesnego sprzętu.' },
+      nextGen: { title: 'Platformy na premierę', description: 'GTA VI zadebiutuje na PlayStation 5 i Xbox Series X|S. Rockstar nie podało jeszcze daty premiery na PC.' },
       rage: { title: 'Silnik RAGE', description: 'Napędzany ulepszoną wersją Rockstar Advanced Game Engine z zapierającą dech grafiką i fizyką.' },
     },
   },
@@ -1645,7 +1645,7 @@ const hi = {
     features: {
       openWorld: { title: 'ओपन वर्ल्ड', description: 'काल्पनिक राज्य लियोनिडा को एक्सप्लोर करें — वाइस सिटी, एवरग्लेड्स से प्रेरित ग्रासरिवर्स और लियोनिडा कीज़।' },
       dualProtagonists: { title: 'दो नायक', description: 'जेसन डुवाल और लूसिया कैमिनोस के रूप में खेलें — बॉनी और क्लाइड से प्रेरित एक रोमांटिक क्रिमिनल जोड़ी।' },
-      nextGen: { title: 'सिर्फ नेक्स्ट-जेन', description: 'PlayStation 5 और Xbox Series X|S के लिए एक्सक्लूसिव, आधुनिक हार्डवेयर की पूरी ताकत का इस्तेमाल करते हुए।' },
+      nextGen: { title: 'लॉन्च प्लेटफ़ॉर्म', description: 'GTA VI PlayStation 5 और Xbox Series X|S पर रिलीज़ होगा। Rockstar ने अभी PC रिलीज़ की तारीख घोषित नहीं की है।' },
       rage: { title: 'RAGE इंजन', description: 'Rockstar Advanced Game Engine के बेहतर वर्जन से संचालित, शानदार विजुअल्स और फिजिक्स के साथ।' },
     },
   },
@@ -1848,7 +1848,7 @@ const ms = {
     features: {
       openWorld: { title: 'Dunia Terbuka', description: 'Terokai negeri rekaan Leonida — Vice City, Grassrivers yang terinspirasi Everglades, dan Leonida Keys.' },
       dualProtagonists: { title: 'Dua Protagonis', description: 'Main sebagai Jason Duval dan Lucia Caminos, duet jenayah romantik yang terinspirasi Bonnie dan Clyde.' },
-      nextGen: { title: 'Eksklusif Next-Gen', description: 'Dibina khas untuk PlayStation 5 dan Xbox Series X|S, memanfaatkan sepenuhnya kuasa perkakasan moden.' },
+      nextGen: { title: 'Platform pelancaran', description: 'GTA VI dilancarkan pada PlayStation 5 dan Xbox Series X|S. Rockstar masih belum mengumumkan tarikh keluaran PC.' },
       rage: { title: 'Enjin RAGE', description: 'Dikuasakan versi terkini Rockstar Advanced Game Engine dengan visual dan fizik yang memukau.' },
     },
   },

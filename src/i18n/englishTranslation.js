@@ -102,7 +102,7 @@ const en = {
     features: {
       openWorld: { title: 'Open World', description: 'Explore the fictional state of Leonida, featuring Vice City, the Everglades-inspired Grassrivers, and the Leonida Keys.' },
       dualProtagonists: { title: 'Dual Protagonists', description: 'Play as Jason Duval and Lucia Caminos, a romantic criminal duo inspired by Bonnie and Clyde.' },
-      nextGen: { title: 'Next-Gen Only', description: 'Built exclusively for PlayStation 5 and Xbox Series X|S, leveraging the full power of modern hardware.' },
+      nextGen: { title: 'Launch platforms', description: 'GTA VI launches on PlayStation 5 and Xbox Series X|S. Rockstar has yet to announce a PC release date.' },
       rage: { title: 'RAGE Engine', description: 'Powered by an enhanced version of the Rockstar Advanced Game Engine with stunning visuals and physics.' },
     },
   },

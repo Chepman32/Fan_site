@@ -2,33 +2,42 @@ export const SEO_GUIDES = [
   {
     slug: 'gta-vi-release-date',
     title: 'GTA VI Release Date: Confirmed Details and Platform Status',
-    summary: 'Track the confirmed Grand Theft Auto VI launch date, announced platforms, and the details that are still unconfirmed.',
-    updatedAt: '2026-07-07',
+    summary: 'Find the GTA VI console release date, digital preload schedule, and Standard and Ultimate Edition details.',
+    updatedAt: '2026-11-09',
     sections: [
       {
         title: 'Confirmed release information',
-        body: 'Take-Two has announced Grand Theft Auto VI for November 19, 2026. Leonida Loot treats that date as the official planning baseline and labels anything beyond the announcement trail as rumor or speculation.',
+        body: 'Rockstar Support lists Grand Theft Auto VI for midnight local time on November 19, 2026, on PlayStation 5 and Xbox Series X|S.',
       },
       {
-        title: 'Platforms',
-        body: 'The confirmed console launch targets PlayStation 5 and Xbox Series X/S. A PC version has not been formally dated, so this guide keeps PC timing separate from confirmed launch information.',
+        title: 'Digital preload and storage',
+        body: 'Digital preload starts November 10 at local midnight on PS5 and at 00:00 UTC worldwide on Xbox Series X|S. Rockstar says to allow up to 212 GB depending on the device. Code-in-box copies reach retailers November 12.',
       },
       {
-        title: 'What is not confirmed yet',
-        body: 'Preload timing, collector editions, PC release windows, and pricing outside announced retail guidance can change. Use this page as a clean status board rather than a rumor roundup.',
+        title: 'Editions and US PlayStation pricing',
+        body: 'The US PlayStation Store lists Standard at $79.99 and Ultimate at $99.99. Digital preorder offers include the Vintage Vice City Pack and one month of GTA+ under the store’s terms. Prices and offers vary by region.',
       },
       {
-        title: 'Related GTA VI guides',
-        body: 'Pair this release-date tracker with the Leonida map guide, character hub, vehicle guide, and trailer breakdown pages for a wider view of confirmed public material.',
+        title: 'PC release timing',
+        body: 'Rockstar has yet to announce a PC release date.',
       },
+    ],
+    sources: [
+      { href: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s', label: 'Rockstar regional launch and preload times' },
+      { href: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10', label: 'Rockstar preload and retail announcement' },
+      { href: 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/', label: 'PlayStation US editions and prices' },
     ],
   },
   {
     slug: 'gta-vi-trailer-breakdown',
     title: 'GTA VI Trailer Breakdown: Characters, Map Clues and Vehicles',
     summary: 'A structured GTA VI trailer breakdown covering Leonida locations, Lucia and Jason, vehicle glimpses, and official source context.',
-    updatedAt: '2026-07-07',
+    updatedAt: '2026-11-09',
     sections: [
+      {
+        title: 'The launch trailer and Extended Look',
+        body: 'Rockstar’s October 15 launch trailer debuted a new Justice track. The August 27 Extended Look runs 26 minutes and 48 seconds and uses in-game footage captured on PS5.',
+      },
       {
         title: 'Confirmed trailer signals',
         body: 'Rockstar trailers place the story across Leonida, with Vice City, beach districts, wetlands, highways, Keys-like islands, and dense social-media moments anchoring the revealed world.',
@@ -46,12 +55,17 @@ export const SEO_GUIDES = [
         body: 'Cars, motorcycles, boats, aircraft, service vehicles, and off-road travel all appear in public media. Leonida Loot groups those references into focused vehicle and location pages.',
       },
     ],
+    sources: [
+      { href: 'https://www.rockstargames.com/VI/launch-trailer', label: 'Rockstar launch trailer' },
+      { href: 'https://www.rockstargames.com/VI/an-extended-look', label: 'Rockstar Extended Look' },
+      { href: 'https://www.rockstargames.com/VI/media/videos', label: 'Official GTA VI video library' },
+    ],
   },
   {
     slug: 'gta-vi-map-and-leonida',
     title: 'GTA VI Map and Leonida Guide',
     summary: 'Explore the confirmed Leonida setting, Vice City, major regions, map clues, and location pages for Grand Theft Auto VI.',
-    updatedAt: '2026-07-07',
+    updatedAt: '2026-11-09',
     sections: [
       {
         title: 'Leonida as the hub',
@@ -66,9 +80,13 @@ export const SEO_GUIDES = [
         body: 'Location detail pages cover Ambrosia, Grassrivers, Leonida Keys, Mount Kalaga National Park, Port Gellhorn, and Vice City with crawlable summaries and source links.',
       },
       {
-        title: 'Speculation policy',
-        body: 'Map scale estimates and community interpretations are clearly separated from official public details so readers can tell confirmed information from fan analysis.',
+        title: 'Launch Gallery and official map',
+        body: 'The November 5 Launch Gallery adds official screenshots from Vice City and Leonida. Rockstar plans to publish a printable map on November 19. Community estimates of the map area remain separate from the official material.',
       },
+    ],
+    sources: [
+      { href: 'https://www.rockstargames.com/VI/launch-gallery', label: 'Rockstar Launch Gallery' },
+      { href: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10', label: 'Rockstar printable map announcement' },
     ],
   },
   {
