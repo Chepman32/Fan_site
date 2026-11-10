@@ -1,0 +1,9 @@
+**
+!package.json
+!package-lock.json
+!Dockerfile
+!.dockerignore
+!.gcloudignore
+!server.cjs
+!generated/
+!generated/**

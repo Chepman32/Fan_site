@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, MonitorPlay, PackageCheck, ShoppingCart, Sparkles, Wallet, X } from 'lucide-react'
-import CryptoCheckoutPanel from './CryptoCheckoutPanel'
+import ShopCheckoutPanel from './ShopCheckoutPanel'
 import ProductPreviewModal from './ProductPreviewModal'
 import ShopLineItemThumbnail from './ShopLineItemThumbnail'
 import { useTranslation } from '../i18n/useTranslation.jsx'
-import { PAYMENT_NETWORK_SUFFIX, SHOP_PRODUCTS_BY_CATEGORY, categoryTabs, formatShopPrice, shopProductSlug } from '../shop/shopData'
+import { SHOP_PRODUCTS_BY_CATEGORY, categoryTabs, formatShopPrice, shopProductSlug } from '../shop/shopData'
+import { starsCopy } from '../shop/starsCopy'
 import { localizeShopProduct } from '../shop/shopLocalization'
 import './ShopPage.css'
 
@@ -76,6 +77,7 @@ function ShopPage({
   onAddCartItem = () => {},
   onRemoveCartItem = () => {},
   onNavigate,
+  onOpenAuth,
 }) {
   const { t, lang } = useTranslation()
   const shopCopy = { ...t.shop, lang }
@@ -333,7 +335,7 @@ function ShopPage({
             </div>
             <button type="button" className="shop-checkout-button" disabled={!cartItems.length} onClick={openCheckout}>
               <Wallet size={16} />
-              {shopCopy.payWithUsdt} {PAYMENT_NETWORK_SUFFIX}
+              {starsCopy(lang).checkout}
             </button>
           </aside>
         </div>
@@ -345,7 +347,7 @@ function ShopPage({
             className="shop-checkout-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={shopCopy.cryptoCheckout}
+            aria-label={starsCopy(lang).checkout}
             onMouseDown={(event) => event.stopPropagation()}
           >
             <div className="shop-checkout-modal-head">
@@ -357,11 +359,12 @@ function ShopPage({
                 <X size={18} />
               </button>
             </div>
-            <CryptoCheckoutPanel
+            <ShopCheckoutPanel
               key={checkoutKey}
               cartItems={cartItems}
               cartTotal={cartTotal}
               onRemoveItem={removeCartItem}
+              onOpenAuth={onOpenAuth}
               wide
             />
           </div>

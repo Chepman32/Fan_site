@@ -1,0 +1,43 @@
+const en = {
+  checkout: 'Checkout', method: 'Payment method', stars: 'Telegram Stars', usdt: 'USDT TRC20',
+  title: 'Pay with Telegram Stars', signIn: 'Sign in to pay with Stars',
+  signInNote: 'Your purchases and downloads will be saved to your account.',
+  total: 'Total in Stars', pay: 'Continue in Telegram', open: 'Open payment in Telegram',
+  note: 'Pay in Telegram, then return here. Your downloads appear after payment is confirmed.',
+  unavailable: 'Telegram Stars payments are not available yet. Please try again later.',
+  loading: 'Checking Stars checkout…', creating: 'Preparing your order…',
+  pending: 'Waiting for Telegram payment', paid: 'Payment confirmed', expired: 'This checkout has expired',
+  refund_pending: 'Refund in progress', refunded: 'Payment refunded',
+  check: 'Check payment status', checking: 'Checking payment…', restart: 'Start a new checkout',
+  order: 'Order', download: 'Download', downloading: 'Preparing download…',
+  history: 'Telegram Stars purchases', historyLink: 'View all purchases',
+  empty: 'No Stars purchases yet.', refresh: 'Refresh purchases', more: 'Show older orders',
+  historyNote: 'Purchases stay here even if you close the checkout.',
+  retry: 'Try again', test: 'Telegram test environment · no real Stars',
+  failed: 'Payment services could not be reached. Please try again.',
+  cartUnavailable: 'One of these products is unavailable for Stars. Please update your cart.',
+  currency: 'Stars', status: 'Payment status', support: 'Payment support',
+}
+
+const ru = {
+  checkout: 'Оформить заказ', method: 'Способ оплаты', stars: 'Telegram Stars', usdt: 'USDT TRC20',
+  title: 'Оплата звёздами Telegram', signIn: 'Войти для оплаты звёздами',
+  signInNote: 'Покупки и файлы сохранятся в вашем аккаунте.',
+  total: 'Итого в звёздах', pay: 'Продолжить в Telegram', open: 'Открыть оплату в Telegram',
+  note: 'Оплатите в Telegram и вернитесь сюда. Файлы появятся после подтверждения оплаты.',
+  unavailable: 'Оплата звёздами Telegram пока недоступна. Попробуйте позже.',
+  loading: 'Проверяем доступность оплаты…', creating: 'Подготавливаем заказ…',
+  pending: 'Ожидаем оплату в Telegram', paid: 'Оплата подтверждена', expired: 'Срок оплаты истёк',
+  refund_pending: 'Возврат обрабатывается', refunded: 'Оплата возвращена',
+  check: 'Проверить оплату', checking: 'Проверяем оплату…', restart: 'Оформить новый заказ',
+  order: 'Заказ', download: 'Скачать', downloading: 'Подготавливаем файл…',
+  history: 'Покупки за Telegram Stars', historyLink: 'Все покупки',
+  empty: 'Покупок за звёзды пока нет.', refresh: 'Обновить покупки', more: 'Более ранние заказы',
+  historyNote: 'Покупки сохраняются здесь после закрытия окна оплаты.',
+  retry: 'Попробовать ещё раз', test: 'Тестовая среда Telegram · без настоящих звёзд',
+  failed: 'Не удалось связаться с платёжным сервисом. Попробуйте ещё раз.',
+  cartUnavailable: 'Один из товаров недоступен за звёзды. Обновите корзину.',
+  currency: 'звёзд', status: 'Статус оплаты', support: 'Помощь с оплатой',
+}
+
+export function starsCopy(lang) { return lang === 'ru' ? ru : en }

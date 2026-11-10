@@ -22,6 +22,7 @@ import { usePreferences } from '../preferences/AppPreferences.jsx'
 import CommunityPostCard from './CommunityPostCard.jsx'
 import PostAttachment from './PostAttachment.jsx'
 import PostMediaAttachments from './PostMediaAttachments.jsx'
+import StarsOrders from './StarsOrders.jsx'
 import './ProfilePage.css'
 
 function formatDate(date, lang = 'en', dateTimeFormat = 'locale') {
@@ -398,6 +399,8 @@ function ProfilePage({ onOpenAuth, onOpenSettings, onNavigate }) {
                 </div>
               </section>
             )}
+
+            <StarsOrders key={currentUser.id} />
 
             <section className="profile-bookmarks-panel profile-purchases-panel">
               <div className="profile-panel-heading">

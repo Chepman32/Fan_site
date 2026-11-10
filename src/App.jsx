@@ -518,6 +518,7 @@ function AppContent({ initialRoute = '/', routeComponents = DEFAULT_ROUTE_COMPON
               onAddCartItem={addCartItem}
               onRemoveCartItem={removeCartItem}
               onNavigate={navigateTo}
+              onOpenAuth={() => setAuthOpen(true)}
             />
           </LazyRoute>
         </main>

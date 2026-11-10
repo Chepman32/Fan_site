@@ -7,6 +7,11 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 export default defineConfig([
   globalIgnores(['dist', 'dist-ssr', '.next']),
   {
+    files: ['functions/shop-stars.cjs', 'functions/stars-*.cjs', 'functions/test/**/*.cjs', 'cloudrun/stars/*.cjs'],
+    extends: [js.configs.recommended],
+    languageOptions: { globals: globals.node },
+  },
+  {
     files: ['**/*.{js,jsx}'],
     extends: [
       js.configs.recommended,

@@ -21,7 +21,7 @@ import { useTranslation } from '../i18n/useTranslation.jsx'
 import { LANGUAGE_NAMES } from '../i18n/languages'
 import './Header.css'
 
-const CryptoCheckoutPanel = lazy(() => import('./CryptoCheckoutPanel'))
+const ShopCheckoutPanel = lazy(() => import('./ShopCheckoutPanel'))
 const QuickSettingsModal = lazy(() => import('./QuickSettingsModal'))
 
 function isPlainLeftClick(event) {
@@ -163,11 +163,12 @@ function Header({
               </button>
               <div className="nav-cart-popover">
                 <Suspense fallback={<div className="nav-cart-loading">{t.nav.preparingCheckout || 'Preparing checkout'}</div>}>
-                  <CryptoCheckoutPanel
+                  <ShopCheckoutPanel
                     key={checkoutKey}
                     cartItems={cartItems}
                     cartTotal={cartTotal}
                     onRemoveItem={onRemoveCartItem}
+                    onOpenAuth={onOpenAuth}
                     compact
                   />
                 </Suspense>

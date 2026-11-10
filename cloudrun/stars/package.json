@@ -1,0 +1,8 @@
+{
+  "name": "leonida-stars-service",
+  "private": true,
+  "version": "1.0.0",
+  "engines": { "node": "22" },
+  "scripts": { "start": "node server.cjs" },
+  "dependencies": { "firebase-admin": "13.10.0" }
+}

@@ -2,6 +2,12 @@
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+## Telegram Stars shop checkout
+
+Signed-in customers can pay through @FSFESbot with fixed Stars prices and recover confirmed purchases in their profile. Because the billing account has reached its project-link quota, use [the Cloud Run setup in the existing billed project fan-site-496610](docs/telegram-stars-cloud-run.md). Auth, Firestore, and Hosting stay in gta-vi-fan-site. New Stars checkout is disabled until configured.
+
+Run `npm run test:stars:coverage` for payment tests, `npm run test:stars:rules` for the local Firestore emulator, and `npm run test:stars:browser` for isolated Chrome checks (requires an available `playwright-core` module).
+
 ## Firebase social features
 
 The community/social section uses Firebase Auth and Cloud Firestore.

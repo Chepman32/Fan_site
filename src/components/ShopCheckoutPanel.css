@@ -1,0 +1,37 @@
+.shop-payment-options { min-width: 0; }
+.shop-payment-methods { display: flex; gap: 8px; padding: 12px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.shop-payment-methods button, .stars-button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 14px; border: 1px solid rgba(255,255,255,.2); border-radius: 10px; background: rgba(255,255,255,.04); color: inherit; font: inherit; font-size: 13px; line-height: 1.4; text-decoration: none; cursor: pointer; }
+.shop-payment-methods button { flex: 1; }
+.shop-payment-methods button[aria-selected="true"], .stars-button.primary { background: #ffc95c; border-color: #ffc95c; color: #17121b; font-weight: 700; }
+.shop-payment-methods button:focus-visible, .stars-button:focus-visible, .stars-history-link:focus-visible { outline: 2px solid #00d9ff; outline-offset: 3px; }
+.stars-button:disabled { opacity: .55; cursor: wait; }
+.stars-checkout { display: flex; flex-direction: column; gap: 14px; padding: 20px; min-width: 0; }
+.stars-checkout h3 { display: flex; align-items: center; gap: 9px; font-size: 18px; margin: 0; }
+.stars-checkout p, .stars-orders p { margin: 0; line-height: 1.6; font-size: 13px; color: #c5c1d0; }
+.stars-order-items { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+.stars-order-items li, .stars-total { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 14px; }
+.stars-order-items strong { white-space: nowrap; color: #ffd279; }
+.stars-total { border-top: 1px solid rgba(255,255,255,.12); padding-top: 14px; }
+.stars-total strong { font-size: 22px; color: #ffd279; }
+.stars-checkout .stars-note { background: rgba(255,201,92,.09); border-radius: 10px; padding: 12px; }
+.stars-checkout .stars-status { display: flex; align-items: center; gap: 8px; color: #ffd279; font-weight: 700; }
+.stars-checkout .stars-status.paid { color: #74e7ac; }
+.stars-checkout .stars-error, .stars-error { color: #ffb0b9; font-size: 12px; }
+.stars-order-reference code, .stars-history-order code { overflow-wrap: anywhere; font-size: 11px; }
+.stars-history-link { color: #bceaff; font-size: 13px; text-decoration: underline; }
+.stars-download-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-top: 1px solid rgba(255,255,255,.08); padding: 12px 0; font-size: 13px; }
+.stars-download-control { display: grid; gap: 8px; }
+.stars-download-control .stars-button { white-space: nowrap; }
+.stars-orders { display: grid; gap: 14px; scroll-margin-top: 100px; }
+.stars-orders > .stars-button { justify-self: start; }
+.stars-history-order { padding: 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; min-width: 0; }
+.stars-history-order > p { margin: 8px 0; }
+.stars-spinner { animation: stars-spin 1s linear infinite; }
+@keyframes stars-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .stars-spinner { animation: none; } }
+@media (max-width: 480px) {
+  .stars-checkout { padding: 14px; }
+  .shop-payment-methods { gap: 6px; padding: 8px; }
+  .shop-payment-methods button { font-size: 12px; padding: 10px 8px; }
+  .stars-download-row { flex-wrap: wrap; }
+}

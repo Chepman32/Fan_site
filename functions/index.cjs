@@ -3,8 +3,22 @@ const admin = require('firebase-admin')
 const { onRequest } = require('firebase-functions/v2/https')
 const logger = require('firebase-functions/logger')
 const { TronWeb } = require('tronweb')
+const { hash: starsHash } = require('./shop-stars.cjs')
+const { createStarsRuntime } = require('./stars-runtime.cjs')
+const starsCatalog = require('./shop-stars-catalog.json')
 
 admin.initializeApp()
+
+function starsHandlers() {
+  return createStarsRuntime({ admin, catalog: starsCatalog, logger })
+}
+
+const starsOptions = {
+  region: 'us-central1', timeoutSeconds: 30, memory: '256MiB',
+  secrets: ['TELEGRAM_STARS_BOT_TOKEN', 'TELEGRAM_STARS_WEBHOOK_SECRET'],
+}
+exports.shopStarsApi = onRequest(starsOptions, (req, res) => starsHandlers().api(req, res))
+exports.telegramStarsWebhook = onRequest(starsOptions, (req, res) => starsHandlers().webhook(req, res))
 
 const DEFAULT_MAX_UPLOAD_BYTES = 50 * 1024 * 1024
 const DEFAULT_MAX_POST_MEDIA_BYTES = 20 * 1024 * 1024
@@ -467,6 +481,7 @@ async function accountCollections(uid) {
     buyerDeals,
     sellerDeals,
     reports,
+    starsOrders,
   ] = await Promise.all([
     db.collection('users').doc(uid).get(),
     db.collection('userSettings').doc(uid).get(),
@@ -479,6 +494,7 @@ async function accountCollections(uid) {
     db.collection('p2pDeals').where('buyerId', '==', uid).get(),
     db.collection('p2pDeals').where('sellerId', '==', uid).get(),
     db.collection('reports').where('reporterId', '==', uid).get(),
+    db.collection('shopStarsOrders').where('ownerUid', '==', uid).get(),
   ])
 
   const dealDocuments = new Map()
@@ -514,6 +530,7 @@ async function accountCollections(uid) {
         ...jsonSafeValue(document.data()),
       })),
       reports: exportedDocuments(reports),
+      shopStarsOrders: exportedDocuments(starsOrders).map(({ handoffHash: _handoffHash, ...order }) => order),
     },
   }
 }
@@ -1115,10 +1132,28 @@ exports.accountManagement = onRequest({
       const newsletterEmail = String(account.data.newsletterSubscription?.email || '').trim()
       if (newsletterEmail) await deleteResendContact(newsletterEmail)
 
+      // The shared marker serializes deletion against new orders and pre-checkout.
+      const starsOrderRefs = await admin.firestore().runTransaction(async (transaction) => {
+        const snapshot = await transaction.get(admin.firestore().collection('shopStarsOrders').where('ownerUid', '==', uid))
+        const activeCheckout = snapshot.docs.some((document) => {
+          const order = document.data()
+          return order.status === 'refund_pending' || (order.status === 'pending'
+            && (order.expiresAt > Date.now() || order.checkoutLeaseUntil > Date.now()))
+        })
+        if (activeCheckout) throw httpError(409, 'Wait for your Stars checkout or refund to finish before deleting the account.')
+        transaction.set(admin.firestore().collection('shopStarsAccounts').doc(starsHash(uid)), { deleting: true })
+        return snapshot.docs.map((document) => document.ref)
+      })
+
       const writer = admin.firestore().bulkWriter()
       account.refs.deletable.forEach((ref) => writer.delete(ref))
       writer.delete(account.refs.settings)
       writer.delete(account.refs.profile)
+      // Retain minimal payment evidence for refunds, while removing the account link.
+      starsOrderRefs.forEach((ref) => writer.update(ref, {
+        ownerUid: null, handoffHash: admin.firestore.FieldValue.delete(),
+        accountDeletedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }))
       await writer.close()
       await admin.auth().deleteUser(uid)
 

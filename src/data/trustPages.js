@@ -51,6 +51,10 @@ export const TRUST_PAGES = [
         body: 'For P2P purchases, buyers should message the seller first. Leonida Loot may use transaction hashes, deal records, listing details, and message history to review settlement issues.',
       },
       {
+        title: 'Telegram Stars purchases',
+        body: 'For a Stars payment issue, use /paysupport in @FSFESbot or contact Leonida Loot with your order number. Approved refunds return Stars to the Telegram payer and revoke website download access for that order. Telegram support does not handle shop purchase disputes.',
+      },
+      {
         title: 'Non-refundable cases',
         body: 'A completed download or delivered file is generally not refundable because the item cannot be returned. Exceptions may apply when the file is missing, corrupted, or misrepresented.',
       },
@@ -125,6 +129,10 @@ export const TRUST_PAGES = [
       {
         title: 'Payments and files',
         body: 'P2P settlement records may include buyer, seller, listing, transaction hash, payout status, and audit fields. File uploads may be bridged through server-side Telegram storage.',
+      },
+      {
+        title: 'Telegram Stars order data',
+        body: 'Stars checkout links a shop order to your signed-in website account and the Telegram account that opens its payment handoff. Private backend records contain the purchased products, Stars total, Telegram payer and charge identifiers, payment or refund status, and payment support messages you submit. On account deletion, the website account link is removed; limited payment evidence and related support requests are retained to resolve refunds and disputes. Stars payment records are not published on profiles.',
       },
       {
         title: 'Newsletter consent',

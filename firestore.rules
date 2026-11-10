@@ -528,6 +528,15 @@ service cloud.firestore {
         );
     }
 
+    // Stars orders, charge ledgers, account barriers and abuse counters are server-only.
+    // The authenticated Stars API supplies owner-filtered views and download access.
+    match /shopStarsOrders/{id} { allow read, write: if false; }
+    match /shopStarsCharges/{id} { allow read, write: if false; }
+    match /shopStarsReview/{id} { allow read, write: if false; }
+    match /shopStarsSupport/{id} { allow read, write: if false; }
+    match /shopStarsAccounts/{id} { allow read, write: if false; }
+    match /shopStarsRateLimits/{id} { allow read, write: if false; }
+
     match /users/{userId} {
       allow read: if true;
       allow create: if owns(userId)
