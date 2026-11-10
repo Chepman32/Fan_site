@@ -56,11 +56,13 @@ export const newsTranslationEn = {
     map: 'map',
     characters: 'characters',
     vehicles: 'vehicles',
+    music: 'music',
+    trailers: 'trailers',
   },
   articles: {
     [releaseSlug]: {
-      title: 'GTA VI Release Date: November 19, 2026 Launch Window',
-      description: 'Track the confirmed GTA VI release date, console platforms, and what remains unknown about PC launch timing, pre-orders, editions, and pricing.',
+      title: 'GTA VI Release Date: November 19, 2026',
+      description: 'Check the console release date, digital preload times, and Standard and Ultimate Edition details. PC timing remains unannounced.',
     },
     [mapSlug]: {
       title: 'GTA VI Leonida Map: Vice City, Keys, Wetlands and Regions',

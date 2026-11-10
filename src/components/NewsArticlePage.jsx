@@ -34,10 +34,11 @@ function formatDate(value, lang) {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return 'IGN'
 
-  return new Intl.DateTimeFormat(dateLocale(lang), {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(date)
+  const options = /^\d{4}-\d{2}-\d{2}$/.test(value)
+    ? { dateStyle: 'medium', timeZone: 'UTC' }
+    : { dateStyle: 'medium', timeStyle: 'short' }
+
+  return new Intl.DateTimeFormat(dateLocale(lang), options).format(date)
 }
 
 function titleFromSlug(slug = '') {
@@ -338,7 +339,9 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
         </a>
 
         <header className="news-article-hero">
-          <div className="news-article-kicker">{articleCopy.kicker}</div>
+          <div className="news-article-kicker">
+            {staticArticle ? t.news.sourceName : articleCopy.kicker}
+          </div>
           <h1>{displayArticle.title}</h1>
           {displayArticle.description && <p className="news-article-dek">{displayArticle.description}</p>}
           <div className="news-article-meta">
@@ -348,8 +351,15 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
             </span>
             <span>
               <Clock size={15} aria-hidden="true" />
-              {formatDate(displayArticle.publishedAt || displayArticle.updatedAt, lang)}
+              <time dateTime={displayArticle.publishedAt || displayArticle.updatedAt}>
+                {formatDate(displayArticle.publishedAt || displayArticle.updatedAt, lang)}
+              </time>
             </span>
+            {staticArticle && displayArticle.updatedAt !== displayArticle.publishedAt && (
+              <span>
+                {t.news.updatedLabel} <time dateTime={displayArticle.updatedAt}>{formatDate(displayArticle.updatedAt, lang)}</time>
+              </span>
+            )}
             <a href={displayArticle.sourceUrl || fallbackSourceUrl} target="_blank" rel="noopener noreferrer">
               {articleCopy.source}
               <ExternalLink size={15} aria-hidden="true" />
@@ -362,7 +372,7 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
         {displayArticle.image && (
           <figure className="news-article-cover">
             <img src={displayArticle.image} alt="" loading="eager" />
-            <figcaption>{articleCopy.imageViaIgn}</figcaption>
+            {!staticArticle && <figcaption>{articleCopy.imageViaIgn}</figcaption>}
           </figure>
         )}
 

@@ -10,7 +10,7 @@ import { newsTranslations } from '../i18n/newsTranslations'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './NewsSection.css'
 
-const INITIAL_ARTICLE_COUNT = 4
+const INITIAL_ARTICLE_COUNT = 5
 const DATE_LOCALES = {
   zh: 'zh-CN',
   hi: 'hi-IN',
@@ -33,6 +33,7 @@ function formatDate(value, lang) {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
+    timeZone: 'UTC',
   }).format(date)
 }
 

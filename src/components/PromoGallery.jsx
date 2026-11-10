@@ -82,6 +82,9 @@ function PromoGallery({ copy }) {
             >
               {copy.viewSource} <ExternalLink size={14} />
             </a>
+            <a href="https://www.rockstargames.com/VI/launch-gallery" target="_blank" rel="noopener noreferrer">
+              GTA VI Launch Gallery <ExternalLink size={14} />
+            </a>
           </div>
         </header>
 

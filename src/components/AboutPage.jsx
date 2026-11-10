@@ -2,9 +2,11 @@ import {
   ArrowRight,
   CalendarDays,
   DollarSign,
+  Download,
   ExternalLink,
   Gamepad2,
   Globe2,
+  HardDrive,
   Info,
   Map,
   Users,
@@ -16,7 +18,9 @@ import { useTranslation } from '../i18n/useTranslation.jsx'
 import './AboutPage.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
-const OFFICIAL_SOURCE = 'https://ir.take2games.com/node/32311/pdf'
+const OFFICIAL_SOURCE = 'https://www.rockstargames.com/VI'
+const EDITIONS_SOURCE = 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/'
+const PRELOAD_SOURCE = 'https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq'
 const WIKIPEDIA_SOURCE = 'https://en.wikipedia.org/wiki/Grand_Theft_Auto_VI'
 const MAP_SOURCE = 'https://www.gtavimods.com/gta-6-map-size-official-regions-what-to-expect/'
 
@@ -42,6 +46,34 @@ function AboutPage() {
       value: '$79.99',
       icon: DollarSign,
       status: 'official',
+      source: EDITIONS_SOURCE,
+    },
+    {
+      id: 'ultimate',
+      value: '$99.99',
+      icon: DollarSign,
+      status: 'official',
+      source: EDITIONS_SOURCE,
+    },
+    {
+      id: 'preload',
+      value: copy.stats.items.preload.value,
+      icon: Download,
+      status: 'official',
+      source: PRELOAD_SOURCE,
+    },
+    {
+      id: 'storage',
+      value: '212 GB',
+      icon: HardDrive,
+      status: 'official',
+      source: PRELOAD_SOURCE,
+    },
+    {
+      id: 'regions',
+      value: '06',
+      icon: Gamepad2,
+      status: 'official',
       source: OFFICIAL_SOURCE,
     },
     {
@@ -63,13 +95,6 @@ function AboutPage() {
       icon: Map,
       status: 'estimate',
       source: MAP_SOURCE,
-    },
-    {
-      id: 'regions',
-      value: '06',
-      icon: Gamepad2,
-      status: 'official',
-      source: 'https://www.rockstargames.com/VI',
     },
   ]
 

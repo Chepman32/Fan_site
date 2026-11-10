@@ -1,81 +1,9 @@
+import { newsTranslationEn as en } from './en/news'
+
 const releaseSlug = 'gta-vi-release-date-november-19-2026'
 const mapSlug = 'gta-vi-leonida-map-and-vice-city-guide'
 const charactersSlug = 'gta-vi-characters-lucia-jason-and-leonida-cast'
 const vehiclesSlug = 'gta-vi-vehicles-weapons-and-platform-news'
-
-const en = {
-  badge: 'IGN COVERAGE',
-  title: 'LATEST',
-  titleHighlight: 'UPDATES',
-  loading: 'Preparing latest news',
-  showMore: 'Show more',
-  showLess: 'Show less',
-  showing: 'Showing',
-  of: 'of',
-  justNow: 'Just now',
-  timeAgo: { year: 'year', month: 'month', week: 'week', day: 'day', hour: 'hour', minute: 'minute' },
-  pageBadge: 'GTA VI updates',
-  pageTitle: 'GTA VI News',
-  pageDescription: 'Follow GTA VI release updates, Rockstar announcements, trailer analysis, Leonida map details, characters, vehicles, weapons, and platform news from one static news hub.',
-  linksLabel: 'News hub links',
-  links: {
-    about: 'About GTA VI',
-    leonida: 'Leonida guide',
-    community: 'Community',
-    shop: 'Creator shop',
-  },
-  featuredLabel: 'Featured article',
-  updatedLabel: 'Updated',
-  lastUpdatedLabel: 'Last updated',
-  readFeatured: 'Read featured article',
-  confirmedKicker: 'Latest confirmed updates',
-  confirmedTitle: 'Latest confirmed updates',
-  listKicker: 'Article cards',
-  listTitle: 'GTA VI article list',
-  categoriesLabel: 'News categories',
-  sourceName: 'Leonida Loot',
-  readArticle: 'Read article',
-  article: {
-    backToNews: 'Back to news',
-    galleryLabel: 'IGN gallery',
-    imageViaIgn: 'Image via IGN',
-    kicker: 'IGN coverage',
-    loading: 'Preparing news article',
-    openOnIgn: (title) => `Open ${title} on IGN`,
-    openSourceOnIgn: 'Open source on IGN',
-    parsedUnavailable: 'The article could not be parsed yet.',
-    source: 'Source',
-    sourceRefreshUnavailable: (message) => `Source refresh unavailable: ${message}`,
-    sources: 'Sources',
-    unavailable: 'News article unavailable',
-    videoLabel: 'IGN video',
-  },
-  showingCount: (visible, total) => `Showing ${visible} of ${total}`,
-  categoryLabels: {
-    'release-date': 'release-date',
-    map: 'map',
-    characters: 'characters',
-    vehicles: 'vehicles',
-  },
-  articles: {
-    [releaseSlug]: {
-      title: 'GTA VI Release Date: November 19, 2026 Launch Window',
-      description: 'Track the confirmed GTA VI release date, console platforms, and what remains unknown about PC launch timing, pre-orders, editions, and pricing.',
-    },
-    [mapSlug]: {
-      title: 'GTA VI Leonida Map: Vice City, Keys, Wetlands and Regions',
-      description: 'Explore GTA VI map clues across Leonida, including Vice City, Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia, and Mount Kalaga.',
-    },
-    [charactersSlug]: {
-      title: 'GTA VI Characters: Lucia, Jason and the Leonida Cast',
-      description: 'Meet Lucia Caminos, Jason Duval, Cal Hampton, Boobie Ike, DreQuan Priest, Real Dimez, Raul Bautista, and Brian Heder.',
-    },
-    [vehiclesSlug]: {
-      title: 'GTA VI Vehicles, Weapons and Platform News Tracker',
-      description: 'Follow public GTA VI vehicle, weapon, and platform signals while separating visible trailer evidence from speculation.',
-    },
-  },
-}
 
 const localized = {
   zh: {
@@ -124,7 +52,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'GTA VI 发售日期：2026 年 11 月 19 日上线窗口',
-        description: '追踪已确认的 GTA VI 发售日期、主机平台，以及 PC 上线时间、预购、版本和定价仍未确认的内容。',
+        description: '查看 GTA VI 主机版发售日期、数字版预载时间和标准版与终极版详情。PC 版发售时间尚未公布。',
       },
       [mapSlug]: {
         title: 'GTA VI Leonida 地图：Vice City、群岛、湿地与区域',
@@ -182,11 +110,31 @@ const localized = {
       videoLabel: 'Видео IGN',
     },
     showingCount: (visible, total) => `Показано ${visible} из ${total}`,
-    categoryLabels: { 'release-date': 'дата релиза', map: 'карта', characters: 'персонажи', vehicles: 'транспорт' },
+    categoryLabels: { 'release-date': 'дата релиза', map: 'карта', characters: 'персонажи', vehicles: 'транспорт', music: 'музыка', trailers: 'трейлеры' },
     articles: {
+      'gta-vi-the-festival-miami-november-21': {
+        title: 'Фестиваль в честь выхода GTA VI пройдёт в Майами 21 ноября',
+        description: 'Rockstar и PlayStation анонсировали концерт на двух сценах Mana Wynwood с Трэвисом Скоттом, Cardi B, Justice и другими артистами.',
+      },
+      'gta-vi-preload-november-10-ps5-xbox': {
+        title: 'Предзагрузка GTA VI на PS5 и Xbox начнётся 10 ноября',
+        description: 'Время загрузки для PS5 и Xbox Series X|S, требования к свободному месту до 212 ГБ и дата продажи коробочных версий с кодом.',
+      },
+      'gta-vi-launch-gallery-new-leonida-screenshots': {
+        title: 'Rockstar открыла галерею новых скриншотов GTA VI',
+        description: 'В галерее от 5 ноября появились официальные кадры Вайс-Сити и других мест Леониды.',
+      },
+      'gta-vi-music-justice-score-radio-soundtrack': {
+        title: 'Музыка GTA VI: саундтрек, оригинальная музыка Justice и радио',
+        description: 'Rockstar показала шесть радиостанций. The Album выйдет 19 ноября, оригинальная музыка Justice — 11 декабря.',
+      },
+      'gta-vi-launch-trailer-and-extended-look': {
+        title: 'Релизный трейлер GTA VI и расширенный показ',
+        description: 'В официальной видеотеке Rockstar доступны октябрьский трейлер и августовский показ с кадрами игрового процесса на PS5.',
+      },
       [releaseSlug]: {
-        title: 'Дата выхода GTA VI: релиз 19 ноября 2026 года',
-        description: 'Отслеживайте подтвержденную дату выхода GTA VI, консольные платформы и то, что еще неизвестно о PC-релизе, предзаказах, изданиях и ценах.',
+        title: 'Дата выхода GTA VI — 19 ноября 2026 года',
+        description: 'Дата релиза на консолях, время цифровой предзагрузки и подробности Standard и Ultimate Edition. Дата выхода на ПК пока не объявлена.',
       },
       [mapSlug]: {
         title: 'Карта GTA VI в Леониде: Вайс-Сити, острова, болота и регионы',
@@ -248,7 +196,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'Data di uscita di GTA VI: lancio il 19 novembre 2026',
-        description: 'Tieni traccia della data di uscita confermata di GTA VI, delle piattaforme console e di ciò che resta ignoto su PC, preordini, edizioni e prezzi.',
+        description: 'Scopri la data di uscita su console, gli orari di precaricamento e le edizioni Standard e Ultimate. La data per PC non è ancora stata annunciata.',
       },
       [mapSlug]: {
         title: 'Mappa di GTA VI a Leonida: Vice City, Keys, paludi e regioni',
@@ -310,7 +258,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'Tanggal Rilis GTA VI: Jendela Peluncuran 19 November 2026',
-        description: 'Pantau tanggal rilis GTA VI yang dikonfirmasi, platform konsol, dan hal yang masih belum diketahui tentang rilis PC, pre-order, edisi, dan harga.',
+        description: 'Lihat tanggal rilis konsol, jadwal pramuat digital, serta detail edisi Standard dan Ultimate. Tanggal rilis PC belum diumumkan.',
       },
       [mapSlug]: {
         title: 'Peta GTA VI Leonida: Vice City, Keys, Wetlands, dan Region',
@@ -372,7 +320,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'Data premiery GTA VI: okno startu 19 listopada 2026',
-        description: 'Śledź potwierdzoną datę premiery GTA VI, platformy konsolowe oraz to, co wciąż nieznane o PC, preorderach, edycjach i cenach.',
+        description: 'Sprawdź datę premiery na konsolach, godziny wstępnego pobierania i informacje o edycjach Standard i Ultimate. Daty premiery na PC jeszcze nie ogłoszono.',
       },
       [mapSlug]: {
         title: 'Mapa Leonidy w GTA VI: Vice City, Keys, mokradła i regiony',
@@ -434,7 +382,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'GTA VI रिलीज़ तारीख: 19 नवंबर 2026 लॉन्च विंडो',
-        description: 'GTA VI की पुष्टि की गई रिलीज़ तारीख, कंसोल प्लेटफ़ॉर्म और PC लॉन्च, प्री-ऑर्डर, एडिशन व कीमतों पर अभी अज्ञात जानकारी ट्रैक करें।',
+        description: 'कंसोल रिलीज़ की तारीख, डिजिटल प्रीलोड का समय और स्टैंडर्ड व अल्टीमेट एडिशन की जानकारी देखें। PC की रिलीज़ तारीख अभी घोषित नहीं हुई है।',
       },
       [mapSlug]: {
         title: 'GTA VI Leonida मैप: Vice City, Keys, Wetlands और क्षेत्र',
@@ -496,7 +444,7 @@ const localized = {
     articles: {
       [releaseSlug]: {
         title: 'Tarikh Keluaran GTA VI: Tetingkap Pelancaran 19 November 2026',
-        description: 'Jejaki tarikh keluaran GTA VI yang disahkan, platform konsol, dan perkara yang masih belum diketahui tentang pelancaran PC, prapesanan, edisi, dan harga.',
+        description: 'Semak tarikh keluaran konsol, waktu pramuat digital serta butiran edisi Standard dan Ultimate. Tarikh keluaran PC belum diumumkan.',
       },
       [mapSlug]: {
         title: 'Peta GTA VI Leonida: Vice City, Keys, Wetlands dan Region',
@@ -514,15 +462,6 @@ const localized = {
   },
 }
 
-function mergeArticles(articles = {}) {
-  return Object.fromEntries(
-    Object.entries(en.articles).map(([slug, article]) => [
-      slug,
-      { ...article, ...(articles[slug] || {}) },
-    ]),
-  )
-}
-
 function createNewsTranslation(code) {
   const copy = localized[code] || {}
 
@@ -532,12 +471,10 @@ function createNewsTranslation(code) {
     article: { ...en.article, ...(copy.article || {}) },
     links: { ...en.links, ...(copy.links || {}) },
     categoryLabels: { ...en.categoryLabels, ...(copy.categoryLabels || {}) },
-    articles: mergeArticles(copy.articles),
+    articles: { ...en.articles, ...copy.articles },
     timeAgo: { ...en.timeAgo, ...(copy.timeAgo || {}) },
   }
 }
-
-export const newsTranslationEn = en
 
 export const newsTranslations = {
   en,

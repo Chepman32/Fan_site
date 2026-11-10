@@ -1,31 +1,181 @@
 export const newsArticles = [
   {
+    slug: 'gta-vi-the-festival-miami-november-21',
+    title: 'GTA VI Launch Festival Comes to Miami on November 21',
+    description: 'Rockstar and PlayStation announced a two-stage live music event at Mana Wynwood, with Travis Scott, Cardi B, Justice and more.',
+    category: 'music',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-09',
+    author: 'Leonida Loot Editorial',
+    image: '/images/leonida/social-media-day.webp',
+    body: [
+      {
+        heading: 'A launch-week concert in Miami',
+        paragraphs: [
+          'Rockstar announced the festival on November 9. The in-person event takes place at Mana Wynwood in Miami on Saturday, November 21, two days after the console launch.',
+          'The event spans two stages. The lineup includes Travis Scott, Cardi B, Justice with a DJ set, Metro Boomin, Tainy, and other artists featured in the game or on its soundtrack.',
+        ],
+      },
+      {
+        heading: 'Ticket lottery',
+        paragraphs: [
+          'The presale lottery closes November 10 at 4 p.m. Eastern Time. Winners can buy tickets starting November 11 at noon Eastern Time. Entry requires a matching DICE account, and purchases are limited to two tickets.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Rockstar Newswire festival announcement', url: 'https://www.rockstargames.com/newswire/article/o39o87a435a25a/grand-theft-auto-vi-the-festival' },
+      { label: 'Official festival and ticket information', url: 'https://www.rockstargames.com/VI/gtavi-thefestival' },
+    ],
+  },
+  {
+    slug: 'gta-vi-preload-november-10-ps5-xbox',
+    title: 'GTA VI Preload Starts November 10 on PS5 and Xbox',
+    description: 'See the PS5 and Xbox Series X|S download times, the November 12 code-in-box date, and the storage requirement of up to 212 GB.',
+    category: 'release-date',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-09',
+    author: 'Leonida Loot Editorial',
+    image: '/og-image.png',
+    body: [
+      {
+        heading: 'Digital preload times by console',
+        paragraphs: [
+          'Rockstar’s November 3 update moved the digital preorder preload to November 10. On PS5 it starts at midnight local time. Xbox Series X|S uses one worldwide start at 00:00 UTC on November 10.',
+          'Rockstar says the download can require up to 212 GB of free space, depending on the device. Retail copies with a download code in the box are scheduled to reach stores on November 12.',
+        ],
+      },
+      {
+        heading: 'When you can play',
+        paragraphs: [
+          'Rockstar lists the game unlock at midnight local time on November 19 for both PS5 and Xbox Series X|S. You can check your preorder and automatic download settings through your console store before the preload opens.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Rockstar Newswire preload announcement', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
+      { label: 'Rockstar Support preload FAQ', url: 'https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq' },
+      { label: 'Rockstar Support regional release times', url: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s' },
+    ],
+  },
+  {
+    slug: 'gta-vi-launch-gallery-new-leonida-screenshots',
+    title: 'Rockstar Opens the GTA VI Launch Gallery',
+    description: 'The November 5 gallery adds official screenshots from Vice City and across Leonida.',
+    category: 'map',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-09',
+    author: 'Leonida Loot Editorial',
+    image: '/images/leonida/locations-day.webp',
+    body: [
+      {
+        heading: 'A new look at Vice City and Leonida',
+        paragraphs: [
+          'Rockstar published its Launch Gallery on November 5. The new screenshots complement the publisher’s People & Places profiles and the trailers already available in its media library.',
+          'The gallery gives fans more scenes to compare with the named locations. Rockstar separately announced a printable Leonida map for November 19 in its preload update.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Rockstar Newswire gallery announcement', url: 'https://www.rockstargames.com/newswire/article/39ak81277255o9/explore-the-grand-theft-auto-vi-launch-gallery' },
+      { label: 'Official GTA VI Launch Gallery', url: 'https://www.rockstargames.com/VI/launch-gallery' },
+      { label: 'Rockstar Newswire map and preload update', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
+    ],
+  },
+  {
+    slug: 'gta-vi-music-justice-score-radio-soundtrack',
+    title: 'GTA VI Music: Justice Score, Soundtrack and In-Game Radio',
+    description: 'Rockstar has previewed six radio stations and dated two music releases: The Album on November 19 and the Justice score on December 11.',
+    category: 'music',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-09',
+    author: 'Leonida Loot Editorial',
+    image: '/images/leonida/social-media.webp',
+    body: [
+      {
+        heading: 'Two releases on separate dates',
+        paragraphs: [
+          'Rockstar lists November 19 for Grand Theft Auto VI: The Album, a 34-track soundtrack featuring multiple artists. The 30-track Original Score by Justice follows December 11 on streaming services, CD and vinyl.',
+          'The score adapts to what players do during Jason and Lucia’s story. Rockstar’s music page has already released previews of “Flower in a Hurricane” and “Pusher.”',
+        ],
+      },
+      {
+        heading: 'Radio previews from Leonida',
+        paragraphs: [
+          'Rockstar’s site has sample broadcasts for Cocoteo, Back Country, Afro Bank FM, The Chamber, Flash FM, and Dirty South Classics. Those six previews cover Latin music, country, African music, metal, pop, and Southern hip-hop.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Rockstar’s GTA VI music hub', url: 'https://www.rockstargames.com/VI/music' },
+      { label: 'Rockstar Newswire Justice score announcement', url: 'https://www.rockstargames.com/newswire/article/39ak8a12395591/grand-theft-auto-vi-original-score-by-justice' },
+    ],
+  },
+  {
+    slug: 'gta-vi-launch-trailer-and-extended-look',
+    title: 'Watch the GTA VI Launch Trailer and Extended Look',
+    description: 'Rockstar’s October launch trailer joins the 26-minute PS5 showcase from August in the official GTA VI video library.',
+    category: 'trailers',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-09',
+    author: 'Leonida Loot Editorial',
+    image: '/images/leonida/characters.webp',
+    body: [
+      {
+        heading: 'The launch trailer',
+        paragraphs: [
+          'Rockstar released the launch trailer on October 15. It debuted “Flower in a Hurricane,” a track by score composers Justice featuring Tame Impala, SZA, and King Gizzard & the Lizard Wizard.',
+        ],
+      },
+      {
+        heading: 'An extended view of the game',
+        paragraphs: [
+          'The August 27 Extended Look runs 26 minutes and 48 seconds. Rockstar says the footage was captured in-game on PlayStation 5. The official watch page links to the full video on YouTube and Netflix.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Watch the official launch trailer', url: 'https://www.rockstargames.com/VI/launch-trailer' },
+      { label: 'Watch the official Extended Look', url: 'https://www.rockstargames.com/VI/an-extended-look' },
+      { label: 'Rockstar Newswire Extended Look announcement', url: 'https://www.rockstargames.com/newswire/article/4k138k8okkk483/grand-theft-auto-vi-an-extended-look-now-playing' },
+    ],
+  },
+  {
     slug: 'gta-vi-release-date-november-19-2026',
-    title: 'GTA VI Release Date: November 19, 2026 Launch Window',
-    description: 'Track the confirmed GTA VI release date, console platforms, and what remains unknown about PC launch timing, pre-orders, editions, and pricing.',
+    title: 'GTA VI Release Date: November 19, 2026',
+    description: 'Check the console release date, digital preload times, and Standard and Ultimate Edition details. PC timing remains unannounced.',
     category: 'release-date',
     publishedAt: '2026-07-07',
-    updatedAt: '2026-07-07',
+    updatedAt: '2026-11-09',
     author: 'Leonida Loot Editorial',
     image: '/og-image.png',
     body: [
       {
         heading: 'Confirmed launch information',
         paragraphs: [
-          'Grand Theft Auto VI is tracked on Leonida Loot with a November 19, 2026 launch date for PlayStation 5 and Xbox Series X/S.',
-          'This article keeps official launch information separate from estimates and rumor-heavy topics so readers can quickly understand what is reliable.',
+          'Grand Theft Auto VI launches for PlayStation 5 and Xbox Series X|S on November 19, 2026. Rockstar lists the digital unlock at midnight local time on both consoles.',
+          'Digital preload starts November 10 at local midnight on PS5 and at 00:00 UTC worldwide on Xbox Series X|S. Rockstar advises having up to 212 GB free, depending on the console.',
+        ],
+      },
+      {
+        heading: 'Preorders and editions',
+        paragraphs: [
+          'The US PlayStation Store lists the Standard Edition at $79.99 and the Ultimate Edition at $99.99. Digital preorder benefits include the Vintage Vice City Pack and one month of GTA+ under the store’s offer terms.',
+          'Rockstar says retail editions with download codes in the box arrive November 12. Prices and offers vary by store and region.',
         ],
       },
       {
         heading: 'What is still unknown',
         paragraphs: [
-          'PC launch timing, special editions, preload dates, pre-order bundles, and final regional pricing should be treated as unconfirmed until official sources publish final details.',
+          'Rockstar has yet to announce a PC release date.',
         ],
       },
     ],
     sources: [
       { label: 'Rockstar Games', url: 'https://www.rockstargames.com/VI' },
-      { label: 'Take-Two Interactive', url: 'https://www.take2games.com/' },
+      { label: 'Rockstar Support regional release and preload times', url: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s' },
+      { label: 'Rockstar Newswire retail and storage details', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
+      { label: 'PlayStation US editions and pricing', url: 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/' },
     ],
   },
   {
@@ -34,7 +184,7 @@ export const newsArticles = [
     description: 'Explore GTA VI map clues across Leonida, including Vice City, Leonida Keys, Grassrivers, Port Gellhorn, Ambrosia, and Mount Kalaga.',
     category: 'map',
     publishedAt: '2026-07-07',
-    updatedAt: '2026-07-07',
+    updatedAt: '2026-11-09',
     author: 'Leonida Loot Editorial',
     image: '/images/leonida/locations-day.webp',
     body: [
@@ -48,12 +198,15 @@ export const newsArticles = [
       {
         heading: 'Confirmed versus estimated locations',
         paragraphs: [
-          'Location names shown in official and reputable public material are treated differently from community estimates, scale guesses, and speculative map reconstructions.',
+          'The November 5 Launch Gallery adds official screenshots for comparing scenes around Vice City and Leonida. Rockstar plans to release a printable Leonida map on November 19.',
+          'Until that map is available, the exact map area and regional boundaries remain unconfirmed. Community reconstructions are estimates.',
         ],
       },
     ],
     sources: [
       { label: 'Rockstar Games GTA VI', url: 'https://www.rockstargames.com/VI' },
+      { label: 'Rockstar’s official Launch Gallery', url: 'https://www.rockstargames.com/VI/launch-gallery' },
+      { label: 'Rockstar Newswire printable map announcement', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
       { label: 'IGN GTA VI Wiki', url: 'https://www.ign.com/wikis/gta-6/' },
     ],
   },

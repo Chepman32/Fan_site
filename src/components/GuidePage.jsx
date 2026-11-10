@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpenText, CalendarDays, ExternalLink } from 'lucide-react'
 import { SEO_GUIDES, getSeoGuide } from '../data/guideContent'
 import { plainContentTranslationSource, translatePlainContent, useTranslatedIgnContent } from '../i18n/ignContentTranslation'
 import { useTranslation } from '../i18n/useTranslation.jsx'
@@ -16,6 +16,7 @@ const GUIDE_CHROME = {
   readGuide: 'Read guide',
   backToGuides: 'Back to guides',
   lastUpdated: 'Last updated',
+  sources: 'Official sources',
   relatedTitle: 'Related GTA VI hubs',
   relatedLinks: [
     { href: '/news', label: 'Latest GTA VI news' },
@@ -44,6 +45,7 @@ const GUIDE_CHROME_TRANSLATION_OPTIONS = {
     'notFoundTitle',
     'readGuide',
     'relatedTitle',
+    'sources',
     'updated',
   ],
 }
@@ -132,6 +134,20 @@ function GuideArticle({ guide, onNavigate, copy }) {
             </section>
           ))}
         </div>
+
+        {guide.sources?.length > 0 && (
+          <aside className="guide-related">
+            <h2>{copy.sources}</h2>
+            <div>
+              {guide.sources.map(({ href, label }) => (
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer">
+                  {label}
+                  <ExternalLink size={14} aria-hidden="true" />
+                </a>
+              ))}
+            </div>
+          </aside>
+        )}
 
         <aside className="guide-related">
           <h2>{copy.relatedTitle}</h2>
