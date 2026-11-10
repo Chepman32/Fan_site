@@ -90,6 +90,12 @@
   margin: 0;
 }
 
+.game-info-accordion-panel-inner a {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--accent-cyan);
+}
+
 .game-info-accordion-item button {
   width: 100%;
   min-height: 68px;

@@ -12,14 +12,14 @@ import './PromoGallery.css'
 
 const INITIAL_VISIBLE_ITEMS = 12
 const LOAD_MORE_ITEMS = 12
-const COLLECTION_ORDER = ['artwork', 'screenshots', 'ultimate']
+const COLLECTION_ORDER = ['launch', 'artwork', 'screenshots', 'ultimate']
 
 function imageUrl(src, width) {
   return `${src}?akim=1&imdensity=1&imwidth=${width}`
 }
 
 function PromoGallery({ copy }) {
-  const [activeCollection, setActiveCollection] = useState('artwork')
+  const [activeCollection, setActiveCollection] = useState('launch')
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS)
   const [activeImageIndex, setActiveImageIndex] = useState(null)
   const items = rockstarPromoMedia.collections[activeCollection]
@@ -66,7 +66,7 @@ function PromoGallery({ copy }) {
   }
 
   return (
-    <section className="about-promo-section section-padding" aria-labelledby="promo-gallery-title">
+    <section id="official-screenshots" className="about-promo-section section-padding" aria-labelledby="promo-gallery-title">
       <div className="container">
         <header className="about-section-heading about-promo-heading">
           <div>
@@ -81,9 +81,6 @@ function PromoGallery({ copy }) {
               rel="noopener noreferrer"
             >
               {copy.viewSource} <ExternalLink size={14} />
-            </a>
-            <a href="https://www.rockstargames.com/VI/launch-gallery" target="_blank" rel="noopener noreferrer">
-              GTA VI Launch Gallery <ExternalLink size={14} />
             </a>
           </div>
         </header>

@@ -131,7 +131,7 @@ function Header({
   return (
     <>
       <nav className={`navbar ${solid || scrolled ? 'scrolled' : ''}`} aria-label={t.nav.primaryNavigation || 'Primary navigation'}>
-        <a className="nav-brand" href="/" onClick={(event) => navigate(event, '/')}>
+        <a className="nav-brand" href="/" onClick={(event) => navigate(event, '/')} aria-label="Leonida Loot">
           <img className="nav-favicon" src="/favicon.svg" alt="" aria-hidden="true" width="32" height="32" />
           <span>Leonida <span className="highlight">Loot</span></span>
         </a>
@@ -248,8 +248,8 @@ function Header({
               </button>
             </>
           ) : (
-            <button type="button" onClick={onOpenAuth}>
-              <User size={16} />
+            <button type="button" onClick={onOpenAuth} aria-label={t.nav.signIn}>
+              <User size={16} aria-hidden="true" />
               <span>{t.nav.signIn}</span>
             </button>
           )}

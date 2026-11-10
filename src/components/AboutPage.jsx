@@ -5,24 +5,27 @@ import {
   Download,
   ExternalLink,
   Gamepad2,
-  Globe2,
   HardDrive,
   Info,
   Map,
+  Monitor,
   Users,
 } from 'lucide-react'
 import Countdown from './Countdown'
 import GameInfo from './GameInfo'
+import MediaGallery from './MediaGallery'
 import PromoGallery from './PromoGallery'
+import { gtaViLaunchSources } from '../content/news'
 import { useTranslation } from '../i18n/useTranslation.jsx'
 import './AboutPage.css'
 
 const RELEASE_DATE = new Date('2026-11-19T00:00:00')
-const OFFICIAL_SOURCE = 'https://www.rockstargames.com/VI'
+const OFFICIAL_SOURCE = gtaViLaunchSources.official
 const EDITIONS_SOURCE = 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/'
+const PREORDER_SOURCE = 'https://www.rockstargames.com/newswire/article/5171972o3ak5oa/pre-order-grand-theft-auto-vi-on-june-25'
 const PRELOAD_SOURCE = 'https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq'
 const WIKIPEDIA_SOURCE = 'https://en.wikipedia.org/wiki/Grand_Theft_Auto_VI'
-const MAP_SOURCE = 'https://www.gtavimods.com/gta-6-map-size-official-regions-what-to-expect/'
+const LOCATIONS_SOURCE = 'https://www.rockstargames.com/VI/only-in-leonida'
 
 function AboutPage() {
   const { t } = useTranslation()
@@ -39,7 +42,7 @@ function AboutPage() {
       value: 'NOV 19, 2026',
       icon: CalendarDays,
       status: 'official',
-      source: OFFICIAL_SOURCE,
+      source: gtaViLaunchSources.regionalTimes,
     },
     {
       id: 'price',
@@ -60,7 +63,7 @@ function AboutPage() {
       value: copy.stats.items.preload.value,
       icon: Download,
       status: 'official',
-      source: PRELOAD_SOURCE,
+      source: gtaViLaunchSources.regionalTimes,
     },
     {
       id: 'storage',
@@ -72,29 +75,30 @@ function AboutPage() {
     {
       id: 'regions',
       value: '06',
+      icon: Map,
+      status: 'official',
+      source: LOCATIONS_SOURCE,
+    },
+    {
+      id: 'storyMode',
+      value: copy.stats.items.storyMode.value,
       icon: Gamepad2,
       status: 'official',
-      source: OFFICIAL_SOURCE,
+      source: PREORDER_SOURCE,
     },
     {
-      id: 'budget',
-      value: '$1–2B',
-      icon: Globe2,
-      status: 'estimate',
-      source: WIKIPEDIA_SOURCE,
+      id: 'pc',
+      value: copy.stats.items.pc.value,
+      icon: Monitor,
+      status: 'reported',
+      source: gtaViLaunchSources.pcReport,
     },
     {
-      id: 'team',
-      value: '≈4K–6K',
+      id: 'online',
+      value: '2027',
       icon: Users,
-      status: 'estimate',
-    },
-    {
-      id: 'map',
-      value: '≈125 KM²',
-      icon: Map,
-      status: 'estimate',
-      source: MAP_SOURCE,
+      status: 'reported',
+      source: gtaViLaunchSources.onlineReport,
     },
   ]
 
@@ -147,7 +151,7 @@ function AboutPage() {
                   <div className="about-stat-topline">
                     <span className="about-stat-icon"><Icon size={18} /></span>
                     <span className="about-stat-status">
-                      {stat.status === 'official' ? copy.stats.official : copy.stats.estimate}
+                      {copy.stats[stat.status]}
                     </span>
                   </div>
                   <strong>{stat.value}</strong>
@@ -168,6 +172,8 @@ function AboutPage() {
 
       <GameInfo />
 
+      <MediaGallery copy={copy.media} />
+
       <PromoGallery copy={copy.media} />
 
       <section className="about-sources-section">
@@ -180,8 +186,8 @@ function AboutPage() {
             <a href={WIKIPEDIA_SOURCE} target="_blank" rel="noopener noreferrer">
               {copy.sources.wikipedia} <ExternalLink size={13} />
             </a>
-            <a href={MAP_SOURCE} target="_blank" rel="noopener noreferrer">
-              {copy.sources.map} <ExternalLink size={13} />
+            <a href={gtaViLaunchSources.takeTwo} target="_blank" rel="noopener noreferrer">
+              {copy.sources.takeTwo} <ExternalLink size={13} />
             </a>
           </div>
         </div>

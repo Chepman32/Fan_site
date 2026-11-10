@@ -1,103 +1,80 @@
 import { useState } from 'react'
-import { Play } from 'lucide-react'
-import { useTranslation } from '../i18n/useTranslation.jsx'
+import { ExternalLink, Play } from 'lucide-react'
+import { rockstarPromoMedia } from '../data/rockstarPromoMedia'
 import './MediaGallery.css'
 
-function MediaGallery() {
-  const { t } = useTranslation()
-  const [activeVideo, setActiveVideo] = useState('QdBZY2fkU-0')
-  const [failedScreenshotUrls, setFailedScreenshotUrls] = useState([])
+const { sources, videos } = rockstarPromoMedia
 
-  const videos = [
-    { id: 'QdBZY2fkU-0', title: t.media.videos.trailer1.title, duration: '1:31', description: t.media.videos.trailer1.description },
-    { id: 'VQRLujxTm3c', title: t.media.videos.trailer2.title, duration: '2:16', description: t.media.videos.trailer2.description },
-  ]
+function posterUrl(src, width) {
+  return `${src}?akim=1&imdensity=1&imwidth=${width}`
+}
 
-  const screenshots = [
-    { url: 'https://upload.wikimedia.org/wikipedia/en/4/46/Grand_Theft_Auto_VI.png', caption: t.media.screenshots.boxArt },
-    { url: 'https://www.rockstargames.com/VI/_next/static/media/Vice_City_01.332891cf.jpg', caption: t.media.screenshots.inGame },
-  ]
-  const visibleScreenshots = screenshots.filter((shot) => !failedScreenshotUrls.includes(shot.url))
-
-  const hideFailedScreenshot = (url) => {
-    setFailedScreenshotUrls((urls) => (urls.includes(url) ? urls : [...urls, url]))
-  }
+function MediaGallery({ copy }) {
+  const [selectedId, setSelectedId] = useState(videos[0].id)
+  const [playing, setPlaying] = useState(false)
+  const selected = videos.find((video) => video.id === selectedId)
 
   return (
-    <section id="media" className="section-padding media-gallery">
+    <section id="official-videos" className="section-padding media-gallery" aria-labelledby="official-videos-title">
       <div className="container">
-        <div className="section-header">
-          <h2 className="section-title">
-            {t.media.title} <span className="gradient-text">{t.media.titleHighlight}</span>
-          </h2>
-        </div>
+        <header className="about-section-heading">
+          <div>
+            <span>{copy.eyebrow}</span>
+            <h2 id="official-videos-title">{copy.videos.title}</h2>
+          </div>
+          <p>{copy.videos.description}</p>
+        </header>
 
         <div className="media-content">
-          {/* Main Video Player */}
-          <div className="video-player">
-            <iframe
-              src={`https://www.youtube.com/embed/${activeVideo}?rel=0`}
-              title={videos.find((video) => video.id === activeVideo)?.title || 'GTA VI trailer'}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-            ></iframe>
+          <div className="video-player-column">
+            <div className="video-player">
+              {playing ? (
+                <iframe
+                  key={selected.id}
+                  src={`https://www.youtube-nocookie.com/embed/${selected.youtubeId}?autoplay=1&rel=0`}
+                  title={selected.title}
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              ) : (
+                <button type="button" className="video-poster" onClick={() => setPlaying(true)} aria-label={`${copy.videos.play}: ${selected.title}`}>
+                  <img src={posterUrl(selected.poster, 1280)} alt="" loading="lazy" decoding="async" />
+                  <span aria-hidden="true"><Play size={28} fill="currentColor" /></span>
+                </button>
+              )}
+            </div>
+            <a href={selected.source} target="_blank" rel="noopener noreferrer">
+              {copy.videos.watchSource} <ExternalLink size={14} />
+            </a>
           </div>
 
-          {/* Video List */}
           <div className="video-list">
             {videos.map((video) => (
               <button
                 key={video.id}
-                className={`video-item ${activeVideo === video.id ? 'active' : ''}`}
-                onClick={() => setActiveVideo(video.id)}
+                type="button"
+                className={`video-item${selectedId === video.id ? ' active' : ''}`}
+                aria-pressed={selectedId === video.id}
+                onClick={() => {
+                  if (selectedId !== video.id) {
+                    setSelectedId(video.id)
+                    setPlaying(false)
+                  }
+                }}
               >
-                <div className="video-thumb">
-                  <img 
-                    src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`} 
-                    alt={video.title}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <div className="play-overlay">
-                    <Play size={20} />
-                  </div>
+                <span className="video-thumb">
+                  <img src={posterUrl(video.poster, 320)} alt="" loading="lazy" decoding="async" />
+                  <span className="play-overlay" aria-hidden="true"><Play size={20} /></span>
                   <span className="video-duration">{video.duration}</span>
-                </div>
-                <div className="video-meta">
-                  <h4>{video.title}</h4>
-                  <p>{video.description}</p>
-                </div>
+                </span>
+                <strong>{video.title}</strong>
               </button>
             ))}
+            <a href={sources.videos} target="_blank" rel="noopener noreferrer">
+              {copy.videos.viewAll} <ExternalLink size={14} />
+            </a>
           </div>
         </div>
-
-        {/* Screenshots */}
-        {visibleScreenshots.length > 0 && (
-          <div className="screenshots-section">
-            <h3 className="screenshots-title">
-              {t.media.officialScreenshots}
-            </h3>
-            <div className="screenshots-grid">
-              {visibleScreenshots.map((shot) => (
-                <div key={shot.url} className="screenshot-card">
-                  <img
-                    src={shot.url}
-                    alt={shot.caption}
-                    loading="lazy"
-                    decoding="async"
-                    onError={() => hideFailedScreenshot(shot.url)}
-                  />
-                  <div className="screenshot-caption">
-                    <span>{shot.caption}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   )

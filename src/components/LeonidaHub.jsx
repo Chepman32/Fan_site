@@ -1,4 +1,4 @@
-import { ArrowRight, Map, Sparkles } from 'lucide-react'
+import { ArrowRight, Sparkles } from 'lucide-react'
 import { useMemo } from 'react'
 import { localizeLeonidaSections } from '../data/leonidaSections'
 import { plainContentTranslationSource, translatePlainContent, useTranslatedIgnContent } from '../i18n/ignContentTranslation'
@@ -6,30 +6,24 @@ import { useTranslation } from '../i18n/useTranslation.jsx'
 import './LeonidaHub.css'
 
 const LEONIDA_EXPLAINER_CHROME = {
-  eyebrow: 'Reader context',
-  title: 'How Leonida Loot Organizes GTA VI Coverage',
-  description: 'Use this hub as the stable doorway into GTA VI map, character, vehicle, weapon, social-media, shop, and marketplace coverage.',
+  title: 'About these guides',
 }
 const LEONIDA_EXPLAINER_SECTIONS = [
   {
-    title: 'What This Leonida Hub Covers',
-    body: 'Leonida Loot treats the state as a connected field guide: Vice City and coastal nightlife, the Leonida Keys, wetlands, inland roads, vehicles, weapons, characters, and fictional social media moments are grouped so readers can move from broad context to focused guides.',
+    title: 'Where to start',
+    body: 'Start with locations to get your bearings, then meet Lucia, Jason, and the people they encounter across Leonida.',
   },
   {
-    title: 'Confirmed vs Reported Details',
-    body: 'Official Rockstar material, trailers, screenshots, and reputable guide references are separated from community interpretation. When something is estimated, rumored, or reconstructed from public footage, the guide language should make that confidence level clear.',
+    title: 'What Rockstar has shown',
+    body: 'The guides cite trailers, screenshots, and other public sources. Look for labels that distinguish official details from fan observations and estimates.',
   },
   {
-    title: 'How To Use The Guide',
-    body: 'Start with locations to understand the state, move into characters for story context, then use vehicles, weapons, and social media to connect trailer moments. Each section links deeper so search visitors can land on the exact topic they need.',
-  },
-  {
-    title: 'Fan-Made Creator Context',
-    body: 'Leonida Loot also connects guide readers to unofficial creator assets in the shop and P2P marketplace. These items must stay clearly fan-made and must never imply official Rockstar affiliation, leaked files, or ripped game assets.',
+    title: 'Fan-made assets',
+    body: 'The shop and marketplace feature unofficial creations such as stream overlays, emotes, and banners.',
   },
 ]
 const EXPLAINER_TRANSLATION_OPTIONS = {
-  keys: ['body', 'description', 'eyebrow', 'title'],
+  keys: ['body', 'title'],
 }
 
 function translateExplainer(data, lang) {
@@ -82,30 +76,6 @@ function LeonidaHub({ onNavigate }) {
 
           <div className="leonida-hub-hero-art">
             <img src="/images/leonida/locations-day.webp" alt={copy.hero.imageAlt} />
-            <div className="leonida-hub-map-stamp">
-              <Map size={20} />
-              <span>{copy.hero.stamp}</span>
-              <strong>05 {copy.hero.collections}</strong>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="section-padding leonida-explainer" aria-labelledby="leonida-explainer-title">
-        <div className="container">
-          <header className="leonida-explainer-heading">
-            <span>{displayExplainer.chrome.eyebrow}</span>
-            <h2 id="leonida-explainer-title">{displayExplainer.chrome.title}</h2>
-            <p>{displayExplainer.chrome.description}</p>
-          </header>
-
-          <div className="leonida-explainer-grid">
-            {displayExplainer.sections.map((section) => (
-              <article key={section.title}>
-                <h3>{section.title}</h3>
-                <p>{section.body}</p>
-              </article>
-            ))}
           </div>
         </div>
       </section>
@@ -145,6 +115,23 @@ function LeonidaHub({ onNavigate }) {
                 </a>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-padding leonida-explainer" aria-labelledby="leonida-explainer-title">
+        <div className="container">
+          <header className="leonida-explainer-heading">
+            <h2 id="leonida-explainer-title">{displayExplainer.chrome.title}</h2>
+          </header>
+
+          <div className="leonida-explainer-grid">
+            {displayExplainer.sections.map((section) => (
+              <article key={section.title}>
+                <h3>{section.title}</h3>
+                <p>{section.body}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

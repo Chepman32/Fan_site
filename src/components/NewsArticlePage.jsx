@@ -340,7 +340,9 @@ function NewsArticlePage({ slug, type = 'article', onNavigate }) {
 
         <header className="news-article-hero">
           <div className="news-article-kicker">
-            {staticArticle ? t.news.sourceName : articleCopy.kicker}
+            {staticArticle?.status === 'reported'
+              ? t.news.reportedLabel || 'Unconfirmed reporting'
+              : staticArticle ? t.news.sourceName : articleCopy.kicker}
           </div>
           <h1>{displayArticle.title}</h1>
           {displayArticle.description && <p className="news-article-dek">{displayArticle.description}</p>}

@@ -1,4 +1,44 @@
+export const gtaViLaunchSources = {
+  official: 'https://www.rockstargames.com/VI',
+  preload: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10',
+  regionalTimes: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s',
+  takeTwo: 'https://ir.take2games.com/node/32676/pdf',
+  pcReport: 'https://gamesbeat.com/grand-theft-auto-vis-pc-release-is-slated-for-q1-2027/',
+  onlineReport: 'https://www.bloomberg.com/features/2026-grand-theft-auto-6-making-of/',
+}
+
 export const newsArticles = [
+  {
+    slug: 'gta-vi-preload-november-10-ps5-xbox',
+    title: 'GTA VI Digital Preload Opens on PS5 and Xbox',
+    description: 'Digital preorders can start downloading on November 10. Rockstar says to allow up to 212 GB, and Take-Two reaffirmed the November 19 console launch.',
+    category: 'release-date',
+    publishedAt: '2026-11-09',
+    updatedAt: '2026-11-10',
+    author: 'Leonida Loot Editorial',
+    image: '/og-image.png',
+    body: [
+      {
+        heading: 'When to start downloading',
+        paragraphs: [
+          'Digital preload for GTA VI starts on November 10. PS5 uses midnight local time; Xbox Series X|S uses a worldwide start at 00:00 UTC. Rockstar says the preload can require up to 212 GB, depending on the console.',
+          'Retail editions contain a download code. Those boxes reach retailers starting November 12, when buyers can redeem their codes and preload.',
+        ],
+      },
+      {
+        heading: 'When the game unlocks',
+        paragraphs: [
+          'Rockstar Support lists midnight local time on November 19 for both PS5 and Xbox Series X|S. Take-Two reaffirmed the console launch date in its November 9 earnings release.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'Rockstar Newswire preload announcement', url: gtaViLaunchSources.preload },
+      { label: 'Rockstar Support preload FAQ', url: 'https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq' },
+      { label: 'Rockstar Support regional release times', url: gtaViLaunchSources.regionalTimes },
+      { label: 'Take-Two’s November 9 earnings release', url: gtaViLaunchSources.takeTwo },
+    ],
+  },
   {
     slug: 'gta-vi-the-festival-miami-november-21',
     title: 'GTA VI Launch Festival Comes to Miami on November 21',
@@ -19,7 +59,7 @@ export const newsArticles = [
       {
         heading: 'Ticket lottery',
         paragraphs: [
-          'The presale lottery closes November 10 at 4 p.m. Eastern Time. Winners can buy tickets starting November 11 at noon Eastern Time. Entry requires a matching DICE account, and purchases are limited to two tickets.',
+          'The lottery closes November 10 at 4 p.m. ET, with winners drawn at 7 p.m. ET. Winners can buy up to two tickets starting November 11 at noon ET through DICE. Attendees must be at least 17.',
         ],
       },
     ],
@@ -29,57 +69,60 @@ export const newsArticles = [
     ],
   },
   {
-    slug: 'gta-vi-preload-november-10-ps5-xbox',
-    title: 'GTA VI Preload Starts November 10 on PS5 and Xbox',
-    description: 'See the PS5 and Xbox Series X|S download times, the November 12 code-in-box date, and the storage requirement of up to 212 GB.',
-    category: 'release-date',
-    publishedAt: '2026-11-09',
-    updatedAt: '2026-11-09',
-    author: 'Leonida Loot Editorial',
-    image: '/og-image.png',
-    body: [
-      {
-        heading: 'Digital preload times by console',
-        paragraphs: [
-          'Rockstar’s November 3 update moved the digital preorder preload to November 10. On PS5 it starts at midnight local time. Xbox Series X|S uses one worldwide start at 00:00 UTC on November 10.',
-          'Rockstar says the download can require up to 212 GB of free space, depending on the device. Retail copies with a download code in the box are scheduled to reach stores on November 12.',
-        ],
-      },
-      {
-        heading: 'When you can play',
-        paragraphs: [
-          'Rockstar lists the game unlock at midnight local time on November 19 for both PS5 and Xbox Series X|S. You can check your preorder and automatic download settings through your console store before the preload opens.',
-        ],
-      },
-    ],
-    sources: [
-      { label: 'Rockstar Newswire preload announcement', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
-      { label: 'Rockstar Support preload FAQ', url: 'https://support.rockstargames.com/articles/7nPqOA2uCbpEQHXx7KVrYd/grand-theft-auto-vi-pre-load-faq' },
-      { label: 'Rockstar Support regional release times', url: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s' },
-    ],
-  },
-  {
     slug: 'gta-vi-launch-gallery-new-leonida-screenshots',
     title: 'Rockstar Opens the GTA VI Launch Gallery',
-    description: 'The November 5 gallery adds official screenshots from Vice City and across Leonida.',
+    description: 'Browse 39 official screenshots from Rockstar’s November 5 gallery, including Vice City nightlife and a look at the Leonida Keys.',
     category: 'map',
     publishedAt: '2026-11-09',
-    updatedAt: '2026-11-09',
+    updatedAt: '2026-11-10',
     author: 'Leonida Loot Editorial',
-    image: '/images/leonida/locations-day.webp',
+    image: 'https://www.rockstargames.com/VI/_next/static/media/Jason_and_Lucia_14.10e7v.06pcm_t.jpg?akim=1&imdensity=1&imwidth=1280',
     body: [
       {
         heading: 'A new look at Vice City and Leonida',
         paragraphs: [
-          'Rockstar published its Launch Gallery on November 5. The new screenshots complement the publisher’s People & Places profiles and the trailers already available in its media library.',
-          'The gallery gives fans more scenes to compare with the named locations. Rockstar separately announced a printable Leonida map for November 19 in its preload update.',
+          'Rockstar published its Launch Gallery on November 5. The 39 screenshots include Jason and Lucia at a Fleeca bank, a busy Vice City marina, a dive in the Leonida Keys and a nighttime view of the Grassrivers.',
+          'The images offer a closer look at those places and characters. Rockstar plans to make a printable Leonida map and cover art available for free on November 19.',
         ],
       },
     ],
     sources: [
       { label: 'Rockstar Newswire gallery announcement', url: 'https://www.rockstargames.com/newswire/article/39ak81277255o9/explore-the-grand-theft-auto-vi-launch-gallery' },
       { label: 'Official GTA VI Launch Gallery', url: 'https://www.rockstargames.com/VI/launch-gallery' },
+      { label: 'Browse the screenshots on Leonida Loot', url: '/about#official-screenshots' },
       { label: 'Rockstar Newswire map and preload update', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
+    ],
+  },
+  {
+    slug: 'gta-vi-pc-release-and-online-reports',
+    title: 'GTA VI PC and Online: What’s Been Reported',
+    description: 'GamesBeat reports a possible early 2027 PC release, and Bloomberg expects an online mode in 2027. Rockstar has announced neither date.',
+    category: 'reporting',
+    status: 'reported',
+    publishedAt: '2026-11-10',
+    updatedAt: '2026-11-10',
+    author: 'Leonida Loot Editorial',
+    image: '/og-image.png',
+    body: [
+      {
+        heading: 'PC: An early 2027 window has been reported',
+        paragraphs: [
+          'On October 13, GamesBeat reported that Rockstar was targeting the first three months of 2027 for the PC version, citing four unnamed industry sources. Rockstar has not announced a PC release window or system requirements.',
+        ],
+      },
+      {
+        heading: 'Online: Reporting points to 2027',
+        paragraphs: [
+          'Bloomberg’s October 14 report on the making of GTA VI says the planned online component is expected in 2027. Rockstar has described the November 19 console release as a single-player game and has not announced an online launch date.',
+          'On November 9, GamesRadar+ covered claims that PlayStation Store metadata references multiplayer activities. Even if those references are accurate, they do not establish when an online mode will be available.',
+        ],
+      },
+    ],
+    sources: [
+      { label: 'GamesBeat’s original PC report', url: gtaViLaunchSources.pcReport },
+      { label: 'Bloomberg’s report from Rockstar North', url: gtaViLaunchSources.onlineReport },
+      { label: 'GamesRadar+ on the PlayStation Store claims', url: 'https://www.gamesradar.com/games/grand-theft-auto/gta-6-launch-files-already-hint-at-online-multiplayer-playstation-store-sleuth-reports-leading-to-hopes-we-wont-be-waiting-for-a-gta-online-follow-up-for-long/' },
+      { label: 'Rockstar’s console preorder announcement', url: 'https://www.rockstargames.com/newswire/article/5171972o3ak5oa/pre-order-grand-theft-auto-vi-on-june-25' },
     ],
   },
   {
@@ -137,6 +180,7 @@ export const newsArticles = [
     sources: [
       { label: 'Watch the official launch trailer', url: 'https://www.rockstargames.com/VI/launch-trailer' },
       { label: 'Watch the official Extended Look', url: 'https://www.rockstargames.com/VI/an-extended-look' },
+      { label: 'Watch the official videos on Leonida Loot', url: '/about#official-videos' },
       { label: 'Rockstar Newswire Extended Look announcement', url: 'https://www.rockstargames.com/newswire/article/4k138k8okkk483/grand-theft-auto-vi-an-extended-look-now-playing' },
     ],
   },
@@ -146,7 +190,7 @@ export const newsArticles = [
     description: 'Check the console release date, digital preload times, and Standard and Ultimate Edition details. PC timing remains unannounced.',
     category: 'release-date',
     publishedAt: '2026-07-07',
-    updatedAt: '2026-11-09',
+    updatedAt: '2026-11-10',
     author: 'Leonida Loot Editorial',
     image: '/og-image.png',
     body: [
@@ -167,7 +211,7 @@ export const newsArticles = [
       {
         heading: 'What is still unknown',
         paragraphs: [
-          'Rockstar has yet to announce a PC release date.',
+          'Rockstar has yet to announce dates for PC or an online mode. GamesBeat and Bloomberg have reported possible 2027 windows, which remain unconfirmed.',
         ],
       },
     ],
@@ -176,6 +220,8 @@ export const newsArticles = [
       { label: 'Rockstar Support regional release and preload times', url: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s' },
       { label: 'Rockstar Newswire retail and storage details', url: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10' },
       { label: 'PlayStation US editions and pricing', url: 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/' },
+      { label: 'Take-Two’s November 9 earnings release', url: gtaViLaunchSources.takeTwo },
+      { label: 'PC and online reporting', url: '/news/gta-vi-pc-release-and-online-reports' },
     ],
   },
   {

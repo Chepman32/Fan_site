@@ -29,11 +29,13 @@
   font-size: 24px;
   letter-spacing: 2px;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .nav-favicon {
   width: 32px;
   height: 32px;
+  flex: none;
   object-fit: contain;
   filter: drop-shadow(0 0 10px rgba(255, 45, 149, 0.45));
 }
@@ -71,8 +73,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  font-size: 24px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .nav-links .nav-p2p-link:hover,
@@ -286,6 +287,21 @@
   display: none;
 }
 
+@media (1120px < width <= 1240px) {
+  .navbar {
+    gap: 12px;
+    padding-inline: 24px;
+  }
+
+  .nav-links {
+    gap: 12px;
+  }
+
+  .nav-profile strong {
+    display: none;
+  }
+}
+
 @media (max-width: 1120px) {
   .nav-links {
     display: none;
@@ -437,6 +453,58 @@
   }
 }
 
+@media (max-width: 600px) {
+  .navbar {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .nav-brand {
+    gap: 6px;
+    font-size: 1.125rem;
+    letter-spacing: 0;
+  }
+
+  .nav-favicon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .nav-auth {
+    gap: 4px;
+  }
+
+  .nav-auth > button,
+  .nav-profile,
+  .nav-cart-toggle,
+  .lang-toggle {
+    display: grid;
+    width: 36px;
+    min-width: 36px;
+    min-height: 38px;
+    place-items: center;
+    padding: 0;
+  }
+
+  .lang-toggle span {
+    display: none;
+  }
+
+  .nav-cart {
+    position: static;
+  }
+
+  .nav-cart::after {
+    display: none;
+  }
+
+  .nav-cart-popover {
+    top: 100%;
+    right: 12px;
+    width: min(calc(100vw - 24px), 390px);
+  }
+}
+
 @media (max-width: 480px) {
   .bottom-tabs-navbar {
     right: max(8px, env(safe-area-inset-right));
@@ -451,5 +519,11 @@
   .bottom-more-menu {
     width: min(344px, calc(100vw - 16px));
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 390px) {
+  .navbar:has(.nav-cart):has(.nav-profile) .nav-brand > span {
+    display: none;
   }
 }

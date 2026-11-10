@@ -234,7 +234,13 @@
 }
 
 .static-social-card {
+  container-type: inline-size;
   cursor: default;
+}
+
+.static-social-card .ign-guide-card-body h3 {
+  font-size: clamp(1.25rem, 7cqi, 1.875rem);
+  letter-spacing: 0;
 }
 
 .static-social-card:hover {

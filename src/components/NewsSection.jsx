@@ -75,6 +75,8 @@ function NewsSection({ onNavigate }) {
     ? googleTranslatedArticles
     : fallbackArticles
   const featuredArticle = localizedArticles[0]
+  const confirmedArticles = localizedArticles.filter((article) => article.status !== 'reported')
+  const reportedArticles = localizedArticles.filter((article) => article.status === 'reported')
   const visibleArticles = showAll ? localizedArticles : localizedArticles.slice(0, INITIAL_ARTICLE_COUNT)
   const categories = Array.from(new Set(localizedArticles.map((article) => article.categoryLabel)))
   const showingCount = typeof newsCopy.showingCount === 'function'
@@ -125,7 +127,7 @@ function NewsSection({ onNavigate }) {
             <h2 id="confirmed-updates-title">{newsCopy.confirmedTitle || 'Latest confirmed updates'}</h2>
           </header>
           <div className="news-confirmed-grid">
-            {localizedArticles.map((article) => (
+            {confirmedArticles.map((article) => (
               <article key={article.slug}>
                 <strong>{article.title}</strong>
                 <p>{article.description}</p>
@@ -134,6 +136,26 @@ function NewsSection({ onNavigate }) {
             ))}
           </div>
         </section>
+
+        {reportedArticles.length > 0 && (
+          <section className="news-confirmed" aria-labelledby="reported-updates-title">
+            <header>
+              <span>{newsCopy.reportedLabel || 'Unconfirmed reporting'}</span>
+              <h2 id="reported-updates-title">{newsCopy.reportedTitle || 'What’s been reported'}</h2>
+            </header>
+            <div className="news-confirmed-grid">
+              {reportedArticles.map((article) => {
+                const href = `/news/${article.slug}`
+                return (
+                  <article key={article.slug}>
+                    <strong><a href={href} onClick={(event) => navigate(event, href)}>{article.title}</a></strong>
+                    <p>{article.description}</p>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <section aria-labelledby="article-list-title">
           <header className="news-list-heading">

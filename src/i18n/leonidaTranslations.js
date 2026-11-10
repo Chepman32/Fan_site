@@ -1,73 +1,18 @@
-const en = {
-  hero: {
-    kicker: 'The GTA VI field guide',
-    title: 'Welcome to',
-    titleHighlight: 'Leonida',
-    description: "One sunburnt state. Five ways in. Explore the people, places, rides, gear, and feeds defining Rockstar's newest open world.",
-    openGuide: 'Open the field guide',
-    imageAlt: 'A sunlit coastal panorama of Leonida',
-    stamp: 'State guide',
-    collections: 'collections',
-  },
-  directory: {
-    eyebrow: 'Choose your route',
-    title: 'The Leonida field guide',
-    description: 'Every section is a focused destination with its own research, imagery, and source-backed details.',
-    explore: 'Explore',
-  },
-  guide: {
-    back: 'All Leonida guides',
-    tabsLabel: 'Leonida guide sections',
-  },
-  sections: {
-    characters: {
-      title: 'Characters',
-      shortTitle: 'People of Leonida',
-      description: 'Meet Lucia, Jason, and the hustlers, artists, fixers, and wild cards orbiting their story.',
-      count: '9 profiles',
-    },
-    locations: {
-      title: 'Locations',
-      shortTitle: 'Explore the state',
-      description: 'Travel from Vice City neon to the Keys, wetlands, faded port towns, and mountain wilderness.',
-      count: '6 major regions',
-    },
-    vehicles: {
-      title: 'Vehicles',
-      shortTitle: 'Road, air & water',
-      description: 'Browse the cars, motorcycles, aircraft, and watercraft spotted across trailers and screenshots.',
-      count: '4 collections',
-    },
-    weapons: {
-      title: 'Weapons',
-      shortTitle: 'The known arsenal',
-      description: 'Review every firearm and melee weapon identified so far, with visual references and context.',
-      count: '9 spotted items',
-    },
-    'social-media': {
-      title: 'In-game social media',
-      shortTitle: 'Leonida goes live',
-      description: 'Follow the fictional accounts, viral clips, and chaotic local personalities shaping the feed.',
-      count: '5 known accounts',
-    },
-  },
-}
+import { leonidaTranslationEn as en } from './en/leonida'
 
 const zh = {
   hero: {
     kicker: 'GTA VI 世界指南',
-    title: '欢迎来到',
+    title: '探索',
     titleHighlight: '莱奥尼达',
-    description: '一个阳光炽烈的州，五条探索路线。认识塑造 Rockstar 最新开放世界的人物、地点、载具、武器和社交动态。',
-    openGuide: '打开地区指南',
+    description: '认识游戏角色，了解罪城和莱奥尼达的其他地区，看看已公开的载具、武器和虚构社交动态。',
+    openGuide: '浏览指南',
     imageAlt: '阳光下的莱奥尼达海岸全景',
-    stamp: '州域指南',
-    collections: '个专题',
   },
   directory: {
     eyebrow: '选择你的路线',
     title: '莱奥尼达实地指南',
-    description: '每个分区都是独立目的地，包含专门研究、图像和可靠来源信息。',
+    description: '查看各个主题的截图、预告片线索和已知信息。',
     explore: '探索',
   },
   guide: {
@@ -111,18 +56,16 @@ const zh = {
 const ru = {
   hero: {
     kicker: 'Путеводитель по миру GTA VI',
-    title: 'Добро пожаловать в',
+    title: 'Откройте',
     titleHighlight: 'Леониду',
-    description: 'Один залитый солнцем штат. Пять путей внутрь. Исследуйте людей, места, транспорт, оружие и ленты нового открытого мира Rockstar.',
+    description: 'Познакомьтесь с героями, загляните в Вайс-Сити и другие уголки Леониды. Узнайте, какой транспорт, оружие и соцсети уже показали.',
     openGuide: 'Открыть путеводитель',
     imageAlt: 'Солнечная панорама побережья Леониды',
-    stamp: 'Путеводитель по штату',
-    collections: 'разделов',
   },
   directory: {
     eyebrow: 'Выберите маршрут',
     title: 'Путеводитель по Леониде',
-    description: 'Каждый раздел — отдельное направление со своими исследованиями, изображениями и данными из источников.',
+    description: 'Скриншоты, детали из трейлеров и всё, что известно по каждой теме.',
     explore: 'Изучить',
   },
   guide: {
@@ -166,18 +109,16 @@ const ru = {
 const it = {
   hero: {
     kicker: 'La guida al mondo di GTA VI',
-    title: 'Benvenuti a',
+    title: 'Esplora',
     titleHighlight: 'Leonida',
-    description: "Uno stato baciato dal sole. Cinque modi per esplorarlo. Scopri persone, luoghi, veicoli, armi e feed del nuovo mondo aperto di Rockstar.",
+    description: 'Incontra i personaggi, esplora Vice City e il resto di Leonida e scopri i veicoli, le armi e i social immaginari mostrati finora.',
     openGuide: 'Apri la guida',
     imageAlt: 'Panorama costiero di Leonida alla luce del sole',
-    stamp: 'Guida dello stato',
-    collections: 'sezioni',
   },
   directory: {
     eyebrow: 'Scegli il tuo percorso',
     title: 'La guida di Leonida',
-    description: 'Ogni sezione è una destinazione dedicata con ricerche, immagini e dettagli basati sulle fonti.',
+    description: 'Per ogni argomento trovi immagini, riferimenti ai trailer e ciò che sappiamo finora.',
     explore: 'Esplora',
   },
   guide: {
@@ -196,18 +137,16 @@ const it = {
 const id = {
   hero: {
     kicker: 'Panduan dunia GTA VI',
-    title: 'Selamat datang di',
+    title: 'Jelajahi',
     titleHighlight: 'Leonida',
-    description: 'Satu negara bagian bermandikan matahari. Lima jalur masuk. Jelajahi tokoh, tempat, kendaraan, senjata, dan linimasa dunia terbuka terbaru Rockstar.',
+    description: 'Kenali para tokoh, jelajahi Vice City dan wilayah Leonida lainnya, lalu lihat kendaraan, senjata, dan media sosial fiktif yang sudah ditampilkan.',
     openGuide: 'Buka panduan',
     imageAlt: 'Panorama pesisir Leonida di bawah sinar matahari',
-    stamp: 'Panduan negara bagian',
-    collections: 'koleksi',
   },
   directory: {
     eyebrow: 'Pilih rute Anda',
     title: 'Panduan lapangan Leonida',
-    description: 'Setiap bagian adalah tujuan khusus dengan riset, gambar, dan detail berbasis sumber.',
+    description: 'Temukan tangkapan layar, rujukan ke trailer, dan informasi yang sudah diketahui untuk setiap topik.',
     explore: 'Jelajahi',
   },
   guide: { back: 'Semua panduan Leonida', tabsLabel: 'Bagian panduan Leonida' },
@@ -223,18 +162,16 @@ const id = {
 const pl = {
   hero: {
     kicker: 'Przewodnik po świecie GTA VI',
-    title: 'Witaj w',
-    titleHighlight: 'Leonidzie',
-    description: 'Jeden skąpany w słońcu stan. Pięć dróg do środka. Poznaj ludzi, miejsca, pojazdy, broń i kanały najnowszego otwartego świata Rockstar.',
+    title: 'Odkryj',
+    titleHighlight: 'Leonidę',
+    description: 'Poznaj bohaterów, zajrzyj do Vice City i innych zakątków Leonidy. Zobacz pokazane dotąd pojazdy, broń i fikcyjne media społecznościowe.',
     openGuide: 'Otwórz przewodnik',
     imageAlt: 'Słoneczna panorama wybrzeża Leonidy',
-    stamp: 'Przewodnik po stanie',
-    collections: 'sekcji',
   },
   directory: {
     eyebrow: 'Wybierz swoją trasę',
     title: 'Przewodnik po Leonidzie',
-    description: 'Każda sekcja to osobny cel z własnymi badaniami, obrazami i informacjami opartymi na źródłach.',
+    description: 'Sprawdź zrzuty ekranu, sceny ze zwiastunów i najważniejsze informacje na każdy temat.',
     explore: 'Odkryj',
   },
   guide: { back: 'Wszystkie przewodniki po Leonidzie', tabsLabel: 'Sekcje przewodnika po Leonidzie' },
@@ -250,18 +187,16 @@ const pl = {
 const hi = {
   hero: {
     kicker: 'GTA VI विश्व गाइड',
-    title: 'स्वागत है',
-    titleHighlight: 'लियोनिडा में',
-    description: 'धूप से चमकता एक राज्य। भीतर जाने के पाँच रास्ते। Rockstar की नई खुली दुनिया के लोगों, जगहों, वाहनों, हथियारों और फ़ीड को जानें।',
+    title: 'जानिए',
+    titleHighlight: 'लियोनिडा को',
+    description: 'किरदारों से मिलें, Vice City और लियोनिडा की बाकी जगहों को जानें और अब तक दिखाए गए वाहन, हथियार और काल्पनिक सोशल फ़ीड देखें।',
     openGuide: 'गाइड खोलें',
     imageAlt: 'धूप में लियोनिडा के तट का दृश्य',
-    stamp: 'राज्य गाइड',
-    collections: 'खंड',
   },
   directory: {
     eyebrow: 'अपना रास्ता चुनें',
     title: 'लियोनिडा फील्ड गाइड',
-    description: 'हर खंड अपने शोध, चित्रों और स्रोत-आधारित विवरणों वाला एक अलग गंतव्य है।',
+    description: 'हर विषय के स्क्रीनशॉट, ट्रेलर में दिखे दृश्य और अब तक की जानकारी देखें।',
     explore: 'देखें',
   },
   guide: { back: 'लियोनिडा की सभी गाइड', tabsLabel: 'लियोनिडा गाइड के खंड' },
@@ -277,18 +212,16 @@ const hi = {
 const ms = {
   hero: {
     kicker: 'Panduan dunia GTA VI',
-    title: 'Selamat datang ke',
+    title: 'Terokai',
     titleHighlight: 'Leonida',
-    description: 'Sebuah negeri bermandikan matahari. Lima laluan masuk. Terokai insan, lokasi, kenderaan, senjata dan suapan dunia terbuka terbaru Rockstar.',
+    description: 'Kenali watak, terokai Vice City dan kawasan lain di Leonida, serta lihat kenderaan, senjata dan suapan sosial fiksyen yang telah ditunjukkan.',
     openGuide: 'Buka panduan',
     imageAlt: 'Panorama pantai Leonida di bawah cahaya matahari',
-    stamp: 'Panduan negeri',
-    collections: 'koleksi',
   },
   directory: {
     eyebrow: 'Pilih laluan anda',
     title: 'Panduan lapangan Leonida',
-    description: 'Setiap bahagian ialah destinasi khusus dengan penyelidikan, imej dan butiran berasaskan sumber.',
+    description: 'Lihat tangkapan skrin, rujukan treler dan maklumat yang diketahui setakat ini bagi setiap topik.',
     explore: 'Terokai',
   },
   guide: { back: 'Semua panduan Leonida', tabsLabel: 'Bahagian panduan Leonida' },

@@ -6,35 +6,35 @@ import { SocialMediaGuide, VehiclesGuide, WeaponsGuide } from './IgnGuide'
 import LeonidaLocations from './LeonidaLocations'
 import './LeonidaGuidePage.css'
 
-const SEO_PRIMERS = {
+const GUIDE_INTROS = {
   vehicles: [
     {
-      title: 'Vehicle categories in public GTA VI media',
-      body: 'Leonida footage points to a broad vehicle mix across city streets, coastal highways, rural roads, waterways, and air travel. This guide keeps cars, motorcycles, aircraft, boats, service vehicles, and off-road references grouped by source context so readers can scan what is visible without treating fan guesses as final vehicle names.',
+      title: 'On the road, water, and in the air',
+      body: 'Browse the cars, motorcycles, aircraft, boats, and service vehicles seen in footage from Vice City and across Leonida.',
     },
     {
-      title: 'How to read this vehicle guide',
-      body: 'Use the vehicle lists as a source-linked field guide rather than a final garage roster. Leonida Loot separates confirmed public trailer appearances from community interpretation, then connects vehicle interest to related map, character, and creator asset pages.',
+      title: 'How vehicles are identified',
+      body: 'Trailer appearances and community identifications are labeled separately. Some vehicles may have different names in the finished game.',
     },
   ],
   weapons: [
     {
-      title: 'Known weapon references',
-      body: 'The GTA VI weapons page tracks public references to firearms and close-range items while avoiding claims based on leaks, datamining, or unsupported screenshots. Each item should be understood as trailer and wiki context until Rockstar publishes final gameplay systems.',
+      title: 'Weapons spotted so far',
+      body: 'See the firearms and melee weapons spotted in public footage, with links to the material behind each identification.',
     },
     {
-      title: 'Why this page stays cautious',
-      body: 'Weapon searches attract rumor-heavy results, so Leonida Loot keeps confidence levels clear. The goal is to help readers understand visible categories, source material, and related story or location context without presenting speculation as a confirmed arsenal.',
+      title: 'What remains unknown',
+      body: 'Some names and mechanics are still unconfirmed. The guide labels fan identifications separately from official details.',
     },
   ],
   'social-media': [
     {
-      title: 'In-game social media as worldbuilding',
-      body: 'GTA VI uses fictional social feeds, viral clips, music accounts, livestream-style posts, and local personalities to show how Leonida feels online. This page organizes those public references so fans can connect characters, locations, and events across the reveal material.',
+      title: 'Life on Leonida’s feed',
+      body: 'From viral wildlife clips to local music and livestreams, Leonida’s fictional feeds offer glimpses of the people and places around the state.',
     },
     {
-      title: 'Source-linked account tracking',
-      body: 'The social media guide focuses on accounts and moments visible in official trailers or reputable wiki coverage. It avoids impersonation claims and treats the fictional handles as worldbuilding clues rather than real accounts or official community channels.',
+      title: 'Who’s behind the accounts?',
+      body: 'Browse handles spotted in public footage and see which ones can be linked to known characters.',
     },
   ],
 }
@@ -71,7 +71,7 @@ function LeonidaGuidePage({ sectionId, onNavigate }) {
     if (section.id === 'weapons') return <WeaponsGuide />
     return <SocialMediaGuide />
   }
-  const primers = SEO_PRIMERS[section.id] || []
+  const primers = GUIDE_INTROS[section.id] || []
 
   return (
     <div className={`leonida-guide-page guide-${section.accent}`}>

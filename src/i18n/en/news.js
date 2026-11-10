@@ -16,7 +16,7 @@ export const newsTranslationEn = {
   timeAgo: { year: 'year', month: 'month', week: 'week', day: 'day', hour: 'hour', minute: 'minute' },
   pageBadge: 'GTA VI updates',
   pageTitle: 'GTA VI News',
-  pageDescription: 'Follow GTA VI release updates, Rockstar announcements, trailer analysis, Leonida map details, characters, vehicles, weapons, and platform news from one static news hub.',
+  pageDescription: 'Follow GTA VI release updates, Rockstar announcements, trailers, and Leonida guides. Unconfirmed reports are marked separately.',
   linksLabel: 'News hub links',
   links: {
     about: 'About GTA VI',
@@ -30,6 +30,8 @@ export const newsTranslationEn = {
   readFeatured: 'Read featured article',
   confirmedKicker: 'Latest confirmed updates',
   confirmedTitle: 'Latest confirmed updates',
+  reportedLabel: 'Unconfirmed reporting',
+  reportedTitle: 'What’s been reported',
   listKicker: 'Article cards',
   listTitle: 'GTA VI article list',
   categoriesLabel: 'News categories',
@@ -58,6 +60,7 @@ export const newsTranslationEn = {
     vehicles: 'vehicles',
     music: 'music',
     trailers: 'trailers',
+    reporting: 'Unconfirmed',
   },
   articles: {
     [releaseSlug]: {

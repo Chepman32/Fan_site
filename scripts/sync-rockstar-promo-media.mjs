@@ -2,20 +2,26 @@ import { writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 
 const ROCKSTAR_ORIGIN = 'https://www.rockstargames.com'
+const LAUNCH_GALLERY_URL = `${ROCKSTAR_ORIGIN}/VI/launch-gallery`
 const ARTWORK_URL = `${ROCKSTAR_ORIGIN}/VI/media/artwork-wallpapers`
 const SCREENSHOTS_URL = `${ROCKSTAR_ORIGIN}/VI/media/screenshots`
+const VIDEOS_URL = `${ROCKSTAR_ORIGIN}/VI/media/videos`
 const OUTPUT_FILE = resolve('src/data/rockstarPromoMedia.js')
 
 const SOURCE_URLS = {
+  launch: LAUNCH_GALLERY_URL,
   artwork: ARTWORK_URL,
   screenshots: SCREENSHOTS_URL,
   ultimate: `${SCREENSHOTS_URL}#ultimate-edition`,
+  videos: VIDEOS_URL,
 }
 
-const ITEM_PATTERN = /title\\":\\"(.*?)\\",\\"thumbnail\\":\{\\"src\\":\\"(.*?)\\",\\"width\\":(\d+),\\"height\\":(\d+)/g
+const ITEM_PATTERN = /"title":("(?:[^"\\]|\\.)*"),"thumbnail":\{"src":("(?:[^"\\]|\\.)*"),"width":(\d+),"height":(\d+)/g
 
-function decodeRscText(value) {
-  return JSON.parse(`"${value}"`)
+function readPageData(html) {
+  // Next.js sends some gallery items across more than one script tag.
+  return Array.from(html.matchAll(/<script>self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)<\/script>/g),
+    ([, value]) => JSON.parse(value)).join('')
 }
 
 function sectionSlice(html, startMarker, endMarker) {
@@ -49,8 +55,8 @@ function parseItems(section, collection) {
   const seen = new Set()
 
   for (const match of section.matchAll(ITEM_PATTERN)) {
-    const title = decodeRscText(match[1])
-    const path = decodeRscText(match[2])
+    const title = JSON.parse(match[1])
+    const path = JSON.parse(match[2])
     const key = `${title}:${path}`
 
     if (seen.has(key)) continue
@@ -72,6 +78,45 @@ function parseItems(section, collection) {
   return items
 }
 
+function parseLaunchGallery(page, screenshots) {
+  const cover = page.match(/"mobileLandscape":\{"src":"([^"]+\/Jason_and_Lucia_14\.[^"]+\.jpg)"/)?.[1]
+  const shots = Array.from(page.matchAll(/"alt":"(?:[^"\\]|\\.)*","src":\{"src":"(\/VI\/_next\/static\/media\/[^"]+\.jpg)","width":\d+,"height":\d+/g), ([, path]) => path)
+  const screenshotsByPath = new Map(screenshots.map((item) => [new URL(item.src).pathname, item]))
+  const paths = [...new Set([cover, ...shots])]
+  if (!cover || shots.length === 0 || paths.some((path) => !screenshotsByPath.has(path))) {
+    throw new Error('Could not match the Rockstar Launch Gallery to its official screenshots catalog')
+  }
+
+  return paths.map((path) => {
+    const item = screenshotsByPath.get(path)
+    return { ...item, id: item.id.replace(/^screenshots-/, 'launch-') }
+  })
+}
+
+function parseVideos(page) {
+  const watchPages = [
+    { id: 'launch-trailer', youtubeId: 'rz1B4B2yBZY' },
+    { id: 'an-extended-look', youtubeId: 'tJbzMqJGH4k' },
+    { id: 'trailer-2', youtubeId: 'VQRLujxTm3c' },
+    { id: 'trailer-1', youtubeId: 'QdBZY2fkU-0' },
+  ]
+  const section = sectionSlice(page, '"data-track":"videos"')
+  const downloads = parseItems(section, 'videos')
+  const durations = Array.from(page.matchAll(/"duration":"(\d+:\d+)"/g), ([, duration]) => duration)
+  if (durations.length !== watchPages.length || downloads.length < watchPages.length) {
+    throw new Error('Could not parse Rockstar’s official trailer metadata')
+  }
+
+  return watchPages.map(({ id, youtubeId }, index) => ({
+    id,
+    title: downloads[index].title,
+    poster: downloads[index].src,
+    duration: durations[index],
+    source: `${ROCKSTAR_ORIGIN}/VI/${id}`,
+    youtubeId,
+  }))
+}
+
 async function fetchPage(url) {
   const response = await fetch(url, {
     headers: {
@@ -83,7 +128,7 @@ async function fetchPage(url) {
     throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`)
   }
 
-  return response.text()
+  return readPageData(await response.text())
 }
 
 function serialize(data) {
@@ -91,26 +136,30 @@ function serialize(data) {
 }
 
 async function main() {
-  const [artworkHtml, screenshotsHtml] = await Promise.all([
+  const [artworkHtml, screenshotsHtml, launchGalleryHtml, videosHtml] = await Promise.all([
     fetchPage(ARTWORK_URL),
     fetchPage(SCREENSHOTS_URL),
+    fetchPage(LAUNCH_GALLERY_URL),
+    fetchPage(VIDEOS_URL),
   ])
 
-  const artworkSection = sectionSlice(artworkHtml, 'data-track\\":\\"artwork\\"')
+  const artworkSection = sectionSlice(artworkHtml, '"data-track":"artwork"')
   const screenshotsSection = sectionSlice(
     screenshotsHtml,
-    'data-track\\":\\"screenshots\\"',
-    'id\\":\\"ultimate-edition\\"',
+    '"data-track":"screenshots"',
+    '"id":"ultimate-edition"',
   )
   const ultimateSection = sectionSlice(
     screenshotsHtml,
-    'id\\":\\"ultimate-edition\\"',
-    'id\\":\\"vintage-vice-city\\"',
+    '"id":"ultimate-edition"',
+    '"id":"vintage-vice-city"',
   )
 
+  const screenshots = parseItems(screenshotsSection, 'screenshots')
   const collections = {
+    launch: parseLaunchGallery(launchGalleryHtml, screenshots),
     artwork: parseItems(artworkSection, 'artwork'),
-    screenshots: parseItems(screenshotsSection, 'screenshots'),
+    screenshots,
     ultimate: parseItems(ultimateSection, 'ultimate'),
   }
 
@@ -118,6 +167,7 @@ async function main() {
     syncedAt: new Date().toISOString(),
     sources: SOURCE_URLS,
     collections,
+    videos: parseVideos(videosHtml),
   }
 
   await writeFile(OUTPUT_FILE, serialize(output), 'utf8')

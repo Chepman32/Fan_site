@@ -1,18 +1,16 @@
 export const leonidaTranslationEn = {
   hero: {
-    kicker: 'The GTA VI field guide',
-    title: 'Welcome to',
+    kicker: 'GTA VI field guide',
+    title: 'Explore',
     titleHighlight: 'Leonida',
-    description: "One sunburnt state. Five ways in. Explore the people, places, rides, gear, and feeds defining Rockstar's newest open world.",
-    openGuide: 'Open the field guide',
+    description: 'Meet the cast, get to know Vice City and the rest of Leonida, and see the vehicles, weapons, and fictional feeds shown so far.',
+    openGuide: 'Browse the guides',
     imageAlt: 'A sunlit coastal panorama of Leonida',
-    stamp: 'State guide',
-    collections: 'collections',
   },
   directory: {
-    eyebrow: 'Choose your route',
-    title: 'The Leonida field guide',
-    description: 'Every section is a focused destination with its own research, imagery, and source-backed details.',
+    eyebrow: 'The field guide',
+    title: 'Pick a topic',
+    description: 'Find screenshots, trailer references, and what we know so far about each topic.',
     explore: 'Explore',
   },
   guide: {

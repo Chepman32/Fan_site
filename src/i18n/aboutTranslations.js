@@ -40,14 +40,14 @@ const zh = {
 const ru = {
   hero: {
     kicker: 'Досье на игру', title: 'Внутри', titleHighlight: 'GTA VI',
-    description: 'Подтверждённые данные о релизе, масштаб нового открытого мира Rockstar и живая энциклопедическая справка на одной странице.',
+    description: 'Время релиза и предзагрузки, путеводитель по Леониде, официальные трейлеры, скриншоты и арты Rockstar.',
     launchCard: 'Официальный отсчёт до релиза',
     contentCta: 'Смотреть факты',
   },
   stats: {
-    eyebrow: 'Ключевые цифры', title: 'Масштаб в цифрах',
-    description: 'Официальные значения отделены от публикаций, реконструкций сообщества и неподтверждённых производственных оценок.',
-    official: 'Официально', estimate: 'Оценка',
+    eyebrow: 'Гид по релизу', title: 'Главное о GTA VI',
+    description: 'Подробности релиза от Rockstar и сообщения СМИ о возможной версии для ПК и сетевом режиме.',
+    official: 'Официально', reported: 'Не подтверждено',
     items: {
       release: { label: 'Дата релиза', note: 'Мировой запуск на консолях' },
       price: { label: 'Цена предзаказа', note: 'Стандартное издание в США' },
@@ -58,20 +58,30 @@ const ru = {
       team: { label: 'Размер команды', note: 'Оценка числа участников из студий Rockstar' },
       map: { label: 'Размер карты', note: 'Фанатская реконструкция; официальной площади нет' },
       regions: { label: 'Крупные регионы', note: 'Названы Rockstar на данный момент' },
+      storyMode: { label: 'Режим на старте', value: 'Соло', note: '19 ноября на консолях выходит одиночная игра.' },
+      pc: { label: 'Версия для ПК', value: 'I кв. 2027', note: 'По данным GamesBeat. Rockstar дату не называла.' },
+      online: { label: 'Сетевой режим', note: 'Bloomberg ожидает его в 2027 году. Официальной даты нет.' },
     },
   },
   media: {
     eyebrow: 'Официальные материалы', title: 'Промо-галерея',
     description: 'Официальные арты, обои, игровые скриншоты и материалы Ultimate Edition из медиатеки GTA VI от Rockstar.',
     tabsLabel: 'Коллекции промоизображений',
-    tabs: { artwork: 'Арты и обои', screenshots: 'Скриншоты', ultimate: 'Ultimate Edition' },
+    tabs: { launch: 'Галерея к релизу', artwork: 'Арты и обои', screenshots: 'Скриншоты', ultimate: 'Ultimate Edition' },
+    videos: {
+      title: 'Трейлеры и игровой процесс',
+      description: 'Трейлер к релизу, 26-минутный обзор с записью на PS5 и первые два трейлера.',
+      play: 'Воспроизвести',
+      watchSource: 'Смотреть у Rockstar Games',
+      viewAll: 'Все официальные видео',
+    },
     official: 'Rockstar Games', viewSource: 'Открыть источник', openImage: 'Открыть изображение',
     showing: 'Показано', of: 'из', showMore: 'Показать ещё',
     sourceNote: 'Названия и изображения предоставлены Rockstar Games.',
     fullSize: 'Открыть оригинал', close: 'Закрыть галерею', previous: 'Предыдущее изображение', next: 'Следующее изображение',
   },
   notice: 'Rockstar не подтверждала бюджет проекта, число участников или площадь карты. Эти карточки содержат оценки и могут измениться.',
-  sources: { label: 'Источники и контекст', official: 'Официальный анонс предзаказа', wikipedia: 'Обзор в Википедии', map: 'Оценка карты сообществом' },
+  sources: { label: 'Источники и контекст', official: 'Сайт GTA VI от Rockstar', wikipedia: 'Обзор в Википедии', takeTwo: 'Сообщение Take-Two от 9 ноября' },
 }
 
 const it = {
@@ -260,4 +270,15 @@ const ms = {
 }
 
 export const aboutTranslationEn = en
-export const aboutTranslations = { en, zh, ru, it, id, pl, hi, ms }
+function withEnglishFallbacks(copy) {
+  return {
+    ...copy,
+    stats: { ...en.stats, ...copy.stats, items: { ...en.stats.items, ...copy.stats.items } },
+    media: { ...en.media, ...copy.media, tabs: { ...en.media.tabs, ...copy.media.tabs } },
+    sources: { ...en.sources, ...copy.sources },
+  }
+}
+
+export const aboutTranslations = Object.fromEntries(
+  Object.entries({ en, zh, ru, it, id, pl, hi, ms }).map(([lang, copy]) => [lang, withEnglishFallbacks(copy)]),
+)

@@ -38,6 +38,7 @@
 }
 
 .leonida-guide-hero-content {
+  width: calc(100% - clamp(32px, 6vw, 80px));
   padding-top: 120px;
   padding-bottom: 72px;
 }
@@ -63,6 +64,12 @@
   display: flex;
   align-items: flex-start;
   gap: 18px;
+}
+
+.leonida-guide-title-row > div {
+  flex: 1;
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .leonida-guide-title-icon {
@@ -91,10 +98,11 @@
 .leonida-guide-title-row h1 {
   max-width: 860px;
   color: #fff;
-  font-size: clamp(58px, 8vw, 118px);
-  font-weight: 400;
-  letter-spacing: -0.045em;
-  line-height: 0.9;
+  font-size: clamp(1.875rem, 11cqi, 5.75rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  text-wrap: balance;
   text-transform: uppercase;
 }
 
@@ -121,6 +129,7 @@
   overflow-x: auto;
   padding-top: 9px;
   padding-bottom: 9px;
+  padding-inline: 16px;
   scrollbar-width: none;
 }
 
@@ -153,7 +162,7 @@
 }
 
 .leonida-guide-primer {
-  padding: 42px 0 12px;
+  padding: 42px 16px 12px;
   background: var(--bg-primary);
 }
 
@@ -201,6 +210,7 @@
   }
 
   .leonida-guide-hero-content {
+    padding-top: 64px;
     padding-bottom: 54px;
   }
 
@@ -208,8 +218,13 @@
     margin-bottom: 36px;
   }
 
-  .leonida-guide-title-row h1 {
-    font-size: clamp(47px, 15vw, 72px);
+  .leonida-guide-title-row {
+    gap: 12px;
+  }
+
+  .leonida-guide-title-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .leonida-guide-description {

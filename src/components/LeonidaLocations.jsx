@@ -26,7 +26,7 @@ const STATIC_GUIDE_TRANSLATION_OPTIONS = {
 const LOCATION_STATIC_GUIDE = {
   ariaLabel: 'GTA VI Leonida locations guide',
   title: 'GTA VI Leonida locations guide',
-  description: 'This static location guide keeps the major Leonida regions visible in the first HTML response, including Vice City, the Leonida Keys, wetlands, coastal towns, industrial areas, wilderness, roads, beaches, hotels, and highways.',
+  description: 'Get to know Vice City, the Leonida Keys, and the wetlands, port towns, and wilderness beyond. Explore the regions Rockstar has revealed and the landmarks spotted in trailers and screenshots.',
 }
 
 function translateLocationStaticGuide(data, lang) {

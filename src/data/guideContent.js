@@ -3,7 +3,7 @@ export const SEO_GUIDES = [
     slug: 'gta-vi-release-date',
     title: 'GTA VI Release Date: Confirmed Details and Platform Status',
     summary: 'Find the GTA VI console release date, digital preload schedule, and Standard and Ultimate Edition details.',
-    updatedAt: '2026-11-09',
+    updatedAt: '2026-11-10',
     sections: [
       {
         title: 'Confirmed release information',
@@ -19,13 +19,15 @@ export const SEO_GUIDES = [
       },
       {
         title: 'PC release timing',
-        body: 'Rockstar has yet to announce a PC release date.',
+        body: 'GamesBeat reports that the PC release is targeting January through March 2027. Rockstar has not announced a PC release date.',
       },
     ],
     sources: [
       { href: 'https://support.rockstargames.com/articles/29jV3Cv2cCgvwM1XgtMO5o/grand-theft-auto-vi-regional-pre-load-and-release-times-on-playstation-5-and-xbox-series-x-or-s', label: 'Rockstar regional launch and preload times' },
       { href: 'https://www.rockstargames.com/newswire/article/k4ak9okk485712/grand-theft-auto-vi-pre-load-begins-on-november-10', label: 'Rockstar preload and retail announcement' },
       { href: 'https://www.playstation.com/en-us/games/grand-theft-auto-vi/', label: 'PlayStation US editions and prices' },
+      { href: 'https://ir.take2games.com/node/32676/pdf', label: 'Take-Two’s November 9 update' },
+      { href: 'https://gamesbeat.com/grand-theft-auto-vis-pc-release-is-slated-for-q1-2027/', label: 'GamesBeat’s unconfirmed PC report' },
     ],
   },
   {

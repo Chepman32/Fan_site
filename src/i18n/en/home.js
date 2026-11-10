@@ -11,18 +11,18 @@ export const homeTranslationEn = {
   news: {
     kicker: 'News hub',
     title: 'Latest GTA VI Updates',
-    description: 'Static, source-aware coverage for release status, Leonida map details, characters, vehicles, weapons, platforms, and official announcements.',
+    description: 'Follow Rockstar announcements, launch and platform news, and new details from trailers and screenshots.',
   },
   start: {
     kicker: 'Start here',
-    title: 'GTA VI hubs and creator paths',
-    description: 'Leonida Loot connects informational GTA VI research with clearly unofficial creator assets, community discussion, and marketplace listings.',
+    title: 'Explore Leonida Loot',
+    description: 'Find a guide, join the fan discussion, or browse unofficial creator assets.',
     cardCta: 'Explore',
   },
   guides: {
-    kicker: 'Evergreen guides',
-    title: 'Confirmed details separated from rumor',
-    description: 'Guide pages keep official information, source context, and fan analysis in separate sections so GTA VI readers can scan quickly without mistaking speculation for fact.',
+    kicker: 'GTA VI guides',
+    title: 'What we know about GTA VI',
+    description: 'Catch up on the release, trailers, map, and cast. Each guide separates Rockstar’s announcements from fan reports.',
     cta: 'View all guides',
   },
   guideCards: {
@@ -46,12 +46,12 @@ export const homeTranslationEn = {
   leonida: {
     kicker: 'Leonida field guide',
     title: 'Characters, locations, vehicles, weapons and social media',
-    description: 'The field guide keeps the major Leonida search paths separated into crawlable pages with clear confirmed-versus-reported context.',
+    description: 'Explore Vice City and the rest of Leonida, from its landmarks and characters to vehicles, weapons, and fictional feeds.',
   },
   market: {
     kicker: 'Creator assets',
     title: 'Creator Shop and P2P Marketplace',
-    description: 'Browse first-party creator packs in the shop or open the P2P marketplace for seller-to-buyer listings, messaging, file delivery, and trust policies.',
+    description: 'Shop for stream overlays, emotes, and banners, or browse listings from other creators in the marketplace.',
     shopCta: 'Browse Creator Shop',
     p2pCta: 'Open P2P Marketplace',
   },
@@ -108,7 +108,7 @@ export const homeTranslationEn = {
     },
     about: {
       title: 'About GTA VI',
-      description: 'Check release facts, countdown details, platform notes, and estimate boundaries.',
+      description: 'Check the release countdown, announced platforms, and launch details.'
     },
   },
   productPreviewAlt: (title) => `Preview of ${title}`,

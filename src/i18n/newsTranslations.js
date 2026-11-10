@@ -69,6 +69,8 @@ const localized = {
     },
   },
   ru: {
+    reportedLabel: 'Неподтверждённые сообщения',
+    reportedTitle: 'Что сообщают СМИ',
     badge: 'МАТЕРИАЛЫ IGN',
     title: 'ПОСЛЕДНИЕ',
     titleHighlight: 'НОВОСТИ',

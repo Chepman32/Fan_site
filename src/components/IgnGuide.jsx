@@ -44,10 +44,10 @@ const SOCIAL_MEDIA_STATIC_TRANSLATION_OPTIONS = {
   arrayKeys: ['paragraphs'],
 }
 const SOCIAL_MEDIA_STATIC_GUIDE = {
-  kicker: 'Static Leonida field guide',
+  kicker: 'Leonida field guide',
   paragraphs: [
-    'GTA VI social media references show how Leonida performs online: viral wildlife clips, neighborhood-watch posts, music personalities, local stunts, and fictional account handles that connect trailer moments to places and characters.',
-    'This guide keeps the visible accounts and social moments crawlable as static page content. Leonida Loot treats every handle as in-game worldbuilding unless Rockstar confirms otherwise, and avoids presenting fictional profiles as real official channels.',
+    'Wildlife clips, neighborhood-watch posts, music, and local stunts fill Leonida’s fictional feeds. The posts offer clues about where the action takes place and who’s involved.',
+    'Each entry notes where the handle appeared and whether it has a confirmed link to a character.',
   ],
   stats: {
     tracked: 'Tracked references',

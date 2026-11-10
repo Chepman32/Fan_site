@@ -92,7 +92,7 @@ export const UNIQUE_PRODUCT_DETAIL_COPY = {
     galleryAlt: 'Neon Storm Overlay Bundle preview gallery',
     longCopy: [
       'Neon Storm Overlay Bundle is for streams that need more tension: pursuit talk, police-response clips, reaction videos, and high-energy GTA VI commentary. The design uses darker contrast and electric accent color so creators can frame loud footage without turning the entire broadcast into visual noise.',
-      'This page is intentionally more than a generated product stub. It explains the scene role, delivery format, license boundary, and buyer expectations so search visitors can understand the pack before opening checkout. The asset remains unofficial and does not contain extracted game files, leaked material, or Rockstar branding.',
+      'The download includes original overlay graphics for your stream. The personal creator license covers use on your own channel.',
     ],
     detailSections: [
       {
